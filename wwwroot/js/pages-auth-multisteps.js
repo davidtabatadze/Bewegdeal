@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Form steps
       const stepsValidationFormStep1 = stepsValidationForm.querySelector('#accountDetailsValidation');
       const stepsValidationFormStep2 = stepsValidationForm.querySelector('#personalInfoValidation');
-      const stepsValidationFormStep3 = stepsValidationForm.querySelector('#billingLinksValidation');
+      const stepsValidationFormStep3 = stepsValidationForm.querySelector('#roleSelectionValidation');
       // Multi steps next prev button
       const stepsValidationNext = [].slice.call(stepsValidationForm.querySelectorAll('.btn-next'));
       const stepsValidationPrev = [].slice.call(stepsValidationForm.querySelectorAll('.btn-prev'));
@@ -234,51 +234,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
         validationStepper.next();
       });
 
-      // Social links
+      // Role selection — radio always has a value, no field validation needed
       const multiSteps3 = FormValidation.formValidation(stepsValidationFormStep3, {
-        fields: {
-          multiStepsCard: {
-            validators: {
-              notEmpty: {
-                message: 'Please enter card number'
-              }
-            }
-          }
-        },
+        fields: {},
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
           bootstrap5: new FormValidation.plugins.Bootstrap5({
-            // Use this for enabling/changing valid/invalid class
-            // eleInvalidClass: '',
             eleValidClass: '',
-            rowSelector: function (field, ele) {
-              // field is the field name
-              // ele is the field element
-              switch (field) {
-                case 'multiStepsCard':
-                  return '.form-control-validation';
-
-                default:
-                  return '.form-control-validation';
-              }
-            }
+            rowSelector: '.form-control-validation'
           }),
           autoFocus: new FormValidation.plugins.AutoFocus(),
           submitButton: new FormValidation.plugins.SubmitButton()
-        },
-        init: instance => {
-          instance.on('plugins.message.placed', function (e) {
-            if (e.element.parentElement.classList.contains('input-group')) {
-              e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-            }
-          });
         }
       }).on('core.form.valid', function () {
-        // You can submit the form
-        // stepsValidationForm.submit()
-        // or send the form data to server via an Ajax request
-        // To make the demo simple, I just placed an alert
-        alert('Submitted..!!');
+        stepsValidationForm.submit();
       });
 
       stepsValidationNext.forEach(item => {
