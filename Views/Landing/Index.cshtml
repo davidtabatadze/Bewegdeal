@@ -1,0 +1,488 @@
+@{
+  Layout = "_FrontLayout";
+  ViewData["Title"] = "Bewegdeal";
+}
+
+@section VendorStyles {
+  <link rel="stylesheet" href="~/vendor/css/pages/front-page-help-center.css" />
+  <link rel="stylesheet" href="~/vendor/css/pages/front-page-landing.css" />
+  <link rel="stylesheet" href="~/vendor/libs/animate-on-scroll/animate-on-scroll.css" />
+}
+
+@section VendorScripts {
+  <script src="~/vendor/libs/animate-on-scroll/animate-on-scroll.js"></script>
+}
+
+@section PageScripts {
+  <script src="~/js/extended-ui-timeline.js"></script>
+}
+
+@* ************** Content ************** *@
+<div data-bs-spy="scroll" class="scrollspy-example">
+
+  <!-- Help Center Header: Start -->
+  <section class="section-py first-section-pt help-center-header position-relative overflow-hidden">
+    <img class="banner-bg-img z-n1" src="~/img/pages/header-light.png" alt="Help center header" data-app-light-img="pages/header-light.png" data-app-dark-img="pages/header-dark.png" />
+    <h4 class="text-center text-primary">Hello, how can we help?</h4>
+    <div class="input-wrapper my-4 input-group input-group-merge position-relative mx-auto">
+      <span class="input-group-text" id="basic-addon1"><i class="icon-base ri ri-search-line"></i></span>
+      <input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="basic-addon1" />
+    </div>
+    <p class="text-center px-4 mb-0">Common troubleshooting topics: eCommerce, Blogging to payment</p>
+  </section>
+  <!-- Help Center Header: End -->
+
+  <!-- Fun facts: Start -->
+  <section id="landingFunFacts" class="section-py landing-fun-facts py-12 my-4">
+    <div class="container">
+      <div class="row gx-0 gy-5 gx-sm-6">
+        <div class="col-md-3 col-sm-6 text-center">
+          <span class="badge rounded-pill bg-label-primary bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-layout-line icon-42px"></i></span>
+          <h2 class="fw-bold mb-0 fun-facts-text">137+</h2>
+          <h6 class="mb-0 text-body">Completed Sites</h6>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center">
+          <span class="badge rounded-pill bg-label-success bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-time-line icon-42px"></i></span>
+          <h2 class="fw-bold mb-0 fun-facts-text">1,100+</h2>
+          <h6 class="mb-0 text-body">Working Hours</h6>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center">
+          <span class="badge rounded-pill bg-label-warning bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-user-smile-line icon-42px"></i></span>
+          <h2 class="fw-bold mb-0 fun-facts-text">137+</h2>
+          <h6 class="mb-0 text-body">Happy Customers</h6>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center">
+          <span class="badge rounded-pill bg-label-info bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-award-line icon-42px"></i></span>
+          <h2 class="fw-bold mb-0 fun-facts-text">23+</h2>
+          <h6 class="mb-0 text-body">Awards Winning</h6>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Fun facts: End -->
+
+  <!-- Timeline: Start -->
+  <section class="section-py bg-body">
+    <div class="container">
+      <div class="row overflow-hidden">
+        <div class="col-12">
+          <ul class="timeline timeline-center mt-12">
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-primary" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-brush-fill"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-right">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                  <h6 class="card-title mb-0">Designing UI</h6>
+                  <div class="meta">
+                    <span class="badge rounded-pill bg-label-primary me-1">Design</span>
+                    <span class="badge rounded-pill bg-label-success">Meeting</span>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <p class="mb-2">Our main goal is to design a new mobile application for our client. The customer wants a clean &amp; flat design.</p>
+                  <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                      <p class="text-body-secondary mb-2">Participants</p>
+                      <ul class="list-unstyled users-list d-flex align-items-center avatar-group">
+                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Vinnie Mostowy" class="avatar avatar-xs pull-up">
+                          <img class="rounded-circle" src="~/img/avatars/5.png" alt="Avatar" />
+                        </li>
+                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Allen Rieske" class="avatar avatar-xs pull-up">
+                          <img class="rounded-circle" src="~/img/avatars/12.png" alt="Avatar" />
+                        </li>
+                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Julee Rossignol" class="avatar avatar-xs pull-up">
+                          <img class="rounded-circle" src="~/img/avatars/6.png" alt="Avatar" />
+                        </li>
+                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Darcey Nooner" class="avatar avatar-xs pull-up">
+                          <img class="rounded-circle" src="~/img/avatars/10.png" alt="Avatar" />
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-event-time">1st January</div>
+              </div>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-success" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-question-mark"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-left">
+                <h6 class="card-header">Survey Report</h6>
+                <div class="card-body">
+                  <div class="d-flex flex-wrap mb-6">
+                    <div>
+                      <div class="avatar avatar-xs me-4">
+                        <img src="~/img/avatars/4.png" alt="Avatar" class="rounded-circle" />
+                      </div>
+                    </div>
+                    <span>assigned this task to <span class="fw-medium">Sarah</span></span>
+                  </div>
+                  <ul class="list-unstyled">
+                    <li class="d-flex">
+                      <div><div class="avatar avatar-xs me-4"><img src="~/img/avatars/2.png" alt="Avatar" class="rounded-circle" /></div></div>
+                      <div class="mb-4 w-100">
+                        <div class="progress bg-label-danger" style="height: 6px;">
+                          <div class="progress-bar bg-danger" role="progressbar" style="width: 48.7%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small>Jquery</small>
+                      </div>
+                    </li>
+                    <li class="d-flex">
+                      <div><div class="avatar avatar-xs me-4"><img src="~/img/avatars/3.png" alt="Avatar" class="rounded-circle" /></div></div>
+                      <div class="mb-4 w-100">
+                        <div class="progress bg-label-primary" style="height: 6px;">
+                          <div class="progress-bar bg-primary" role="progressbar" style="width: 31.3%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small>React</small>
+                      </div>
+                    </li>
+                    <li class="d-flex">
+                      <div><div class="avatar avatar-xs me-4"><img src="~/img/avatars/4.png" alt="Avatar" class="rounded-circle" /></div></div>
+                      <div class="mb-4 w-100">
+                        <div class="progress bg-label-warning" style="height: 6px;">
+                          <div class="progress-bar bg-warning" role="progressbar" style="width: 30%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small>Angular</small>
+                      </div>
+                    </li>
+                    <li class="d-flex">
+                      <div><div class="avatar avatar-xs me-4"><img src="~/img/avatars/5.png" alt="Avatar" class="rounded-circle" /></div></div>
+                      <div class="mb-4 w-100">
+                        <div class="progress bg-label-info" style="height: 6px;">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 15%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small>VUE</small>
+                      </div>
+                    </li>
+                    <li class="d-flex">
+                      <div><div class="avatar avatar-xs me-4"><img src="~/img/avatars/6.png" alt="Avatar" class="rounded-circle" /></div></div>
+                      <div class="w-100">
+                        <div class="progress bg-label-success" style="height: 6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: 10%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small>Laravel</small>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="timeline-event-time">2nd January</div>
+              </div>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-danger" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-line-chart-line"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-right">
+                <h6 class="card-header">Financial Reports</h6>
+                <div class="card-body">
+                  <p class="mb-2">Click the button below to read financial reports</p>
+                  <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Show Report</button>
+                  <div class="collapse" id="collapseExample">
+                    <ul class="list-group list-group-flush mt-4">
+                      <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span>Last Year's Profit : $20000</span>
+                        <i class="icon-base ri ri-share-line cursor-pointer icon-sm"></i>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span>This Year's Profit : $25000</span>
+                        <i class="icon-base ri ri-share-line cursor-pointer icon-sm"></i>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span>Last Year's Commission : $5000</span>
+                        <i class="icon-base ri ri-share-line cursor-pointer icon-sm"></i>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span>This Year's Commission : $7000</span>
+                        <i class="icon-base ri ri-share-line cursor-pointer icon-sm"></i>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between flex-wrap">
+                        <span>This Year's Total Balance : $70000</span>
+                        <i class="icon-base ri ri-share-line cursor-pointer icon-sm"></i>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="timeline-event-time">5th January</div>
+              </div>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-warning" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-donut-chart-fill"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-left">
+                <h6 class="card-header">Snacks</h6>
+                <div class="card-body">
+                  <div class="d-flex flex-sm-row flex-column">
+                    <img src="~/img/elements/4.png" class="rounded me-4 mb-sm-0 mb-2" alt="doughnut" height="64" width="64" />
+                    <div>
+                      <h6 class="mb-2">A Donut which straight gone to Your Tummy</h6>
+                      <p class="mb-2">I gaze longingly at the beautiful, perfect, plump donut. This is a delicately crafted piece of art...<a href="javascript:void(0)">read more</a></p>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="icon-base ri ri-star-fill text-warning"></i>
+                          <i class="icon-base ri ri-star-fill text-warning"></i>
+                          <i class="icon-base ri ri-star-fill text-warning"></i>
+                          <i class="icon-base ri ri-star-fill text-warning"></i>
+                          <i class="icon-base ri ri-star-line"></i>
+                        </div>
+                        <div>
+                          <span class="fw-medium">$5.00</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-event-time">10th January</div>
+              </div>
+            </li>
+            <li class="timeline-item timeline-item-right">
+              <span class="timeline-indicator timeline-indicator-info" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-map-pin-line"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-left">
+                <div class="card-header d-flex justify-content-between">
+                  <h6 class="card-title mb-0">
+                    <i class="icon-base ri ri-map-pin-line"></i>
+                    <span class="align-middle">Location</span>
+                  </h6>
+                  <span class="badge rounded-pill bg-label-danger">High</span>
+                </div>
+                <div class="card-body py-0">
+                  <h6 class="mb-2">Final location for the company celebration.</h6>
+                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, quidem?</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                  <div class="d-flex align-items-center flex-wrap cursor-pointer gap-4">
+                    <i class="icon-base ri ri-links-line"></i>
+                    <div class="position-relative">
+                      <i class="icon-base ri ri-chat-4-line"></i>
+                      <span class="badge rounded-pill bg-info badge-dot badge-notifications"></span>
+                    </div>
+                    <i class="icon-base ri ri-user-3-line"></i>
+                  </div>
+                  <p class="mb-0">
+                    <span class="text-body-secondary">Due Date:</span>
+                    15th Jan
+                  </p>
+                </div>
+                <div class="timeline-event-time">12th January</div>
+              </div>
+            </li>
+            <li class="timeline-item timeline-item-left">
+              <span class="timeline-indicator timeline-indicator-primary" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-open-arm-line"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-right">
+                <div class="card-header d-flex justify-content-between">
+                  <h6 class="card-title mb-0">Gym Program</h6>
+                  <span class="text-body-secondary">5:00 - 6:10AM</span>
+                </div>
+                <div class="card-body pb-4 pt-0">
+                  <div class="hours mb-2">
+                    <i class="icon-base ri ri-time-line icon-sm"></i>
+                    <span>1.1 Hours</span>
+                    <i class="icon-base ri ri-arrow-left-right-line mx-2"></i>
+                    <span>Weekly</span>
+                  </div>
+                  <div class="location">
+                    <i class="icon-base ri ri-map-pin-line icon-sm"></i>
+                    <span class="align-middle">Rock's Gym</span>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                  <div class="tags">
+                    <span class="badge rounded-pill bg-label-danger me-1">Gym</span>
+                    <span class="badge rounded-pill bg-label-info">Power</span>
+                  </div>
+                  <div>
+                    <i class="icon-base ri ri-more-2-line cursor-pointer"></i>
+                  </div>
+                </div>
+                <div class="timeline-event-time">15th January</div>
+              </div>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-success" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-money-dollar-circle-line"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-right">
+                <h6 class="card-header">General Reserve</h6>
+                <div class="card-body">
+                  <ul class="list-unstyled">
+                    <li class="d-flex justify-content-start align-items-center text-success mb-4">
+                      <i class="icon-base ri ri-money-dollar-circle-line icon-24px me-4"></i>
+                      <div class="ps-4 border-start">
+                        <small class="text-body-secondary mb-1">Cash</small>
+                        <h5 class="mb-0">$500</h5>
+                      </div>
+                    </li>
+                    <li class="d-flex justify-content-start align-items-center text-info mb-4">
+                      <i class="icon-base ri ri-bank-card-2-line icon-24px me-4"></i>
+                      <div class="ps-4 border-start">
+                        <small class="text-body-secondary mb-1">Credit Card</small>
+                        <h5 class="mb-0">$5000</h5>
+                      </div>
+                    </li>
+                    <li class="d-flex justify-content-start align-items-center text-primary">
+                      <i class="icon-base ri ri-line-chart-line icon-24px me-4"></i>
+                      <div class="ps-4 border-start">
+                        <small class="text-body-secondary mb-1">Investments</small>
+                        <h5 class="mb-0">$300</h5>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="timeline-event-time">16th January</div>
+              </div>
+            </li>
+            <li class="timeline-item">
+              <span class="timeline-indicator timeline-indicator-danger" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-server-fill"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-left">
+                <div class="card-header d-flex justify-content-between">
+                  <h6 class="card-title mb-0">
+                    <span class="align-middle">Ubuntu Server</span>
+                  </h6>
+                  <span class="badge rounded-pill bg-label-danger">Inactive</span>
+                </div>
+                <div class="card-body pb-2 pt-0">
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                      <div><i class="icon-base ri ri-global-line icon-sm"></i><span>IP Address</span></div>
+                      <div>192.654.8.566</div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                      <div><i class="icon-base ri ri-cpu-line icon-sm"></i><span>CPU</span></div>
+                      <div>4 Cores</div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                      <div><i class="icon-base ri ri-ram-2-fill icon-sm"></i><span>Ram</span></div>
+                      <div>500 MB</div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                  <div class="server-icons">
+                    <i class="icon-base ri ri-share-line me-2 icon-sm"></i>
+                    <i class="icon-base ri ri-loop-left-line icon-sm"></i>
+                  </div>
+                </div>
+                <div class="timeline-event-time">20th January</div>
+              </div>
+            </li>
+            <li class="timeline-item border-0 pb-2">
+              <span class="timeline-indicator timeline-indicator-info" data-aos="zoom-in" data-aos-delay="200">
+                <i class="icon-base ri ri-store-2-line"></i>
+              </span>
+              <div class="timeline-event card p-0" data-aos="fade-right">
+                <div class="card-header d-flex justify-content-between">
+                  <h6 class="card-title mb-0">
+                    <span class="align-middle">Online Store</span>
+                  </h6>
+                  <i class="icon-base ri ri-more-2-line cursor-pointer"></i>
+                </div>
+                <div class="card-body pt-0">
+                  <p>Develop an online store of electronic devices for the provided layout, as well as develop a mobile version of it.</p>
+                  <div class="d-flex flex-wrap flex-sm-row flex-column">
+                    <div class="mb-sm-0 mb-4 me-12">
+                      <p class="text-body-secondary mb-2">Developers</p>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar avatar-xs me-2"><span class="avatar-initial rounded-circle bg-label-primary">A</span></div>
+                        <div class="avatar avatar-xs me-2"><span class="avatar-initial rounded-circle bg-label-success">B</span></div>
+                        <div class="avatar avatar-xs"><span class="avatar-initial rounded-circle bg-label-danger">C</span></div>
+                      </div>
+                    </div>
+                    <div class="mb-sm-0 mb-4 me-12">
+                      <p class="text-body-secondary mb-2">Deadline</p>
+                      <p class="mb-0">20 Dec 2077</p>
+                    </div>
+                    <div>
+                      <p class="text-body-secondary mb-2">Budget</p>
+                      <p class="mb-0">$50000</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-event-time">25th January</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Timeline: End -->
+
+  <!-- FAQ: Start -->
+  <section id="landingFAQ" class="section-py bg-body landing-faq">
+    <div class="container bg-icon-right">
+      <img src="~/img/front-pages/icons/bg-right-icon-light.png" alt="section icon" class="position-absolute top-0 end-0" data-speed="1" data-app-light-img="front-pages/icons/bg-right-icon-light.png" data-app-dark-img="front-pages/icons/bg-right-icon-dark.png" />
+      <h6 class="text-center d-flex justify-content-center align-items-center mb-6">
+        <img src="~/img/front-pages/icons/section-title-icon.png" alt="section title icon" class="me-2" height="19" />
+        <span class="text-uppercase">faq</span>
+      </h6>
+      <h5 class="text-center mb-2">Frequently asked<span class="h4 fw-bold"> questions</span></h5>
+      <p class="text-center fw-medium mb-4 mb-md-12 pb-4">Browse through these FAQs to find answers to commonly asked questions.</p>
+      <div class="row gy-5">
+        <div class="col-lg-5">
+          <div class="text-center">
+            <img
+              src="~/img/front-pages/landing-page/sitting-girl-with-laptop.png"
+              alt="sitting girl with laptop"
+              class="faq-image scaleX-n1-rtl" />
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="accordion" id="accordionFront">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="head-One">
+                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionOne" aria-expanded="true" aria-controls="accordionOne">Do you charge for each upgrade?</button>
+              </h2>
+              <div id="accordionOne" class="accordion-collapse collapse" data-bs-parent="#accordionFront" aria-labelledby="accordionOne">
+                <div class="accordion-body">Lemon drops chocolate cake gummies carrot cake chupa chups muffin topping. Sesame snaps icing marzipan gummi bears macaroon dragée danish caramels powder. Bear claw dragée pastry topping soufflé. Wafer gummi bears marshmallow pastry pie.</div>
+              </div>
+            </div>
+            <div class="accordion-item previous-active">
+              <h2 class="accordion-header" id="head-Two">
+                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionTwo" aria-expanded="false" aria-controls="accordionTwo">Do I need to purchase a license for each website?</button>
+              </h2>
+              <div id="accordionTwo" class="accordion-collapse collapse" aria-labelledby="accordionTwo" data-bs-parent="#accordionFront">
+                <div class="accordion-body">Dessert ice cream donut oat cake jelly-o pie sugar plum cheesecake. Bear claw dragée oat cake dragée ice cream halvah tootsie roll. Danish cake oat cake pie macaroon tart donut gummies. Jelly beans candy canes carrot cake. Fruitcake chocolate chupa chups.</div>
+              </div>
+            </div>
+            <div class="accordion-item active">
+              <h2 class="accordion-header" id="head-Three">
+                <button type="button" class="accordion-button" data-bs-toggle="collapse" data-bs-target="#accordionThree" aria-expanded="true" aria-controls="accordionThree">What is regular license?</button>
+              </h2>
+              <div id="accordionThree" class="accordion-collapse collapse show" aria-labelledby="accordionThree" data-bs-parent="#accordionFront">
+                <div class="accordion-body">
+                  Regular license can be used for end products that do not charge users for access or service (access is free and there will be no monthly subscription fee). Single regular license can be used for single end product and end product can be used by you or your client. If you want to sell end product to multiple clients then you will need to purchase separate license for each client.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="head-Four">
+                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFour" aria-expanded="false" aria-controls="accordionFour">What is extended license?</button>
+              </h2>
+              <div id="accordionFour" class="accordion-collapse collapse" aria-labelledby="accordionFour" data-bs-parent="#accordionFront">
+                <div class="accordion-body">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.</div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="head-Five">
+                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFive" aria-expanded="false" aria-controls="accordionFive">Which license is applicable for SASS application?</button>
+              </h2>
+              <div id="accordionFive" class="accordion-collapse collapse" aria-labelledby="accordionFive" data-bs-parent="#accordionFront">
+                <div class="accordion-body">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sequi molestias exercitationem ab cum nemo facere voluptates veritatis quia, eveniet veniam at et repudiandae mollitia ipsam quasi labore enim architecto non!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- FAQ: End -->
+
+</div>

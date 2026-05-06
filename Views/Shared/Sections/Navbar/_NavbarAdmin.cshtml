@@ -1,0 +1,139 @@
+<!-- Navbar -->
+<nav class="layout-navbar navbar-detached container-xxl navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+
+  <!-- Menu toggle (visible on small screens) -->
+  <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+    <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+      <i class="icon-base ri ri-menu-line icon-md"></i>
+    </a>
+  </div>
+
+  <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
+
+    <ul class="navbar-nav flex-row align-items-center ms-md-auto">
+
+      <!-- Style Switcher -->
+      <li class="nav-item dropdown me-sm-2 me-xl-0">
+        <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill" id="nav-theme" href="javascript:void(0);" data-bs-toggle="dropdown">
+          <i class="icon-base ri ri-sun-line icon-22px theme-icon-active"></i>
+          <span class="d-none ms-2" id="nav-theme-text">Toggle theme</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-theme-text">
+          <li>
+            <button type="button" class="dropdown-item align-items-center active" data-bs-theme-value="light" aria-pressed="false">
+              <span><i class="icon-base ri ri-sun-line icon-md me-3" data-icon="sun-line"></i>Light</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item align-items-center" data-bs-theme-value="dark" aria-pressed="true">
+              <span><i class="icon-base ri ri-moon-clear-line icon-md me-3" data-icon="moon-clear-line"></i>Dark</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item align-items-center" data-bs-theme-value="system" aria-pressed="false">
+              <span><i class="icon-base ri ri-computer-line icon-md me-3" data-icon="computer-line"></i>System</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <!-- / Style Switcher -->
+
+      <!-- Notifications -->
+      <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+        <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+          <span class="position-relative">
+            <i class="icon-base ri ri-notification-2-line icon-22px"></i>
+            <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
+          </span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end p-0">
+          <li class="dropdown-menu-header border-bottom">
+            <div class="dropdown-header d-flex align-items-center py-3">
+              <h6 class="mb-0 me-auto">Notifications</h6>
+              <div class="d-flex align-items-center h6 mb-0">
+                <span class="badge bg-label-primary rounded-pill me-2">0 New</span>
+              </div>
+            </div>
+          </li>
+          <li class="dropdown-notifications-list scrollable-container">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                <div class="d-flex">
+                  <div class="flex-shrink-0 me-3">
+                    <div class="avatar">
+                      <span class="avatar-initial rounded-circle bg-label-primary">
+                        <i class="icon-base ri ri-information-line"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="small mb-50">Welcome to Bewegdeal</h6>
+                    <small class="mb-1 d-block text-body">Your account is ready to use.</small>
+                    <small class="text-body-secondary">Just now</small>
+                  </div>
+                  <div class="flex-shrink-0 dropdown-notifications-actions">
+                    <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
+                    <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="icon-base ri ri-close-line"></span></a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li class="border-top">
+            <div class="d-grid p-4">
+              <a class="btn btn-primary btn-sm d-flex h-px-34" href="javascript:void(0);">
+                <small class="align-middle">View all notifications</small>
+              </a>
+            </div>
+          </li>
+        </ul>
+      </li>
+      <!-- / Notifications -->
+
+      <!-- User -->
+      <li class="nav-item navbar-dropdown dropdown-user dropdown">
+        <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+          <div class="avatar avatar-online">
+            <img src="~/img/avatars/1.png" alt="User" class="rounded-circle" />
+          </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-2">
+                  <div class="avatar avatar-online">
+                    <img src="~/img/avatars/1.png" alt="User" class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0 small">Admin</h6>
+                  <small class="text-body-secondary">Administrator</small>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li><div class="dropdown-divider"></div></li>
+          <li>
+            <a class="dropdown-item" asp-controller="Home" asp-action="Settings">
+              <i class="icon-base ri ri-settings-4-line icon-22px me-2"></i>
+              <span class="align-middle">Settings</span>
+            </a>
+          </li>
+          <li><div class="dropdown-divider"></div></li>
+          <li>
+            <div class="d-grid px-4 pt-2 pb-1">
+              <a class="btn btn-danger d-flex" asp-controller="Landing" asp-action="Index">
+                <small class="align-middle">Logout</small>
+                <i class="icon-base ri ri-logout-box-r-line ms-2 icon-16px"></i>
+              </a>
+            </div>
+          </li>
+        </ul>
+      </li>
+      <!-- / User -->
+
+    </ul>
+  </div>
+</nav>
+<!-- / Navbar -->
