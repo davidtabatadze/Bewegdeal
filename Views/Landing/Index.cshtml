@@ -18,273 +18,292 @@
 }
 
 @* ************** Content ************** *@
-<div data-bs-spy="scroll" class="scrollspy-example">
 
-    <!-- Banner: Start -->
-    <section class="section-py first-section-pt help-center-header position-relative overflow-hidden">
-        <img class="banner-bg-img z-n1" src="~/img/pages/header-light.png" alt="header" data-app-light-img="pages/header-light.png" data-app-dark-img="pages/header-dark.png" />
-        <h1 class="text-center fw-bold">Your service, <span class="text-primary">delivered.</span></h1>
-        <div class="input-wrapper my-4 input-group input-group-merge position-relative mx-auto">
-            <span class="input-group-text" id="basic-addon1"><i class="icon-base ri ri-search-line"></i></span>
-            <input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="basic-addon1" />
-        </div>
+
+<!-- Banner: Start -->
+<section id="banner" class="section-py first-section-pt help-center-header position-relative overflow-hidden">
+    <img class="banner-bg-img z-n1" src="~/img/pages/header-light.png" alt="header" data-app-light-img="pages/header-light.png" data-app-dark-img="pages/header-dark.png" />
+    <h1 class="text-center fw-bold">Your service, <span class="text-primary">delivered.</span></h1>
+    <div class="input-wrapper my-4 input-group input-group-merge position-relative mx-auto">
         <p class="text-center px-4 mb-0">
             Bewegdeal connects you with trusted providers for moving, junk removal,
             store pickup, and vehicle transport — all in one place.
         </p>
-    </section>
-    <!-- Banner: End -->
-    <!-- Services: Start -->
-    <section id="landingFunFacts" class="section-py landing-fun-facts py-12 my-4">
-        <div class="container">
-            <div class="text-center mb-8">
-                <h2 class="mb-2">Everything you need, on demand</h2>
-                <p class="text-muted">
-                    Four specialised services. One trusted platform.
+    </div>
+    
+</section>
+<!-- Banner: End -->
+<!-- Services: Start -->
+<section id="services" class="section-py landing-features">
+    <div class="container">
+        <h6 class="text-center d-flex justify-content-center align-items-center mb-6">
+            <img src="~/img/front-pages/icons/section-title-icon.png" alt="section title icon" class="me-2" height="19" />
+            <span class="text-uppercase">services</span>
+        </h6>
+        <div class="text-center mb-8">
+            <h2 class="mb-2">Everything you need, on demand</h2>
+            <p class="text-muted">
+                Four specialised services. One trusted platform.
+            </p>
+        </div>
+        <div class="row gx-0 gy-5 gx-sm-6">
+            <div class="col-md-3 col-sm-6 text-center">
+                <span class="badge rounded-pill bg-label-success bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-truck-line icon-42px"></i></span>
+                <h5 class="mb-3">Moving Service</h5>
+                <h6 class="mb-0 text-body">
+                    Relocating home or office? We match you with professional movers
+                    who handle your belongings with care, from packing to delivery.
+                </h6>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <span class="badge rounded-pill bg-label-danger bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-delete-bin-line icon-42px"></i></span>
+                <h5 class="mb-3">Junk Removal</h5>
+                <h6 class="mb-0 text-body">
+                    Clear out unwanted items responsibly. Our providers collect,
+                    haul, and dispose of your junk in an eco-friendly manner.
+                </h6>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <span class="badge rounded-pill bg-label-warning bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-shopping-bag-line icon-42px"></i></span>
+                <h5 class="mb-3">Store Pickup</h5>
+                <h6 class="mb-0 text-body">
+                    Bought something big? We pick it up from any store and
+                    deliver it straight to your door — no van rental needed.
+                </h6>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <span class="badge rounded-pill bg-label-info bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-car-line icon-42px"></i></span>
+                <h5 class="mb-3">Vehicle Transport</h5>
+                <h6 class="mb-0 text-body">
+                    Broken down or need your car moved? We dispatch licensed
+                    recovery operators to evacuate your vehicle safely.
+                </h6>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Services: End -->
+<!-- HIW: Start -->
+<section id="hiw" class="section-py bg-body" style="isolation: isolate;">
+    <div class="container">
+        <h6 class="text-center d-flex justify-content-center align-items-center mb-6">
+            <img src="~/img/front-pages/icons/section-title-icon.png" alt="section title icon" class="me-2" height="19" />
+            <span class="text-uppercase">how it works</span>
+        </h6>
+        <div class="text-center mb-8">
+            <h2 class="mb-2">How Bewegdeal works</h2>
+            <p class="text-muted">Four sequential steps — each one unlocks the next.</p>
+        </div>
+        <div class="row overflow-hidden">
+            <div class="col-12">
+                <ul class="timeline timeline-center mt-12">
+                    <li class="timeline-item">
+                        <span class="timeline-indicator timeline-indicator-primary" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="icon-base ri ri-user-add-line"></i>
+                        </span>
+                        <div class="timeline-event card p-0" data-aos="fade-right">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                                <h6 class="card-title mb-0">Register</h6>
+                                <div class="meta">
+                                    <span class="badge rounded-pill bg-label-primary me-1">Get me there</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    Create your free account. Registration takes under a minute.
+                                </p>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-primary"></i>
+                                        <span class="text-body">Choose your role: client or Company</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-primary"></i>
+                                        <span class="text-body">Complete your profile and verify your email</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-primary"></i>
+                                        <span class="text-body">Access the full platform instantly</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-indicator timeline-indicator-warning" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="icon-base ri ri-file-list-3-line"></i>
+                        </span>
+                        <div class="timeline-event card p-0" data-aos="fade-left">
+                            <h6 class="card-header">Make a Request</h6>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    Describe what you need in detail so providers can give you
+                                    accurate quotes and show up prepared.
+                                </p>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-warning"></i>
+                                        <span class="text-body">Select the service type and location</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-warning"></i>
+                                        <span class="text-body">Upload photos and videos to show the job</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-warning"></i>
+                                        <span class="text-body">Set your preferred date, time, and budget</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-indicator timeline-indicator-info" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="icon-base ri ri-discuss-line"></i>
+                        </span>
+                        <div class="timeline-event card p-0" data-aos="fade-right">
+                            <h6 class="card-header">Make a Deal</h6>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    Interested companies respond to your request. Chat directly,
+                                    negotiate the price, and confirm the provider you trust most.
+                                </p>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-info"></i>
+                                        <span class="text-body">Receive offers from provider(s)</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-info"></i>
+                                        <span class="text-body">Chat, ask questions, and negotiate price</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-info"></i>
+                                        <span class="text-body">Confirm the deal with a single click</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-indicator timeline-indicator-success" data-aos="zoom-in" data-aos-delay="200">
+                            <i class="icon-base ri ri-open-arm-line"></i>
+                        </span>
+                        <div class="timeline-event card p-0" data-aos="fade-left">
+                            <h6 class="card-header">Sit Back &amp; Relax</h6>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    The provider takes it from here. Your deal is in safe hands.
+                                </p>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-success"></i>
+                                        <span class="text-body">Provider arrives and completes the job</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-success"></i>
+                                        <span class="text-body">Pay securely and leave a review</span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="ri ri-check-line text-success"></i>
+                                        <span class="text-body">Get back for more</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- HIW: End -->
+<!-- Register: Start -->
+<section id="register" class="section-py landing-contact">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">Ready to get things moving?</h2>
+                <p class="text-muted mb-6">
+                    Join thousands of clients and providers already using Bewegdeal.
+                    Sign up free and post your first job in under two minutes.
                 </p>
-            </div>
-            <div class="row gx-0 gy-5 gx-sm-6">
-                <div class="col-md-3 col-sm-6 text-center">
-                    <span class="badge rounded-pill bg-label-primary bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-layout-line icon-42px"></i></span>
-                    <h2 class="fw-bold mb-0 fun-facts-text">137+</h2>
-                    <h6 class="mb-0 text-body">Completed Sites</h6>
-                </div>
-                <div class="col-md-3 col-sm-6 text-center">
-                    <span class="badge rounded-pill bg-label-success bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-time-line icon-42px"></i></span>
-                    <h2 class="fw-bold mb-0 fun-facts-text">1,100+</h2>
-                    <h6 class="mb-0 text-body">Working Hours</h6>
-                </div>
-                <div class="col-md-3 col-sm-6 text-center">
-                    <span class="badge rounded-pill bg-label-warning bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-user-smile-line icon-42px"></i></span>
-                    <h2 class="fw-bold mb-0 fun-facts-text">137+</h2>
-                    <h6 class="mb-0 text-body">Happy Customers</h6>
-                </div>
-                <div class="col-md-3 col-sm-6 text-center">
-                    <span class="badge rounded-pill bg-label-info bg-label-hover fun-facts-icon mb-6 p-5"><i class="icon-base ri ri-award-line icon-42px"></i></span>
-                    <h2 class="fw-bold mb-0 fun-facts-text">23+</h2>
-                    <h6 class="mb-0 text-body">Awards Winning</h6>
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <a asp-action="Register" asp-controller="Authentication" class="btn btn-outline-primary btn-lg">
+                        <i class="ri ri-user-add-line me-2"></i>Become A Member
+                    </a>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Services: End -->
-    <!-- HIW: Start -->
-    <section class="section-py bg-body" style="isolation: isolate;">
-        <div class="container">
-            <div class="text-center mb-8">
-                <h2 class="mb-2">How Bewegdeal works</h2>
-                <p class="text-muted">Four sequential steps — each one unlocks the next.</p>
-            </div>
-            <div class="row overflow-hidden">
-                <div class="col-12">
-                    <ul class="timeline timeline-center mt-12">
-                        <li class="timeline-item">
-                            <span class="timeline-indicator timeline-indicator-primary" data-aos="zoom-in" data-aos-delay="200">
-                                <i class="icon-base ri ri-user-add-line"></i>
-                            </span>
-                            <div class="timeline-event card p-0" data-aos="fade-right">
-                                <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-                                    <h6 class="card-title mb-0">Register</h6>
-                                    <div class="meta">
-                                        <span class="badge rounded-pill bg-label-primary me-1">Get me there</span>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <p class="mb-2">
-                                        Create your free account. Registration takes under a minute.
-                                    </p>
-                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-primary"></i>
-                                            <span class="text-body">Choose your role: client or Company</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-primary"></i>
-                                            <span class="text-body">Complete your profile and verify your email</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-primary"></i>
-                                            <span class="text-body">Access the full platform instantly</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-item">
-                            <span class="timeline-indicator timeline-indicator-warning" data-aos="zoom-in" data-aos-delay="200">
-                                <i class="icon-base ri ri-file-list-3-line"></i>
-                            </span>
-                            <div class="timeline-event card p-0" data-aos="fade-left">
-                                <h6 class="card-header">Make a Request</h6>
-                                <div class="card-body">
-                                    <p class="mb-2">
-                                        Describe what you need in detail so providers can give you
-                                        accurate quotes and show up prepared.
-                                    </p>
-                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-warning"></i>
-                                            <span class="text-body">Select the service type and location</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-warning"></i>
-                                            <span class="text-body">Upload photos and videos to show the job</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-warning"></i>
-                                            <span class="text-body">Set your preferred date, time, and budget</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-item">
-                            <span class="timeline-indicator timeline-indicator-info" data-aos="zoom-in" data-aos-delay="200">
-                                <i class="icon-base ri ri-discuss-line"></i>
-                            </span>
-                            <div class="timeline-event card p-0" data-aos="fade-right">
-                                <h6 class="card-header">Make a Deal</h6>
-                                <div class="card-body">
-                                    <p class="mb-2">
-                                        Interested companies respond to your request. Chat directly,
-                                        negotiate the price, and confirm the provider you trust most.
-                                    </p>
-                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-info"></i>
-                                            <span class="text-body">Receive offers from provider(s)</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-info"></i>
-                                            <span class="text-body">Chat, ask questions, and negotiate price</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-info"></i>
-                                            <span class="text-body">Confirm the deal with a single click</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-item">
-                            <span class="timeline-indicator timeline-indicator-success" data-aos="zoom-in" data-aos-delay="200">
-                                <i class="icon-base ri ri-open-arm-line"></i>
-                            </span>
-                            <div class="timeline-event card p-0" data-aos="fade-left">
-                                <h6 class="card-header">Sit Back &amp; Relax</h6>
-                                <div class="card-body">
-                                    <p class="mb-2">
-                                        The provider takes it from here. Your deal is in safe hands.
-                                    </p>
-                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-success"></i>
-                                            <span class="text-body">Provider arrives and completes the job</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-success"></i>
-                                            <span class="text-body">Pay securely and leave a review</span>
-                                        </li>
-                                        <li class="d-flex align-items-center gap-2">
-                                            <i class="ri ri-check-line text-success"></i>
-                                            <span class="text-body">Get back for more</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+    </div>
+</section>
+<!-- Register: End -->
+<!-- FAQ: Start -->
+<section id="faq" class="section-py bg-body landing-faq">
+    <div class="container bg-icon-right">
+        <img src="~/img/front-pages/icons/bg-right-icon-light.png" alt="section icon" class="position-absolute top-0 end-0" data-speed="1" data-app-light-img="front-pages/icons/bg-right-icon-light.png" data-app-dark-img="front-pages/icons/bg-right-icon-dark.png" />
+        <h6 class="text-center d-flex justify-content-center align-items-center mb-6">
+            <img src="~/img/front-pages/icons/section-title-icon.png" alt="section title icon" class="me-2" height="19" />
+            <span class="text-uppercase">faq</span>
+        </h6>
+        <h5 class="text-center mb-2">Frequently asked<span class="h4 fw-bold"> questions</span></h5>
+        <p class="text-center fw-medium mb-4 mb-md-12 pb-4">Browse through these FAQs to find answers to commonly asked questions.</p>
+        <div class="row gy-5">
+            <div class="col-lg-5">
+                <div class="text-center">
+                    <img src="~/img/front-pages/landing-page/sitting-girl-with-laptop.png"
+                         alt="sitting girl with laptop"
+                         class="faq-image scaleX-n1-rtl" />
                 </div>
             </div>
-        </div>
-    </section>
-    <!-- HIW: End -->
-    <!-- Register: Start -->
-    <section id="register" class="section-py landing-contact">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="mb-3">Ready to get things moving?</h2>
-                    <p class="text-muted mb-6">
-                        Join thousands of clients and providers already using Bewegdeal.
-                        Sign up free and post your first job in under two minutes.
-                    </p>
-                    <div class="d-flex flex-wrap gap-3 justify-content-center">
-                        <a asp-action="RegisterCustomer" asp-controller="Account" class="btn btn-outline-primary btn-lg">
-                            <i class="ri ri-user-add-line me-2"></i>Create an Account
-                        </a>
-                        <a asp-action="RegisterCompany" asp-controller="Account" class="btn btn-outline-primary btn-lg">
-                            <i class="ri ri-briefcase-line me-2"></i>Become a Provider
-                        </a>
+            <div class="col-lg-7">
+                <div class="accordion" id="accordionFront">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="head-One">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionOne" aria-expanded="false" aria-controls="accordionOne">Do you charge for each upgrade?</button>
+                        </h2>
+                        <div id="accordionOne" class="accordion-collapse collapse" data-bs-parent="#accordionFront" aria-labelledby="accordionOne">
+                            <div class="accordion-body">Lemon drops chocolate cake gummies carrot cake chupa chups muffin topping. Sesame snaps icing marzipan gummi bears macaroon dragée danish caramels powder. Bear claw dragée pastry topping soufflé. Wafer gummi bears marshmallow pastry pie.</div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Register: End -->
-    <!-- FAQ: Start -->
-    <section id="landingFAQ" class="section-py bg-body landing-faq">
-        <div class="container bg-icon-right">
-            <img src="~/img/front-pages/icons/bg-right-icon-light.png" alt="section icon" class="position-absolute top-0 end-0" data-speed="1" data-app-light-img="front-pages/icons/bg-right-icon-light.png" data-app-dark-img="front-pages/icons/bg-right-icon-dark.png" />
-            <h5 class="text-center mb-2">Frequently asked<span class="h4 fw-bold"> questions</span></h5>
-            <p class="text-center fw-medium mb-4 mb-md-12 pb-4">Browse through these FAQs to find answers to commonly asked questions.</p>
-            <div class="row gy-5">
-                <div class="col-lg-5">
-                    <div class="text-center">
-                        <img src="~/img/front-pages/landing-page/sitting-girl-with-laptop.png"
-                             alt="sitting girl with laptop"
-                             class="faq-image scaleX-n1-rtl" />
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="head-Two">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionTwo" aria-expanded="false" aria-controls="accordionTwo">Do I need to purchase a license for each website?</button>
+                        </h2>
+                        <div id="accordionTwo" class="accordion-collapse collapse" aria-labelledby="accordionTwo" data-bs-parent="#accordionFront">
+                            <div class="accordion-body">Dessert ice cream donut oat cake jelly-o pie sugar plum cheesecake. Bear claw dragée oat cake dragée ice cream halvah tootsie roll. Danish cake oat cake pie macaroon tart donut gummies. Jelly beans candy canes carrot cake. Fruitcake chocolate chupa chups.</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-7">
-                    <div class="accordion" id="accordionFront">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="head-One">
-                                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionOne" aria-expanded="false" aria-controls="accordionOne">Do you charge for each upgrade?</button>
-                            </h2>
-                            <div id="accordionOne" class="accordion-collapse collapse" data-bs-parent="#accordionFront" aria-labelledby="accordionOne">
-                                <div class="accordion-body">Lemon drops chocolate cake gummies carrot cake chupa chups muffin topping. Sesame snaps icing marzipan gummi bears macaroon dragée danish caramels powder. Bear claw dragée pastry topping soufflé. Wafer gummi bears marshmallow pastry pie.</div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="head-Three">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionThree" aria-expanded="false" aria-controls="accordionThree">What is regular license?</button>
+                        </h2>
+                        <div id="accordionThree" class="accordion-collapse collapse" aria-labelledby="accordionThree" data-bs-parent="#accordionFront">
+                            <div class="accordion-body">
+                                Regular license can be used for end products that do not charge users for access or service (access is free and there will be no monthly subscription fee). Single regular license can be used for single end product and end product can be used by you or your client. If you want to sell end product to multiple clients then you will need to purchase separate license for each client.
                             </div>
                         </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="head-Two">
-                                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionTwo" aria-expanded="false" aria-controls="accordionTwo">Do I need to purchase a license for each website?</button>
-                            </h2>
-                            <div id="accordionTwo" class="accordion-collapse collapse" aria-labelledby="accordionTwo" data-bs-parent="#accordionFront">
-                                <div class="accordion-body">Dessert ice cream donut oat cake jelly-o pie sugar plum cheesecake. Bear claw dragée oat cake dragée ice cream halvah tootsie roll. Danish cake oat cake pie macaroon tart donut gummies. Jelly beans candy canes carrot cake. Fruitcake chocolate chupa chups.</div>
-                            </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="head-Four">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFour" aria-expanded="false" aria-controls="accordionFour">What is extended license?</button>
+                        </h2>
+                        <div id="accordionFour" class="accordion-collapse collapse" aria-labelledby="accordionFour" data-bs-parent="#accordionFront">
+                            <div class="accordion-body">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.</div>
                         </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="head-Three">
-                                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionThree" aria-expanded="false" aria-controls="accordionThree">What is regular license?</button>
-                            </h2>
-                            <div id="accordionThree" class="accordion-collapse collapse" aria-labelledby="accordionThree" data-bs-parent="#accordionFront">
-                                <div class="accordion-body">
-                                    Regular license can be used for end products that do not charge users for access or service (access is free and there will be no monthly subscription fee). Single regular license can be used for single end product and end product can be used by you or your client. If you want to sell end product to multiple clients then you will need to purchase separate license for each client.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="head-Four">
-                                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFour" aria-expanded="false" aria-controls="accordionFour">What is extended license?</button>
-                            </h2>
-                            <div id="accordionFour" class="accordion-collapse collapse" aria-labelledby="accordionFour" data-bs-parent="#accordionFront">
-                                <div class="accordion-body">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.</div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="head-Five">
-                                <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFive" aria-expanded="false" aria-controls="accordionFive">Which license is applicable for SASS application?</button>
-                            </h2>
-                            <div id="accordionFive" class="accordion-collapse collapse" aria-labelledby="accordionFive" data-bs-parent="#accordionFront">
-                                <div class="accordion-body">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sequi molestias exercitationem ab cum nemo facere voluptates veritatis quia, eveniet veniam at et repudiandae mollitia ipsam quasi labore enim architecto non!</div>
-                            </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="head-Five">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionFive" aria-expanded="false" aria-controls="accordionFive">Which license is applicable for SASS application?</button>
+                        </h2>
+                        <div id="accordionFive" class="accordion-collapse collapse" aria-labelledby="accordionFive" data-bs-parent="#accordionFront">
+                            <div class="accordion-body">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sequi molestias exercitationem ab cum nemo facere voluptates veritatis quia, eveniet veniam at et repudiandae mollitia ipsam quasi labore enim architecto non!</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- FAQ: End -->
+    </div>
+</section>
+<!-- FAQ: End -->
 
-</div>
