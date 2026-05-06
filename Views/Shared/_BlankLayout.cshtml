@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="layout-navbar-fixed layout-wide"
+<html lang="en"
+      class="customizer-hide"
       data-skin="default" data-bs-theme="light"
-      data-assets-path="/" data-template="front-page">
+      data-assets-path="/" data-template="vertical-menu-template">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
@@ -20,46 +21,31 @@
   <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
   <link rel="stylesheet" href="~/vendor/css/core.css" />
   <link rel="stylesheet" href="~/css/demo.css" />
-  <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
   <link rel="stylesheet" href="~/css/site.css" />
 
   @RenderSection("VendorStyles", required: false)
   @RenderSection("PageStyles", required: false)
 
-  <!-- front-page.css last so first-section-pt always wins over any section-py redefinitions in page-specific sheets -->
-  <link rel="stylesheet" href="~/vendor/css/pages/front-page.css" />
-
   <!-- Template helpers & config (must be in <head>) -->
   <script src="~/vendor/js/helpers.js"></script>
-  <script src="~/vendor/js/template-customizer.js"></script>
-  <script src="~/js/front-config.js"></script>
-  <script src="~/vendor/js/dropdown-hover.js"></script>
-  <script src="~/vendor/js/mega-dropdown.js"></script>
+  <script src="~/js/config.js"></script>
 </head>
 <body>
-
-  <!-- Navbar -->
-  @await Html.PartialAsync("Sections/Navbar/_NavbarFront")
-  <!-- / Navbar -->
 
   @RenderBody()
 
   <!-- Core Scripts -->
+  <script src="~/vendor/libs/jquery/jquery.js"></script>
   <script src="~/vendor/libs/popper/popper.js"></script>
   <script src="~/vendor/js/bootstrap.js"></script>
   <script src="~/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="~/vendor/libs/pickr/pickr.js"></script>
   <script src="~/js/site.js"></script>
 
   @RenderSection("VendorScripts", required: false)
 
-  <script src="~/js/front-main.js"></script>
+  <script src="~/js/main.js"></script>
 
   @RenderSection("PageScripts", required: false)
-
-  <!-- Footer -->
-  @await Html.PartialAsync("Sections/Footer/_FooterFront")
-  <!-- / Footer -->
 
 </body>
 </html>

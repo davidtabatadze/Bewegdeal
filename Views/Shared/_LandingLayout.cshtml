@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" class="layout-navbar-fixed layout-wide"
+      data-skin="default" data-bs-theme="light"
+      data-assets-path="/" data-template="front-page">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>@ViewData["Title"] - Bewegdeal</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
+  <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
+  <link rel="stylesheet" href="~/vendor/css/core.css" />
+  <link rel="stylesheet" href="~/css/demo.css" />
+  <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
+  <link rel="stylesheet" href="~/css/site.css" />
+
+  @RenderSection("VendorStyles", required: false)
+  @RenderSection("PageStyles", required: false)
+
+  <!-- front-page.css last so first-section-pt always wins over any section-py redefinitions in page-specific sheets -->
+  <link rel="stylesheet" href="~/vendor/css/pages/front-page.css" />
+
+  <!-- Template helpers & config (must be in <head>) -->
+  <script src="~/vendor/js/helpers.js"></script>
+  <script src="~/vendor/js/template-customizer.js"></script>
+  <script src="~/js/front-config.js"></script>
+  <script src="~/vendor/js/dropdown-hover.js"></script>
+  <script src="~/vendor/js/mega-dropdown.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  @await Html.PartialAsync("Sections/Navbar/_NavbarLanding")
+  <!-- / Navbar -->
+
+  @RenderBody()
+
+  <!-- Core Scripts -->
+  <script src="~/vendor/libs/popper/popper.js"></script>
+  <script src="~/vendor/js/bootstrap.js"></script>
+  <script src="~/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="~/vendor/libs/pickr/pickr.js"></script>
+  <script src="~/js/site.js"></script>
+
+  @RenderSection("VendorScripts", required: false)
+
+  <script src="~/js/front-main.js"></script>
+
+  @RenderSection("PageScripts", required: false)
+
+  <!-- Footer -->
+  @await Html.PartialAsync("Sections/Footer/_FooterLanding")
+  <!-- / Footer -->
+
+</body>
+</html>
