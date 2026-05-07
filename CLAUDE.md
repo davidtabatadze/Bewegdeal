@@ -34,7 +34,7 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 ### `_BlankLayout` — authentication pages
 - Location: `Views/Shared/_BlankLayout.cshtml`
-- Used by: all `Authentication/` views
+- Used by: all `Account/` views
 - Loads: Inter font, iconify-icons, node-waves, core.css, demo.css, site.css, VendorStyles/PageStyles, head scripts (helpers.js, config.js, **no template-customizer**)
 - Body scripts: jquery, popper, bootstrap, node-waves, site.js, VendorScripts, **main.js**, PageScripts
 - Renders: body only — no navbar, sidebar, or footer
@@ -49,11 +49,11 @@ Admin pages live under `/Home`:
 - `/Home/Users` → Users
 - `/Home/Settings` → Settings
 
-Authentication pages live under `/Authentication`:
-- `/Authentication/Login`
-- `/Authentication/Register`
-- `/Authentication/ForgotPassword`
-- `/Authentication/VerifyEmail`
+Account pages live under `/Account`:
+- `/Account/Login`
+- `/Account/Register`
+- `/Account/ForgotPassword`
+- `/Account/VerifyEmail`
 
 ## Partials
 
@@ -80,11 +80,11 @@ Views/
 
 - `LandingController` — public landing page
 - `HomeController` — admin/app pages (Dashboard, Users, Settings)
-- `AuthenticationController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
+- `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
 
-## Authentication Views
+## Account Views
 
-All four auth views live in `Views/Authentication/` and use `Layout = "_BlankLayout"`.
+All four auth views live in `Views/Account/` and use `Layout = "_BlankLayout"`.
 They share the same visual shell: `authentication-wrapper authentication-basic`, centered card with logo, tree decoration images.
 
 - `Login.cshtml` — email/password form, links to ForgotPassword and Register
@@ -105,7 +105,7 @@ Sections with IDs (navbar anchor targets):
 - `id="hiw"` — how it works (timeline, has `style="isolation: isolate;"` to prevent timeline icons overlapping the fixed navbar)
 - `id="faq"` — FAQ accordion
 
-Navbar links (`_NavbarLanding.cshtml`): Home (tag helper), Services (`#services`), How it works (`#hiw`), FAQ (`#faq`), Login/Register button → `/Authentication/Login`.
+Navbar links (`_NavbarLanding.cshtml`): Home (tag helper), Services (`#services`), How it works (`#hiw`), FAQ (`#faq`), Login/Register button → `/Account/Login`.
 
 ## Vertical Menu
 
@@ -138,8 +138,8 @@ To add a menu item:
 
 ## Adding a New Auth Page
 
-1. Add action to `AuthenticationController`
-2. Create view in `Views/Authentication/` with `Layout = "_BlankLayout"`
+1. Add action to `AccountController`
+2. Create view in `Views/Account/` with `Layout = "_BlankLayout"`
 3. Use `authentication-wrapper authentication-basic container-p-y` shell with card + tree images
 
 ---

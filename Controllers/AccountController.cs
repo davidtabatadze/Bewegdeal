@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
-public class AuthenticationController(IUserRepository userRepository) : Controller
+public class AccountController(IUserRepository userRepository) : Controller
 {
     [HttpGet]
     public IActionResult Login() => View();
