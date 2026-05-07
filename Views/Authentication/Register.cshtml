@@ -1,250 +1,304 @@
 @{
-  Layout = "_BlankLayout";
-  ViewData["Title"] = "Register";
+    Layout = "_BlankLayout";
+    ViewData["Title"] = "Register";
 }
 
 @section VendorStyles {
-<link rel="stylesheet" href="~/vendor/libs/bs-stepper/bs-stepper.css" />
-<link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
-<link rel="stylesheet" href="~/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/bs-stepper/bs-stepper.css" />
+    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
 }
 
 @section VendorScripts {
-<script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
-<script src="~/vendor/libs/bs-stepper/bs-stepper.js"></script>
-<script src="~/vendor/libs/select2/select2.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+    <script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
+    <script src="~/vendor/libs/bs-stepper/bs-stepper.js"></script>
+    <script src="~/vendor/libs/select2/select2.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
 }
 
 @section PageStyles {
-<link rel="stylesheet" href="~/vendor/css/pages/page-auth.css" />
+    <link rel="stylesheet" href="~/vendor/css/pages/page-auth.css" />
 }
 
 @section PageScripts {
-<script src="~/js/pages-auth-multisteps.js"></script>
+    <script src="~/js/pages-auth-multisteps.js"></script>
 }
 
 <div class="position-relative">
-  <div class="authentication-wrapper authentication-basic container-p-y">
-    <div class="authentication-inner py-6 mx-4" style="max-width: 740px;">
-      <div class="card p-sm-7 p-2">
-        <!-- Logo -->
-        <div class="app-brand justify-content-center mt-5">
-          <a href="/" class="app-brand-link gap-3">
-            <span class="app-brand-logo demo">@await Html.PartialAsync("../_Partials/_Macros")</span>
-            <span class="app-brand-text demo text-heading fw-semibold">Bewegdeal</span>
-          </a>
-        </div>
-        <!-- /Logo -->
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner py-6 mx-4" style="max-width: 740px;">
+            <div class="card p-sm-7 p-2">
+                <!-- Logo -->
+                <div class="app-brand justify-content-center mt-5">
+                    <a href="/" class="app-brand-link gap-3">
+                        <span class="app-brand-logo demo">@await Html.PartialAsync("../_Partials/_Macros")</span>
+                        <span class="app-brand-text demo text-heading fw-semibold">Bewegdeal</span>
+                    </a>
+                </div>
+                <!-- /Logo -->
 
-        <div class="card-body mt-1">
-          <div id="multiStepsValidation" class="bs-stepper wizard-numbered shadow-none">
-            <div class="bs-stepper-header border-bottom-0 mb-2">
-              <div class="step" data-target="#accountDetailsValidation">
-                <button type="button" class="step-trigger">
-                  <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
-                  <span class="bs-stepper-label">
-                    <span class="bs-stepper-number">01</span>
-                    <span class="d-flex flex-column ms-1">
-                      <span class="bs-stepper-title">Account</span>
-                      <span class="bs-stepper-subtitle">Account Details</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-              <div class="line"></div>
-              <div class="step" data-target="#personalInfoValidation">
-                <button type="button" class="step-trigger">
-                  <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
-                  <span class="bs-stepper-label">
-                    <span class="bs-stepper-number">02</span>
-                    <span class="d-flex flex-column ms-1">
-                      <span class="bs-stepper-title">Personal</span>
-                      <span class="bs-stepper-subtitle">Enter Information</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-              <div class="line"></div>
-              <div class="step" data-target="#roleSelectionValidation">
-                <button type="button" class="step-trigger">
-                  <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
-                  <span class="bs-stepper-label">
-                    <span class="bs-stepper-number">03</span>
-                    <span class="d-flex flex-column ms-1">
-                      <span class="bs-stepper-title">Role</span>
-                      <span class="bs-stepper-subtitle">Account Type</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
+                <div class="card-body mt-1">
+                    <div id="multiStepsValidation" class="bs-stepper wizard-numbered shadow-none">
+                        <div class="bs-stepper-header border-bottom-0 mb-2">
+                            <div class="step" data-target="#roleSelectionValidation">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-number">01</span>
+                                        <span class="d-flex flex-column ms-1">
+                                            <span class="bs-stepper-title">Role</span>
+                                            <span class="bs-stepper-subtitle">Positioning</span>
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line"></div>
+                            <div class="step" data-target="#personalInfoValidation">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-number">02</span>
+                                        <span class="d-flex flex-column ms-1">
+                                            <span class="bs-stepper-title">General</span>
+                                            <span class="bs-stepper-subtitle">Identification</span>
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line"></div>
+                            <div class="step" data-target="#accountDetailsValidation">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-number">03</span>
+                                        <span class="d-flex flex-column ms-1">
+                                            <span class="bs-stepper-title">Account</span>
+                                            <span class="bs-stepper-subtitle">Finalize</span>
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bs-stepper-content">
+                            <form id="multiStepsForm" onsubmit="return false">
+                                <!-- Step 1: Role -->
+                                <div id="roleSelectionValidation" class="content">
+                                    <div class="content-header mb-5">
+                                        <h4 class="mb-0">Position Yourself</h4>
+                                        <span>How you will use Bewegdeal?</span>
+                                    </div>
+                                    <div class="row gap-md-0 gap-4 gx-5 form-control-validation">
+                                        <div class="col-md">
+                                            <div class="form-check custom-option custom-option-icon">
+                                                <label class="form-check-label custom-option-content" for="roleCustomer">
+                                                    <span class="custom-option-body">
+                                                        <i class="icon-base ri ri-user-line icon-32px mb-2"></i>
+                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
+                                                        <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
+                                                    </span>
+                                                    <input name="role" class="form-check-input" type="radio" value="Customer" id="roleCustomer" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="form-check custom-option custom-option-icon">
+                                                <label class="form-check-label custom-option-content" for="roleCompany">
+                                                    <span class="custom-option-body">
+                                                        <i class="icon-base ri ri-building-line icon-32px mb-2"></i>
+                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Company</span>
+                                                        <small>I provide services and want to connect with customers</small>
+                                                    </span>
+                                                    <input name="role" class="form-check-input" type="radio" value="Company" id="roleCompany" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex justify-content-between mt-8">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-next">
+                                            <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
+                                            <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Personal Information -->
+                                <div id="personalInfoValidation" class="content">
+                                    <div class="content-header mb-5">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <h4 class="mb-0">Briefly About Yourself</h4>
+                                            <span id="roleIndicator" class="badge d-none"></span>
+                                        </div>
+                                        <span>Provide your data carefully</span>
+                                    </div>
+                                    <div class="row gx-5">
+                                        <div class="col-sm-6 mb-5 form-control-validation">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="multiStepsName" name="multiStepsName" class="form-control" placeholder="" />
+                                                <label for="multiStepsName">Name</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 mb-5">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="multiStepsIdentificationNumber" name="multiStepsIdentificationNumber" class="form-control" placeholder="" />
+                                                <label for="multiStepsIdentificationNumber">Identification Number</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 mb-5">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="multiStepsMobile" name="multiStepsMobile" class="form-control" placeholder="" />
+                                                <label for="multiStepsMobile">Phone Number</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 mb-5 form-control-validation">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="multiStepsAddress" name="multiStepsAddress" class="form-control" placeholder="" />
+                                                <label for="multiStepsAddress">Address</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button class="btn btn-outline-secondary btn-prev">
+                                                <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
+                                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                            </button>
+                                            <button class="btn btn-primary btn-next">
+                                                <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
+                                                <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Account Details -->
+                                <div id="accountDetailsValidation" class="content">
+                                    <div class="content-header mb-5">
+                                        <h4 class="mb-0">Let`s Create Your User</h4>
+                                        <span>Some final touches</span>
+                                    </div>
+                                    <div class="row gx-5">
+                                        <div class="col-sm-6 mb-5 form-control-validation">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="email" name="multiStepsEmail" id="multiStepsEmail" class="form-control" placeholder="" />
+                                                <label for="multiStepsEmail">Email</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 mb-5 form-control-validation d-flex align-items-center">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" />
+                                                <label class="form-check-label" for="agreeTerms">
+                                                    I agree <a href="/terms">Terms &amp; Conditions</a>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
+                                            <div class="input-group input-group-merge">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="password" id="multiStepsPass" name="multiStepsPass" class="form-control" placeholder="" />
+                                                    <label for="multiStepsPass">Password</label>
+                                                </div>
+                                                <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
+                                            <div class="input-group input-group-merge">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="password" id="multiStepsConfirmPass" name="multiStepsConfirmPass" class="form-control" placeholder="" />
+                                                    <label for="multiStepsConfirmPass">Confirm Password</label>
+                                                </div>
+                                                <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
+                                            </div>
+                                        </div>
+                                        <!-- Services -->
+                                        <div id="servicesSection" class="col-12 mb-5 d-none">
+                                            <p class="fw-medium mb-3">Your interests</p>
+                                            <div class="row g-4">
+                                                <div class="col-sm-6">
+                                                    <div class="form-check custom-option custom-option-icon">
+                                                        <label class="form-check-label custom-option-content" for="serviceMoving">
+                                                            <span class="custom-option-body">
+                                                                <i class="icon-base ri ri-truck-line icon-24px mb-1"></i>
+                                                                <span class="custom-option-title">Moving Service</span>
+                                                            </span>
+                                                            <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="Moving" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-check custom-option custom-option-icon">
+                                                        <label class="form-check-label custom-option-content" for="serviceJunk">
+                                                            <span class="custom-option-body">
+                                                                <i class="icon-base ri ri-delete-bin-line icon-24px mb-1"></i>
+                                                                <span class="custom-option-title">Junk Removal</span>
+                                                            </span>
+                                                            <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="JunkRemoval" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-check custom-option custom-option-icon">
+                                                        <label class="form-check-label custom-option-content" for="serviceStorePickup">
+                                                            <span class="custom-option-body">
+                                                                <i class="icon-base ri ri-shopping-bag-line icon-24px mb-1"></i>
+                                                                <span class="custom-option-title">Store Pickup</span>
+                                                            </span>
+                                                            <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="StorePickup" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-check custom-option custom-option-icon">
+                                                        <label class="form-check-label custom-option-content" for="serviceVehicle">
+                                                            <span class="custom-option-body">
+                                                                <i class="icon-base ri ri-car-line icon-24px mb-1"></i>
+                                                                <span class="custom-option-title">Vehicle Transport</span>
+                                                            </span>
+                                                            <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="VehicleTransport" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /Services -->
+                                        <div id="companyTermsUpload" class="col-12 mb-5 d-none">
+                                            <p class="fw-medium mb-3">Your terms of service (.pdf file only)</p>
+                                            <input class="form-control form-control-sm" id="companyTermsFile" name="companyTermsFile" type="file" accept=".pdf" />
+                                        </div>
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button class="btn btn-outline-secondary btn-prev">
+                                                <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
+                                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-next btn-submit">
+                                                Submit <i class="icon-base ri ri-check-line icon-16px ms-1_5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <p class="text-center mt-5 mb-0">
+                        <span>Already have an account?</span>
+                        <a href="/Authentication/Login"><span>Sign in instead</span></a>
+                    </p>
+                </div>
             </div>
 
-            <div class="bs-stepper-content">
-              <form id="multiStepsForm" onsubmit="return false">
-                <!-- Step 1: Account Details -->
-                <div id="accountDetailsValidation" class="content">
-                  <div class="content-header mb-5">
-                    <h4 class="mb-0">Account Information</h4>
-                    <span>Enter Your Account Details</span>
-                  </div>
-                  <div class="row gx-5">
-                    <div class="col-sm-6 mb-5 form-control-validation">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" name="multiStepsUsername" id="multiStepsUsername" class="form-control" placeholder="johndoe" />
-                        <label for="multiStepsUsername">Username</label>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 mb-5 form-control-validation">
-                      <div class="form-floating form-floating-outline">
-                        <input type="email" name="multiStepsEmail" id="multiStepsEmail" class="form-control" placeholder="john.doe@email.com" />
-                        <label for="multiStepsEmail">Email</label>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
-                      <div class="input-group input-group-merge">
-                        <div class="form-floating form-floating-outline">
-                          <input type="password" id="multiStepsPass" name="multiStepsPass" class="form-control" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
-                          <label for="multiStepsPass">Password</label>
-                        </div>
-                        <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
-                      <div class="input-group input-group-merge">
-                        <div class="form-floating form-floating-outline">
-                          <input type="password" id="multiStepsConfirmPass" name="multiStepsConfirmPass" class="form-control" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
-                          <label for="multiStepsConfirmPass">Confirm Password</label>
-                        </div>
-                        <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
-                      </div>
-                    </div>
-                    <div class="col-12 d-flex justify-content-between">
-                      <button class="btn btn-outline-secondary btn-prev" disabled>
-                        <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                        <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                      </button>
-                      <button class="btn btn-primary btn-next">
-                        <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
-                        <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Step 2: Personal Information -->
-                <div id="personalInfoValidation" class="content">
-                  <div class="content-header mb-5">
-                    <h4 class="mb-0">Personal Information</h4>
-                    <span>Enter Your Personal Information</span>
-                  </div>
-                  <div class="row gx-5">
-                    <div class="col-sm-6 mb-5 form-control-validation">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multiStepsFirstName" name="multiStepsFirstName" class="form-control" placeholder="John" />
-                        <label for="multiStepsFirstName">First Name</label>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 mb-5">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multiStepsLastName" name="multiStepsLastName" class="form-control" placeholder="Doe" />
-                        <label for="multiStepsLastName">Last Name</label>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 mb-5">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multiStepsMobile" name="multiStepsMobile" class="form-control multi-steps-mobile" placeholder="555 000 0000" />
-                        <label for="multiStepsMobile">Phone Number</label>
-                      </div>
-                    </div>
-                    <div class="col-sm-6 mb-5 form-control-validation">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multiStepsCity" name="multiStepsCity" class="form-control" placeholder="City" />
-                        <label for="multiStepsCity">City</label>
-                      </div>
-                    </div>
-                    <div class="col-md-12 mb-5 form-control-validation">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" id="multiStepsAddress" name="multiStepsAddress" class="form-control" placeholder="Address" />
-                        <label for="multiStepsAddress">Address</label>
-                      </div>
-                    </div>
-                    <div class="col-12 d-flex justify-content-between">
-                      <button class="btn btn-outline-secondary btn-prev">
-                        <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                        <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                      </button>
-                      <button class="btn btn-primary btn-next">
-                        <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
-                        <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Step 3: Role Selection -->
-                <div id="roleSelectionValidation" class="content">
-                  <div class="content-header mb-5">
-                    <h4 class="mb-0">Account Type</h4>
-                    <span>Select how you will use Bewegdeal</span>
-                  </div>
-                  <div class="row gap-md-0 gap-4 mb-8 gx-5">
-                    <div class="col-md">
-                      <div class="form-check custom-option custom-option-icon">
-                        <label class="form-check-label custom-option-content" for="roleCustomer">
-                          <span class="custom-option-body">
-                            <i class="icon-base ri ri-user-line icon-32px mb-2"></i>
-                            <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
-                            <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
-                          </span>
-                          <input name="role" class="form-check-input" type="radio" value="Customer" id="roleCustomer" checked />
-                        </label>
-                      </div>
-                    </div>
-                    <div class="col-md">
-                      <div class="form-check custom-option custom-option-icon">
-                        <label class="form-check-label custom-option-content" for="roleCompany">
-                          <span class="custom-option-body">
-                            <i class="icon-base ri ri-building-line icon-32px mb-2"></i>
-                            <span class="fs-6 d-block fw-medium text-heading mb-2">Company</span>
-                            <small>I provide services and want to connect with customers</small>
-                          </span>
-                          <input name="role" class="form-check-input" type="radio" value="Company" id="roleCompany" />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 d-flex justify-content-between form-control-validation">
-                    <button class="btn btn-outline-secondary btn-prev">
-                      <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                      <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                    </button>
-                    <button type="submit" class="btn btn-success btn-next btn-submit">
-                      Submit <i class="icon-base ri ri-check-line icon-16px ms-1_5"></i>
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <p class="text-center mt-5 mb-0">
-            <span>Already have an account?</span>
-            <a href="/Authentication/Login"><span>Sign in instead</span></a>
-          </p>
+            <img src="~/img/illustrations/tree-3.png" alt="auth-tree" class="authentication-image-object-left d-none d-lg-block" />
+            <img src="~/img/illustrations/auth-basic-mask-light.png" class="authentication-image d-none d-lg-block scaleX-n1-rtl" height="172" alt="triangle-bg" data-app-light-img="illustrations/auth-basic-mask-light.png" data-app-dark-img="illustrations/auth-basic-mask-dark.png" />
+            <img src="~/img/illustrations/tree.png" alt="auth-tree" class="authentication-image-object-right d-none d-lg-block" />
         </div>
-      </div>
-
-      <img src="~/img/illustrations/tree-3.png" alt="auth-tree" class="authentication-image-object-left d-none d-lg-block" />
-      <img src="~/img/illustrations/auth-basic-mask-light.png" class="authentication-image d-none d-lg-block scaleX-n1-rtl" height="172" alt="triangle-bg" data-app-light-img="illustrations/auth-basic-mask-light.png" data-app-dark-img="illustrations/auth-basic-mask-dark.png" />
-      <img src="~/img/illustrations/tree.png" alt="auth-tree" class="authentication-image-object-right d-none d-lg-block" />
     </div>
-  </div>
 </div>
 
 <script>
-  window.Helpers.initCustomOptionCheck();
+    window.Helpers.initCustomOptionCheck();
 </script>

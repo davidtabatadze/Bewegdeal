@@ -8,7 +8,6 @@
 $(function () {
   var select2 = $('.select2');
 
-  // select2
   if (select2.length) {
     select2.each(function () {
       var $this = $(this);
@@ -27,49 +26,18 @@ document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const stepsValidation = document.querySelector('#multiStepsValidation');
     if (typeof stepsValidation !== undefined && stepsValidation !== null) {
-      // Multi Steps form
       const stepsValidationForm = stepsValidation.querySelector('#multiStepsForm');
-      // Form steps
-      const stepsValidationFormStep1 = stepsValidationForm.querySelector('#accountDetailsValidation');
-      const stepsValidationFormStep2 = stepsValidationForm.querySelector('#personalInfoValidation');
-      const stepsValidationFormStep3 = stepsValidationForm.querySelector('#roleSelectionValidation');
-      // Multi steps next prev button
+
+      const roleStep    = stepsValidationForm.querySelector('#roleSelectionValidation');
+      const generalStep = stepsValidationForm.querySelector('#personalInfoValidation');
+      const accountStep = stepsValidationForm.querySelector('#accountDetailsValidation');
+
       const stepsValidationNext = [].slice.call(stepsValidationForm.querySelectorAll('.btn-next'));
       const stepsValidationPrev = [].slice.call(stepsValidationForm.querySelectorAll('.btn-prev'));
 
-      const multiStepsExDate = document.querySelector('.multi-steps-exp-date'),
-        multiStepsCvv = document.querySelector('.multi-steps-cvv'),
-        multiStepsMobile = document.querySelector('.multi-steps-mobile'),
-        multiStepsPincode = document.querySelector('.multi-steps-pincode'),
-        multiStepsCard = document.querySelector('.multi-steps-card');
+      const roleIndicator    = document.querySelector('#roleIndicator');
+      const multiStepsMobile = document.querySelector('.multi-steps-mobile');
 
-      // Expiry Date Mask
-      if (multiStepsExDate) {
-        multiStepsExDate.addEventListener('input', event => {
-          multiStepsExDate.value = formatDate(event.target.value, {
-            date: true,
-            delimiter: '/',
-            datePattern: ['m', 'y']
-          });
-        });
-        registerCursorTracker({
-          input: multiStepsExDate,
-          delimiter: '/'
-        });
-      }
-
-      // CVV
-      if (multiStepsCvv) {
-        multiStepsCvv.addEventListener('input', event => {
-          const cleanValue = event.target.value.replace(/\D/g, '');
-          multiStepsCvv.value = formatNumeral(cleanValue, {
-            numeral: true,
-            numeralPositiveOnly: true
-          });
-        });
-      }
-
-      // Mobile
       if (multiStepsMobile) {
         multiStepsMobile.addEventListener('input', event => {
           const cleanValue = event.target.value.replace(/\D/g, '');
@@ -78,64 +46,128 @@ document.addEventListener('DOMContentLoaded', function (e) {
             delimiters: [' ', ' ']
           });
         });
-        registerCursorTracker({
-          input: multiStepsMobile,
-          delimiter: ' '
+        registerCursorTracker({ input: multiStepsMobile, delimiter: ' ' });
+      }
+
+      let validationStepper = new Stepper(stepsValidation, { linear: true });
+
+      function resetGeneralStep() {
+        generalValidation.resetForm();
+        ['multiStepsMobile', 'multiStepsIdentificationNumber', 'multiStepsAddress'].forEach(function (name) {
+          const el = generalStep.querySelector('[name="' + name + '"]');
+          if (!el) return;
+          el.classList.remove('is-invalid');
+          const fb = el.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.remove();
         });
       }
 
-      // Pincode
-      if (multiStepsPincode) {
-        multiStepsPincode.addEventListener('input', event => {
-          multiStepsPincode.value = formatNumeral(event.target.value, {
-            delimiter: '',
-            numeral: true
-          });
-        });
-      }
+      function validateGeneralManualFields() {
+        const selected  = roleStep.querySelector('[name="role"]:checked');
+        const isCompany = selected && selected.value === 'Company';
 
-      // Credit Card
-      if (multiStepsCard) {
-        multiStepsCard.addEventListener('input', event => {
-          multiStepsCard.value = formatCreditCard(event.target.value);
-          const cleanValue = event.target.value.replace(/\D/g, '');
-          let cardType = getCreditCardType(cleanValue);
-          if (cardType && cardType !== 'unknown' && cardType !== 'general') {
-            document.querySelector('.card-type').innerHTML =
-              `<img src="${assetsPath}img/icons/payments/${cardType}-cc.png" height="18"/>`;
-          } else {
-            document.querySelector('.card-type').innerHTML = '';
+        const toCheck = [
+          { el: generalStep.querySelector('[name="multiStepsMobile"]'),              msg: 'Please enter phone number' }
+        ];
+        if (isCompany) {
+          toCheck.push({ el: generalStep.querySelector('[name="multiStepsIdentificationNumber"]'), msg: 'Please enter identification number' });
+          toCheck.push({ el: generalStep.querySelector('[name="multiStepsAddress"]'),              msg: 'Please enter your address' });
+        }
+
+        let passed = true;
+        toCheck.forEach(function (item) {
+          if (!item.el) return;
+          if (!item.el.value.trim()) {
+            item.el.classList.add('is-invalid');
+            let fb = item.el.parentElement.querySelector('.invalid-feedback');
+            if (!fb) {
+              fb = document.createElement('div');
+              fb.className = 'invalid-feedback';
+              item.el.parentElement.appendChild(fb);
+            }
+            fb.textContent = item.msg;
+            item.el.addEventListener('input', function () { item.el.classList.remove('is-invalid'); }, { once: true });
+            passed = false;
           }
         });
-        registerCursorTracker({
-          input: multiStepsCard,
-          delimiter: ' '
-        });
+        return passed;
       }
 
-      let validationStepper = new Stepper(stepsValidation, {
-        linear: true
-      });
-
-      // Account details
-      const multiSteps1 = FormValidation.formValidation(stepsValidationFormStep1, {
+      // Step 1: Role
+      const roleValidation = FormValidation.formValidation(roleStep, {
         fields: {
-          multiStepsUsername: {
+          role: {
             validators: {
               notEmpty: {
-                message: 'Please enter username'
-              },
-              stringLength: {
-                min: 6,
-                max: 30,
-                message: 'The name must be more than 6 and less than 30 characters long'
-              },
-              regexp: {
-                regexp: /^[a-zA-Z0-9 ]+$/,
-                message: 'The name can only consist of alphabetical, number and space'
+                message: 'Please select an account type'
               }
             }
-          },
+          }
+        },
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            rowSelector: function (field, ele) {
+              return '.form-control-validation';
+            }
+          }),
+          autoFocus: new FormValidation.plugins.AutoFocus(),
+          submitButton: new FormValidation.plugins.SubmitButton()
+        }
+      }).on('core.form.valid', function () {
+        const selected = roleStep.querySelector('[name="role"]:checked');
+        if (selected && roleIndicator) {
+          const isCompany = selected.value === 'Company';
+          roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${selected.value}`;
+          roleIndicator.className = 'badge bg-label-primary';
+        }
+        validationStepper.next();
+      });
+
+      // Step 2: General
+      const generalValidation = FormValidation.formValidation(generalStep, {
+        fields: {
+          multiStepsName: {
+            validators: {
+              notEmpty: {
+                message: 'Please enter your name'
+              }
+            }
+          }
+        },
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            rowSelector: function (field, ele) {
+              switch (field) {
+                case 'multiStepsName':
+                  return '.form-control-validation';
+                default:
+                  return '.row';
+              }
+            }
+          }),
+          autoFocus: new FormValidation.plugins.AutoFocus(),
+          submitButton: new FormValidation.plugins.SubmitButton()
+        }
+      }).on('core.form.valid', function () {
+        if (!validateGeneralManualFields()) return;
+
+        const isCompany = roleStep.querySelector('[name="role"]:checked') &&
+                          roleStep.querySelector('[name="role"]:checked').value === 'Company';
+        const servicesSection = document.querySelector('#servicesSection');
+        if (servicesSection) servicesSection.classList.toggle('d-none', !isCompany);
+        const companyTermsUpload = document.querySelector('#companyTermsUpload');
+        if (companyTermsUpload) companyTermsUpload.classList.toggle('d-none', !isCompany);
+
+        validationStepper.next();
+      });
+
+      // Step 3: Account
+      const accountValidation = FormValidation.formValidation(accountStep, {
+        fields: {
           multiStepsEmail: {
             validators: {
               notEmpty: {
@@ -160,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
               },
               identical: {
                 compare: function () {
-                  return stepsValidationFormStep1.querySelector('[name="multiStepsPass"]').value;
+                  return accountStep.querySelector('[name="multiStepsPass"]').value;
                 },
                 message: 'The password and its confirm are not the same'
               }
@@ -170,8 +202,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
           bootstrap5: new FormValidation.plugins.Bootstrap5({
-            // Use this for enabling/changing valid/invalid class
-            // eleInvalidClass: '',
             eleValidClass: '',
             rowSelector: '.form-control-validation'
           }),
@@ -186,88 +216,64 @@ document.addEventListener('DOMContentLoaded', function (e) {
           });
         }
       }).on('core.form.valid', function () {
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
-      });
+        const agreeTerms = accountStep.querySelector('[name="agreeTerms"]');
+        if (agreeTerms && !agreeTerms.checked) return;
 
-      // Personal info
-      const multiSteps2 = FormValidation.formValidation(stepsValidationFormStep2, {
-        fields: {
-          multiStepsFirstName: {
-            validators: {
-              notEmpty: {
-                message: 'Please enter first name'
-              }
-            }
-          },
-          multiStepsAddress: {
-            validators: {
-              notEmpty: {
-                message: 'Please enter your address'
-              }
-            }
-          }
-        },
-        plugins: {
-          trigger: new FormValidation.plugins.Trigger(),
-          bootstrap5: new FormValidation.plugins.Bootstrap5({
-            // Use this for enabling/changing valid/invalid class
-            // eleInvalidClass: '',
-            eleValidClass: '',
-            rowSelector: function (field, ele) {
-              // field is the field name
-              // ele is the field element
-              switch (field) {
-                case 'multiStepsFirstName':
-                case 'multiStepsAddress':
-                  return '.form-control-validation';
-                default:
-                  return '.row';
-              }
-            }
-          }),
-          autoFocus: new FormValidation.plugins.AutoFocus(),
-          submitButton: new FormValidation.plugins.SubmitButton()
+        const servicesSection = document.querySelector('#servicesSection');
+        if (servicesSection && !servicesSection.classList.contains('d-none')) {
+          const anyService = accountStep.querySelectorAll('[name^="service"]:checked').length > 0;
+          if (!anyService) return;
         }
-      }).on('core.form.valid', function () {
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
-      });
 
-      // Role selection — radio always has a value, no field validation needed
-      const multiSteps3 = FormValidation.formValidation(stepsValidationFormStep3, {
-        fields: {},
-        plugins: {
-          trigger: new FormValidation.plugins.Trigger(),
-          bootstrap5: new FormValidation.plugins.Bootstrap5({
-            eleValidClass: '',
-            rowSelector: '.form-control-validation'
-          }),
-          autoFocus: new FormValidation.plugins.AutoFocus(),
-          submitButton: new FormValidation.plugins.SubmitButton()
-        }
-      }).on('core.form.valid', function () {
         stepsValidationForm.submit();
       });
 
       stepsValidationNext.forEach(item => {
         item.addEventListener('click', event => {
-          // When click the Next button, we will validate the current step
           switch (validationStepper._currentIndex) {
-            case 0:
-              multiSteps1.validate();
-              break;
-
-            case 1:
-              multiSteps2.validate();
-              break;
-
+            case 0: roleValidation.validate();    break;
+            case 1: validateGeneralManualFields(); generalValidation.validate(); break;
             case 2:
-              multiSteps3.validate();
-              break;
+              const agreeTerms = accountStep.querySelector('[name="agreeTerms"]');
+              if (agreeTerms && !agreeTerms.checked) {
+                agreeTerms.classList.add('is-invalid');
+                let fb = agreeTerms.parentElement.querySelector('.invalid-feedback');
+                if (!fb) {
+                  fb = document.createElement('div');
+                  fb.className = 'invalid-feedback';
+                  agreeTerms.parentElement.appendChild(fb);
+                }
+                fb.textContent = 'You must agree to the Terms & Conditions';
+                agreeTerms.addEventListener('change', function () { agreeTerms.classList.remove('is-invalid'); }, { once: true });
+              }
 
-            default:
+              const servicesSection = document.querySelector('#servicesSection');
+              if (servicesSection && !servicesSection.classList.contains('d-none')) {
+                const anyService = accountStep.querySelectorAll('[name^="service"]:checked').length > 0;
+                if (!anyService) {
+                  let svcFb = servicesSection.querySelector('.services-invalid-feedback');
+                  if (!svcFb) {
+                    svcFb = document.createElement('div');
+                    svcFb.className = 'services-invalid-feedback text-danger small mt-2';
+                    servicesSection.appendChild(svcFb);
+                  }
+                  svcFb.textContent = 'Please select at least one service';
+                  servicesSection.querySelectorAll('[name^="service"]').forEach(function (cb) {
+                    cb.addEventListener('change', function () {
+                      if (servicesSection.querySelectorAll('[name^="service"]:checked').length > 0) {
+                        if (svcFb) svcFb.textContent = '';
+                      }
+                    });
+                  });
+                } else {
+                  const svcFb = servicesSection.querySelector('.services-invalid-feedback');
+                  if (svcFb) svcFb.textContent = '';
+                }
+              }
+
+              accountValidation.validate();
               break;
+            default: break;
           }
         });
       });
@@ -275,18 +281,24 @@ document.addEventListener('DOMContentLoaded', function (e) {
       stepsValidationPrev.forEach(item => {
         item.addEventListener('click', event => {
           switch (validationStepper._currentIndex) {
-            case 2:
-              validationStepper.previous();
-              break;
-
             case 1:
+              resetGeneralStep();
               validationStepper.previous();
               break;
-
-            case 0:
-
-            default:
+            case 2:
+              resetGeneralStep();
+              accountValidation.resetForm();
+              const agreeTermsReset = accountStep.querySelector('[name="agreeTerms"]');
+              if (agreeTermsReset) {
+                agreeTermsReset.classList.remove('is-invalid');
+                const fb = agreeTermsReset.parentElement.querySelector('.invalid-feedback');
+                if (fb) fb.remove();
+              }
+              const svcFbReset = document.querySelector('#servicesSection .services-invalid-feedback');
+              if (svcFbReset) svcFbReset.textContent = '';
+              validationStepper.previous();
               break;
+            default: break;
           }
         });
       });
