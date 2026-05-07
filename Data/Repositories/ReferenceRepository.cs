@@ -17,18 +17,20 @@ namespace Bewegdeal.Data.Repositories
         {
             var rows = new[]
             {
-                new ReferenceEntity { Id = UserRoleEnum.Administrator, Type = ReferenceTypeEnum.UseRole,    Name = "Administrator" },
-                new ReferenceEntity { Id = UserRoleEnum.Customer,      Type = ReferenceTypeEnum.UseRole,    Name = "Customer"      },
-                new ReferenceEntity { Id = UserRoleEnum.Company,       Type = ReferenceTypeEnum.UseRole,    Name = "Company"       },
+                new ReferenceEntity { Id = UserRoleEnum.Administrator, Type = ReferenceTypeEnum.UserRole,   Name = "Administrator" },
+                new ReferenceEntity { Id = UserRoleEnum.Customer,      Type = ReferenceTypeEnum.UserRole,   Name = "Customer"      },
+                new ReferenceEntity { Id = UserRoleEnum.Company,       Type = ReferenceTypeEnum.UserRole,   Name = "Company"       },
                 new ReferenceEntity { Id = UserStatusEnum.Active,      Type = ReferenceTypeEnum.UserStatus, Name = "Active"        },
                 new ReferenceEntity { Id = UserStatusEnum.Pending,     Type = ReferenceTypeEnum.UserStatus, Name = "Pending"       },
                 new ReferenceEntity { Id = UserStatusEnum.Blocked,     Type = ReferenceTypeEnum.UserStatus, Name = "Blocked"       },
+                new ReferenceEntity { Id = UserStatusEnum.Unverified,  Type = ReferenceTypeEnum.UserStatus, Name = "Unverified" },
             };
 
             foreach (var row in rows)
             {
-                if (await Get(new BaseFilter<string> { Id = row.Id }) == null)
-                    await Create(row);
+                if (await Get(new BaseFilter<string> { Id = row.Id }) != null) continue;
+
+                await Create(row);
             }
         }
 
@@ -39,7 +41,9 @@ namespace Bewegdeal.Data.Repositories
             var query = _context.References.AsQueryable();
 
             if (filter.Id is not null)
+            {
                 query = query.Where(r => r.Id == filter.Id);
+            }
 
             return await query.FirstOrDefaultAsync();
         }

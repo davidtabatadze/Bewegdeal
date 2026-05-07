@@ -32,7 +32,6 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new UserEntity
                 {
                     Id = row.Id,
-                    Code = row.Id.ToString(),
                     Role = UserRoleEnum.Administrator,
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
@@ -40,8 +39,7 @@ namespace Bewegdeal.Data.Repositories
                     Mobile = row.Mobile,
                     Address = row.Address,
                     Password = hash,
-                    Salt = salt,
-                    Interests = [ServiceEnum.All],
+                    Salt = salt
                 });
             }
         }
@@ -53,12 +51,13 @@ namespace Bewegdeal.Data.Repositories
             var query = _context.Users.AsQueryable();
 
             if (filter.Id.HasValue)
+            {
                 query = query.Where(u => u.Id == filter.Id.Value);
+            }
 
             if (filter.Email is not null)
             {
-                var lower = filter.Email.ToLower();
-                query = query.Where(u => u.Email.ToLower() == lower);
+                query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
             }
 
             return await query.FirstOrDefaultAsync();

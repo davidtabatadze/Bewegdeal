@@ -38,10 +38,15 @@
                     <h4 class="mb-1">Welcome to Bewegdeal! 👋🏻</h4>
                     <p class="mb-5">Sign-in and start the adventure</p>
 
-                    <form id="formAuthentication" class="mb-5" action="/" method="POST">
+                    @if (ViewBag.Error is string error)
+                    {
+                        <div class="alert alert-danger mb-5" role="alert">@error</div>
+                    }
+
+                    <form id="formAuthentication" class="mb-5" asp-controller="Authentication" asp-action="Login" method="POST">
                         <div class="form-floating form-floating-outline mb-5 form-control-validation">
-                            <input type="text" class="form-control" id="email" name="email-username" placeholder="Enter your email or username" autofocus />
-                            <label for="email">Email or Username</label>
+                            <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" autofocus />
+                            <label for="email">Email</label>
                         </div>
                         <div class="mb-5">
                             <div class="form-password-toggle form-control-validation">

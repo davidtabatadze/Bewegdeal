@@ -88,7 +88,10 @@ All four auth views live in `Views/Authentication/` and use `Layout = "_BlankLay
 They share the same visual shell: `authentication-wrapper authentication-basic`, centered card with logo, tree decoration images.
 
 - `Login.cshtml` — email/password form, links to ForgotPassword and Register
-- `Register.cshtml` — 3-step bs-stepper inside the basic card shell (max-width: 740px); steps: Account → Personal → Role (Customer/Company). Driven by `wwwroot/js/pages-auth-multisteps.js` (modified: step 3 uses `#roleSelectionValidation` instead of `#billingLinksValidation`, no card field validation)
+- `Register.cshtml` — 3-step bs-stepper (max-width: 740px); steps: **Role → General → Account**. Driven by `wwwroot/js/pages-auth-multisteps.js`
+  - Step 1 `#roleSelectionValidation`: Customer/Company radio cards, no default selection, FormValidation `notEmpty` on `role`
+  - Step 2 `#personalInfoValidation`: roleIndicator badge in header; fields: Name (required always), Phone (required always), IdentificationNumber + Address (required for Company only). Manual `is-invalid` pattern for phone/id/address — NOT in FormValidation
+  - Step 3 `#accountDetailsValidation`: Email, agreeTerms checkbox (links to `/terms`), Password, ConfirmPassword, `#servicesSection` (Company only, d-none toggle, 2×2 grid: Moving/Junk/Pickup/Vehicle, at least one required), `#companyTermsUpload` (Company only, d-none toggle, PDF only, not mandatory)
 - `ForgotPassword.cshtml` — single email field, back to login link
 - `VerifyEmail.cshtml` — 6-digit OTP input, driven by pages-auth-two-steps.js
 
@@ -138,3 +141,106 @@ To add a menu item:
 1. Add action to `AuthenticationController`
 2. Create view in `Views/Authentication/` with `Layout = "_BlankLayout"`
 3. Use `authentication-wrapper authentication-basic container-p-y` shell with card + tree images
+
+---
+
+## Backend Architecture
+
+### Conventions
+
+- **Async/await throughout** — no sync equivalents, no `Async` suffix on method names
+- **Entities = pure DB objects** — no business logic, no methods
+- **Repositories = CRUD only** — no business logic, no service calls
+- **String constant classes instead of C# enums** — values are lowercase strings stored directly in the DB
+
+### Project Structure
+
+```
+Data/
+├── Base/
+│   ├── IEntity.cs               # Marker interface for all entities
+│   ├── IRepository.cs           # Marker interface for all repositories
+│   ├── IRepositorySeedable.cs   # Adds Task Seed() — implemented by repos that need initial data
+│   └── BaseFilter.cs            # Generic filter with Id<T>
+├── Entities/
+│   ├── UserEntity.cs            # Users table
+│   └── ReferenceEntity.cs       # References table (lookup/reference data)
+├── Filters/
+│   └── UserFilter.cs            # Extends BaseFilter<long?>, adds Email
+├── Repositories/
+│   ├── IUserRepository.cs       # Get(UserFilter), Create(UserEntity), Update(UserEntity)
+│   ├── IReferenceRepository.cs  # Get(BaseFilter<string>), Create(ReferenceEntity), Update(ReferenceEntity)
+│   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (2 admin users)
+│   └── ReferenceRepository.cs  # EF Core impl + IRepositorySeedable (7 reference rows)
+└── SqlContext.cs                # DbContext: Users + References DbSets, EF config, value converters
+Enums/
+├── UserRoleEnum.cs              # "administrator", "customer", "company"
+├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
+├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
+├── ReferenceTypeEnum.cs         # "user-role", "user-status" (note: UseRole field has a typo — should be UserRole)
+└── EmailStatusEnum.cs           # "sent", "failed"
+Tools/
+├── PasswordTool.cs              # Static, PBKDF2/SHA-256, HashPassword() → (hash, salt), Verify()
+└── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
+```
+
+### Entities
+
+**UserEntity** (`Users` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| Role | string | `UserRoleEnum` value, max 16 |
+| Status | string | `UserStatusEnum` value, max 16 |
+| Name | string | max 128 |
+| Email | string | unique index, max 128 |
+| Mobile | string | max 16 |
+| Password | string | PBKDF2 hash (Base64) |
+| Salt | string | random salt (Base64) |
+| Code | string? | verification/reset code, max 16 |
+| Address | string? | max 512 |
+| Interests | string[] | serialized as comma-separated string, max 128; values from `ServiceEnum` |
+
+**ReferenceEntity** (`References` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | string | PK, human-readable key (e.g. "customer"), max 16, never auto-generated |
+| Type | string | `ReferenceTypeEnum` value, max 16 |
+| Name | string | display name, max 16 |
+
+### Filters
+
+Filters are criteria bags — only non-null fields are applied in the query. Add new fields to extend lookup without adding new repository methods.
+
+- `BaseFilter<T>` — has `Id`
+- `UserFilter : BaseFilter<long?>` — adds `Email`
+- `ReferenceRepository` uses `BaseFilter<string>` directly (no dedicated filter class)
+
+### Tools
+
+**PasswordTool** (static):
+```csharp
+var (hash, salt) = PasswordTool.HashPassword(plainText);
+bool ok = PasswordTool.Verify(plainText, storedHash, storedSalt);
+```
+
+**BrevoTool** (static, configured once in `Program.cs`):
+```csharp
+// appsettings.json sections required: Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName
+string status = await BrevoTool.Send(email, subject, htmlContent, optionalText);
+// returns EmailStatusEnum.Sent or EmailStatusEnum.Failed
+```
+
+### Infrastructure (Program.cs)
+
+- **Session**: HttpOnly, IsEssential, 8hr idle timeout, SecurePolicy = SameAsRequest
+- **Database**: SQLite via EF Core, connection string `DefaultConnection` (fallback: `bewegdeal.db`)
+- **DI**: `IUserRepository` → `UserRepository` (scoped), `IReferenceRepository` → `ReferenceRepository` (scoped)
+- **Startup seeding**: `EnsureCreatedAsync` → seed References → seed Users (order matters)
+- **BrevoTool.Configure** called at startup before app runs
+
+### Seed Data
+
+References (7 rows): administrator/customer/company (type: user-role), active/pending/blocked/unverified (type: user-status)
+
+Users (2 rows): `admin@bewegdeal.at` and `david.tabatadze@outlook.com`, both Role=Administrator, Status=Active, password hashed at seed time.

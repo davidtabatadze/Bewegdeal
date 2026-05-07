@@ -27,7 +27,12 @@
       "Edit(*)",
       "Write(*)",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\" -Recurse -Filter \"*.cs\")",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)"
     ]
   }
 }
