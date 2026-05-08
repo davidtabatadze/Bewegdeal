@@ -146,12 +146,14 @@ To add a menu item:
 
 ## Backend Architecture
 
-### Conventions
+### C# Coding Conventions
 
 - **Async/await throughout** — no sync equivalents, no `Async` suffix on method names
 - **Entities = pure DB objects** — no business logic, no methods
 - **Repositories = CRUD only** — no business logic, no service calls
 - **String constant classes instead of C# enums** — values are lowercase strings stored directly in the DB
+- **Always use `{}` for all control flow blocks** — even single-line `if`, `foreach`, `for`, `while`, `using` bodies
+- **Never pass explicit `StringComparison`** — rely on the default (`Ordinal`, case-sensitive); only deviate when culture-aware comparison is genuinely needed
 
 ### Project Structure
 
@@ -234,9 +236,12 @@ string status = await BrevoTool.Send(email, subject, htmlContent, optionalText);
 ### Infrastructure (Program.cs)
 
 - **Session**: HttpOnly, IsEssential, 8hr idle timeout, SecurePolicy = SameAsRequest
-- **Database**: SQLite via EF Core, connection string `DefaultConnection` (fallback: `bewegdeal.db`)
+- **Database**: SQLite or MySQL via EF Core — provider selected by `Database:Provider` in `appsettings.json` (`"sqlite"` or `"mysql"`). Invalid value throws at startup.
+- **Table prefix**: configurable via `Database:TablePrefix` (e.g. `"dev_"`) — applied to all table names in `SqlContext`
+- **Connection strings**: live inside the `Database` section (`Database:Sqlite`, `Database:MySql`)
 - **DI**: `IUserRepository` → `UserRepository` (scoped), `IReferenceRepository` → `ReferenceRepository` (scoped)
-- **Startup seeding**: `EnsureCreatedAsync` → seed References → seed Users (order matters)
+- **Startup schema**: `SqlContext.EnsureTablesAsync()` — generates full DDL from the EF Core model and executes each statement with `IF NOT EXISTS`, safe on every run
+- **Startup seeding**: seed References → seed Users (order matters — users depend on role values)
 - **BrevoTool.Configure** called at startup before app runs
 
 ### Seed Data
