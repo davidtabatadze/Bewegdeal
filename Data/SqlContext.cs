@@ -102,18 +102,19 @@ namespace Bewegdeal.Data
                 e.HasIndex(u => u.Status);
 
                 // Required fields
-                e.Property(u => u.Password).IsRequired();
+                e.Property(u => u.Password).IsRequired().HasMaxLength(64);
                 e.Property(u => u.Salt).IsRequired();
 
                 e.Property(u => u.Role).IsRequired().HasMaxLength(16);
-                e.Property(u => u.Name).IsRequired().HasMaxLength(128);
-                e.Property(u => u.Email).IsRequired().HasMaxLength(128);
+                e.Property(u => u.Name).IsRequired().HasMaxLength(32);
+                e.Property(u => u.Email).IsRequired().HasMaxLength(32);
                 e.Property(u => u.Mobile).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
 
                 // Optional fields
                 e.Property(u => u.Code).HasMaxLength(16);
-                e.Property(u => u.Address).HasMaxLength(512);
+                e.Property(u => u.Number).HasMaxLength(16);
+                e.Property(u => u.Address).HasMaxLength(256);
 
                 // Stored as a comma-separated string (e.g. "moving,pickup").
                 // ValueComparer is required so EF Core can detect changes to array contents,

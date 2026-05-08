@@ -29,6 +29,9 @@ namespace Bewegdeal.Data.Entities
         /// <summary>Short-lived code used for email verification or password reset.</summary>
         public string? Code { get; set; }
 
+        /// <summary>Company identification / registration number.</summary>
+        public string? Number { get; set; }
+
         public string? Address { get; set; }
 
         /// <summary>

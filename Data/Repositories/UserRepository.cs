@@ -19,8 +19,8 @@ namespace Bewegdeal.Data.Repositories
         {
             var rows = new[]
             {
-                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",          Mobile = "+995599438038",  Password = "asdAsd123" },
-                new UserEntity { Id = 2, Name = "David Tabatadze", Email = "david.tabatadze@outlook.com", Mobile = "+4369910433340", Password = "asdAsd123" },
+                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",          Mobile = "+4369910433340", Password = "asdAsd123" },
+                new UserEntity { Id = 2, Name = "David Tabatadze", Email = "david.tabatadze@outlook.com", Mobile = "+995599438038", Password = "asdAsd123" },
             };
 
             foreach (var row in rows)

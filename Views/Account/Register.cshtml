@@ -1,3 +1,4 @@
+@model Bewegdeal.Models.RegisterViewModel
 @{
     Layout = "_BlankLayout";
     ViewData["Title"] = "Register";
@@ -84,7 +85,11 @@
                         </div>
 
                         <div class="bs-stepper-content">
-                            <form id="multiStepsForm" onsubmit="return false">
+                            @if (ViewBag.Error is string error)
+                            {
+                                <div class="alert alert-danger mb-4">@error</div>
+                            }
+                            <form id="multiStepsForm" method="post" asp-controller="Account" asp-action="Register" onsubmit="return false">
                                 <!-- Step 1: Role -->
                                 <div id="roleSelectionValidation" class="content">
                                     <div class="content-header mb-5">
@@ -100,7 +105,7 @@
                                                         <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
                                                         <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
                                                     </span>
-                                                    <input name="role" class="form-check-input" type="radio" value="Customer" id="roleCustomer" />
+                                                    <input name="role" class="form-check-input" type="radio" value="@UserRoleEnum.Customer" id="roleCustomer" checked="@(Model.Role == UserRoleEnum.Customer ? "checked" : null)" />
                                                 </label>
                                             </div>
                                         </div>
@@ -112,7 +117,7 @@
                                                         <span class="fs-6 d-block fw-medium text-heading mb-2">Company</span>
                                                         <small>I provide services and want to connect with customers</small>
                                                     </span>
-                                                    <input name="role" class="form-check-input" type="radio" value="Company" id="roleCompany" />
+                                                    <input name="role" class="form-check-input" type="radio" value="@UserRoleEnum.Company" id="roleCompany" checked="@(Model.Role == UserRoleEnum.Company ? "checked" : null)" />
                                                 </label>
                                             </div>
                                         </div>
@@ -141,26 +146,26 @@
                                     <div class="row gx-5">
                                         <div class="col-sm-6 mb-5 form-control-validation">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="text" id="multiStepsName" name="multiStepsName" class="form-control" placeholder="" />
-                                                <label for="multiStepsName">Name</label>
+                                                <input type="text" id="name" name="name" class="form-control" placeholder="" value="@Model.Name" />
+                                                <label for="name">Name</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="text" id="multiStepsIdentificationNumber" name="multiStepsIdentificationNumber" class="form-control" placeholder="" />
-                                                <label for="multiStepsIdentificationNumber">Identification Number</label>
+                                                <input type="text" id="number" name="number" class="form-control" placeholder="" value="@Model.Number" />
+                                                <label for="number">Identification Number</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="text" id="multiStepsMobile" name="multiStepsMobile" class="form-control" placeholder="" />
-                                                <label for="multiStepsMobile">Phone Number</label>
+                                                <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
+                                                <label for="mobile">Phone Number</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5 form-control-validation">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="text" id="multiStepsAddress" name="multiStepsAddress" class="form-control" placeholder="" />
-                                                <label for="multiStepsAddress">Address</label>
+                                                <input type="text" id="address" name="address" class="form-control" placeholder="" value="@Model.Address" />
+                                                <label for="address">Address</label>
                                             </div>
                                         </div>
                                         <div class="col-12 d-flex justify-content-between">
@@ -185,8 +190,8 @@
                                     <div class="row gx-5">
                                         <div class="col-sm-6 mb-5 form-control-validation">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="email" name="multiStepsEmail" id="multiStepsEmail" class="form-control" placeholder="" />
-                                                <label for="multiStepsEmail">Email</label>
+                                                <input type="email" name="email" id="email" class="form-control" placeholder="" value="@Model.Email" />
+                                                <label for="email">Email</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5 form-control-validation d-flex align-items-center">
@@ -200,8 +205,8 @@
                                         <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline">
-                                                    <input type="password" id="multiStepsPass" name="multiStepsPass" class="form-control" placeholder="" />
-                                                    <label for="multiStepsPass">Password</label>
+                                                    <input type="password" id="password" name="password" class="form-control" placeholder="" />
+                                                    <label for="password">Password</label>
                                                 </div>
                                                 <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
                                             </div>
@@ -209,8 +214,8 @@
                                         <div class="col-sm-6 form-password-toggle mb-5 form-control-validation">
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline">
-                                                    <input type="password" id="multiStepsConfirmPass" name="multiStepsConfirmPass" class="form-control" placeholder="" />
-                                                    <label for="multiStepsConfirmPass">Confirm Password</label>
+                                                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="" />
+                                                    <label for="confirmPassword">Confirm Password</label>
                                                 </div>
                                                 <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
                                             </div>
@@ -226,7 +231,7 @@
                                                                 <i class="icon-base ri ri-truck-line icon-24px mb-1"></i>
                                                                 <span class="custom-option-title">Moving Service</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="Moving" />
+                                                            <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="@ServiceEnum.Moving" checked="@(Model.ServiceMoving != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -237,7 +242,7 @@
                                                                 <i class="icon-base ri ri-delete-bin-line icon-24px mb-1"></i>
                                                                 <span class="custom-option-title">Junk Removal</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="JunkRemoval" />
+                                                            <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="@ServiceEnum.Removal" checked="@(Model.ServiceJunk != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -248,7 +253,7 @@
                                                                 <i class="icon-base ri ri-shopping-bag-line icon-24px mb-1"></i>
                                                                 <span class="custom-option-title">Store Pickup</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="StorePickup" />
+                                                            <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="@ServiceEnum.Pickup" checked="@(Model.ServiceStorePickup != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -259,7 +264,7 @@
                                                                 <i class="icon-base ri ri-car-line icon-24px mb-1"></i>
                                                                 <span class="custom-option-title">Vehicle Transport</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="VehicleTransport" />
+                                                            <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="@ServiceEnum.Transport" checked="@(Model.ServiceVehicle != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -301,4 +306,15 @@
 
 <script>
     window.Helpers.initCustomOptionCheck();
+
+    // Restore company-only sections when the page reloads with a pre-selected role
+    document.addEventListener('DOMContentLoaded', function () {
+        const selected = document.querySelector('[name="role"]:checked');
+        if (selected && selected.value === 'company') {
+            const servicesSection = document.querySelector('#servicesSection');
+            if (servicesSection) { servicesSection.classList.remove('d-none'); }
+            const companyTermsUpload = document.querySelector('#companyTermsUpload');
+            if (companyTermsUpload) { companyTermsUpload.classList.remove('d-none'); }
+        }
+    });
 </script>

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
       function resetGeneralStep() {
         generalValidation.resetForm();
-        ['multiStepsMobile', 'multiStepsIdentificationNumber', 'multiStepsAddress'].forEach(function (name) {
+        ['mobile', 'number', 'address'].forEach(function (name) {
           const el = generalStep.querySelector('[name="' + name + '"]');
           if (!el) return;
           el.classList.remove('is-invalid');
@@ -64,14 +64,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
       function validateGeneralManualFields() {
         const selected  = roleStep.querySelector('[name="role"]:checked');
-        const isCompany = selected && selected.value === 'Company';
+        const isCompany = selected && selected.value === 'company';
 
         const toCheck = [
-          { el: generalStep.querySelector('[name="multiStepsMobile"]'),              msg: 'Please enter phone number' }
+          { el: generalStep.querySelector('[name="mobile"]'),                msg: 'Please enter phone number' }
         ];
         if (isCompany) {
-          toCheck.push({ el: generalStep.querySelector('[name="multiStepsIdentificationNumber"]'), msg: 'Please enter identification number' });
-          toCheck.push({ el: generalStep.querySelector('[name="multiStepsAddress"]'),              msg: 'Please enter your address' });
+          toCheck.push({ el: generalStep.querySelector('[name="number"]'), msg: 'Please enter identification number' });
+          toCheck.push({ el: generalStep.querySelector('[name="address"]'),              msg: 'Please enter your address' });
         }
 
         let passed = true;
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Step 1: Role
       const roleValidation = FormValidation.formValidation(roleStep, {
         fields: {
-          role: {
+          role: {  // matches input name="role"
             validators: {
               notEmpty: {
                 message: 'Please select an account type'
@@ -118,8 +118,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
       }).on('core.form.valid', function () {
         const selected = roleStep.querySelector('[name="role"]:checked');
         if (selected && roleIndicator) {
-          const isCompany = selected.value === 'Company';
-          roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${selected.value}`;
+          const isCompany = selected.value === 'company';
+          const label = selected.value.charAt(0).toUpperCase() + selected.value.slice(1);
+          roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${label}`;
           roleIndicator.className = 'badge bg-label-primary';
         }
         validationStepper.next();
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Step 2: General
       const generalValidation = FormValidation.formValidation(generalStep, {
         fields: {
-          multiStepsName: {
+          name: {
             validators: {
               notEmpty: {
                 message: 'Please enter your name'
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             eleValidClass: '',
             rowSelector: function (field, ele) {
               switch (field) {
-                case 'multiStepsName':
+                case 'name':
                   return '.form-control-validation';
                 default:
                   return '.row';
@@ -156,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         if (!validateGeneralManualFields()) return;
 
         const isCompany = roleStep.querySelector('[name="role"]:checked') &&
-                          roleStep.querySelector('[name="role"]:checked').value === 'Company';
+                          roleStep.querySelector('[name="role"]:checked').value === 'company';
         const servicesSection = document.querySelector('#servicesSection');
         if (servicesSection) servicesSection.classList.toggle('d-none', !isCompany);
         const companyTermsUpload = document.querySelector('#companyTermsUpload');
@@ -168,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Step 3: Account
       const accountValidation = FormValidation.formValidation(accountStep, {
         fields: {
-          multiStepsEmail: {
+          email: {
             validators: {
               notEmpty: {
                 message: 'Please enter email address'
@@ -178,21 +179,26 @@ document.addEventListener('DOMContentLoaded', function (e) {
               }
             }
           },
-          multiStepsPass: {
+          password: {
             validators: {
               notEmpty: {
                 message: 'Please enter password'
+              },
+              stringLength: {
+                min: 6,
+                max: 16,
+                message: 'Password must be between 6 and 16 characters'
               }
             }
           },
-          multiStepsConfirmPass: {
+          confirmPassword: {
             validators: {
               notEmpty: {
                 message: 'Confirm Password is required'
               },
               identical: {
                 compare: function () {
-                  return accountStep.querySelector('[name="multiStepsPass"]').value;
+                  return accountStep.querySelector('[name="password"]').value;
                 },
                 message: 'The password and its confirm are not the same'
               }
