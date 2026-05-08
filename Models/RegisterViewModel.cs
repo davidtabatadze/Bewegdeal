@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using Bewegdeal.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bewegdeal.Models
 {

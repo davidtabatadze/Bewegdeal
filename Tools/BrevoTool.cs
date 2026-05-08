@@ -5,21 +5,18 @@ using System.Text.Json;
 namespace Bewegdeal.Tools
 {
     /// <summary>
-    /// Sends transactional emails via the Brevo v3 REST API.
-    /// Call <see cref="Configure"/> once at startup before using <see cref="Send"/>.
-    /// Uses a single shared <see cref="HttpClient"/> instance to avoid socket exhaustion.
+    /// Provides static methods for configuring and sending transactional emails using the Brevo email service.
     /// </summary>
+    /// <remarks>This class is intended for use in applications that need to send transactional emails via
+    /// Brevo. Before sending emails, call Configure to initialize the required settings from the application's
+    /// configuration. All methods are thread-safe and can be used concurrently. This class cannot be
+    /// instantiated.</remarks>
     public static class BrevoTool
     {
-        private const string ApiEndpoint = "https://api.brevo.com/v3/smtp/email";
-
         private static readonly HttpClient Http = new();
-
         private static string _apiKey = string.Empty;
         private static string _fromEmail = string.Empty;
         private static string _fromName = string.Empty;
-
-        // ── Startup ──────────────────────────────────────────────────────────────
 
         /// <summary>
         /// Reads Brevo settings from <c>appsettings.json</c> (section <c>Brevo</c>).
@@ -32,21 +29,15 @@ namespace Bewegdeal.Tools
             _fromName = configuration["Brevo:FromName"] ?? throw new InvalidOperationException("Brevo:FromName is not configured.");
         }
 
-        // ── Public API ───────────────────────────────────────────────────────────
-
         /// <summary>
-        /// Sends a transactional email through Brevo.
-        /// Sender credentials are taken from <c>appsettings.json</c> via <see cref="Configure"/>.
-        /// await BrevoTool.Send("david.tabatadze@outlook.com", "Welcome", "<p>Hello!</p>");
+        /// Sends an email message asynchronously using the configured SMTP API.
         /// </summary>
-        /// <param name="email">Recipient e-mail address.</param>
-        /// <param name="subject">E-mail subject line.</param>
-        /// <param name="content">HTML body of the message.</param>
-        /// <param name="text"> textual alternative.</param>
-        /// <returns>
-        /// <see langword="EmailStatus.Sent"/> when Brevo accepted the message (HTTP 201);
-        /// <see langword="EmailStatus.Failed"/> otherwise.
-        /// </returns>
+        /// <param name="email">The recipient's email address. Cannot be null or empty.</param>
+        /// <param name="subject">The subject line of the email message. Cannot be null or empty.</param>
+        /// <param name="content">The HTML content of the email message. Cannot be null or empty.</param>
+        /// <param name="text">The plain text version of the email message. Optional; if not provided, only the HTML content will be sent.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is a string indicating the status of the
+        /// email send operation. Returns "Sent" if the email was sent successfully; otherwise, returns "Failed".</returns>
         public static async Task<string> Send(
             string email,
             string subject,
@@ -55,15 +46,18 @@ namespace Bewegdeal.Tools
         {
             try
             {
-                var payload = BuildPayload(email, subject, content, text);
-                var json = JsonSerializer.Serialize(payload);
+                // ready the payload
+                var payload = JsonSerializer.Serialize(BuildPayload(email, subject, content, text));
 
-                using var request = new HttpRequestMessage(HttpMethod.Post, ApiEndpoint);
+                // configure the request
+                using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.brevo.com/v3/smtp/email");
                 request.Headers.Add("api-key", _apiKey);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
+                // do send the request
                 var response = await Http.SendAsync(request);
 
+                // return the status
                 return response.StatusCode == System.Net.HttpStatusCode.Created ?
                        EmailStatusEnum.Sent : EmailStatusEnum.Failed;
             }
@@ -74,14 +68,21 @@ namespace Bewegdeal.Tools
             }
         }
 
-        // ── Private ──────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Builds a payload dictionary for an email message with the specified sender, recipient, subject, and content.
+        /// </summary>
+        /// <param name="email">The email address of the recipient. Cannot be null.</param>
+        /// <param name="subject">The subject line of the email message. Cannot be null.</param>
+        /// <param name="content">The HTML content of the email message. Cannot be null.</param>
+        /// <param name="text">The plain text content of the email message. If null, the payload will not include a plain text version.</param>
+        /// <returns>A dictionary containing the email payload, including sender, recipient, subject, and content fields.</returns>
         private static Dictionary<string, object> BuildPayload(
             string email,
             string subject,
             string content,
             string? text)
         {
+            // set up mail
             var payload = new Dictionary<string, object>
             {
                 ["sender"] = new { name = _fromName, email = _fromEmail },
@@ -90,11 +91,13 @@ namespace Bewegdeal.Tools
                 ["htmlContent"] = content,
             };
 
+            // add text content if provided
             if (text is not null)
             {
                 payload["textContent"] = text;
             }
 
+            // all good
             return payload;
         }
     }

@@ -14,6 +14,7 @@ namespace Bewegdeal.Data
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
+
         #endregion
 
         /// <summary>
@@ -98,13 +99,12 @@ namespace Bewegdeal.Data
                 e.HasIndex(u => u.Id).IsUnique();
                 e.HasIndex(u => u.Email).IsUnique();
                 e.HasIndex(u => u.Role);
-                e.HasIndex(u => u.Code);
                 e.HasIndex(u => u.Status);
+                e.HasIndex(u => u.Number);
 
                 // Required fields
                 e.Property(u => u.Password).IsRequired().HasMaxLength(64);
                 e.Property(u => u.Salt).IsRequired();
-
                 e.Property(u => u.Role).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Name).IsRequired().HasMaxLength(32);
                 e.Property(u => u.Email).IsRequired().HasMaxLength(32);
@@ -112,7 +112,6 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
 
                 // Optional fields
-                e.Property(u => u.Code).HasMaxLength(16);
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
 

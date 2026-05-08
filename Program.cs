@@ -18,6 +18,7 @@ namespace Bewegdeal
             // ── Session ───────────────────────────────────────────────────────────
             // HttpOnly + SameAsRequest keeps the cookie secure without forcing HTTPS in dev.
             // 8-hour idle timeout matches a typical working day.
+            builder.Services.AddMemoryCache();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {

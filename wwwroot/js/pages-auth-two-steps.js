@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
             otp: {
               validators: {
                 notEmpty: {
-                  message: 'Please enter OTP'
+                  message: ''
                 }
               }
             }
