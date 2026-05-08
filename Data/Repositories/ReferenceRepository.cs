@@ -1,6 +1,6 @@
-using Bewegdeal.Enums;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
@@ -28,7 +28,10 @@ namespace Bewegdeal.Data.Repositories
 
             foreach (var row in rows)
             {
-                if (await Get(new BaseFilter<string> { Id = row.Id }) != null) continue;
+                if (await Get(new BaseFilter<string> { Id = row.Id }) != null)
+                {
+                    continue;
+                }
 
                 await Create(row);
             }

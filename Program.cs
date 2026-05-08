@@ -12,10 +12,12 @@ namespace Bewegdeal
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // ── MVC ──────────────────────────────────────────────────────────────
             builder.Services.AddControllersWithViews();
 
-            // Session
+            // ── Session ───────────────────────────────────────────────────────────
+            // HttpOnly + SameAsRequest keeps the cookie secure without forcing HTTPS in dev.
+            // 8-hour idle timeout matches a typical working day.
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -25,48 +27,69 @@ namespace Bewegdeal
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
 
-            // Data / EF Core
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                                   ?? "Data Source=bewegdeal.db";
+            // ── Database ──────────────────────────────────────────────────────────
+            // Provider and connection strings are read from Database section in appsettings.json.
+            // Valid providers: "sqlite" (local dev) | "mysql" (production).
+            var dbConfiguration = builder.Configuration.GetSection("Database");
+            var dbProvider = dbConfiguration["Provider"] ?? "";
+
+            if (!new List<string> { "sqlite", "mysql" }.Contains(dbProvider))
+            {
+                throw new InvalidOperationException(
+                    $"Unsupported database provider '{dbProvider}'. Set Database:Provider to 'sqlite' or 'mysql' in appsettings.json."
+                );
+            }
 
             builder.Services.AddDbContext<SqlContext>(options =>
-                options.UseSqlite(connectionString));
+            {
+                if (dbProvider == "sqlite")
+                {
+                    options.UseSqlite(dbConfiguration["Sqlite"] ?? "Data Source=bewegdeal.db");
+                }
+                if (dbProvider == "mysql")
+                {
+                    options.UseMySQL(dbConfiguration["MySql"] ?? "Server=localhost;Database=bewegdeal;User=root;Password=;");
+                }
+            });
 
-            // Repositories
+            // ── Repositories ──────────────────────────────────────────────────────
+            // Scoped per request — each request gets its own DbContext and repository instance.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
 
-            // Brevo
+            // ── Email ─────────────────────────────────────────────────────────────
+            // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
             BrevoTool.Configure(builder.Configuration);
 
-            // Build
+            // ── Build ─────────────────────────────────────────────────────────────
             var app = builder.Build();
 
-            // Seed Data
+            // ── Startup: schema + seed ────────────────────────────────────────────
+            // EnsureTablesAsync creates any missing tables using IF NOT EXISTS — safe on every run.
+            // References must be seeded before Users (users reference role values).
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<SqlContext>();
-                await context.Database.EnsureCreatedAsync();
+                await context.EnsureTablesAsync();
 
-                // References first — users depend on role values being present
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IReferenceRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
             }
 
-            // Configure the HTTP request pipeline.
+            // ── Middleware pipeline ───────────────────────────────────────────────
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseSession();
             app.UseAuthorization();
 
+            // ── Routes ────────────────────────────────────────────────────────────
+            // Default route lands on the public landing page, not the admin dashboard.
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",

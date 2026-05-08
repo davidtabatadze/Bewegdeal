@@ -91,7 +91,9 @@ namespace Bewegdeal.Tools
             };
 
             if (text is not null)
+            {
                 payload["textContent"] = text;
+            }
 
             return payload;
         }

@@ -25,7 +25,10 @@ namespace Bewegdeal.Data.Repositories
 
             foreach (var row in rows)
             {
-                if (await Get(new UserFilter { Id = row.Id }) != null) continue;
+                if (await Get(new UserFilter { Id = row.Id }) != null)
+                {
+                    continue;
+                }
 
                 var (hash, salt) = PasswordTool.HashPassword(row.Password);
 
