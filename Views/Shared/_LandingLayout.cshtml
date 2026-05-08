@@ -7,6 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
   <title>@ViewData["Title"] - Bewegdeal</title>
 
+  <!-- Sync theme from home/account pages — must run before stylesheets to prevent flash -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('templateCustomizer-vertical-menu-template--Theme');
+      if (!stored) { return; }
+      localStorage.setItem('templateCustomizer-front-page--Theme', stored);
+      var resolved = stored === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : stored;
+      document.documentElement.setAttribute('data-bs-theme', resolved);
+    })();
+  </script>
+
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
 
