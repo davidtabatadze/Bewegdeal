@@ -5,6 +5,7 @@
 
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
 }
 
 @section VendorScripts {
@@ -12,6 +13,7 @@
     <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
 }
 
 @section PageStyles {
@@ -21,6 +23,12 @@
 @section PageScripts {
     <script src="~/js/pages-auth.js"></script>
     <script src="~/js/pages-auth-two-steps.js"></script>
+    @if (ViewBag.Error is string error)
+    {
+        <script>
+            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+        </script>
+    }
 }
 
 <div class="position-relative">
@@ -43,10 +51,6 @@
                     </p>
                     <p class="mb-5 text-muted small">The code expires in 10 minutes.</p>
 
-                    @if (ViewBag.Error is string error)
-                    {
-                        <div class="alert alert-danger mb-4">@error</div>
-                    }
                     @if (ViewBag.Success is string success)
                     {
                         <div class="alert alert-success mb-4">@success</div>

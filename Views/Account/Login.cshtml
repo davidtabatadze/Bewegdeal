@@ -5,12 +5,14 @@
 
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
 }
 
 @section VendorScripts {
     <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
 }
 
 @section PageStyles {
@@ -19,6 +21,12 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth.js"></script>
+    @if (ViewBag.Error is string error)
+    {
+        <script>
+            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+        </script>
+    }
 }
 
 <div class="position-relative">
@@ -38,21 +46,16 @@
                     <h4 class="mb-1">Welcome to Bewegdeal! 👋🏻</h4>
                     <p class="mb-5">Sign-in and start the adventure</p>
 
-                    @if (ViewBag.Error is string error)
-                    {
-                        <div class="alert alert-danger mb-5" role="alert">@error</div>
-                    }
-
                     <form id="formAuthentication" class="mb-5" asp-controller="Account" asp-action="Login" method="POST">
                         <div class="form-floating form-floating-outline mb-5 form-control-validation">
-                            <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" autofocus />
+                            <input type="text" class="form-control" id="email" name="email" placeholder="" autofocus />
                             <label for="email">Email</label>
                         </div>
                         <div class="mb-5">
                             <div class="form-password-toggle form-control-validation">
                                 <div class="input-group input-group-merge">
                                     <div class="form-floating form-floating-outline">
-                                        <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="" aria-describedby="password" />
                                         <label for="password">Password</label>
                                     </div>
                                     <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line icon-20px"></i></span>

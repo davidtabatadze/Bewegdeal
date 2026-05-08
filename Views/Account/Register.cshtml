@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
     <link rel="stylesheet" href="~/vendor/libs/select2/select2.css" />
     <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
 }
 
 @section VendorScripts {
@@ -18,6 +19,7 @@
     <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
     <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
 }
 
 @section PageStyles {
@@ -26,6 +28,12 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js"></script>
+    @if (ViewBag.Error is string error)
+    {
+        <script>
+            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+        </script>
+    }
 }
 
 <div class="position-relative">
@@ -85,10 +93,6 @@
                         </div>
 
                         <div class="bs-stepper-content">
-                            @if (ViewBag.Error is string error)
-                            {
-                                <div class="alert alert-danger mb-4">@error</div>
-                            }
                             <form id="multiStepsForm" method="post" asp-controller="Account" asp-action="Register" onsubmit="return false">
                                 <!-- Step 1: Role -->
                                 <div id="roleSelectionValidation" class="content">
