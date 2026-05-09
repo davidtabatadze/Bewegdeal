@@ -15,10 +15,18 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
     #region Login
 
     [HttpGet]
-    public IActionResult Login() => View();
+    public IActionResult Login()
+    {
+        if (HttpContext.Session.GetString("UserId") is not null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View();
+    }
 
     [HttpPost]
-    public async Task<IActionResult> Login(string email, string password)
+    public async Task<IActionResult> Login(string email, string password, bool rememberMe)
     {
         // seek user
         var user = await userRepository.Get(new UserFilter { Email = email });
@@ -51,6 +59,19 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
         HttpContext.Session.SetString("UserId", user.Id.ToString());
         HttpContext.Session.SetString("UserRole", user.Role);
         HttpContext.Session.SetString("UserName", user.Name);
+
+        // set persistent cookie when "remember me" is checked
+        if (rememberMe)
+        {
+            Response.Cookies.Append("bewegdeal_remember", user.Id.ToString(), new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                SameSite = SameSiteMode.Lax,
+                IsEssential = true
+            });
+        }
 
         // all good
         return RedirectToAction("Index", "Home");

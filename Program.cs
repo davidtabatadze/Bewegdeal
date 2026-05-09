@@ -1,6 +1,7 @@
 using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
+using Bewegdeal.Middleware;
 using Bewegdeal.Tools;
 using Microsoft.EntityFrameworkCore;
 
@@ -87,6 +88,7 @@ namespace Bewegdeal
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseSession();
+            app.UseMiddleware<RememberMeMiddleware>();
             app.UseAuthorization();
 
             // ── Routes ────────────────────────────────────────────────────────────
