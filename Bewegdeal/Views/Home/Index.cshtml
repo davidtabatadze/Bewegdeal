@@ -1,0 +1,150 @@
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "My Requests";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-task-list.js"></script>
+}
+
+<!-- Stat Cards -->
+<div class="row g-6 mb-6">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Total Requests</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.TotalCount</h4>
+                        </div>
+                        <small class="mb-0">All your published requests</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-primary rounded">
+                            <div class="icon-base ri ri-file-list-3-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Active</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.ActiveCount</h4>
+                        </div>
+                        <small class="mb-0">Visible to companies</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-success rounded">
+                            <div class="icon-base ri ri-checkbox-circle-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Pending</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.PendingCount</h4>
+                        </div>
+                        <small class="mb-0">Awaiting approval</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <div class="icon-base ri ri-time-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Completed</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.CompletedCount</h4>
+                        </div>
+                        <small class="mb-0">Successfully fulfilled</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-info rounded">
+                            <div class="icon-base ri ri-medal-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    string? _role = Context.Session.GetString("UserRole");
+}
+@if (_role == "customer")
+{
+    <!-- Client CTA -->
+    <div class="text-center mb-6">
+        <a asp-controller="Home" asp-action="NewRequest"
+           class="btn btn-primary btn-lg waves-effect waves-light px-8 py-3">
+            <i class="ri ri-add-circle-line icon-20px me-2"></i>
+            New Request
+        </a>
+        <p class="text-muted mt-3 mb-0 small">Publish a new service request and receive offers from registered companies</p>
+    </div>
+}
+
+<!-- Requests Table -->
+<div class="card">
+    <div class="card-header border-bottom">
+        <h6 class="card-title mb-0">Filters</h6>
+        <div class="d-flex justify-content-between align-items-center row pt-4 pb-2 gap-4 gap-md-0 gx-5">
+            <div class="col-md-6 task_type"></div>
+            <div class="col-md-6 task_status"></div>
+        </div>
+    </div>
+    <div class="card-datatable">
+        <table class="datatables-tasks table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Request</th>
+                    <th>Date</th>
+                    <th>Cost</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>

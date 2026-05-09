@@ -1,0 +1,356 @@
+@model Bewegdeal.Data.Entities.TaskEntity
+@using Bewegdeal.Enums
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Edit Request";
+
+    var existingMedia = (Model.Media ?? "")
+        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+        .Where(p => !string.IsNullOrWhiteSpace(p))
+        .ToList();
+
+    string[] videoExts = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
+
+    bool IsVideo(string p) => videoExts.Contains(
+        System.IO.Path.GetExtension(p).ToLowerInvariant());
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-edit-task.js"></script>
+    @if (ViewBag.Error is string err)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(err));
+            });
+        </script>
+    }
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10 col-12">
+
+        <!-- Page header -->
+        <div class="d-flex align-items-center gap-3 mb-6">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-icon btn-text-secondary rounded-pill">
+                <i class="ri ri-arrow-left-line icon-22px"></i>
+            </a>
+            <div>
+                <h4 class="mb-0">Edit Request</h4>
+                <small class="text-muted">Update the details of your service request</small>
+            </div>
+        </div>
+
+        <form id="editTaskForm"
+              method="post"
+              enctype="multipart/form-data"
+              asp-controller="Home"
+              asp-action="EditTask"
+              asp-route-id="@Model.Id">
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden inputs managed by JS -->
+            <input type="hidden" name="removeMedia"      id="removeMedia"      value="" />
+            <input type="hidden" name="removeMainPhoto"  id="removeMainPhoto"  value="false" />
+            <!-- Actual file inputs for form submission -->
+            <input type="file" id="photosInput"    name="photos" multiple accept="image/*" class="d-none" />
+            <input type="file" id="videoFileInput" name="video"          accept="video/*"  class="d-none" />
+
+            <!-- ══ SERVICE TYPE ══════════════════════════════════════════════════ -->
+            <div class="card mb-5">
+                <div class="card-header border-bottom">
+                    <h6 class="card-title mb-0">
+                        <i class="ri ri-layout-grid-line me-2 text-primary"></i>Service Type
+                    </h6>
+                </div>
+                <div class="card-body pt-5">
+                    <input type="hidden" name="type" id="selectedType" value="@Model.Type" />
+                    <div class="row g-4" id="typeCards">
+
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="type-card card border border-2 h-100 text-center cursor-pointer"
+                                 data-type="moving" style="transition:border-color .2s,background .2s">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                         style="width:72px;height:72px;background:rgba(var(--bs-primary-rgb),.12)">
+                                        <i class="ri ri-truck-line text-primary" style="font-size:38px"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Moving</h6>
+                                    <p class="text-muted small mb-0">Apartment &amp; office relocation</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="type-card card border border-2 h-100 text-center cursor-pointer"
+                                 data-type="removal" style="transition:border-color .2s,background .2s">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                         style="width:72px;height:72px;background:rgba(var(--bs-danger-rgb),.12)">
+                                        <i class="ri ri-delete-bin-7-line text-danger" style="font-size:38px"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Junk Removal</h6>
+                                    <p class="text-muted small mb-0">Furniture, appliances &amp; waste</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="type-card card border border-2 h-100 text-center cursor-pointer"
+                                 data-type="pickup" style="transition:border-color .2s,background .2s">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                         style="width:72px;height:72px;background:rgba(var(--bs-success-rgb),.12)">
+                                        <i class="ri ri-store-2-line text-success" style="font-size:38px"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Store Pickup</h6>
+                                    <p class="text-muted small mb-0">Collect &amp; deliver large store orders</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="type-card card border border-2 h-100 text-center cursor-pointer"
+                                 data-type="transport" style="transition:border-color .2s,background .2s">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                         style="width:72px;height:72px;background:rgba(var(--bs-warning-rgb),.12)">
+                                        <i class="ri ri-car-line text-warning" style="font-size:38px"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Vehicle Transport</h6>
+                                    <p class="text-muted small mb-0">Car &amp; motorcycle shipping</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ DETAILS ═══════════════════════════════════════════════════════ -->
+            <div class="card mb-5">
+                <div class="card-header border-bottom">
+                    <h6 class="card-title mb-0">
+                        <i class="ri ri-file-text-line me-2 text-primary"></i>Request Details
+                    </h6>
+                </div>
+                <div class="card-body pt-5">
+                    <div class="mb-5">
+                        <div class="form-floating form-floating-outline">
+                            <input type="text"
+                                   id="requestName"
+                                   name="name"
+                                   class="form-control"
+                                   placeholder="Request title"
+                                   maxlength="128"
+                                   value="@Model.Name" />
+                            <label for="requestName">Request Title <span class="text-danger">*</span></label>
+                        </div>
+                        <small class="text-muted">Short headline — max 128 characters</small>
+                    </div>
+                    <div>
+                        <div class="form-floating form-floating-outline">
+                            <textarea id="requestDescription"
+                                      name="description"
+                                      class="form-control"
+                                      placeholder="Detailed description"
+                                      maxlength="512"
+                                      style="height:140px">@Model.Description</textarea>
+                            <label for="requestDescription">Detailed Description</label>
+                        </div>
+                        <small class="text-muted">Floor, elevator, special items, timing, etc. Max 512 characters.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ MEDIA ══════════════════════════════════════════════════════════ -->
+            <div class="card mb-5">
+                <div class="card-header border-bottom">
+                    <h6 class="card-title mb-0">
+                        <i class="ri ri-image-line me-2 text-primary"></i>Photos &amp; Video
+                    </h6>
+                </div>
+                <div class="card-body pt-5">
+
+                    <!-- Existing main photo -->
+                    @if (Model.Image is not null)
+                    {
+                        <p class="fw-medium small mb-3">Current main photo</p>
+                        <div class="d-flex align-items-start gap-3 mb-5">
+                            <div class="position-relative" id="mainPhotoWrapper">
+                                <img src="@Model.Image" alt="Main photo"
+                                     style="width:120px;height:120px;object-fit:cover;border-radius:10px;"
+                                     class="border border-3 border-primary" />
+                                <span class="badge bg-primary position-absolute bottom-0 start-50 translate-middle-x mb-1"
+                                      style="font-size:10px">Main</span>
+                            </div>
+                            <div>
+                                <p class="small text-muted mb-2">This is the main (profile) photo for your request.</p>
+                                <button type="button" id="removeMainPhotoBtn"
+                                        class="btn btn-sm btn-outline-danger waves-effect">
+                                    <i class="ri ri-delete-bin-7-line me-1"></i>Remove main photo
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Existing additional media -->
+                    @if (existingMedia.Count > 0)
+                    {
+                        <p class="fw-medium small mb-3">Additional media</p>
+                        <div class="d-flex flex-wrap gap-3 mb-5" id="existingMediaGrid">
+                            @foreach (var path in existingMedia)
+                            {
+                                @if (IsVideo(path))
+                                {
+                                    <div class="existing-media-item d-flex align-items-center gap-2 p-3 border rounded-3 bg-light-subtle"
+                                         data-path="@path">
+                                        <i class="ri ri-video-line icon-24px text-primary"></i>
+                                        <span class="small text-truncate" style="max-width:150px">
+                                            @System.IO.Path.GetFileName(path)
+                                        </span>
+                                        <button type="button" class="btn btn-icon btn-text-danger btn-sm remove-existing ms-2" title="Remove">
+                                            <i class="ri ri-close-line"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="existing-media-item position-relative" data-path="@path">
+                                        <img src="@path" alt="media"
+                                             style="width:100px;height:100px;object-fit:cover;border-radius:8px;"
+                                             class="border" />
+                                        <button type="button"
+                                                class="btn btn-danger btn-icon rounded-circle position-absolute top-0 end-0 remove-existing"
+                                                style="width:22px;height:22px;padding:0;font-size:11px;transform:translate(40%,-40%)"
+                                                title="Remove">
+                                            <i class="ri ri-close-line"></i>
+                                        </button>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+
+                    <!-- Add new media -->
+                    <p class="fw-medium small mb-3">Add new files</p>
+                    <div id="uploadZone"
+                         class="border border-2 border-dashed rounded-3 p-5 text-center mb-4"
+                         style="border-style:dashed!important;cursor:pointer;transition:border-color .2s,background .2s">
+                        <i class="ri ri-image-add-line icon-36px text-muted mb-2 d-block"></i>
+                        <p class="text-muted small mb-3">Drag &amp; drop or click to add photos / video</p>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <button type="button" id="photoUploadBtn" class="btn btn-sm btn-outline-primary waves-effect">
+                                <i class="ri ri-image-line me-1"></i>Photos
+                                <span class="badge bg-label-primary ms-1" id="photoCount">0 / 5</span>
+                            </button>
+                            <button type="button" id="videoUploadBtn" class="btn btn-sm btn-outline-secondary waves-effect">
+                                <i class="ri ri-video-add-line me-1"></i>Video
+                                <span class="badge bg-label-secondary ms-1" id="videoStatus">None</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- New photo thumbnails -->
+                    <div id="photoPreview" class="row g-3 mb-3"></div>
+                    <!-- New video preview -->
+                    <div id="videoPreview"></div>
+
+                </div>
+            </div>
+
+            <!-- ══ ADDRESSES ══════════════════════════════════════════════════════ -->
+            <div class="card mb-5">
+                <div class="card-header border-bottom">
+                    <h6 class="card-title mb-0">
+                        <i class="ri ri-map-pin-line me-2 text-primary"></i>Addresses
+                    </h6>
+                </div>
+                <div class="card-body pt-5">
+                    <div class="row gx-5">
+                        <div class="col-md-6 mb-md-0 mb-5">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text"
+                                       id="pickupAddress"
+                                       name="pickupAddress"
+                                       class="form-control"
+                                       placeholder="Street, City, ZIP"
+                                       maxlength="512"
+                                       value="@Model.PickupAddress" />
+                                <label for="pickupAddress">
+                                    <i class="ri ri-map-pin-line text-primary me-1"></i>Pickup Address
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text"
+                                       id="deliveryAddress"
+                                       name="deliveryAddress"
+                                       class="form-control"
+                                       placeholder="Street, City, ZIP"
+                                       maxlength="512"
+                                       value="@Model.DeliveryAddress" />
+                                <label for="deliveryAddress">
+                                    <i class="ri ri-map-pin-2-line text-danger me-1"></i>Delivery Address
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ PRICE ══════════════════════════════════════════════════════════ -->
+            <div class="card mb-6">
+                <div class="card-header border-bottom">
+                    <h6 class="card-title mb-0">
+                        <i class="ri ri-money-euro-circle-line me-2 text-primary"></i>Budget Estimate
+                    </h6>
+                </div>
+                <div class="card-body pt-5">
+                    <div class="col-md-5">
+                        <div class="input-group input-group-merge">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number"
+                                       id="costInput"
+                                       name="cost"
+                                       class="form-control"
+                                       placeholder="0.00"
+                                       min="0"
+                                       step="0.01"
+                                       value="@Model.Cost" />
+                                <label for="costInput">Approximate Amount</label>
+                            </div>
+                            <span class="input-group-text p-0 border-0" style="background:transparent">
+                                <select name="currency" id="currencySelect"
+                                        class="form-select rounded-start-0 h-100" style="min-width:90px">
+                                    <option value="EUR" selected="@(Model.Currency == "EUR" || Model.Currency is null)">€ EUR</option>
+                                    <option value="USD" selected="@(Model.Currency == "USD")">$ USD</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ ACTIONS ════════════════════════════════════════════════════════ -->
+            <div class="d-flex justify-content-between align-items-center">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary waves-effect">
+                    <i class="ri ri-arrow-left-line icon-16px me-1"></i>Cancel
+                </a>
+                <button type="submit" id="submitBtn" class="btn btn-primary waves-effect waves-light px-6">
+                    <i class="ri ri-save-line icon-16px me-1"></i>Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>

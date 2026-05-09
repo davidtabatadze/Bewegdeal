@@ -1,0 +1,359 @@
+/**
+ * My Requests (Task List) — Bewegdeal
+ */
+
+'use strict';
+
+document.addEventListener('DOMContentLoaded', function () {
+  const dt_task_table = document.querySelector('.datatables-tasks');
+
+  // Status → badge class + label
+  const statusObj = {
+    active:    { title: 'Active',    class: 'bg-label-success'   },
+    pending:   { title: 'Pending',   class: 'bg-label-warning'   },
+    completed: { title: 'Completed', class: 'bg-label-primary'   },
+    cancelled: { title: 'Cancelled', class: 'bg-label-danger'    }
+  };
+
+  // Type → icon + color
+  const typeObj = {
+    moving:    { icon: 'ri-truck-line',          color: 'primary', label: 'Moving'    },
+    removal:   { icon: 'ri-delete-bin-7-line',   color: 'danger',  label: 'Removal'   },
+    pickup:    { icon: 'ri-store-2-line',         color: 'info',    label: 'Pickup'    },
+    transport: { icon: 'ri-car-line',             color: 'warning', label: 'Transport' }
+  };
+
+  if (!dt_task_table) { return; }
+
+  const dt_task = new DataTable(dt_task_table, {
+    ajax: '/Home/GetTasks',
+    columns: [
+      { data: 'id'        },  // 0 — responsive control
+      { data: 'id'        },  // 1 — checkbox
+      { data: 'name'      },  // 2 — image + name + type badge
+      { data: 'createdAt' },  // 3 — creation date
+      { data: 'cost'      },  // 4 — cost
+      { data: 'status'    },  // 5 — status badge
+      { data: 'views'     },  // 6 — view count
+      { data: 'type'      },  // 7 — type (hidden, used for filter)
+      { data: 'id'        }   // 8 — actions
+    ],
+    columnDefs: [
+      {
+        // Responsive expand control
+        className: 'control',
+        searchable: false,
+        orderable: false,
+        responsivePriority: 2,
+        targets: 0,
+        render: () => ''
+      },
+      {
+        // Checkbox
+        targets: 1,
+        orderable: false,
+        searchable: false,
+        responsivePriority: 4,
+        render: () => '<input type="checkbox" class="dt-checkboxes form-check-input">',
+        checkboxes: {
+          selectAllRender: '<input type="checkbox" class="form-check-input">'
+        }
+      },
+      {
+        // Image slot + request name + type label
+        targets: 2,
+        responsivePriority: 1,
+        render: function (data, type, full) {
+          const name  = full['name'];
+          const type_ = full['type'];
+          const image = full['image'];
+          const info  = typeObj[type_] || { icon: 'ri-file-list-line', color: 'secondary', label: type_ };
+
+          let imageSlot;
+          if (image) {
+            imageSlot =
+              '<div class="rounded overflow-hidden" style="width:48px;height:48px;flex-shrink:0;">' +
+                '<img src="' + image + '" alt="" style="width:100%;height:100%;object-fit:cover;" />' +
+              '</div>';
+          } else {
+            imageSlot =
+              '<div class="avatar-initial rounded bg-label-' + info.color + '" style="width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">' +
+                '<i class="icon-base ri ' + info.icon + ' icon-22px"></i>' +
+              '</div>';
+          }
+
+          return (
+            '<div class="d-flex align-items-center gap-3">' +
+              imageSlot +
+              '<div class="d-flex flex-column">' +
+                '<span class="text-heading fw-medium text-truncate">' + name + '</span>' +
+                '<small class="text-muted text-capitalize">' + info.label + '</small>' +
+              '</div>' +
+            '</div>'
+          );
+        }
+      },
+      {
+        // Creation date
+        targets: 3,
+        render: (data) => '<span>' + (data || '—') + '</span>'
+      },
+      {
+        // Cost
+        targets: 4,
+        render: function (data) {
+          if (data === null || data === undefined) { return '<span class="text-muted">—</span>'; }
+          return '<span>€ ' + Number(data).toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>';
+        }
+      },
+      {
+        // Status badge
+        targets: 5,
+        render: function (data) {
+          const obj = statusObj[data] || { title: data, class: 'bg-label-secondary' };
+          return '<span class="badge rounded-pill ' + obj.class + ' text-capitalize">' + obj.title + '</span>';
+        }
+      },
+      {
+        // Views count
+        targets: 6,
+        render: function (data) {
+          return (
+            '<span class="d-flex align-items-center gap-1">' +
+              '<i class="icon-base ri ri-eye-line icon-16px text-muted"></i>' +
+              '<span>' + (data || 0) + '</span>' +
+            '</span>'
+          );
+        }
+      },
+      {
+        // Type — hidden column used only for filter
+        targets: 7,
+        visible: false,
+        searchable: true
+      },
+      {
+        // Actions — edit button (only for active requests)
+        targets: -1,
+        title: 'Actions',
+        searchable: false,
+        orderable: false,
+        render: (data, type, full) => {
+          if (full['status'] === 'active') {
+            return (
+              '<div class="d-flex align-items-center">' +
+                '<a href="/Home/EditTask/' + data + '" class="btn btn-icon btn-text-secondary rounded-pill" title="Edit">' +
+                  '<i class="icon-base ri ri-edit-box-line icon-md"></i>' +
+                '</a>' +
+              '</div>'
+            );
+          }
+          return (
+            '<div class="d-flex align-items-center">' +
+              '<span class="btn btn-icon btn-text-secondary rounded-pill disabled opacity-50" title="Editing is not available in this status">' +
+                '<i class="icon-base ri ri-lock-line icon-md"></i>' +
+              '</span>' +
+            '</div>'
+          );
+        }
+      }
+    ],
+    select: {
+      style: 'multi',
+      selector: 'td:nth-child(2)'
+    },
+    order: [[3, 'desc']],
+    layout: {
+      topStart: {
+        rowClass: 'row m-2 my-0 mt-0 justify-content-between',
+        features: [
+          {
+            buttons: [
+              {
+                extend: 'collection',
+                className: 'btn btn-outline-secondary dropdown-toggle waves-effect',
+                text: '<span class="d-flex align-items-center gap-2"><i class="icon-base ri ri-download-line icon-16px me-sm-1"></i><span class="d-inline-block">Export</span></span>',
+                buttons: [
+                  {
+                    extend: 'print',
+                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-printer-line me-1"></i>Print</span>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                      columns: [2, 3, 4, 5, 6],
+                      format: {
+                        body: function (inner) {
+                          if (!inner.length) { return inner; }
+                          const el = new DOMParser().parseFromString(inner, 'text/html').body.childNodes;
+                          let result = '';
+                          el.forEach(item => {
+                            const fw = item.querySelector && item.querySelector('span.fw-medium');
+                            result += fw ? fw.textContent : (item.textContent || item.innerText || '');
+                          });
+                          return result;
+                        }
+                      }
+                    },
+                    customize: function (win) {
+                      win.document.body.style.color           = config.colors.headingColor;
+                      win.document.body.style.borderColor     = config.colors.borderColor;
+                      win.document.body.style.backgroundColor = config.colors.bodyBg;
+                      const table = win.document.body.querySelector('table');
+                      table.classList.add('compact');
+                      table.style.color           = 'inherit';
+                      table.style.borderColor     = 'inherit';
+                      table.style.backgroundColor = 'inherit';
+                    }
+                  },
+                  {
+                    extend: 'csv',
+                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-text-line me-1"></i>Csv</span>',
+                    className: 'dropdown-item',
+                    exportOptions: { columns: [2, 3, 4, 5, 6] }
+                  },
+                  {
+                    extend: 'excel',
+                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>',
+                    className: 'dropdown-item',
+                    exportOptions: { columns: [2, 3, 4, 5, 6] }
+                  },
+                  {
+                    extend: 'pdf',
+                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-pdf-line me-1"></i>Pdf</span>',
+                    className: 'dropdown-item',
+                    exportOptions: { columns: [2, 3, 4, 5, 6] }
+                  },
+                  {
+                    extend: 'copy',
+                    text: '<i class="icon-base ri ri-file-copy-line me-1"></i>Copy',
+                    className: 'dropdown-item',
+                    exportOptions: { columns: [2, 3, 4, 5, 6] }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      topEnd: {
+        features: [
+          {
+            search: {
+              placeholder: 'Search Request',
+              text: '_INPUT_'
+            }
+          }
+        ]
+      },
+      bottomStart: {
+        rowClass: 'row mx-3 justify-content-between',
+        features: ['info']
+      },
+      bottomEnd: 'paging'
+    },
+    language: {
+      paginate: {
+        next:     '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
+        previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
+        first:    '<i class="icon-base ri ri-skip-back-mini-line    scaleX-n1-rtl icon-22px"></i>',
+        last:     '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
+      }
+    },
+    responsive: {
+      details: {
+        display: DataTable.Responsive.display.modal({
+          header: function (row) {
+            return 'Details of ' + row.data()['name'];
+          }
+        }),
+        type: 'column',
+        renderer: function (api, rowIdx, columns) {
+          const data = columns
+            .map(col =>
+              col.title !== ''
+                ? `<tr data-dt-row="${col.rowIndex}" data-dt-column="${col.columnIndex}">
+                     <td>${col.title}:</td><td>${col.data}</td>
+                   </tr>`
+                : ''
+            )
+            .join('');
+          if (!data) { return false; }
+          const div   = document.createElement('div');
+          div.classList.add('table-responsive');
+          const table = document.createElement('table');
+          table.classList.add('table');
+          const tbody = document.createElement('tbody');
+          tbody.innerHTML = data;
+          table.appendChild(tbody);
+          div.appendChild(table);
+          return div;
+        }
+      }
+    },
+    initComplete: function () {
+      const api = this.api();
+
+      // Type filter (searches hidden column 7)
+      const typeContainer = document.querySelector('.task_type');
+      if (typeContainer) {
+        const typeSelect = document.createElement('select');
+        typeSelect.id = 'TaskType';
+        typeSelect.className = 'form-select text-capitalize';
+        typeSelect.innerHTML = '<option value="">Select Type</option>';
+        typeContainer.appendChild(typeSelect);
+        typeSelect.addEventListener('change', () => {
+          const val = typeSelect.value ? `^${typeSelect.value}$` : '';
+          api.column(7).search(val, true, false).draw();
+        });
+        Array.from(new Set(api.column(7).data().toArray())).sort().forEach(d => {
+          const info = typeObj[d] || { label: d };
+          const opt  = document.createElement('option');
+          opt.value       = d;
+          opt.textContent = info.label;
+          typeSelect.appendChild(opt);
+        });
+      }
+
+      // Status filter (column 5 — search against rendered badge text)
+      const statusContainer = document.querySelector('.task_status');
+      if (statusContainer) {
+        const statusSelect = document.createElement('select');
+        statusSelect.id = 'TaskStatus';
+        statusSelect.className = 'form-select text-capitalize';
+        statusSelect.innerHTML = '<option value="">Select Status</option>';
+        statusContainer.appendChild(statusSelect);
+        statusSelect.addEventListener('change', () => {
+          const val = statusSelect.value ? `^${statusSelect.value}$` : '';
+          api.column(5).search(val, true, false).draw();
+        });
+        Array.from(new Set(api.column(5).data().toArray())).sort().forEach(d => {
+          const obj = statusObj[d] || { title: d };
+          const opt = document.createElement('option');
+          opt.value       = obj.title;
+          opt.textContent = obj.title;
+          statusSelect.appendChild(opt);
+        });
+      }
+    }
+  });
+
+  // Layout tweaks (Materio theme)
+  setTimeout(() => {
+    [
+      { selector: '.dt-buttons .btn',       classToRemove: 'btn-secondary' },
+      { selector: '.dt-length .form-select', classToAdd: 'ms-0' },
+      { selector: '.dt-length',             classToAdd: 'mb-md-4 mb-0' },
+      { selector: '.dt-layout-end',         classToRemove: 'justify-content-between', classToAdd: 'd-flex gap-md-4 justify-content-md-between justify-content-center gap-md-2 flex-wrap mt-0' },
+      { selector: '.dt-layout-start',       classToAdd: 'mt-md-0 mt-5' },
+      { selector: '.dt-layout-start .dt-buttons', classToAdd: 'd-md-flex d-block gap-4 justify-content-center' },
+      { selector: '.dt-layout-end .dt-buttons',   classToAdd: 'd-md-flex d-block gap-4 mb-md-0 mb-5 justify-content-center' },
+      { selector: '.dt-layout-table',       classToRemove: 'row mt-2' },
+      { selector: '.dt-layout-full',        classToRemove: 'col-md col-12' },
+      { selector: '.dt-layout-full .table', classToAdd: 'table-responsive' }
+    ].forEach(({ selector, classToRemove, classToAdd }) => {
+      document.querySelectorAll(selector).forEach(el => {
+        if (classToRemove) { classToRemove.split(' ').forEach(c => el.classList.remove(c)); }
+        if (classToAdd)    { classToAdd.split(' ').forEach(c => el.classList.add(c)); }
+      });
+    });
+  }, 100);
+});

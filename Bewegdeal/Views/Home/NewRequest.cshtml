@@ -1,0 +1,440 @@
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "New Request";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/bs-stepper/bs-stepper.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/bs-stepper/bs-stepper.js"></script>
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-new-request.js"></script>
+    @if (ViewBag.Error is string err)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(err));
+            });
+        </script>
+    }
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10 col-12">
+
+        <!-- Page header -->
+        <div class="d-flex align-items-center gap-3 mb-6">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-icon btn-text-secondary rounded-pill">
+                <i class="ri ri-arrow-left-line icon-22px"></i>
+            </a>
+            <div>
+                <h4 class="mb-0">New Request</h4>
+                <small class="text-muted">Fill in the details to publish your service request</small>
+            </div>
+        </div>
+
+        <div class="card shadow-none border">
+            <div class="card-body p-sm-6 p-4">
+
+                <!-- bs-stepper -->
+                <div id="newRequestWizard" class="bs-stepper wizard-numbered shadow-none">
+
+                    <!-- Step headers -->
+                    <div class="bs-stepper-header border-bottom pb-4 mb-5 flex-wrap row-gap-3">
+
+                        <div class="step" data-target="#step-type">
+                            <button type="button" class="step-trigger">
+                                <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                <span class="bs-stepper-label">
+                                    <span class="bs-stepper-number">01</span>
+                                    <span class="d-flex flex-column ms-1">
+                                        <span class="bs-stepper-title">Service Type</span>
+                                        <span class="bs-stepper-subtitle">What do you need?</span>
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="line"></div>
+
+                        <div class="step" data-target="#step-details">
+                            <button type="button" class="step-trigger">
+                                <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                <span class="bs-stepper-label">
+                                    <span class="bs-stepper-number">02</span>
+                                    <span class="d-flex flex-column ms-1">
+                                        <span class="bs-stepper-title">Details</span>
+                                        <span class="bs-stepper-subtitle">Describe your request</span>
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="line"></div>
+
+                        <div class="step" data-target="#step-media">
+                            <button type="button" class="step-trigger">
+                                <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                <span class="bs-stepper-label">
+                                    <span class="bs-stepper-number">03</span>
+                                    <span class="d-flex flex-column ms-1">
+                                        <span class="bs-stepper-title">Media</span>
+                                        <span class="bs-stepper-subtitle">Photos &amp; video</span>
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="line"></div>
+
+                        <div class="step" data-target="#step-addresses">
+                            <button type="button" class="step-trigger">
+                                <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                <span class="bs-stepper-label">
+                                    <span class="bs-stepper-number">04</span>
+                                    <span class="d-flex flex-column ms-1">
+                                        <span class="bs-stepper-title">Addresses</span>
+                                        <span class="bs-stepper-subtitle">Pickup &amp; delivery</span>
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="line"></div>
+
+                        <div class="step" data-target="#step-price">
+                            <button type="button" class="step-trigger">
+                                <span class="bs-stepper-circle"><i class="icon-base ri ri-check-line"></i></span>
+                                <span class="bs-stepper-label">
+                                    <span class="bs-stepper-number">05</span>
+                                    <span class="d-flex flex-column ms-1">
+                                        <span class="bs-stepper-title">Price</span>
+                                        <span class="bs-stepper-subtitle">Budget estimate</span>
+                                    </span>
+                                </span>
+                            </button>
+                        </div>
+
+                    </div>
+                    <!-- /Step headers -->
+
+                    <!-- Step contents -->
+                    <div class="bs-stepper-content">
+                        <form id="newRequestForm"
+                              method="post"
+                              enctype="multipart/form-data"
+                              asp-controller="Home"
+                              asp-action="NewRequest"
+                              onsubmit="return false">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Hidden inputs kept in sync by JS -->
+                            <input type="hidden" name="type"           id="selectedType" />
+                            <input type="hidden" name="mainPhotoIndex" id="mainPhotoIndex" value="0" />
+                            <!-- Actual file inputs for form submission -->
+                            <input type="file" id="photosInput"    name="photos" multiple accept="image/*" class="d-none" />
+                            <input type="file" id="videoFileInput" name="video"          accept="video/*" class="d-none" />
+
+                            <!-- ══ STEP 1 — Service Type ════════════════════════════════ -->
+                            <div id="step-type" class="content">
+                                <div class="content-header mb-6">
+                                    <h5 class="mb-1">What type of service do you need?</h5>
+                                    <p class="text-muted mb-0">Choose one category for your request</p>
+                                </div>
+
+                                <div class="row g-4 mb-6" id="typeCards">
+
+                                    <!-- Moving -->
+                                    <div class="col-sm-6 col-xl-3">
+                                        <div class="type-card card border border-2 h-100 text-center cursor-pointer" data-type="moving" style="transition:border-color .2s,background .2s">
+                                            <div class="card-body p-5 d-flex flex-column align-items-center">
+                                                <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-4"
+                                                     style="width:88px;height:88px;background:rgba(var(--bs-primary-rgb),.12)">
+                                                    <i class="ri ri-truck-line text-primary" style="font-size:46px"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Moving</h6>
+                                                <p class="text-muted small mb-0">Apartment &amp; office relocation</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Junk Removal -->
+                                    <div class="col-sm-6 col-xl-3">
+                                        <div class="type-card card border border-2 h-100 text-center cursor-pointer" data-type="removal" style="transition:border-color .2s,background .2s">
+                                            <div class="card-body p-5 d-flex flex-column align-items-center">
+                                                <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-4"
+                                                     style="width:88px;height:88px;background:rgba(var(--bs-danger-rgb),.12)">
+                                                    <i class="ri ri-delete-bin-7-line text-danger" style="font-size:46px"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Junk Removal</h6>
+                                                <p class="text-muted small mb-0">Furniture, appliances &amp; waste disposal</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Store Pickup -->
+                                    <div class="col-sm-6 col-xl-3">
+                                        <div class="type-card card border border-2 h-100 text-center cursor-pointer" data-type="pickup" style="transition:border-color .2s,background .2s">
+                                            <div class="card-body p-5 d-flex flex-column align-items-center">
+                                                <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-4"
+                                                     style="width:88px;height:88px;background:rgba(var(--bs-success-rgb),.12)">
+                                                    <i class="ri ri-store-2-line text-success" style="font-size:46px"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Store Pickup</h6>
+                                                <p class="text-muted small mb-0">Collect &amp; deliver large store orders</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Transport -->
+                                    <div class="col-sm-6 col-xl-3">
+                                        <div class="type-card card border border-2 h-100 text-center cursor-pointer" data-type="transport" style="transition:border-color .2s,background .2s">
+                                            <div class="card-body p-5 d-flex flex-column align-items-center">
+                                                <div class="type-icon-wrap d-flex align-items-center justify-content-center rounded-3 mb-4"
+                                                     style="width:88px;height:88px;background:rgba(var(--bs-warning-rgb),.12)">
+                                                    <i class="ri ri-car-line text-warning" style="font-size:46px"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mb-1">Vehicle Transport</h6>
+                                                <p class="text-muted small mb-0">Car &amp; motorcycle shipping</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary btn-next">
+                                        <span class="me-1">Next</span>
+                                        <i class="ri ri-arrow-right-line icon-16px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /STEP 1 -->
+
+                            <!-- ══ STEP 2 — Details ═══════════════════════════════════ -->
+                            <div id="step-details" class="content">
+                                <div class="content-header mb-6">
+                                    <h5 class="mb-1">Describe your request</h5>
+                                    <p class="text-muted mb-0">A clear title and description helps companies understand your needs</p>
+                                </div>
+
+                                <div class="mb-5">
+                                    <div class="form-floating form-floating-outline">
+                                        <input type="text"
+                                               id="requestName"
+                                               name="name"
+                                               class="form-control"
+                                               placeholder="e.g. Move 2-bedroom apartment from Vienna to Graz"
+                                               maxlength="128" />
+                                        <label for="requestName">Request Title <span class="text-danger">*</span></label>
+                                    </div>
+                                    <small class="text-muted">Short headline — max 128 characters</small>
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="form-floating form-floating-outline">
+                                        <textarea id="requestDescription"
+                                                  name="description"
+                                                  class="form-control"
+                                                  placeholder="Detailed description"
+                                                  maxlength="512"
+                                                  style="height:150px"></textarea>
+                                        <label for="requestDescription">Detailed Description</label>
+                                    </div>
+                                    <small class="text-muted">Provide as much detail as possible — floor, elevator, special items, timing, etc. Max 512 characters.</small>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary btn-prev">
+                                        <i class="ri ri-arrow-left-line icon-16px me-1"></i>
+                                        <span>Previous</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-next">
+                                        <span class="me-1">Next</span>
+                                        <i class="ri ri-arrow-right-line icon-16px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /STEP 2 -->
+
+                            <!-- ══ STEP 3 — Media ═════════════════════════════════════ -->
+                            <div id="step-media" class="content">
+                                <div class="content-header mb-6">
+                                    <h5 class="mb-1">Add photos &amp; video</h5>
+                                    <p class="text-muted mb-0">Upload up to 5 photos (2 MB each) and 1 video (10 MB). Select one photo as the main image.</p>
+                                </div>
+
+                                <!-- Drop zone -->
+                                <div id="uploadZone"
+                                     class="border border-2 border-dashed rounded-3 p-6 text-center mb-4"
+                                     style="border-style:dashed!important;cursor:pointer;transition:border-color .2s,background .2s">
+                                    <i class="ri ri-image-add-line icon-48px text-muted mb-3 d-block"></i>
+                                    <p class="fw-medium mb-1">Drag &amp; drop files here</p>
+                                    <p class="text-muted small mb-4">or use the buttons below</p>
+                                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                        <button type="button" id="photoUploadBtn" class="btn btn-outline-primary waves-effect">
+                                            <i class="ri ri-image-line me-1"></i>
+                                            Add Photos
+                                            <span class="badge bg-label-primary ms-1" id="photoCount">0 / 5</span>
+                                        </button>
+                                        <button type="button" id="videoUploadBtn" class="btn btn-outline-secondary waves-effect">
+                                            <i class="ri ri-video-add-line me-1"></i>
+                                            Add Video
+                                            <span class="badge bg-label-secondary ms-1" id="videoStatus">None</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Photo previews -->
+                                <div id="photoPreview" class="row g-3 mb-3"></div>
+
+                                <!-- Video preview -->
+                                <div id="videoPreview" class="mb-3"></div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary btn-prev">
+                                        <i class="ri ri-arrow-left-line icon-16px me-1"></i>
+                                        <span>Previous</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-next">
+                                        <span class="me-1">Next</span>
+                                        <i class="ri ri-arrow-right-line icon-16px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /STEP 3 -->
+
+                            <!-- ══ STEP 4 — Addresses ════════════════════════════════ -->
+                            <div id="step-addresses" class="content">
+                                <div class="content-header mb-6">
+                                    <h5 class="mb-1">Pickup &amp; delivery locations</h5>
+                                    <p class="text-muted mb-0">Enter the relevant addresses for your service</p>
+                                </div>
+
+                                <div class="row gx-5">
+                                    <div class="col-md-6 mb-5">
+                                        <div class="form-floating form-floating-outline">
+                                            <input type="text"
+                                                   id="pickupAddress"
+                                                   name="pickupAddress"
+                                                   class="form-control"
+                                                   placeholder="Street, City, ZIP"
+                                                   maxlength="512" />
+                                            <label for="pickupAddress">
+                                                <i class="ri ri-map-pin-line text-primary me-1"></i>
+                                                Pickup Address
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Where should the company come to?</small>
+                                    </div>
+
+                                    <div class="col-md-6 mb-5">
+                                        <div class="form-floating form-floating-outline">
+                                            <input type="text"
+                                                   id="deliveryAddress"
+                                                   name="deliveryAddress"
+                                                   class="form-control"
+                                                   placeholder="Street, City, ZIP"
+                                                   maxlength="512" />
+                                            <label for="deliveryAddress">
+                                                <i class="ri ri-map-pin-2-line text-danger me-1"></i>
+                                                Delivery Address
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Where should things be delivered to?</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary btn-prev">
+                                        <i class="ri ri-arrow-left-line icon-16px me-1"></i>
+                                        <span>Previous</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-next">
+                                        <span class="me-1">Next</span>
+                                        <i class="ri ri-arrow-right-line icon-16px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /STEP 4 -->
+
+                            <!-- ══ STEP 5 — Price ══════════════════════════════════════ -->
+                            <div id="step-price" class="content">
+                                <div class="content-header mb-6">
+                                    <h5 class="mb-1">Budget estimate</h5>
+                                    <p class="text-muted mb-0">Enter an approximate price you are willing to pay. Companies will use this to tailor their offers.</p>
+                                </div>
+
+                                <div class="row gx-5 mb-6">
+                                    <div class="col-md-6 mb-md-0 mb-5">
+                                        <label class="form-label fw-medium">Approximate Price</label>
+                                        <div class="input-group input-group-merge">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="number"
+                                                       id="costInput"
+                                                       name="cost"
+                                                       class="form-control"
+                                                       placeholder="0.00"
+                                                       min="0"
+                                                       step="0.01" />
+                                                <label for="costInput">Amount</label>
+                                            </div>
+                                            <span class="input-group-text p-0 border-0" style="background:transparent">
+                                                <select name="currency" id="currencySelect" class="form-select rounded-start-0 h-100" style="min-width:90px">
+                                                    <option value="EUR" selected>€ EUR</option>
+                                                    <option value="USD">$ USD</option>
+                                                </select>
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">Leave blank if unsure — you can always discuss pricing with the company</small>
+                                    </div>
+                                </div>
+
+                                <!-- Summary card -->
+                                <div class="card bg-light-subtle border mb-6">
+                                    <div class="card-body">
+                                        <h6 class="fw-semibold mb-3">
+                                            <i class="ri ri-survey-line me-1 text-primary"></i>
+                                            Request Summary
+                                        </h6>
+                                        <dl class="row mb-0 small">
+                                            <dt class="col-sm-4 text-muted fw-normal">Type</dt>
+                                            <dd class="col-sm-8 mb-2" id="summaryType">—</dd>
+                                            <dt class="col-sm-4 text-muted fw-normal">Title</dt>
+                                            <dd class="col-sm-8 mb-2" id="summaryName">—</dd>
+                                            <dt class="col-sm-4 text-muted fw-normal">Photos</dt>
+                                            <dd class="col-sm-8 mb-2" id="summaryPhotos">0</dd>
+                                            <dt class="col-sm-4 text-muted fw-normal">Pickup</dt>
+                                            <dd class="col-sm-8 mb-2" id="summaryPickup">—</dd>
+                                            <dt class="col-sm-4 text-muted fw-normal">Delivery</dt>
+                                            <dd class="col-sm-8 mb-0" id="summaryDelivery">—</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary btn-prev">
+                                        <i class="ri ri-arrow-left-line icon-16px me-1"></i>
+                                        <span>Previous</span>
+                                    </button>
+                                    <button type="submit" id="submitBtn" class="btn btn-success waves-effect waves-light">
+                                        <i class="ri ri-check-line icon-16px me-1"></i>
+                                        Publish Request
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /STEP 5 -->
+
+                        </form>
+                    </div>
+                    <!-- /Step contents -->
+
+                </div>
+                <!-- /bs-stepper -->
+
+            </div>
+        </div>
+    </div>
+</div>
