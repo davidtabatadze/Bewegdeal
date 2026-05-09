@@ -17,6 +17,12 @@ namespace Bewegdeal.Data.Repositories
         Task<UserEntity?> Get(UserFilter filter);
 
         /// <summary>
+        /// Returns all users matching all non-null criteria in
+        /// <paramref name="filter"/>. Returns every user when the filter is empty.
+        /// </summary>
+        Task<List<UserEntity>> GetAll(UserFilter filter);
+
+        /// <summary>
         /// Inserts <paramref name="user"/> and returns the same object
         /// with the database-generated <c>Id</c> populated.
         /// </summary>

@@ -66,6 +66,23 @@ namespace Bewegdeal.Data.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<List<UserEntity>> GetAll(UserFilter filter)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (filter.Id.HasValue)
+            {
+                query = query.Where(u => u.Id == filter.Id.Value);
+            }
+
+            if (filter.Email is not null)
+            {
+                query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
+            }
+
+            return await query.OrderBy(u => u.Name).ToListAsync();
+        }
+
         // ── Write ────────────────────────────────────────────────────────────────
 
         public async Task<UserEntity> Create(UserEntity user)
