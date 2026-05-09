@@ -33,7 +33,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\" -Recurse -Filter \"*.cs\")",
       "Bash(Measure-Object)",
       "Bash(Select-Object -ExpandProperty Count)",
-      "Bash(mkdir -p \"/mnt/c/Users/david.tabatadze/Sources/Bewegdeal/Middleware\")"
+      "Bash(mkdir -p \"/mnt/c/Users/david.tabatadze/Sources/Bewegdeal/Middleware\")",
+      "WebFetch(domain:demos.themeselection.com)",
+      "WebFetch(domain:datatables.net)"
     ]
   }
 }

@@ -199,7 +199,7 @@ Tools/
 | Mobile | string | max 16 |
 | Password | string | PBKDF2 hash (Base64) |
 | Salt | string | random salt (Base64) |
-| Code | string? | verification/reset code, max 16 |
+| Number | string? | company identification number, max 16 |
 | Address | string? | max 512 |
 | Interests | string[] | serialized as comma-separated string, max 128; values from `ServiceEnum` |
 
@@ -249,3 +249,64 @@ string status = await BrevoTool.Send(email, subject, htmlContent, optionalText);
 References (7 rows): administrator/customer/company (type: user-role), active/pending/blocked/unverified (type: user-status)
 
 Users (2 rows): `admin@bewegdeal.at` and `david.tabatadze@outlook.com`, both Role=Administrator, Status=Active, password hashed at seed time.
+
+---
+
+## DataTables
+
+DataTables is used for all admin list views (Users, etc.). The full reference is in `.claude/skills/datatables.md`. Key project conventions:
+
+### Required vendor assets (every DataTable page)
+
+```html
+@* VendorStyles *@
+<link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+<link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+<link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+<link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+
+@* VendorScripts *@
+<script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+<script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
+<script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
+<script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+<script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
+```
+
+The JS bundle (`datatables-bootstrap5.js`) already includes Responsive, Buttons, and Select extensions — no separate extension scripts needed.
+
+### JSON endpoint convention
+
+Every DataTable loads from a `[HttpGet]` controller action returning `Json(new { data })`. DataTables' default `dataSrc` is `"data"`, so no extra configuration is needed on the JS side.
+
+```csharp
+[HttpGet]
+public async Task<IActionResult> GetUsers()
+{
+    var items = await repository.GetAll(new UserFilter());
+    var data = items.Select(u => new { u.Id, u.Name, u.Email, u.Role, u.Status });
+    return Json(new { data });
+}
+```
+
+### Standard column order
+
+Every table uses this fixed column layout:
+- **0**: responsive control (`className: 'control'`, `render: () => ''`)
+- **1**: checkbox (`render: () => '<input type="checkbox" class="dt-checkboxes form-check-input">'`)
+- **2…n-1**: data columns
+- **last** (`targets: -1`): Actions (searchable: false, orderable: false)
+
+Export `columns` indices always skip 0, 1, and the last (actions) column.
+
+### JS file location
+
+Each DataTable has its own file in `wwwroot/js/`, e.g. `app-user-list.js`. Follow the pattern in that file for new tables.
+
+### Searching columns
+
+Use `column().search(value, { exact: true }).draw()` for exact matching (DT2 style — no regex needed). For status columns where raw data maps to a display label, the filter value must match the **rendered text** (DataTables strips HTML tags before searching, so `<span>Active</span>` is searchable as `"Active"`).
+
+### Materio layout tweaks
+
+Always apply the `setTimeout` class-adjustment block after initialization (see `app-user-list.js`) so buttons and layout elements match the Materio theme.
