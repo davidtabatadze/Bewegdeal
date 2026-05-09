@@ -79,6 +79,18 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
 
     #endregion
 
+    [HttpPost]
+    public IActionResult Logout()
+    {
+        // clear session
+        HttpContext.Session.Clear();
+
+        // remove the remember-me cookie
+        Response.Cookies.Delete("bewegdeal_remember");
+
+        return RedirectToAction("Index", "Landing");
+    }
+
     [HttpGet]
     public IActionResult ForgotPassword() => View();
 
