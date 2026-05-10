@@ -58,6 +58,12 @@ namespace Bewegdeal
             // Scoped per request — each request gets its own DbContext and repository instance.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
+            builder.Services.AddScoped<IFileRepository, FileRepository>();
+
+            // ── Storage ───────────────────────────────────────────────────────────
+            // Files are stored on the local file system.
+            // Base path is read from Storage:Local:Path in appsettings.json.
+            builder.Services.AddSingleton<IFileStorageTool, FileStorageTool>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
