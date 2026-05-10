@@ -33,6 +33,8 @@ namespace Bewegdeal.Models
         [MaxLength(16)]
         public string Password { get; set; } = string.Empty;
 
+        public IFormFile? TermsFile { get; set; }
+
         // Each nullable property represents one service checkbox.
         // null = unchecked; non-null = checked (value is the ServiceEnum constant).
         // Company only — Customer always results in an empty Interests array.

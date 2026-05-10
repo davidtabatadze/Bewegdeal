@@ -13,6 +13,7 @@ namespace Bewegdeal.Data
 
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
+        public DbSet<FileEntity> Files => Set<FileEntity>();
         public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
 
         #endregion
@@ -83,6 +84,7 @@ namespace Bewegdeal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureUsers(modelBuilder);
+            ConfigureFiles(modelBuilder);
             ConfigureReferences(modelBuilder);
         }
 
@@ -95,14 +97,12 @@ namespace Bewegdeal.Data
                 e.HasKey(u => u.Id);
                 e.Property(u => u.Id).ValueGeneratedOnAdd();
 
-                // Indexes — Id and Email are unique
                 e.HasIndex(u => u.Id).IsUnique();
                 e.HasIndex(u => u.Email).IsUnique();
                 e.HasIndex(u => u.Role);
                 e.HasIndex(u => u.Status);
                 e.HasIndex(u => u.Number);
 
-                // Required fields
                 e.Property(u => u.Password).IsRequired().HasMaxLength(64);
                 e.Property(u => u.Salt).IsRequired();
                 e.Property(u => u.Role).IsRequired().HasMaxLength(16);
@@ -111,13 +111,10 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Mobile).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
 
-                // Optional fields
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
+                e.Property(u => u.TermsFileId).IsRequired(false);
 
-                // Stored as a comma-separated string (e.g. "moving,pickup").
-                // ValueComparer is required so EF Core can detect changes to array contents,
-                // not just reference changes.
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -132,13 +129,30 @@ namespace Bewegdeal.Data
             });
         }
 
+        private void ConfigureFiles(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FileEntity>(e =>
+            {
+                e.ToTable(_prefix + "Files");
+
+                e.HasKey(f => f.Id);
+                e.Property(f => f.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(f => f.Key).IsUnique();
+
+                e.Property(f => f.Size).IsRequired();
+                e.Property(f => f.Key).IsRequired().HasMaxLength(64);
+                e.Property(f => f.MimeType).IsRequired().HasMaxLength(16);
+                e.Property(f => f.FileName).IsRequired().HasMaxLength(256);
+            });
+        }
+
         private void ConfigureReferences(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ReferenceEntity>(e =>
             {
                 e.ToTable(_prefix + "References");
 
-                // Id is a human-readable string key (e.g. "customer"), never auto-generated
                 e.HasKey(r => r.Id);
                 e.HasIndex(r => r.Id).IsUnique();
                 e.HasIndex(r => r.Type);
