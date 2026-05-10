@@ -336,6 +336,138 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // ── Row click → preview offcanvas ────────────────────────────────────────
+  const previewOffcanvasEl = document.querySelector('#requestPreviewOffcanvas');
+  const previewOffcanvas   = previewOffcanvasEl
+    ? new bootstrap.Offcanvas(previewOffcanvasEl)
+    : null;
+
+  // Helper: currency symbol
+  function currencySymbol(c) { return c === 'USD' ? '$' : '€'; }
+
+  function openPreview(data) {
+    if (!previewOffcanvasEl) { return; }
+
+    const type   = data['type']   || '';
+    const status = data['status'] || '';
+    const info   = typeObj[type]   || { icon: 'ri-file-list-line', color: 'secondary', label: type };
+    const st     = statusObj[status] || { title: status, class: 'bg-label-secondary' };
+
+    // ── Image banner ───────────────────────────────────────────────────────
+    const imgEl          = previewOffcanvasEl.querySelector('#previewImage');
+    const placeholder    = previewOffcanvasEl.querySelector('#previewImagePlaceholder');
+    const placeholderIcon = previewOffcanvasEl.querySelector('#previewTypePlaceholderIcon');
+    const imageWrap      = previewOffcanvasEl.querySelector('#previewImageWrap');
+
+    if (data['image']) {
+      imgEl.src          = data['image'];
+      imgEl.style.display = 'block';
+      placeholder.style.display = 'none';
+    } else {
+      imgEl.style.display       = 'none';
+      placeholder.style.display = 'flex';
+      placeholderIcon.className  = `ri ${info.icon} text-${info.color}`;
+      imageWrap.style.background = `rgba(var(--bs-${info.color}-rgb),.08)`;
+    }
+
+    // ── Badges ─────────────────────────────────────────────────────────────
+    const typeBadge   = previewOffcanvasEl.querySelector('#previewTypeBadge');
+    const statusBadge = previewOffcanvasEl.querySelector('#previewStatusBadge');
+    typeBadge.className   = `badge rounded-pill bg-label-${info.color}`;
+    typeBadge.textContent = info.label;
+    statusBadge.className   = `badge rounded-pill ${st.class}`;
+    statusBadge.textContent = st.title;
+
+    // ── Title & description ────────────────────────────────────────────────
+    previewOffcanvasEl.querySelector('#previewName').textContent        = data['name'] || '—';
+    previewOffcanvasEl.querySelector('#previewDescription').textContent = data['description'] || '';
+
+    // ── Meta ───────────────────────────────────────────────────────────────
+    const cost = data['cost'];
+    previewOffcanvasEl.querySelector('#previewCost').textContent =
+      cost != null ? `${currencySymbol(data['currency'])} ${Number(cost).toLocaleString('de-AT', { minimumFractionDigits: 2 })}` : '—';
+    previewOffcanvasEl.querySelector('#previewDate').textContent  = data['createdAt'] || '—';
+    previewOffcanvasEl.querySelector('#previewViews').textContent = data['views'] ?? 0;
+
+    // ── Addresses ─────────────────────────────────────────────────────────
+    const pickup   = (data['pickupAddress']   || '').trim();
+    const delivery = (data['deliveryAddress'] || '').trim();
+    const addrSection   = previewOffcanvasEl.querySelector('#previewAddressSection');
+    const pickupWrap    = previewOffcanvasEl.querySelector('#previewPickupWrap');
+    const deliveryWrap  = previewOffcanvasEl.querySelector('#previewDeliveryWrap');
+
+    if (pickup || delivery) {
+      addrSection.classList.remove('d-none');
+      if (pickup) {
+        pickupWrap.classList.remove('d-none');
+        previewOffcanvasEl.querySelector('#previewPickup').textContent = pickup;
+      } else { pickupWrap.classList.add('d-none'); }
+      if (delivery) {
+        deliveryWrap.classList.remove('d-none');
+        previewOffcanvasEl.querySelector('#previewDelivery').textContent = delivery;
+      } else { deliveryWrap.classList.add('d-none'); }
+    } else {
+      addrSection.classList.add('d-none');
+    }
+
+    // ── Additional media ───────────────────────────────────────────────────
+    const mediaPaths  = (data['media'] || '').split(',').filter(Boolean);
+    const mediaSection = previewOffcanvasEl.querySelector('#previewMediaSection');
+    const mediaGrid    = previewOffcanvasEl.querySelector('#previewMediaGrid');
+    mediaGrid.innerHTML = '';
+
+    const videoExts = ['.mp4', '.mov', '.avi', '.webm', '.mkv'];
+    const isVideo   = p => videoExts.includes(p.split('.').pop().toLowerCase().replace(/^/, '.'));
+
+    if (mediaPaths.length) {
+      mediaSection.classList.remove('d-none');
+      mediaPaths.forEach(path => {
+        if (isVideo(path)) {
+          const el = document.createElement('div');
+          el.className = 'd-flex align-items-center gap-2 p-2 border rounded-3 bg-light-subtle';
+          el.innerHTML = `<i class="ri ri-video-line text-primary icon-20px"></i>
+                          <span class="small text-truncate" style="max-width:140px">${path.split('/').pop()}</span>`;
+          mediaGrid.appendChild(el);
+        } else {
+          const img = document.createElement('img');
+          img.src   = path;
+          img.alt   = '';
+          img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--bs-border-color)';
+          mediaGrid.appendChild(img);
+        }
+      });
+    } else {
+      mediaSection.classList.add('d-none');
+    }
+
+    // ── Edit button ────────────────────────────────────────────────────────
+    const editBtn = previewOffcanvasEl.querySelector('#previewEditBtn');
+    if (status === 'active') {
+      editBtn.href               = `/Home/EditTask/${data['id']}`;
+      editBtn.classList.remove('d-none', 'disabled', 'opacity-50');
+    } else {
+      editBtn.classList.add('d-none');
+    }
+
+    previewOffcanvas.show();
+  }
+
+  // Bind row clicks — skip checkbox column (col 1), actions column (last)
+  dt_task.on('click', 'tbody tr td:not(:nth-child(2)):not(:last-child)', function () {
+    // Skip responsive detail rows
+    if (this.closest('tr')?.classList.contains('child')) { return; }
+    const row = dt_task.row(this.closest('tr'));
+    if (!row || !row.data()) { return; }
+    openPreview(row.data());
+  });
+
+  // Pointer cursor on hoverable cells
+  dt_task_table.style.cursor = 'default';
+  dt_task.on('draw', function () {
+    dt_task_table.querySelectorAll('tbody tr td:not(:nth-child(2)):not(:last-child)')
+      .forEach(td => { td.style.cursor = 'pointer'; });
+  });
+
   // Layout tweaks (Materio theme)
   setTimeout(() => {
     [

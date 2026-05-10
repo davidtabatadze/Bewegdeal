@@ -148,3 +148,123 @@
         </table>
     </div>
 </div>
+
+<!-- ══ Request Preview Offcanvas ════════════════════════════════════════════ -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="requestPreviewOffcanvas"
+     aria-labelledby="requestPreviewLabel" style="width:460px;max-width:100vw">
+
+    <div class="offcanvas-header border-bottom py-4">
+        <h5 class="offcanvas-title fw-semibold" id="requestPreviewLabel">Request Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0 overflow-y-auto">
+
+        <!-- Main image banner -->
+        <div id="previewImageWrap" style="height:220px;overflow:hidden;background:var(--bs-secondary-bg)">
+            <img id="previewImage" src="" alt=""
+                 style="width:100%;height:100%;object-fit:cover;display:none" />
+            <div id="previewImagePlaceholder"
+                 class="w-100 h-100 d-flex align-items-center justify-content-center">
+                <i id="previewTypePlaceholderIcon" class="ri icon-64px text-secondary" style="font-size:72px"></i>
+            </div>
+        </div>
+
+        <div class="p-5">
+
+            <!-- Badges row -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span id="previewTypeBadge"  class="badge rounded-pill"></span>
+                <span id="previewStatusBadge" class="badge rounded-pill"></span>
+            </div>
+
+            <!-- Title -->
+            <h5 id="previewName" class="fw-semibold mb-2"></h5>
+
+            <!-- Description -->
+            <p id="previewDescription" class="text-muted mb-5" style="white-space:pre-line"></p>
+
+            <hr class="my-4" />
+
+            <!-- Meta grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="avatar-initial rounded bg-label-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:38px;height:38px">
+                            <i class="ri ri-money-euro-circle-line icon-20px"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Budget</p>
+                            <p id="previewCost" class="fw-medium mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="avatar-initial rounded bg-label-info d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:38px;height:38px">
+                            <i class="ri ri-calendar-line icon-20px"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Created</p>
+                            <p id="previewDate" class="fw-medium mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="avatar-initial rounded bg-label-success d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:38px;height:38px">
+                            <i class="ri ri-eye-line icon-20px"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Company Views</p>
+                            <p id="previewViews" class="fw-medium mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Addresses -->
+            <div id="previewAddressSection" class="d-none mb-4">
+                <hr class="my-4" />
+                <h6 class="fw-semibold mb-3">
+                    <i class="ri ri-map-pin-line me-1 text-primary"></i>Locations
+                </h6>
+                <div id="previewPickupWrap" class="d-none mb-3">
+                    <p class="text-muted small mb-1">Pickup address</p>
+                    <p id="previewPickup" class="fw-medium mb-0"></p>
+                </div>
+                <div id="previewDeliveryWrap" class="d-none">
+                    <p class="text-muted small mb-1">Delivery address</p>
+                    <p id="previewDelivery" class="fw-medium mb-0"></p>
+                </div>
+            </div>
+
+            <!-- Additional media -->
+            <div id="previewMediaSection" class="d-none mb-4">
+                <hr class="my-4" />
+                <h6 class="fw-semibold mb-3">
+                    <i class="ri ri-image-line me-1 text-primary"></i>Media
+                </h6>
+                <div id="previewMediaGrid" class="d-flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- Action buttons -->
+            <hr class="my-4" />
+            <div class="d-flex gap-3">
+                <a id="previewEditBtn" href="#"
+                   class="btn btn-primary waves-effect waves-light flex-grow-1">
+                    <i class="ri ri-edit-box-line me-1"></i>Edit Request
+                </a>
+                <button type="button" class="btn btn-outline-secondary waves-effect"
+                        data-bs-dismiss="offcanvas">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /Request Preview Offcanvas -->

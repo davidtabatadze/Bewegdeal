@@ -36,15 +36,19 @@ namespace Bewegdeal.Controllers
 
             var data = tasks.Select(t => new
             {
-                id        = t.Id,
-                name      = t.Name,
-                type      = t.Type,
-                image     = t.Image,
-                cost      = t.Cost,
-                currency  = t.Currency ?? "EUR",
-                status    = t.Status,
-                views     = t.Views,
-                createdAt = t.CreatedAt.ToString("dd.MM.yyyy")
+                id              = t.Id,
+                name            = t.Name,
+                type            = t.Type,
+                image           = t.Image,
+                media           = t.Media,
+                description     = t.Description,
+                cost            = t.Cost,
+                currency        = t.Currency ?? "EUR",
+                pickupAddress   = t.PickupAddress,
+                deliveryAddress = t.DeliveryAddress,
+                status          = t.Status,
+                views           = t.Views,
+                createdAt       = t.CreatedAt.ToString("dd.MM.yyyy")
             });
 
             return Json(new { data });
