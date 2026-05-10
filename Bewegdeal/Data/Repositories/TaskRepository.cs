@@ -126,5 +126,19 @@ namespace Bewegdeal.Data.Repositories
             _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
         }
+
+        public async Task Delete(TaskFilter filter)
+        {
+            var query = _context.Tasks.AsQueryable();
+
+            if (filter.Id.HasValue)     { query = query.Where(t => t.Id     == filter.Id.Value);     }
+            if (filter.UserId.HasValue) { query = query.Where(t => t.UserId == filter.UserId.Value); }
+
+            var task = await query.FirstOrDefaultAsync();
+            if (task is null) { return; }
+
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+        }
     }
 }

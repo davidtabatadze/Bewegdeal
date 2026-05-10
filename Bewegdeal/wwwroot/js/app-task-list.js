@@ -133,28 +133,32 @@ document.addEventListener('DOMContentLoaded', function () {
         searchable: true
       },
       {
-        // Actions — edit button (only for active requests)
+        // Actions — edit + delete buttons
         targets: -1,
         title: 'Actions',
         searchable: false,
         orderable: false,
         render: (data, type, full) => {
-          if (full['status'] === 'active') {
-            return (
-              '<div class="d-flex align-items-center">' +
-                '<a href="/Home/EditTask/' + data + '" class="btn btn-icon btn-text-secondary rounded-pill" title="Edit">' +
-                  '<i class="icon-base ri ri-edit-box-line icon-md"></i>' +
-                '</a>' +
-              '</div>'
-            );
-          }
-          return (
-            '<div class="d-flex align-items-center">' +
-              '<span class="btn btn-icon btn-text-secondary rounded-pill disabled opacity-50" title="Editing is not available in this status">' +
+          const status     = full['status'];
+          const canEdit    = status === 'active';
+          const canDelete  = status !== 'completed';
+
+          const editBtn = canEdit
+            ? '<a href="/Home/EditTask/' + data + '" class="btn btn-icon btn-text-secondary rounded-pill" title="Edit">' +
+                '<i class="icon-base ri ri-edit-box-line icon-md"></i>' +
+              '</a>'
+            : '<span class="btn btn-icon btn-text-secondary rounded-pill disabled opacity-50" title="Editing is not available in this status">' +
                 '<i class="icon-base ri ri-lock-line icon-md"></i>' +
-              '</span>' +
-            '</div>'
-          );
+              '</span>';
+
+          const deleteBtn = canDelete
+            ? '<button type="button" class="btn btn-icon btn-text-danger rounded-pill dt-delete-btn"' +
+                ' data-id="' + data + '" data-name="' + (full['name'] || '').replace(/"/g, '&quot;') + '" title="Delete">' +
+                '<i class="icon-base ri ri-delete-bin-7-line icon-md"></i>' +
+              '</button>'
+            : '';
+
+          return '<div class="d-flex align-items-center">' + editBtn + deleteBtn + '</div>';
         }
       }
     ],
@@ -449,8 +453,42 @@ document.addEventListener('DOMContentLoaded', function () {
       editBtn.classList.add('d-none');
     }
 
+    // ── Delete button in offcanvas ─────────────────────────────────────────
+    const deleteBtn = previewOffcanvasEl.querySelector('#previewDeleteBtn');
+    if (deleteBtn) {
+      if (status !== 'completed') {
+        deleteBtn.classList.remove('d-none');
+        deleteBtn.onclick = function () {
+          previewOffcanvas.hide();
+          openDeleteModal(data['id'], data['name'] || '');
+        };
+      } else {
+        deleteBtn.classList.add('d-none');
+      }
+    }
+
     previewOffcanvas.show();
   }
+
+  // ── Delete confirmation modal ─────────────────────────────────────────────
+  const deleteModalEl = document.querySelector('#deleteTaskModal');
+  const deleteModal   = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+
+  function openDeleteModal(id, name) {
+    const nameEl = document.querySelector('#deleteTaskName');
+    const idEl   = document.querySelector('#deleteTaskId');
+    if (nameEl) { nameEl.textContent = name; }
+    if (idEl)   { idEl.value = id; }
+    if (deleteModal) { deleteModal.show(); }
+  }
+
+  // Delete button clicks inside the DataTable actions column
+  dt_task_table.addEventListener('click', function (e) {
+    const btn = e.target.closest('.dt-delete-btn');
+    if (!btn) { return; }
+    e.stopPropagation();
+    openDeleteModal(btn.dataset.id, btn.dataset.name || '');
+  });
 
   // Bind row clicks — skip checkbox column (col 1), actions column (last)
   dt_task.on('click', 'tbody tr td:not(:nth-child(2)):not(:last-child)', function () {

@@ -269,6 +269,36 @@ namespace Bewegdeal.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ── Delete Task ──────────────────────────────────────────────────────────
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteTask(long id)
+        {
+            var userId = long.Parse(HttpContext.Session.GetString("UserId")!);
+            var task   = await taskRepository.Get(new TaskFilter { Id = id, UserId = userId });
+
+            if (task is null) { return NotFound(); }
+
+            // Completed requests cannot be deleted
+            if (task.Status == TaskStatusEnum.Completed)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Delete uploaded files from disk
+            if (task.Image is not null) { DeleteUpload(task.Image); }
+
+            foreach (var path in (task.Media ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                DeleteUpload(path);
+            }
+
+            await taskRepository.Delete(new TaskFilter { Id = id, UserId = userId });
+
+            return RedirectToAction(nameof(Index));
+        }
+
         private void DeleteUpload(string relativePath)
         {
             var full = Path.Combine(

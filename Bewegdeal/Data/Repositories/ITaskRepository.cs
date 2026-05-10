@@ -10,5 +10,6 @@ namespace Bewegdeal.Data.Repositories
         Task<List<TaskEntity>>  GetAll (TaskFilter filter);
         Task<TaskEntity>        Create (TaskEntity task);
         Task                    Update (TaskEntity task);
+        Task                    Delete (TaskFilter filter);
     }
 }
