@@ -34,7 +34,7 @@ namespace Bewegdeal.Tools
             return key;
         }
 
-        public async Task Delete(string key)
+        public Task Delete(string key)
         {
             var fullPath = Path.Combine(_basePath, key);
 
@@ -42,6 +42,8 @@ namespace Bewegdeal.Tools
             {
                 File.Delete(fullPath);
             }
+
+            return Task.CompletedTask;
         }
 
         public string GetUrl(string key) => $"/File/Download/{key}";

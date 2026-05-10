@@ -93,7 +93,7 @@
                         </div>
 
                         <div class="bs-stepper-content">
-                            <form id="multiStepsForm" method="post" asp-controller="Account" asp-action="Register" onsubmit="return false">
+                            <form id="multiStepsForm" method="post" enctype="multipart/form-data" asp-controller="Account" asp-action="Register" onsubmit="return false">
                                 <!-- Step 1: Role -->
                                 <div id="roleSelectionValidation" class="content">
                                     <div class="content-header mb-5">
@@ -277,7 +277,7 @@
                                         <!-- /Services -->
                                         <div id="companyTermsUpload" class="col-12 mb-5 d-none">
                                             <p class="fw-medium mb-3">Your terms of service (.pdf file only)</p>
-                                            <input class="form-control form-control-sm" id="companyTermsFile" name="companyTermsFile" type="file" accept=".pdf" />
+                                            <input class="form-control form-control-sm" id="companyTermsFile" name="TermsFile" type="file" accept=".pdf" />
                                         </div>
                                         <div class="col-12 d-flex justify-content-between">
                                             <button class="btn btn-outline-secondary btn-prev">

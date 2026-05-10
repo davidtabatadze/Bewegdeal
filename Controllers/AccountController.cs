@@ -218,9 +218,9 @@ public class AccountController(
 
         // ready terms of service
         long? termsFileId = null;
-        if (model.Role == UserRoleEnum.Company && model.TermsOfService is not null)
+        if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await fileService.Create(model.TermsOfService, null, FileTypeEnum.PDF);
+            var file = await fileService.Create(model.TermsFile, null, FileTypeEnum.PDF);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;
