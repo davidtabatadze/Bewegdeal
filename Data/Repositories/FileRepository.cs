@@ -1,5 +1,4 @@
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
@@ -12,21 +11,9 @@ namespace Bewegdeal.Data.Repositories
     {
         private readonly SqlContext _context = context;
 
-        public async Task<FileEntity?> Get(FileFilter filter)
+        public async Task<FileEntity?> Get(long id)
         {
-            var query = _context.Files.AsQueryable();
-
-            if (filter.Id.HasValue)
-            {
-                query = query.Where(f => f.Id == filter.Id.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.Key))
-            {
-                query = query.Where(f => f.Key == filter.Key);
-            }
-
-            return await query.FirstOrDefaultAsync();
+            return await _context.Files.FirstOrDefaultAsync(f => f.Id == id);
         }
 
         public async Task<FileEntity> Create(FileEntity file)

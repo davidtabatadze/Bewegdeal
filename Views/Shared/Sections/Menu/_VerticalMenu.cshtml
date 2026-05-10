@@ -42,8 +42,8 @@
         </li>
 
         <!-- Settings -->
-        <li class='menu-item@(currentPage == "/Home/Settings" ? " active" : "")'>
-            <a asp-controller="Home" asp-action="Settings" class="menu-link">
+        <li class='menu-item@(currentPage == "/Settings" || currentPage == "/Settings/Index" ? " active" : "")'>
+            <a asp-controller="Settings" asp-action="Index" class="menu-link">
                 <i class="menu-icon icon-base ri ri-settings-4-line"></i>
                 <div data-i18n="Settings">Settings</div>
             </a>

@@ -1,0 +1,155 @@
+@using Bewegdeal.Data.Entities
+@model SettingsEntity
+
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Settings";
+}
+
+<div class="row g-6">
+
+    <!-- Terms & Conditions -->
+    <div class="col-12">
+        <form asp-controller="Settings" asp-action="SaveTermAndConditionSettings" method="post" enctype="multipart/form-data">
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Terms &amp; Conditions</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["TermsError"] is string termsError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
+                    }
+                    @if (TempData["TermsSuccess"] is string termsSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
+                    }
+
+                    @if (ViewBag.TermsFile is FileEntity termsFile)
+                    {
+                        <div class="text-center">
+                            <a href="@Url.Action("Download", "File", new { key = termsFile.Key })" target="_blank" class="fw-semibold fs-5">
+                                <i class="ri ri-file-pdf-line me-1"></i>T&amp;C@* @termsFile.FileName *@
+                            </a>
+                        </div>
+
+                        <hr class="my-6 mx-n4" />
+                    }
+
+                    <div class="d-flex flex-column align-items-center gap-4">
+
+                        <div style="width: 420px">
+                            <input type="file" name="termsFile" class="form-control" accept=".pdf" />
+                        </div>
+
+                        <div class="alert row alert-warning mb-0 mx-0" style="width: 420px" role="alert">
+                            <span class="col-auto alert-icon me-0 rounded-1 px-0">
+                                <i class="icon-base ri ri-error-warning-line icon-22px"></i>
+                            </span>
+                            <div class="col text-wrap ps-4 pe-0 pt-sm-1">
+                                Modifying this file will force the users to re-agree to the Terms &amp; Conditions.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Request -->
+    <div class="col-12">
+        <form asp-controller="Settings" asp-action="SaveRequestSettings" method="post">
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Request</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["RequestError"] is string requestError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@requestError</div>
+                    }
+                    @if (TempData["RequestSuccess"] is string requestSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@requestSuccess</div>
+                    }
+
+                    <!-- Negotiation -->
+                    <div class="row justify-content-center">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="requestNegotiationMinutes"
+                                       name="requestNegotiationMinutes" value="@Model.RequestNegotiationMinutes"
+                                       min="1" placeholder="0" />
+                                <label for="requestNegotiationMinutes">Negotiation Minutes</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-6 mx-n4" />
+
+                    <!-- Images -->
+                    <div class="row justify-content-center g-5">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="requestImageMaxCount"
+                                       name="requestImageMaxCount" value="@Model.RequestImageMaxCount"
+                                       min="1" placeholder="0" />
+                                <label for="requestImageMaxCount">Image Max Count</label>
+                            </div>
+                        </div>
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="requestImageMaxSize"
+                                       name="requestImageMaxSize" value="@Model.RequestImageMaxSize"
+                                       min="1" placeholder="0" />
+                                <label for="requestImageMaxSize">Image Max Size (MB)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-6 mx-n4" />
+
+                    <!-- Videos -->
+                    <div class="row justify-content-center g-5">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="requestVideoMaxCount"
+                                       name="requestVideoMaxCount" value="@Model.RequestVideoMaxCount"
+                                       min="1" placeholder="0" />
+                                <label for="requestVideoMaxCount">Video Max Count</label>
+                            </div>
+                        </div>
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="requestVideoMaxSize"
+                                       name="requestVideoMaxSize" value="@Model.RequestVideoMaxSize"
+                                       min="1" placeholder="0" />
+                                <label for="requestVideoMaxSize">Video Max Size (MB)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>

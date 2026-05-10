@@ -7,9 +7,11 @@ namespace Bewegdeal.Controllers
     /// Serves files stored by LocalFileStorageService.
     /// Not used when the R2 provider is active — R2 files are served directly via their public URL.
     /// </summary>
-    public class FileController(IConfiguration configuration) : Controller
+    public class FileController(IConfiguration configuration, IWebHostEnvironment environment) : Controller
     {
-        private readonly string _basePath = configuration["Storage:Local:Path"] ?? "";
+        private readonly string _basePath = Path.IsPathRooted(configuration["Storage:Local:Path"] ?? "")
+            ? configuration["Storage:Local:Path"]!
+            : Path.Combine(environment.ContentRootPath, configuration["Storage:Local:Path"] ?? "");
 
         [HttpGet]
         public IActionResult Download(string key)

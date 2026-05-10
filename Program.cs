@@ -60,6 +60,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
             builder.Services.AddScoped<IFileRepository, FileRepository>();
+            builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
 
             // ── Storage ───────────────────────────────────────────────────────────
             // Files are stored on the local file system.
@@ -87,6 +88,7 @@ namespace Bewegdeal
 
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IReferenceRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
+                await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
             }
 
             // ── Middleware pipeline ───────────────────────────────────────────────

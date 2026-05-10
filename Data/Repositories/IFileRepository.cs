@@ -1,6 +1,5 @@
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
 
 namespace Bewegdeal.Data.Repositories
 {
@@ -10,8 +9,8 @@ namespace Bewegdeal.Data.Repositories
     /// </summary>
     public interface IFileRepository : IRepository
     {
-        /// <summary>Returns the first file matching all non-null criteria, or null if none found.</summary>
-        Task<FileEntity?> Get(FileFilter filter);
+        /// <summary>Returns the file with the given Id, or null if not found.</summary>
+        Task<FileEntity?> Get(long id);
 
         /// <summary>Inserts a file metadata record and returns it with the generated Id.</summary>
         Task<FileEntity> Create(FileEntity file);

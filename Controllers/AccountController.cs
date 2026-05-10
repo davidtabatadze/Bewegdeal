@@ -13,6 +13,8 @@ namespace Bewegdeal.Controllers;
 public class AccountController(
     FileService fileService,
     IUserRepository userRepository,
+    ISettingsRepository settingsRepository,
+    IFileRepository fileRepository,
     IMemoryCache cache) : Controller
 {
 
@@ -183,7 +185,14 @@ public class AccountController(
     #region Register
 
     [HttpGet]
-    public IActionResult Register() => View(new RegisterViewModel());
+    public async Task<IActionResult> Register()
+    {
+        var settings = await settingsRepository.Get();
+        var file = await fileRepository.Get(settings.TermsAndConditionsFileId);
+        ViewBag.TermsFileKey = file?.Key;
+
+        return View(new RegisterViewModel());
+    }
 
     [HttpPost]
     public async Task<IActionResult> Register(RegisterViewModel model)

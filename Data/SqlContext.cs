@@ -15,6 +15,7 @@ namespace Bewegdeal.Data
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<FileEntity> Files => Set<FileEntity>();
         public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
+        public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
 
         #endregion
 
@@ -85,6 +86,7 @@ namespace Bewegdeal.Data
         {
             ConfigureUsers(modelBuilder);
             ConfigureFiles(modelBuilder);
+            ConfigureSettings(modelBuilder);
             ConfigureReferences(modelBuilder);
         }
 
@@ -160,6 +162,24 @@ namespace Bewegdeal.Data
 
                 e.Property(r => r.Type).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Name).IsRequired().HasMaxLength(16);
+            });
+        }
+
+        private void ConfigureSettings(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SettingsEntity>(e =>
+            {
+                e.ToTable(_prefix + "Settings");
+
+                e.HasKey(s => s.Id);
+                e.Property(s => s.Id).ValueGeneratedNever();
+
+                e.Property(s => s.TermsAndConditionsFileId).IsRequired();
+                e.Property(s => s.RequestNegotiationMinutes).IsRequired();
+                e.Property(s => s.RequestImageMaxCount).IsRequired();
+                e.Property(s => s.RequestImageMaxSize).IsRequired();
+                e.Property(s => s.RequestVideoMaxCount).IsRequired();
+                e.Property(s => s.RequestVideoMaxSize).IsRequired();
             });
         }
     }

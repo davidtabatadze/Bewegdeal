@@ -7,7 +7,5 @@ namespace Bewegdeal.Controllers
     public class HomeController : Controller
     {
         public IActionResult Index() => View();
-
-        public IActionResult Settings() => View();
     }
 }

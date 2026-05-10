@@ -46,7 +46,7 @@ Default route: `{controller=Landing}/{action=Index}` → public landing page at 
 
 Admin pages:
 - `/Home` or `/Home/Index` → Dashboard
-- `/Home/Settings` → Settings
+- `/Settings` or `/Settings/Index` → Settings
 - `/User/List` → Users list
 
 Account pages live under `/Account`:
@@ -79,9 +79,10 @@ Views/
 ## Controllers
 
 - `LandingController` — public landing page
-- `HomeController` — Dashboard (`Index`), Settings (`Settings`); no repository dependency
+- `HomeController` — Dashboard (`Index`) only; no repository dependency
 - `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
 - `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
+- `SettingsController` — Settings (`Index`), Terms upload (`SaveTerms`), request config (`SaveRequest`)
 
 ## Account Views
 
@@ -167,29 +168,41 @@ Data/
 │   └── BaseFilter.cs            # Generic filter: Id<T>, SortField, SortDirection, Start, Length
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
+│   ├── FileEntity.cs            # Files table (metadata only — bytes on disk)
+│   ├── SettingsEntity.cs        # Settings table (single row, Id = 1, seeded at startup)
 │   └── ReferenceEntity.cs       # References table (lookup/reference data)
 ├── Filters/
 │   └── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
 ├── Repositories/
 │   ├── IUserRepository.cs       # Get, Load, Count, Create, Update, SetUserStatus
 │   ├── IReferenceRepository.cs  # Get, Load, Create, Update
+│   ├── IFileRepository.cs       # Get(FileFilter), Create, Delete(id)
+│   ├── ISettingsRepository.cs   # Get(), Update(entity)
 │   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (2 admin users)
 │   │                            #   private ApplyFilters helper shared by Count and Load
-│   └── ReferenceRepository.cs  # EF Core impl + IRepositorySeedable (7 reference rows)
+│   ├── ReferenceRepository.cs   # EF Core impl + IRepositorySeedable (7 reference rows)
+│   ├── FileRepository.cs        # EF Core impl; no seeding
+│   └── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, all zeroes)
 └── SqlContext.cs                # DbContext: Users + References DbSets, EF config, value converters
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
+├── FileTypeEnum.cs              # MIME type constants: PDF = "application/pdf"
 ├── SortFieldEnum.cs             # "status" (add new fields here as new sortable columns are added)
 ├── SortDirectionEnum.cs         # "asc", "desc"
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 └── EmailStatusEnum.cs           # "sent", "failed"
 Models/
-└── GridResultViewModel.cs          # Generic server-side DataTables response envelope
+└── GridResultViewModel.cs       # Generic server-side DataTables response envelope
+Services/
+└── FileService.cs               # Scoped — validate MIME type, upload bytes, persist metadata, optionally delete old file
+Storage/                         # Git-ignored. Local file storage root (configurable via Storage:Local:Path)
 Tools/
 ├── PasswordTool.cs              # Static, PBKDF2/SHA-256, HashPassword() → (hash, salt), Verify()
-└── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
+├── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
+├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
+└── FileStorageTool.cs           # Singleton local-filesystem impl; key = GUID + extension; base path from appsettings
 ```
 
 ### Entities
@@ -208,6 +221,27 @@ Tools/
 | Number | string? | company identification number, max 16 |
 | Address | string? | max 512 |
 | Interests | string[] | serialized as comma-separated string, max 128; values from `ServiceEnum` |
+| TermsFileId | long? | FK to Files table — company terms of service PDF |
+
+**FileEntity** (`Files` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| Key | string | unique storage key (GUID + extension), max 64 — used to locate bytes on disk |
+| FileName | string | original upload name, max 256 |
+| MimeType | string | e.g. `"application/pdf"`, max 16 |
+| Size | long | file size in bytes |
+
+**SettingsEntity** (`Settings` table — always exactly one row, Id = 1):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, `ValueGeneratedNever()` — always 1 |
+| TermsAndConditionsFileId | long? | FK to Files — platform T&C PDF |
+| RequestNegotiationMinutes | short | SMALLINT |
+| RequestImageMaxCount | short | SMALLINT |
+| RequestImageMaxSize | short | SMALLINT, in MB |
+| RequestVideoMaxCount | short | SMALLINT |
+| RequestVideoMaxSize | short | SMALLINT, in MB |
 
 **ReferenceEntity** (`References` table):
 | Field | Type | Notes |
@@ -239,15 +273,41 @@ string status = await BrevoTool.Send(email, subject, htmlContent, optionalText);
 // returns EmailStatusEnum.Sent or EmailStatusEnum.Failed
 ```
 
+**IFileStorageTool / FileStorageTool** (singleton — no DB dependency):
+```csharp
+// Stores bytes, returns a unique key (GUID + extension)
+string key = await storageTool.Create(stream, fileName, mimeType);
+// Deletes bytes from disk
+await storageTool.Delete(key);
+// Returns a download URL (/File/Download/{key})
+string url = storageTool.GetUrl(key);
+```
+Configured via `Storage:Local:Path` in `appsettings.json`. Relative paths are resolved against `ContentRootPath`. The `Storage/` folder is git-ignored.
+
+### Services
+
+**FileService** (scoped — wraps `IFileStorageTool` + `IFileRepository`):
+```csharp
+// Upload a new file. Pass replaceId to delete an old file after the new one is saved.
+// allowedMimeTypes: use FileTypeEnum constants. Pass none to skip MIME validation.
+var (id, error) = await fileService.Create(formFile, replaceId: null, FileTypeEnum.PDF);
+if (error is not null) { /* show error */ }
+// id is the new FileEntity.Id
+```
+Use `FileService` anywhere a controller needs to handle file uploads — never duplicate the validate + upload + persist logic inline.
+
+**FileController** (no auth — files may be public):
+- `GET /File/Download/{key}` — streams the file; validates key against path traversal (`/`, `\`, `..`); resolves MIME type via `FileExtensionContentTypeProvider`; `enableRangeProcessing: true`
+
 ### Infrastructure (Program.cs)
 
 - **Session**: HttpOnly, IsEssential, 8hr idle timeout, SecurePolicy = SameAsRequest
 - **Database**: SQLite or MySQL via EF Core — provider selected by `Database:Provider` in `appsettings.json` (`"sqlite"` or `"mysql"`). Invalid value throws at startup.
 - **Table prefix**: configurable via `Database:TablePrefix` (e.g. `"dev_"`) — applied to all table names in `SqlContext`
 - **Connection strings**: live inside the `Database` section (`Database:Sqlite`, `Database:MySql`)
-- **DI**: `IUserRepository` → `UserRepository` (scoped), `IReferenceRepository` → `ReferenceRepository` (scoped)
+- **DI**: `IUserRepository` → `UserRepository` (scoped), `IReferenceRepository` → `ReferenceRepository` (scoped), `IFileRepository` → `FileRepository` (scoped), `ISettingsRepository` → `SettingsRepository` (scoped), `IFileStorageTool` → `FileStorageTool` (singleton), `FileService` (scoped)
 - **Startup schema**: `SqlContext.EnsureTablesAsync()` — generates full DDL from the EF Core model and executes each statement with `IF NOT EXISTS`, safe on every run
-- **Startup seeding**: seed References → seed Users (order matters — users depend on role values)
+- **Startup seeding**: References → Users → Settings (Settings has no inter-dependencies; order relative to Users/References does not matter)
 - **BrevoTool.Configure** called at startup before app runs
 
 ### Seed Data
