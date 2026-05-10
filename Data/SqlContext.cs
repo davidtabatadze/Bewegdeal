@@ -113,6 +113,7 @@ namespace Bewegdeal.Data
 
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
+                e.Property(u => u.TermsFileId).IsRequired(false);
 
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)

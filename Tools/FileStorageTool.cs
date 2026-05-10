@@ -3,7 +3,6 @@ namespace Bewegdeal.Tools
     /// <summary>
     /// Stores files on the local file system.
     /// Configured via Storage:Local:Path in appsettings.json.
-    /// Files are served through FileController — never exposed directly from disk.
     /// </summary>
     public class FileStorageTool : IFileStorageTool
     {
@@ -23,10 +22,10 @@ namespace Bewegdeal.Tools
             Directory.CreateDirectory(_basePath);
         }
 
-        public async Task<string> Upload(Stream stream, string fileName, string mimeType)
+        public async Task<string> Create(Stream stream, string fileName, string mimeType)
         {
-            var extension = Path.GetExtension(fileName);
-            var key = Guid.NewGuid().ToString("N") + extension.ToLower();
+            var key = Guid.NewGuid().ToString("N") +
+                      Path.GetExtension(fileName).ToLower();
             var fullPath = Path.Combine(_basePath, key);
 
             using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
@@ -35,7 +34,7 @@ namespace Bewegdeal.Tools
             return key;
         }
 
-        public Task Delete(string key)
+        public async Task Delete(string key)
         {
             var fullPath = Path.Combine(_basePath, key);
 
@@ -43,8 +42,6 @@ namespace Bewegdeal.Tools
             {
                 File.Delete(fullPath);
             }
-
-            return Task.CompletedTask;
         }
 
         public string GetUrl(string key) => $"/File/Download/{key}";

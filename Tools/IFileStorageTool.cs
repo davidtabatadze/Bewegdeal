@@ -10,7 +10,7 @@ namespace Bewegdeal.Tools
         /// <summary>
         /// Uploads a file and returns the storage key (unique identifier within the backend).
         /// </summary>
-        Task<string> Upload(Stream stream, string fileName, string mimeType);
+        Task<string> Create(Stream stream, string fileName, string mimeType);
 
         /// <summary>
         /// Deletes the file identified by <paramref name="key"/> from storage.

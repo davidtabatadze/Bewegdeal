@@ -3,13 +3,17 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
+using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Controllers;
 
-public class AccountController(IUserRepository userRepository, IMemoryCache cache) : Controller
+public class AccountController(
+    FileService fileService,
+    IUserRepository userRepository,
+    IMemoryCache cache) : Controller
 {
 
     #region Login
@@ -80,6 +84,8 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
 
     #endregion
 
+    #region Logout
+
     [HttpPost]
     public IActionResult Logout()
     {
@@ -92,8 +98,14 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
         return RedirectToAction("Index", "Landing");
     }
 
+    #endregion
+
+    #region Forgot Password
+
     [HttpGet]
     public IActionResult ForgotPassword() => View();
+
+    #endregion
 
     #region Verify Email
 
@@ -155,7 +167,7 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
 
         // send verification email
         var mailError = await SendVerificationEmail(email);
-        if (!string.IsNullOrWhiteSpace(mailError))
+        if (mailError is not null)
         {
             ViewBag.Error = mailError;
             return View();
@@ -204,6 +216,19 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
                             model.ServiceVehicle ?? ""
                         }.Where(i => !string.IsNullOrWhiteSpace(i));
 
+        // ready terms of service
+        long? termsFileId = null;
+        if (model.Role == UserRoleEnum.Company && model.TermsOfService is not null)
+        {
+            var file = await fileService.Create(model.TermsOfService, null, FileTypeEnum.PDF);
+            if (file.Error is not null)
+            {
+                ViewBag.Error = file.Error;
+                return View(model);
+            }
+            termsFileId = file!.Id;
+        }
+
         // ready password
         var (hash, salt) = PasswordTool.HashPassword(model.Password);
 
@@ -219,12 +244,13 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
             Password = hash,
             Salt = salt,
             Interests = [.. interests],
-            Status = UserStatusEnum.Unverified
+            Status = UserStatusEnum.Unverified,
+            TermsFileId = termsFileId
         });
 
         // send verification email
         var mailError = await SendVerificationEmail(user.Email);
-        if (!string.IsNullOrWhiteSpace(mailError))
+        if (mailError is not null)
         {
             ViewBag.Error = mailError;
             return View(model);
@@ -243,7 +269,7 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
     /// error message can be displayed to the user or logged for troubleshooting.</remarks>
     /// <param name="email">The email address to which the verification code will be sent. Cannot be null or empty.</param>
     /// <returns>An empty string if the email was sent successfully; otherwise, an error message describing the failure.</returns>
-    private async Task<string> SendVerificationEmail(string email)
+    private async Task<string?> SendVerificationEmail(string email)
     {
         // generate one-time code
         var oneTimeCode = Random.Shared.Next(100000, 1000000).ToString();
@@ -271,7 +297,7 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
         // all good
         if (result == EmailStatusEnum.Sent)
         {
-            return "";
+            return null;
         }
 
         // something went wrong

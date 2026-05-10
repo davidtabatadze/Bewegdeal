@@ -39,7 +39,7 @@ namespace Bewegdeal.Controllers
                 interests = u.Interests
             });
 
-            return Json(new DataTablesResult<object>(draw, total, filtered, data));
+            return Json(new GridResultViewModel<object>(draw, total, filtered, data));
         }
 
         [HttpPost]

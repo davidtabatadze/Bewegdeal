@@ -186,7 +186,7 @@ Enums/
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 └── EmailStatusEnum.cs           # "sent", "failed"
 Models/
-└── DataTablesResult.cs          # Generic server-side DataTables response envelope
+└── GridResultViewModel.cs          # Generic server-side DataTables response envelope
 Tools/
 ├── PasswordTool.cs              # Static, PBKDF2/SHA-256, HashPassword() → (hash, salt), Verify()
 └── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
@@ -264,17 +264,17 @@ DataTables is used for all admin list views. The full reference and checklist is
 
 ### Mode — always serverSide: true
 
-All tables use `serverSide: true`. DataTables sends `draw`, `start`, `length`, and order params; the server returns `{ draw, recordsTotal, recordsFiltered, data }` via `DataTablesResult<T>`.
+All tables use `serverSide: true`. DataTables sends `draw`, `start`, `length`, and order params; the server returns `{ draw, recordsTotal, recordsFiltered, data }` via `GridResultViewModel<T>`.
 
 ### Controller naming convention
 
 - Page action: e.g. `List()` — loads ViewBag stats, returns the view
-- Data action: `[HttpGet] LoadXxx(...)` — returns `DataTablesResult<object>`
+- Data action: `[HttpGet] LoadXxx(...)` — returns `GridResultViewModel<object>`
 - Mutation action: `[HttpPost] UpdateXxxStatus(long id)` — self-protection check first
 
 ### Response model
 
-Use `Models/DataTablesResult<T>` — never an anonymous `new { draw, recordsTotal, ... }`.
+Use `Models/GridResultViewModel<T>` — never an anonymous `new { draw, recordsTotal, ... }`.
 
 ### Repository convention
 
