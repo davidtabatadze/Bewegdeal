@@ -58,7 +58,7 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u => u.Id == filter.Id.Value);
             }
 
-            if (filter.Email is not null)
+            if (!string.IsNullOrWhiteSpace(filter.Email))
             {
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
             }
@@ -66,21 +66,70 @@ namespace Bewegdeal.Data.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<UserEntity>> GetAll(UserFilter filter)
+        public async Task<int> Count(UserFilter filter)
         {
-            var query = _context.Users.AsQueryable();
+            return await ApplyFilters(_context.Users.AsQueryable(), filter).CountAsync();
+        }
 
+        public async Task<List<UserEntity>> Load(UserFilter filter)
+        {
+            var query = ApplyFilters(_context.Users.AsQueryable(), filter);
+
+            if (!string.IsNullOrWhiteSpace(filter.SortDirection) && !string.IsNullOrWhiteSpace(filter.SortField))
+            {
+                var desc = filter.SortDirection == SortDirectionEnum.Desc;
+                query = filter.SortField switch
+                {
+                    SortFieldEnum.Status => desc ? query.OrderByDescending(u => u.Status) : query.OrderBy(u => u.Status),
+                    _ => desc ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id)
+                };
+            }
+
+            if (filter.Start.HasValue && filter.Length.HasValue)
+            {
+                query = query.Skip(filter.Start.Value);
+                query = query.Take(filter.Length.Value);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────────
+
+        private static IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
+        {
             if (filter.Id.HasValue)
             {
                 query = query.Where(u => u.Id == filter.Id.Value);
             }
 
-            if (filter.Email is not null)
+            if (!string.IsNullOrWhiteSpace(filter.Email))
             {
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
             }
 
-            return await query.OrderBy(u => u.Name).ToListAsync();
+            if (!string.IsNullOrWhiteSpace(filter.Role))
+            {
+                query = query.Where(u => u.Role == filter.Role);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Status))
+            {
+                query = query.Where(u => u.Status == filter.Status);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                var term = filter.Search.Trim().ToLower();
+                query = query.Where(u =>
+                    u.Name.ToLower().Contains(term) ||
+                    u.Email.ToLower().Contains(term) ||
+                    (u.Mobile != null && u.Mobile.ToLower().Contains(term)) ||
+                    (u.Address != null && u.Address.ToLower().Contains(term))
+                );
+            }
+
+            return query;
         }
 
         // ── Write ────────────────────────────────────────────────────────────────
@@ -92,10 +141,12 @@ namespace Bewegdeal.Data.Repositories
             return user;
         }
 
-        public async Task Update(UserEntity user)
+        public async Task SetUserStatus(long id, string status)
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            // TODO: if does not exist?
+            await _context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
         }
     }
 }

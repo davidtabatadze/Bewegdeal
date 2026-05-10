@@ -26,7 +26,7 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 ### `_HomeLayout` — admin/app pages
 - Location: `Views/Shared/_HomeLayout.cshtml`
-- Used by: `Home/Index`, `Home/Users`, `Home/Settings`
+- Used by: `Home/Index`, `Home/Settings`, `User/List`
 - Loads: Inter font, iconify-icons, node-waves, pickr-themes, core.css, demo.css, perfect-scrollbar.css, site.css, VendorStyles/PageStyles, then head scripts (helpers.js, **no template-customizer**, config.js)
 - Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts
 - Renders: vertical menu → `_NavbarHome` → body → `_FooterHome`
@@ -44,10 +44,10 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 Default route: `{controller=Landing}/{action=Index}` → public landing page at `/`
 
-Admin pages live under `/Home`:
+Admin pages:
 - `/Home` or `/Home/Index` → Dashboard
-- `/Home/Users` → Users
 - `/Home/Settings` → Settings
+- `/User/List` → Users list
 
 Account pages live under `/Account`:
 - `/Account/Login`
@@ -79,7 +79,8 @@ Views/
 ## Controllers
 
 - `LandingController` — public landing page
-- `HomeController` — admin/app pages (Dashboard, Users, Settings)
+- `HomeController` — Dashboard (`Index`), Settings (`Settings`); no repository dependency
+- `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
 - `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
 
 ## Account Views
@@ -112,9 +113,9 @@ Navbar links (`_NavbarLanding.cshtml`): Home (tag helper), Services (`#services`
 Menu items are hardcoded in `_VerticalMenu.cshtml`. Active state is determined server-side by comparing `ViewContext.HttpContext.Request.Path`.
 
 To add a menu item:
-1. Add action to `HomeController` (or a new controller)
+1. Add action to the appropriate controller (create a new dedicated controller if the feature is distinct)
 2. Create the view with `Layout = "_HomeLayout"`
-3. Add `<li>` entry to `_VerticalMenu.cshtml` with the correct path check
+3. Add `<li>` entry to `_VerticalMenu.cshtml` with the correct path check (`ViewContext.HttpContext.Request.Path == "/Controller/Action"`)
 
 ## Menu Behavior
 
@@ -163,24 +164,29 @@ Data/
 │   ├── IEntity.cs               # Marker interface for all entities
 │   ├── IRepository.cs           # Marker interface for all repositories
 │   ├── IRepositorySeedable.cs   # Adds Task Seed() — implemented by repos that need initial data
-│   └── BaseFilter.cs            # Generic filter with Id<T>
+│   └── BaseFilter.cs            # Generic filter: Id<T>, SortField, SortDirection, Start, Length
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
 │   └── ReferenceEntity.cs       # References table (lookup/reference data)
 ├── Filters/
-│   └── UserFilter.cs            # Extends BaseFilter<long?>, adds Email
+│   └── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
 ├── Repositories/
-│   ├── IUserRepository.cs       # Get(UserFilter), Create(UserEntity), Update(UserEntity)
-│   ├── IReferenceRepository.cs  # Get(BaseFilter<string>), Create(ReferenceEntity), Update(ReferenceEntity)
+│   ├── IUserRepository.cs       # Get, Load, Count, Create, Update, SetUserStatus
+│   ├── IReferenceRepository.cs  # Get, Load, Create, Update
 │   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (2 admin users)
+│   │                            #   private ApplyFilters helper shared by Count and Load
 │   └── ReferenceRepository.cs  # EF Core impl + IRepositorySeedable (7 reference rows)
 └── SqlContext.cs                # DbContext: Users + References DbSets, EF config, value converters
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
-├── ReferenceTypeEnum.cs         # "user-role", "user-status" (note: UseRole field has a typo — should be UserRole)
+├── SortFieldEnum.cs             # "status" (add new fields here as new sortable columns are added)
+├── SortDirectionEnum.cs         # "asc", "desc"
+├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 └── EmailStatusEnum.cs           # "sent", "failed"
+Models/
+└── DataTablesResult.cs          # Generic server-side DataTables response envelope
 Tools/
 ├── PasswordTool.cs              # Static, PBKDF2/SHA-256, HashPassword() → (hash, salt), Verify()
 └── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
@@ -212,10 +218,10 @@ Tools/
 
 ### Filters
 
-Filters are criteria bags — only non-null fields are applied in the query. Add new fields to extend lookup without adding new repository methods.
+Filters are criteria bags — only non-null/non-empty fields are applied in the query. Add new fields to extend lookup without adding new repository methods. Always guard with `!string.IsNullOrWhiteSpace()`, never bare null checks.
 
-- `BaseFilter<T>` — has `Id`
-- `UserFilter : BaseFilter<long?>` — adds `Email`
+- `BaseFilter<T>` — has `Id`, `SortField`, `SortDirection`, `Start` (int?), `Length` (int?) — the last four are used by DataTables server-side mode
+- `UserFilter : BaseFilter<long?>` — adds `Email`, `Search`, `Role`, `Status`
 - `ReferenceRepository` uses `BaseFilter<string>` directly (no dedicated filter class)
 
 ### Tools
@@ -254,59 +260,47 @@ Users (2 rows): `admin@bewegdeal.at` and `david.tabatadze@outlook.com`, both Rol
 
 ## DataTables
 
-DataTables is used for all admin list views (Users, etc.). The full reference is in `.claude/skills/datatables.md`. Key project conventions:
+DataTables is used for all admin list views. The full reference and checklist is in `.claude/skills/datatables.md`. Key project conventions:
 
-### Required vendor assets (every DataTable page)
+### Mode — always serverSide: true
 
-```html
-@* VendorStyles *@
-<link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-<link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
-<link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
-<link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+All tables use `serverSide: true`. DataTables sends `draw`, `start`, `length`, and order params; the server returns `{ draw, recordsTotal, recordsFiltered, data }` via `DataTablesResult<T>`.
 
-@* VendorScripts *@
-<script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
-<script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
-<script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
-```
+### Controller naming convention
 
-The JS bundle (`datatables-bootstrap5.js`) already includes Responsive, Buttons, and Select extensions — no separate extension scripts needed.
+- Page action: e.g. `List()` — loads ViewBag stats, returns the view
+- Data action: `[HttpGet] LoadXxx(...)` — returns `DataTablesResult<object>`
+- Mutation action: `[HttpPost] UpdateXxxStatus(long id)` — self-protection check first
 
-### JSON endpoint convention
+### Response model
 
-Every DataTable loads from a `[HttpGet]` controller action returning `Json(new { data })`. DataTables' default `dataSrc` is `"data"`, so no extra configuration is needed on the JS side.
+Use `Models/DataTablesResult<T>` — never an anonymous `new { draw, recordsTotal, ... }`.
 
-```csharp
-[HttpGet]
-public async Task<IActionResult> GetUsers()
-{
-    var items = await repository.GetAll(new UserFilter());
-    var data = items.Select(u => new { u.Id, u.Name, u.Email, u.Role, u.Status });
-    return Json(new { data });
-}
-```
+### Repository convention
 
-### Standard column order
-
-Every table uses this fixed column layout:
-- **0**: responsive control (`className: 'control'`, `render: () => ''`)
-- **1**: checkbox (`render: () => '<input type="checkbox" class="dt-checkboxes form-check-input">'`)
-- **2…n-1**: data columns
-- **last** (`targets: -1`): Actions (searchable: false, orderable: false)
-
-Export `columns` indices always skip 0, 1, and the last (actions) column.
+Every DataTable repository method pair:
+- `Count(filter)` — filtered count, no paging (used for `recordsFiltered`)
+- `Load(filter)` — filtered + sorted + paged via `Skip`/`Take`
+- Both share a private `ApplyFilters` helper to avoid duplicated filtering logic
+- `Count(new Filter())` gives the unfiltered total (`recordsTotal`)
+- EF Core `DbContext` is not thread-safe — these three calls must be awaited sequentially
 
 ### JS file location
 
-Each DataTable has its own file in `wwwroot/js/`, e.g. `app-user-list.js`. Follow the pattern in that file for new tables.
+Each DataTable has its own file in `wwwroot/js/`, e.g. `app-user-list.js`. Use that file as the template for new tables.
 
-### Searching columns
+### Filters
 
-Use `column().search(value, { exact: true }).draw()` for exact matching (DT2 style — no regex needed). For status columns where raw data maps to a display label, the filter value must match the **rendered text** (DataTables strips HTML tags before searching, so `<span>Active</span>` is searchable as `"Active"`).
+Filters live in the `card-header` as plain HTML (search input + bootstrap-select dropdowns). They call `dt.ajax.reload(null, true)` on change (reset to page 1). Search uses 500ms debounce.
+
+### Loading indicator
+
+Use Notiflix `Block.pulse('.card-datatable')` on `preXhr.dt`, removed on `xhr.dt`. Never use DataTables' built-in `processing: true`.
+
+### Mobile / responsive
+
+Use `scrollX: true` and `responsive: false`. The Responsive extension conflicts with `scrollX` and must always be disabled.
 
 ### Materio layout tweaks
 
-Always apply the `setTimeout` class-adjustment block after initialization (see `app-user-list.js`) so buttons and layout elements match the Materio theme.
+Always apply the `setTimeout` class-adjustment block after initialization (see `app-user-list.js`).

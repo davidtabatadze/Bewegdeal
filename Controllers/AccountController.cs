@@ -59,6 +59,7 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
         HttpContext.Session.SetString("UserId", user.Id.ToString());
         HttpContext.Session.SetString("UserRole", user.Role);
         HttpContext.Session.SetString("UserName", user.Name);
+        HttpContext.Session.SetString("UserEmail", user.Email);
 
         // set persistent cookie when "remember me" is checked
         if (rememberMe)
@@ -134,9 +135,11 @@ public class AccountController(IUserRepository userRepository, IMemoryCache cach
         var user = await userRepository.Get(new UserFilter { Email = email });
         if (user is not null)
         {
-            user.Status = user.Role == UserRoleEnum.Customer ?
-                          UserStatusEnum.Active : UserStatusEnum.Pending;
-            await userRepository.Update(user);
+            await userRepository.SetUserStatus(
+                user.Id,
+                user.Role == UserRoleEnum.Customer ?
+                UserStatusEnum.Active : UserStatusEnum.Pending
+            );
         }
 
         // all good

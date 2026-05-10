@@ -1,21 +1,23 @@
+@using Bewegdeal.Enums
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Users";
 }
 
 @section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
+    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
-    <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
 }
 
 @section VendorScripts {
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-    <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
-    <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
-    <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
-    <script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
+    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
 }
 
 @section PageScripts {
@@ -109,59 +111,49 @@
 <!-- Users Table -->
 <div class="card">
     <div class="card-header border-bottom">
-        <h6 class="card-title mb-0">Filters</h6>
-        <div class="d-flex justify-content-between align-items-center row pt-4 pb-2 gap-4 gap-md-0 gx-5">
-            <div class="col-md-6 user_role"></div>
-            <div class="col-md-6 user_status"></div>
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-7">
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                    <input type="text" id="usersSearch" class="form-control" placeholder="Search users..." />
+                </div>
+            </div>
+            <div class="col-12 col-md-5">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <select id="filterRole" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Roles</option>
+                            <option data-divider="true"></option>
+                            <option value="@UserRoleEnum.Customer">Customer</option>
+                            <option value="@UserRoleEnum.Company">Company</option>
+                            <option value="@UserRoleEnum.Administrator">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Statuses</option>
+                            <option data-divider="true"></option>
+                            <option value="@UserStatusEnum.Active">Active</option>
+                            <option value="@UserStatusEnum.Pending">Pending</option>
+                            <option value="@UserStatusEnum.Blocked">Blocked</option>
+                            <option value="@UserStatusEnum.Unverified">Unverified</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card-datatable">
         <table class="datatables-users table">
             <thead>
                 <tr>
-                    <th></th>
-                    <th></th>
-                    <th>User</th>
-                    <th>Mobile</th>
+                    <th class="text-center">Status</th>
                     <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Interests</th>
                 </tr>
             </thead>
         </table>
-    </div>
-
-    <!-- Offcanvas — Add New User -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddUser" aria-labelledby="offcanvasAddUserLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 id="offcanvasAddUserLabel" class="offcanvas-title">Add Userjbjh</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body mx-0 flex-grow-0 h-100">
-            <form class="add-new-user pt-0" id="addNewUserForm" onsubmit="return false">
-                <div class="form-floating form-floating-outline mb-5 form-control-validation">
-                    <input type="text" class="form-control" id="add-user-name" placeholder="John Doe" name="userName" />
-                    <label for="add-user-name">Full Name</label>
-                </div>
-                <div class="form-floating form-floating-outline mb-5 form-control-validation">
-                    <input type="email" class="form-control" id="add-user-email" placeholder="john@example.com" name="userEmail" />
-                    <label for="add-user-email">Email</label>
-                </div>
-                <div class="form-floating form-floating-outline mb-5">
-                    <input type="tel" class="form-control phone-mask" id="add-user-mobile" placeholder="000 000 0000" name="userMobile" />
-                    <label for="add-user-mobile">Mobile</label>
-                </div>
-                <div class="form-floating form-floating-outline mb-5">
-                    <select id="add-user-role" class="form-select" name="userRole">
-                        <option value="customer">Customer</option>
-                        <option value="company">Company</option>
-                        <option value="administrator">Administrator</option>
-                    </select>
-                    <label for="add-user-role">Role</label>
-                </div>
-                <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
-                <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
-            </form>
-        </div>
     </div>
 </div>

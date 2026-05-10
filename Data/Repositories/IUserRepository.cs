@@ -20,7 +20,13 @@ namespace Bewegdeal.Data.Repositories
         /// Returns all users matching all non-null criteria in
         /// <paramref name="filter"/>. Returns every user when the filter is empty.
         /// </summary>
-        Task<List<UserEntity>> GetAll(UserFilter filter);
+        Task<List<UserEntity>> Load(UserFilter filter);
+
+        /// <summary>
+        /// Returns the count of users matching the non-null filter criteria,
+        /// ignoring any paging (<c>Start</c> / <c>Length</c>).
+        /// </summary>
+        Task<int> Count(UserFilter filter);
 
         /// <summary>
         /// Inserts <paramref name="user"/> and returns the same object
@@ -28,7 +34,7 @@ namespace Bewegdeal.Data.Repositories
         /// </summary>
         Task<UserEntity> Create(UserEntity user);
 
-        /// <summary>Persists changes to an existing user row.</summary>
-        Task Update(UserEntity user);
+        /// <summary>Updates only the <c>Status</c> column for the given user ID.</summary>
+        Task SetUserStatus(long id, string status);
     }
 }

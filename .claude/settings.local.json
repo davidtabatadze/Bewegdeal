@@ -35,7 +35,10 @@
       "Bash(Select-Object -ExpandProperty Count)",
       "Bash(mkdir -p \"/mnt/c/Users/david.tabatadze/Sources/Bewegdeal/Middleware\")",
       "WebFetch(domain:demos.themeselection.com)",
-      "WebFetch(domain:datatables.net)"
+      "WebFetch(domain:datatables.net)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Software Templates\\\\Materio\\\\AspnetCoreMvcFull\\\\wwwroot\\\\js\" -File -Recurse)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Users.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\User\\\\Users.cshtml\")"
     ]
   }
 }

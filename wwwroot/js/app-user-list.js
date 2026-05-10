@@ -7,12 +7,20 @@
 document.addEventListener('DOMContentLoaded', function () {
   const dt_user_table = document.querySelector('.datatables-users');
 
-  // Status → badge class + display label
+  // Status → button class + display label
   const statusObj = {
-    active:      { title: 'Active',      class: 'bg-label-success' },
-    pending:     { title: 'Pending',     class: 'bg-label-warning' },
-    blocked:     { title: 'Blocked',     class: 'bg-label-danger'  },
-    unverified:  { title: 'Unverified',  class: 'bg-label-secondary' }
+    active:     { title: 'Active',     class: 'btn-text-success' },
+    pending:    { title: 'Pending',    class: 'btn-text-warning' },
+    blocked:    { title: 'Blocked',    class: 'btn-text-danger'  },
+    unverified: { title: 'Unverified', class: 'btn-text-dark'    }
+  };
+
+  // Interest → icon + color + label
+  const interestMap = {
+    moving:    { icon: 'ri-truck-line',      color: 'bg-label-primary', title: 'Moving'    },
+    removal:   { icon: 'ri-delete-bin-line', color: 'bg-label-danger',  title: 'Removal'   },
+    pickup:    { icon: 'ri-store-2-line',    color: 'bg-label-success', title: 'Pickup'    },
+    transport: { icon: 'ri-car-line',        color: 'bg-label-info',    title: 'Transport' }
   };
 
   // Role → icon HTML
@@ -22,54 +30,56 @@ document.addEventListener('DOMContentLoaded', function () {
     administrator: '<i class="icon-base ri ri-computer-line   icon-22px text-danger  me-2"></i>'
   };
 
+  // Column index → sort field name sent to the server (only orderable columns listed)
+  const columnToField = { 0: 'status' };
+
   if (!dt_user_table) { return; }
 
   const dt_user = new DataTable(dt_user_table, {
-    ajax: '/Home/GetUsers',
+    serverSide: true,
+    scrollX: true,
+    ajax: {
+      url: '/User/LoadUsers',
+      data: function (d) {
+        // Map DT's nested order to the flat sortField/sortDirection the filter expects
+        const order       = d.order && d.order[0];
+        d.sortField     = columnToField[order ? order.column : 0] || 'status';
+        d.sortDirection = order ? order.dir : 'desc';
+
+        // Remove DT's auto-generated nested params — controller doesn't use them
+        delete d.order;
+        delete d.columns;
+        delete d.search;   // replaced below with our own plain-string value
+
+        // Custom filters
+        d.search = document.getElementById('usersSearch').value;
+        d.role   = document.getElementById('filterRole').value;
+        d.status = document.getElementById('filterStatus').value;
+
+        return d;
+      }
+    },
     columns: [
-      { data: 'id'     },   // 0 — responsive control
-      { data: 'id'     },   // 1 — checkbox
-      { data: 'name'   },   // 2 — user cell
-      { data: 'mobile' },   // 3 — mobile
-      { data: 'role'   },   // 4 — role
-      { data: 'status' },   // 5 — status
-      { data: 'id'     }    // 6 — actions
+      { data: 'status'    },   // 0 — status (sortable)
+      { data: 'role'      },   // 1 — role
+      { data: 'name'      },   // 2 — user cell
+      { data: 'mobile'    },   // 3 — contact
+      { data: 'interests' },   // 4 — interests
     ],
     columnDefs: [
       {
-        // Responsive expand control
-        className: 'control',
-        searchable: false,
-        orderable: false,
-        responsivePriority: 2,
-        targets: 0,
-        render: () => ''
-      },
-      {
-        // Checkbox
-        targets: 1,
-        orderable: false,
-        searchable: false,
-        responsivePriority: 4,
-        render: () => '<input type="checkbox" class="dt-checkboxes form-check-input">',
-        checkboxes: {
-          selectAllRender: '<input type="checkbox" class="form-check-input">'
-        }
-      },
-      {
         // User cell: avatar initials + name + email
         targets: 2,
+        orderable: false,
         responsivePriority: 4,
         render: function (data, type, full) {
           const name = full['name'];
           const email = full['email'];
 
-          const states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary'];
-          const state  = states[Math.floor(Math.random() * states.length)];
           const initials = ((name.match(/\b\w/g) || []).map(c => c.toUpperCase()));
           const badge = ((initials.shift() || '') + (initials.pop() || '')).toUpperCase();
 
-          const avatar = '<span class="avatar-initial rounded-circle bg-label-' + state + '">' + badge + '</span>';
+          const avatar = '<span class="avatar-initial rounded-circle bg-label-primary">' + badge + '</span>';
 
           return (
             '<div class="d-flex justify-content-start align-items-center user-name">' +
@@ -85,151 +95,95 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       },
       {
-        // Mobile
+        // Contact
         targets: 3,
-        render: (data, type, full) => '<span>' + (full['mobile'] || '—') + '</span>'
+        orderable: false,
+        render: (data, type, full) => {
+          const mobile  = full['mobile']  || '—';
+          const address = full['address'] || '—';
+          return (
+            '<div class="d-flex flex-column">' +
+              '<span class="fw-medium">' + mobile + '</span>' +
+              '<small class="text-muted">' + address + '</small>' +
+            '</div>'
+          );
+        }
       },
       {
         // Role
-        targets: 4,
+        targets: 1,
+        width: '60px',
+        orderable: false,
         render: function (data, type, full) {
-          const role = full['role'];
-          const icon = roleBadgeObj[role] || '';
+          const role  = full['role'];
+          const icon  = roleBadgeObj[role] || '';
           const label = role ? (role.charAt(0).toUpperCase() + role.slice(1)) : role;
-          return "<span class='text-truncate d-flex align-items-center text-heading'>" + icon + label + '</span>';
+          return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
         }
       },
       {
-        // Status badge
-        targets: 5,
+        // Interests
+        targets: 4,
+        width: '120px',
+        orderable: false,
+        searchable: false,
+        render: function (data, type, full) {
+          const interests = full['interests'];
+          if (!interests || interests.length === 0) { return ''; }
+          const items = interests.map(function (key) {
+            const map = interestMap[key];
+            if (!map) { return ''; }
+            return (
+              '<li class="avatar avatar-xs pull-up" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
+                '<div class="avatar-initial rounded-circle ' + map.color + '">' +
+                  '<i class="icon-base ri ' + map.icon + ' icon-xs"></i>' +
+                '</div>' +
+              '</li>'
+            );
+          }).join('');
+          return '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' + items + '</ul>';
+        }
+      },
+      {
+        // Status button
+        targets: 0,
+        width: '120px',
         render: function (data, type, full) {
           const status = full['status'];
-          const obj = statusObj[status] || { title: status, class: 'bg-label-secondary' };
-          return '<span class="badge rounded-pill ' + obj.class + ' text-capitalize">' + obj.title + '</span>';
+          const obj = statusObj[status] || { title: status, class: 'btn-text-secondary' };
+          const id   = full['id'];
+
+          if (status === 'unverified') {
+            return (
+              '<button type="button" class="btn ' + obj.class + '" disabled style="pointer-events:none">' +
+                obj.title +
+              '</button>'
+            );
+          }
+
+          return (
+            '<button type="button" class="btn ' + obj.class + ' status-toggle-btn"' +
+              ' data-user-id="' + id + '"' +
+              ' data-current-status="' + status + '">' +
+              '<span class="icon-base ri ri-exchange-line icon-16px me-1_5"></span>' +
+              obj.title +
+            '</button>'
+          );
         }
       },
-      {
-        // Actions
-        targets: -1,
-        title: 'Actions',
-        searchable: false,
-        orderable: false,
-        render: (data, type, full) => `
-          <div class="d-flex align-items-center">
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary rounded-pill delete-record">
-              <i class="icon-base ri ri-delete-bin-7-line icon-md"></i>
-            </a>
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i class="icon-base ri ri-more-2-line icon-md"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end m-0">
-              <a href="javascript:;" class="dropdown-item">Edit</a>
-              <a href="javascript:;" class="dropdown-item">Block</a>
-            </div>
-          </div>`
-      }
     ],
-    select: {
-      style: 'multi',
-      selector: 'td:nth-child(2)'
+    pageLength: 10,
+    order: [[0, 'desc']],
+    drawCallback: function () {
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        if (!bootstrap.Tooltip.getInstance(el)) {
+          new bootstrap.Tooltip(el);
+        }
+      });
     },
-    order: [[2, 'asc']],
     layout: {
-      topStart: {
-        rowClass: 'row m-2 my-0 mt-0 justify-content-between',
-        features: [
-          {
-            buttons: [
-              {
-                extend: 'collection',
-                className: 'btn btn-outline-secondary dropdown-toggle waves-effect',
-                text: '<span class="d-flex align-items-center gap-2"><i class="icon-base ri ri-download-line icon-16px me-sm-1"></i><span class="d-inline-block">Export</span></span>',
-                buttons: [
-                  {
-                    extend: 'print',
-                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-printer-line me-1"></i>Print</span>',
-                    className: 'dropdown-item',
-                    exportOptions: {
-                      columns: [2, 3, 4, 5],
-                      format: {
-                        body: function (inner) {
-                          if (!inner.length) { return inner; }
-                          const el = new DOMParser().parseFromString(inner, 'text/html').body.childNodes;
-                          let result = '';
-                          el.forEach(item => {
-                            if (item.classList && item.classList.contains('user-name')) {
-                              result += item.querySelector('span.fw-medium')?.textContent || '';
-                            } else {
-                              result += item.textContent || item.innerText || '';
-                            }
-                          });
-                          return result;
-                        }
-                      }
-                    },
-                    customize: function (win) {
-                      win.document.body.style.color = config.colors.headingColor;
-                      win.document.body.style.borderColor = config.colors.borderColor;
-                      win.document.body.style.backgroundColor = config.colors.bodyBg;
-                      const table = win.document.body.querySelector('table');
-                      table.classList.add('compact');
-                      table.style.color = 'inherit';
-                      table.style.borderColor = 'inherit';
-                      table.style.backgroundColor = 'inherit';
-                    }
-                  },
-                  {
-                    extend: 'csv',
-                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-text-line me-1"></i>Csv</span>',
-                    className: 'dropdown-item',
-                    exportOptions: { columns: [2, 3, 4, 5] }
-                  },
-                  {
-                    extend: 'excel',
-                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>',
-                    className: 'dropdown-item',
-                    exportOptions: { columns: [2, 3, 4, 5] }
-                  },
-                  {
-                    extend: 'pdf',
-                    text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-pdf-line me-1"></i>Pdf</span>',
-                    className: 'dropdown-item',
-                    exportOptions: { columns: [2, 3, 4, 5] }
-                  },
-                  {
-                    extend: 'copy',
-                    text: '<i class="icon-base ri ri-file-copy-line me-1"></i>Copy',
-                    className: 'dropdown-item',
-                    exportOptions: { columns: [2, 3, 4, 5] }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      topEnd: {
-        features: [
-          {
-            search: {
-              placeholder: 'Search User',
-              text: '_INPUT_'
-            }
-          },
-          {
-            buttons: [
-              {
-                text: '<i class="icon-base ri ri-add-line icon-sm me-0 me-sm-2 d-sm-none d-inline-block"></i><span class="d-inline-block">Add New User</span>',
-                className: 'add-new btn btn-primary',
-                attr: {
-                  'data-bs-toggle': 'offcanvas',
-                  'data-bs-target': '#offcanvasAddUser'
-                }
-              }
-            ]
-          }
-        ]
-      },
+      topStart: null,
+      topEnd: null,
       bottomStart: {
         rowClass: 'row mx-3 justify-content-between',
         features: ['info']
@@ -237,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
       bottomEnd: 'paging'
     },
     language: {
+      search: '',
       paginate: {
         next:     '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
         previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
@@ -244,112 +199,92 @@ document.addEventListener('DOMContentLoaded', function () {
         last:     '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
       }
     },
-    responsive: {
-      details: {
-        display: DataTable.Responsive.display.modal({
-          header: function (row) {
-            return 'Details of ' + row.data()['name'];
-          }
-        }),
-        type: 'column',
-        renderer: function (api, rowIdx, columns) {
-          const data = columns
-            .map(col =>
-              col.title !== ''
-                ? `<tr data-dt-row="${col.rowIndex}" data-dt-column="${col.columnIndex}">
-                     <td>${col.title}:</td><td>${col.data}</td>
-                   </tr>`
-                : ''
-            )
-            .join('');
-          if (!data) { return false; }
-          const div = document.createElement('div');
-          div.classList.add('table-responsive');
-          const table = document.createElement('table');
-          table.classList.add('table');
-          const tbody = document.createElement('tbody');
-          tbody.innerHTML = data;
-          table.appendChild(tbody);
-          div.appendChild(table);
-          return div;
-        }
-      }
-    },
-    initComplete: function () {
-      const api = this.api();
-
-      // Role filter (column 4 — raw data is the role string)
-      const roleContainer = document.querySelector('.user_role');
-      if (roleContainer) {
-        const roleSelect = document.createElement('select');
-        roleSelect.id = 'UserRole';
-        roleSelect.className = 'form-select text-capitalize';
-        roleSelect.innerHTML = '<option value="">Select Role</option>';
-        roleContainer.appendChild(roleSelect);
-        roleSelect.addEventListener('change', () => {
-          const val = roleSelect.value ? `^${roleSelect.value}$` : '';
-          api.column(4).search(val, true, false).draw();
-        });
-        Array.from(new Set(api.column(4).data().toArray())).sort().forEach(d => {
-          const opt = document.createElement('option');
-          opt.value = d;
-          opt.textContent = d.charAt(0).toUpperCase() + d.slice(1);
-          roleSelect.appendChild(opt);
-        });
-      }
-
-      // Status filter (column 5)
-      const statusContainer = document.querySelector('.user_status');
-      if (statusContainer) {
-        const statusSelect = document.createElement('select');
-        statusSelect.id = 'UserStatus';
-        statusSelect.className = 'form-select text-capitalize';
-        statusSelect.innerHTML = '<option value="">Select Status</option>';
-        statusContainer.appendChild(statusSelect);
-        statusSelect.addEventListener('change', () => {
-          // Search against rendered text (badge label)
-          const val = statusSelect.value ? `^${statusSelect.value}$` : '';
-          api.column(5).search(val, true, false).draw();
-        });
-        Array.from(new Set(api.column(5).data().toArray())).sort().forEach(d => {
-          const obj = statusObj[d] || { title: d };
-          const opt = document.createElement('option');
-          opt.value = obj.title;
-          opt.textContent = obj.title;
-          statusSelect.appendChild(opt);
-        });
-      }
-    }
+    responsive: false,
   });
 
-  // Delete row (client-side only for now)
-  function deleteRecord(event) {
-    let row = document.querySelector('.dtr-expanded');
-    if (event) { row = event.target.closest('tr'); }
-    if (row) { dt_user.row(row).remove().draw(); }
-  }
+  // Loading indicator — Notiflix pulse block on the table card
+  dt_user.on('preXhr.dt', function () {
+    Block.pulse('.card-datatable');
+  });
 
-  function bindDeleteEvent() {
-    const table = document.querySelector('.datatables-users');
-    const modal = document.querySelector('.dtr-bs-modal');
+  dt_user.on('xhr.dt', function () {
+    Block.remove('.card-datatable');
+  });
 
-    if (table && table.classList.contains('collapsed')) {
-      modal?.addEventListener('click', function (e) {
-        if (e.target.closest('.delete-record')) {
-          deleteRecord();
-          modal.querySelector('.btn-close')?.click();
+  // Filters
+  let searchTimeout;
+  document.getElementById('usersSearch').addEventListener('input', function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function () { dt_user.ajax.reload(null, true); }, 500);
+  });
+
+  document.getElementById('filterRole').addEventListener('change', function () {
+    dt_user.ajax.reload(null, true);
+  });
+
+  document.getElementById('filterStatus').addEventListener('change', function () {
+    dt_user.ajax.reload(null, true);
+  });
+
+  // Status change — delegated click on the table wrapper
+  const confirmTextMap = {
+    active:  'Sure you want to change status to <span class="text-danger fw-medium">Blocked</span>?',
+    blocked: 'Sure you want to change status to <span class="text-success fw-medium">Active</span>?',
+    pending: 'Sure you want to change status to <span class="text-success fw-medium">Active</span>?'
+  };
+
+  dt_user_table.addEventListener('click', function (e) {
+    const btn = e.target.closest('.status-toggle-btn');
+    if (!btn) { return; }
+
+    const userId        = btn.dataset.userId;
+    const currentStatus = btn.dataset.currentStatus;
+    const confirmHtml   = confirmTextMap[currentStatus];
+    const dtRow         = dt_user.row(btn.closest('tr'));
+
+    if (!confirmHtml) { return; }
+
+    Swal.fire({
+      title: 'Confirm Action',
+      html: confirmHtml,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, change it',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        confirmButton: 'btn btn-primary me-3',
+        cancelButton:  'btn btn-label-secondary'
+      },
+      buttonsStyling: false
+    }).then(function (result) {
+      if (!result.isConfirmed) { return; }
+
+      fetch('/User/UpdateUserStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:   'id=' + encodeURIComponent(userId)
+      }).then(function (res) {
+        if (res.ok) {
+          res.json().then(function (body) {
+            const rowData = dtRow.data();
+            rowData.status = body.status;
+            dtRow.data(rowData).draw(false);
+          });
+          Swal.fire({
+            title: 'Done!',
+            text: 'User status has been updated.',
+            icon: 'success',
+            customClass: { confirmButton: 'btn btn-primary' },
+            buttonsStyling: false
+          });
+        } else if (res.status === 400) {
+          Swal.fire({ title: 'Not allowed', text: 'You cannot change your own status.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+        } else {
+          Swal.fire({ title: 'Error', text: 'Failed to update status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
         }
       });
-    } else {
-      table?.querySelector('tbody')?.addEventListener('click', function (e) {
-        if (e.target.closest('.delete-record')) { deleteRecord(e); }
-      });
-    }
-  }
-
-  bindDeleteEvent();
-  document.addEventListener('show.bs.modal', e => { if (e.target.classList.contains('dtr-bs-modal')) { bindDeleteEvent(); } });
-  document.addEventListener('hide.bs.modal', e => { if (e.target.classList.contains('dtr-bs-modal')) { bindDeleteEvent(); } });
+    });
+  });
 
   // Layout tweaks (same as template)
   setTimeout(() => {
@@ -372,41 +307,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, 100);
 
-  // Add New User — phone mask & form validation
-  const phoneMaskList = document.querySelectorAll('.phone-mask');
-  const addNewUserForm = document.getElementById('addNewUserForm');
-
-  if (phoneMaskList.length) {
-    phoneMaskList.forEach(phoneMask => {
-      phoneMask.addEventListener('input', e => {
-        const clean = e.target.value.replace(/\D/g, '');
-        phoneMask.value = formatGeneral(clean, { blocks: [3, 3, 4], delimiters: [' ', ' '] });
-      });
-      registerCursorTracker({ input: phoneMask, delimiter: ' ' });
-    });
-  }
-
-  if (addNewUserForm) {
-    FormValidation.formValidation(addNewUserForm, {
-      fields: {
-        userName: {
-          validators: {
-            notEmpty: { message: 'Please enter a full name' }
-          }
-        },
-        userEmail: {
-          validators: {
-            notEmpty:     { message: 'Please enter an email address' },
-            emailAddress: { message: 'The value is not a valid email address' }
-          }
-        }
-      },
-      plugins: {
-        trigger:      new FormValidation.plugins.Trigger(),
-        bootstrap5:   new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: () => '.form-control-validation' }),
-        submitButton: new FormValidation.plugins.SubmitButton(),
-        autoFocus:    new FormValidation.plugins.AutoFocus()
-      }
-    });
-  }
 });

@@ -43,7 +43,7 @@ namespace Bewegdeal.Data.Repositories
         {
             var query = _context.References.AsQueryable();
 
-            if (filter.Id is not null)
+            if (!string.IsNullOrWhiteSpace(filter.Id))
             {
                 query = query.Where(r => r.Id == filter.Id);
             }
