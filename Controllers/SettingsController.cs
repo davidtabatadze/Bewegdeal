@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
-[RequireLogin]
+[RequireAdmin]
 public class SettingsController(
     ISettingsRepository settingsRepository,
     IFileRepository fileRepository,

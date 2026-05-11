@@ -33,21 +33,24 @@
             </a>
         </li>
 
-        <!-- Users -->
-        <li class='menu-item@(currentPage == "/User/List" ? " active" : "")'>
-            <a asp-controller="User" asp-action="List" class="menu-link">
-                <i class="menu-icon icon-base ri ri-group-line"></i>
-                <div data-i18n="Users">Users</div>
-            </a>
-        </li>
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Administrator)
+        {
+            <!-- Users -->
+            <li class='menu-item@(currentPage == "/User/List" ? " active" : "")'>
+                <a asp-controller="User" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-group-line"></i>
+                    <div data-i18n="Users">Users</div>
+                </a>
+            </li>
 
-        <!-- Settings -->
-        <li class='menu-item@(currentPage == "/Settings" || currentPage == "/Settings/Index" ? " active" : "")'>
-            <a asp-controller="Settings" asp-action="Index" class="menu-link">
-                <i class="menu-icon icon-base ri ri-settings-4-line"></i>
-                <div data-i18n="Settings">Settings</div>
-            </a>
-        </li>
+            <!-- Settings -->
+            <li class='menu-item@(currentPage == "/Settings" || currentPage == "/Settings/Index" ? " active" : "")'>
+                <a asp-controller="Settings" asp-action="Index" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-settings-4-line"></i>
+                    <div data-i18n="Settings">Settings</div>
+                </a>
+            </li>
+        }
 
     </ul>
 </aside>

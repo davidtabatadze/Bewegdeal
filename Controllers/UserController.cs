@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireLogin]
+    [RequireAdmin]
     public class UserController(IUserRepository userRepository) : Controller
     {
         public async Task<IActionResult> List()

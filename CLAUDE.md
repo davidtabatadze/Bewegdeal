@@ -26,7 +26,7 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 ### `_HomeLayout` — admin/app pages
 - Location: `Views/Shared/_HomeLayout.cshtml`
-- Used by: `Home/Index`, `Home/Settings`, `User/List`
+- Used by: `Home/Index`, `Settings/Index`, `User/List`
 - Loads: Inter font, iconify-icons, node-waves, pickr-themes, core.css, demo.css, perfect-scrollbar.css, site.css, VendorStyles/PageStyles, then head scripts (helpers.js, **no template-customizer**, config.js)
 - Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts
 - Renders: vertical menu → `_NavbarHome` → body → `_FooterHome`
@@ -82,7 +82,8 @@ Views/
 - `HomeController` — Dashboard (`Index`) only; no repository dependency
 - `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
 - `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
-- `SettingsController` — Settings (`Index`), Terms upload (`SaveTerms`), request config (`SaveRequest`)
+- `SettingsController` — Settings (`Index`), Terms upload (`SaveTermAndConditionSettings`), request config (`SaveRequestSettings`); **admin only**
+- `FileController` — file download (`Download`); no auth required — files may be public
 
 ## Account Views
 
@@ -93,9 +94,23 @@ They share the same visual shell: `authentication-wrapper authentication-basic`,
 - `Register.cshtml` — 3-step bs-stepper (max-width: 740px); steps: **Role → General → Account**. Driven by `wwwroot/js/pages-auth-multisteps.js`
   - Step 1 `#roleSelectionValidation`: Customer/Company radio cards, no default selection, FormValidation `notEmpty` on `role`
   - Step 2 `#personalInfoValidation`: roleIndicator badge in header; fields: Name (required always), Phone (required always), IdentificationNumber + Address (required for Company only). Manual `is-invalid` pattern for phone/id/address — NOT in FormValidation
-  - Step 3 `#accountDetailsValidation`: Email, agreeTerms checkbox (links to `/terms`), Password, ConfirmPassword, `#servicesSection` (Company only, d-none toggle, 2×2 grid: Moving/Junk/Pickup/Vehicle, at least one required), `#companyTermsUpload` (Company only, d-none toggle, PDF only, not mandatory)
+  - Step 3 `#accountDetailsValidation`: Email, agreeTerms checkbox (T&C link is dynamic — loaded from Settings via `ViewBag.TermsFileKey`, opens `/File/Download/{key}` in a new tab; renders as plain `<span>` if no file is configured), Password, ConfirmPassword, `#servicesSection` (Company only, d-none toggle, 2×2 grid: Moving/Junk/Pickup/Vehicle, at least one required), `#companyTermsUpload` (Company only, d-none toggle, PDF only, not mandatory)
 - `ForgotPassword.cshtml` — single email field, back to login link
 - `VerifyEmail.cshtml` — 6-digit OTP input, driven by pages-auth-two-steps.js
+
+## Settings Page
+
+`Views/Settings/Index.cshtml` — two independent cards, each with its own `<form>` and Save button. Admin only.
+
+**Terms & Conditions card** (`POST SaveTermAndConditionSettings`):
+- Shows current file as a bold link (if one exists) → `<hr>` separator → file upload input + warning alert; all centered via `align-items-center`
+- File upload: PDF only (`FileTypeEnum.PDF`); replaces the previous file via `fileService.Create(..., replaceId)`
+- Success/error feedback via `TempData` (survives the redirect)
+
+**Request card** (`POST SaveRequestSettings`):
+- Three visual groups separated by `<hr class="my-6 mx-n4" />`: Negotiation Minutes / Image settings / Video settings
+- All inputs are `type="number"`, `col-auto` with fixed `width: 200px`, centered via `justify-content-center`
+- Controller rejects any value `<= 0` — all fields must be greater than zero
 
 ## Landing Page Sections
 
@@ -113,10 +128,13 @@ Navbar links (`_NavbarLanding.cshtml`): Home (tag helper), Services (`#services`
 
 Menu items are hardcoded in `_VerticalMenu.cshtml`. Active state is determined server-side by comparing `ViewContext.HttpContext.Request.Path`.
 
+**Users** and **Settings** items are wrapped in `@if (Context.Session.GetString("UserRole") == UserRoleEnum.Administrator)` — they are invisible to non-admin users.
+
 To add a menu item:
 1. Add action to the appropriate controller (create a new dedicated controller if the feature is distinct)
 2. Create the view with `Layout = "_HomeLayout"`
 3. Add `<li>` entry to `_VerticalMenu.cshtml` with the correct path check (`ViewContext.HttpContext.Request.Path == "/Controller/Action"`)
+4. Wrap in the admin `@if` block if the page is admin-only
 
 ## Menu Behavior
 
@@ -157,6 +175,20 @@ To add a menu item:
 - **Always use `{}` for all control flow blocks** — even single-line `if`, `foreach`, `for`, `while`, `using` bodies
 - **Never pass explicit `StringComparison`** — rely on the default (`Ordinal`, case-sensitive); only deviate when culture-aware comparison is genuinely needed
 
+### Access Control
+
+Two action filter attributes in `Filters/`:
+
+| Attribute | Check | On fail |
+|-----------|-------|---------|
+| `[RequireLogin]` | Session has `UserId` | Redirect → `Account/Login` |
+| `[RequireAdmin]` | Logged in **and** `UserRole == "administrator"` | Not logged in → `Account/Login`; wrong role → `Home/Index` |
+
+- `HomeController` — `[RequireLogin]` (any logged-in user)
+- `UserController` — `[RequireAdmin]`
+- `SettingsController` — `[RequireAdmin]`
+- `AccountController`, `FileController`, `LandingController` — no attribute (public)
+
 ### Project Structure
 
 ```
@@ -176,13 +208,13 @@ Data/
 ├── Repositories/
 │   ├── IUserRepository.cs       # Get, Load, Count, Create, Update, SetUserStatus
 │   ├── IReferenceRepository.cs  # Get, Load, Create, Update
-│   ├── IFileRepository.cs       # Get(FileFilter), Create, Delete(id)
+│   ├── IFileRepository.cs       # Get(long id), Create, Delete(long id)
 │   ├── ISettingsRepository.cs   # Get(), Update(entity)
 │   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (2 admin users)
 │   │                            #   private ApplyFilters helper shared by Count and Load
 │   ├── ReferenceRepository.cs   # EF Core impl + IRepositorySeedable (7 reference rows)
 │   ├── FileRepository.cs        # EF Core impl; no seeding
-│   └── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, all zeroes)
+│   └── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, default values seeded)
 └── SqlContext.cs                # DbContext: Users + References DbSets, EF config, value converters
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
@@ -193,6 +225,9 @@ Enums/
 ├── SortDirectionEnum.cs         # "asc", "desc"
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 └── EmailStatusEnum.cs           # "sent", "failed"
+Filters/
+├── RequireLoginAttribute.cs     # Redirects to Login if no session UserId
+└── RequireAdminAttribute.cs     # Redirects to Login if not logged in; to Home if not administrator
 Models/
 └── GridResultViewModel.cs       # Generic server-side DataTables response envelope
 Services/
@@ -236,7 +271,7 @@ Tools/
 | Field | Type | Notes |
 |-------|------|-------|
 | Id | long | PK, `ValueGeneratedNever()` — always 1 |
-| TermsAndConditionsFileId | long? | FK to Files — platform T&C PDF |
+| TermsAndConditionsFileId | long | FK to Files — platform T&C PDF; required, seeded to 1 |
 | RequestNegotiationMinutes | short | SMALLINT |
 | RequestImageMaxCount | short | SMALLINT |
 | RequestImageMaxSize | short | SMALLINT, in MB |
