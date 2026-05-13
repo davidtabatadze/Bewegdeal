@@ -6,6 +6,6 @@ namespace Bewegdeal.Controllers
     [RequireLogin]
     public class HomeController : Controller
     {
-        public IActionResult Index() => View();
+        public IActionResult Index() => RedirectToAction("Index", "Dashboard");
     }
 }

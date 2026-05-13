@@ -26,7 +26,7 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 ### `_HomeLayout` — admin/app pages
 - Location: `Views/Shared/_HomeLayout.cshtml`
-- Used by: `Home/Index`, `Settings/Index`, `User/List`
+- Used by: `Dashboard/Admin`, `Dashboard/Company`, `Dashboard/Customer`, `Settings/Index`, `User/List`
 - Loads: Inter font, iconify-icons, node-waves, pickr-themes, core.css, demo.css, perfect-scrollbar.css, site.css, VendorStyles/PageStyles, then head scripts (helpers.js, **no template-customizer**, config.js)
 - Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts
 - Renders: vertical menu → `_NavbarHome` → body → `_FooterHome`
@@ -45,7 +45,8 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 Default route: `{controller=Landing}/{action=Index}` → public landing page at `/`
 
 Admin pages:
-- `/Home` or `/Home/Index` → Dashboard
+- `/Dashboard` or `/Dashboard/Index` → Dashboard (role-dispatched: Admin / Company / Customer view)
+- `/Home` or `/Home/Index` → redirects to `/Dashboard`
 - `/Settings` or `/Settings/Index` → Settings
 - `/User/List` → Users list
 
@@ -79,7 +80,8 @@ Views/
 ## Controllers
 
 - `LandingController` — public landing page
-- `HomeController` — Dashboard (`Index`) only; no repository dependency
+- `HomeController` — redirects `Index` → `Dashboard/Index`; kept for backwards-compatible `/Home` URL
+- `DashboardController` — `Index()` dispatches to `Views/Dashboard/Admin`, `Company`, or `Customer` based on session role
 - `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
 - `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
 - `SettingsController` — Settings (`Index`), Terms upload (`SaveTermAndConditionSettings`), request config (`SaveRequestSettings`); **admin only**
