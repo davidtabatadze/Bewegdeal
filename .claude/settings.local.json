@@ -38,7 +38,16 @@
       "WebFetch(domain:datatables.net)",
       "Bash(Get-ChildItem -Path \"C:\\\\Software Templates\\\\Materio\\\\AspnetCoreMvcFull\\\\wwwroot\\\\js\" -File -Recurse)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Users.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\User\\\\Users.cshtml\")"
+      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Users.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\User\\\\Users.cshtml\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Software Templates\\\\Materio\\\\AspnetCoreMvcFull\" -Recurse -Filter \"*.json\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Admin.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Admin.cshtml\")",
+      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Company.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Company.cshtml\")",
+      "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Customer.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Customer.cshtml\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\" -Force)"
     ]
   }
 }
