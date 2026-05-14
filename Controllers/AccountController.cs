@@ -142,42 +142,34 @@ public class AccountController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> ResetPassword(string token, string password, string confirmPassword)
+    public async Task<IActionResult> ResetPassword(string token, string password)
     {
         token = token ?? "-";
         ViewBag.Token = token;
 
         // load cache
-        var cacheKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token);
-        var email = cache.Get<string>(cacheKey);
+        var tokenKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token);
+        var email = cache.Get<string>(tokenKey) ?? "-";
+        var emailKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, email);
+        var lastToken = cache.Get<string>(emailKey) ?? "-";
+
+        // clear cache
+        cache.Remove(tokenKey);
+        cache.Remove(emailKey);
 
         // load user
-        var user = await userRepository.Get(new UserFilter { Email = email ?? "-" });
+        var user = await userRepository.Get(new UserFilter { Email = email });
 
         // validate
-        if (user is null)
+        if (user is null || lastToken != token)
         {
             TempData["ForgotError"] = AnnotationEnum.Account.ResetPassword.Expired;
             return RedirectToAction(nameof(ForgotPassword));
         }
 
-        // validate passwords
-        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
-        {
-            ViewBag.Error = AnnotationEnum.Account.ResetPassword.PasswordLength;
-            return View();
-        }
-
-        if (password != confirmPassword)
-        {
-            ViewBag.Error = AnnotationEnum.Account.ResetPassword.PasswordMatch;
-            return View();
-        }
-
         // update password and clear token
         var (hash, salt) = PasswordTool.HashPassword(password);
         await userRepository.UpdatePassword(user.Id, hash, salt);
-        cache.Remove(cacheKey);
 
         TempData["LoginSuccess"] = AnnotationEnum.Account.ResetPassword.Success;
         return RedirectToAction(nameof(Login));
@@ -391,10 +383,15 @@ public class AccountController(
         var tokenBytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
         var token = Convert.ToHexString(tokenBytes).ToLower();
 
-        // cache the token
+        // cache 
         cache.Set(
             CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token),
             email,
+            TimeSpan.FromMinutes(ConstantEnum.ResetPasswordTimeout)
+        );
+        cache.Set(
+            CacheKeyTool.Get(CacheKeyEnum.PasswordReset, email),
+            token,
             TimeSpan.FromMinutes(ConstantEnum.ResetPasswordTimeout)
         );
 

@@ -19,8 +19,6 @@ namespace Bewegdeal.Enums
             public class ResetPassword
             {
                 public const string Expired = "Your password reset link has expired or is invalid. Please request a new one.";
-                public const string PasswordLength = "Password must be at least 6 characters.";
-                public const string PasswordMatch = "Passwords do not match.";
                 public const string Success = "Your password has been reset. You can now log in.";
             }
             public class VerifyEmail
