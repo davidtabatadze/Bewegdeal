@@ -29,6 +29,12 @@
             new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
+    @if (ViewBag.Success is string success)
+    {
+        <script>
+            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(success));
+        </script>
+    }
 }
 
 <div class="position-relative">
@@ -47,14 +53,9 @@
                 <div class="card-body mt-1">
                     <h4 class="mb-1">Two Step Verification 💬</h4>
                     <p class="text-start mb-1">
-                        We sent a verification code to <strong>@ViewBag.Email</strong>. Enter the code from the email in the field below.
+                        We have sent a verification code to <strong>@ViewBag.Email</strong>
                     </p>
-                    <p class="mb-5 text-muted small">The code expires in 10 minutes.</p>
-
-                    @if (ViewBag.Success is string success)
-                    {
-                        <div class="alert alert-success mb-4">@success</div>
-                    }
+                    <p class="mb-5 text-muted small">The code expires in @Bewegdeal.Enums.ConstantEnum.EmailVerificationTimeout minutes.</p>
 
                     <p class="mb-0">Type your 6 digit security code</p>
 
@@ -74,9 +75,13 @@
                         <button class="btn btn-primary d-grid w-100 mb-5">Verify my account</button>
                     </form>
 
+                    <form id="resendForm" method="post" asp-controller="Account" asp-action="VerifyResend">
+                        <input type="hidden" name="email" value="@ViewBag.Email" />
+                    </form>
+
                     <div class="text-center">
                         Didn't get the code?
-                        <a href="/Account/VerifyResend"> Resend </a>
+                        <a href="javascript:void(0);" onclick="document.getElementById('resendForm').submit()"> Resend </a>
                     </div>
                 </div>
             </div>

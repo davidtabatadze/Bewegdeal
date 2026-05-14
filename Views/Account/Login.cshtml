@@ -27,6 +27,12 @@
             new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
+    @if (TempData["LoginSuccess"] is string loginSuccess)
+    {
+        <script>
+            new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(loginSuccess));
+        </script>
+    }
 }
 
 <div class="position-relative">

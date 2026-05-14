@@ -36,5 +36,8 @@ namespace Bewegdeal.Data.Repositories
 
         /// <summary>Updates only the <c>Status</c> column for the given user ID.</summary>
         Task SetUserStatus(long id, string status);
+
+        /// <summary>Updates the <c>Password</c> and <c>Salt</c> columns for the given user ID.</summary>
+        Task UpdatePassword(long id, string hash, string salt);
     }
 }

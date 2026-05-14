@@ -19,8 +19,10 @@ namespace Bewegdeal.Data.Repositories
         {
             var rows = new[]
             {
-                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",          Mobile = "+4369910433340", Password = "asdAsd123" },
-                new UserEntity { Id = 2, Name = "David Tabatadze", Email = "david.tabatadze@outlook.com", Mobile = "+995599438038", Password = "asdAsd123" },
+                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Mobile = "+4369910433340", Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Company },
             };
 
             foreach (var row in rows)
@@ -35,7 +37,7 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new UserEntity
                 {
                     Id = row.Id,
-                    Role = UserRoleEnum.Administrator,
+                    Role = row.Role,
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
@@ -143,10 +145,19 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task SetUserStatus(long id, string status)
         {
-            // TODO: if does not exist?
             await _context.Users
                 .Where(u => u.Id == id)
                 .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
+        }
+
+        public async Task UpdatePassword(long id, string hash, string salt)
+        {
+            await _context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.Password, hash)
+                    .SetProperty(u => u.Salt, salt)
+                );
         }
     }
 }

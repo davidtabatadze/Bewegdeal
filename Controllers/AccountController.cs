@@ -40,7 +40,7 @@ public class AccountController(
         // verify user existence and password
         if (user is null || !PasswordTool.Verify(password, user.Password, user.Salt))
         {
-            ViewBag.Error = "Invalid email or password.";
+            ViewBag.Error = AnnotationEnum.Account.Login.Credentials; //OK
             return View();
         }
 
@@ -49,14 +49,14 @@ public class AccountController(
         {
 
             case UserStatusEnum.Blocked:
-                ViewBag.Error = "Your account has been blocked. Please, contact support.";
+                ViewBag.Error = AnnotationEnum.Account.Login.Blocked; //OK
                 return View();
 
             case UserStatusEnum.Pending:
-                ViewBag.Error = "Your account is pending approval. Please, wait for confirmation.";
+                ViewBag.Error = AnnotationEnum.Account.Login.Pending; //OK
                 return View();
 
-            case UserStatusEnum.Unverified:
+            case UserStatusEnum.Unverified: //OK
                 return RedirectToAction(nameof(VerifyEmail), new { email = user.Email });
 
         }
@@ -107,6 +107,82 @@ public class AccountController(
     [HttpGet]
     public IActionResult ForgotPassword() => View();
 
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        email = (email ?? "").Trim();
+
+        var user = await userRepository.Get(new UserFilter { Email = email });
+
+        if (user is not null)
+        {
+            // send verification email
+            var mailError = await SendResetEmail(user.Email, user.Name);
+            if (mailError is not null)
+            {
+                TempData["ForgotError"] = mailError;
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+        }
+
+        // always show success — never reveal whether an email exists
+        TempData["ForgotSuccess"] = AnnotationEnum.Account.ForgotPassword.Success;
+        return RedirectToAction(nameof(ForgotPassword));
+    }
+
+    #endregion
+
+    #region Reset Password
+
+    [HttpGet]
+    public IActionResult ResetPassword(string token)
+    {
+        ViewBag.Token = token;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string token, string password, string confirmPassword)
+    {
+        token = token ?? "-";
+        ViewBag.Token = token;
+
+        // load cache
+        var cacheKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token);
+        var email = cache.Get<string>(cacheKey);
+
+        // load user
+        var user = await userRepository.Get(new UserFilter { Email = email ?? "-" });
+
+        // validate
+        if (user is null)
+        {
+            TempData["ForgotError"] = AnnotationEnum.Account.ResetPassword.Expired;
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        // validate passwords
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+        {
+            ViewBag.Error = AnnotationEnum.Account.ResetPassword.PasswordLength;
+            return View();
+        }
+
+        if (password != confirmPassword)
+        {
+            ViewBag.Error = AnnotationEnum.Account.ResetPassword.PasswordMatch;
+            return View();
+        }
+
+        // update password and clear token
+        var (hash, salt) = PasswordTool.HashPassword(password);
+        await userRepository.UpdatePassword(user.Id, hash, salt);
+        cache.Remove(cacheKey);
+
+        TempData["LoginSuccess"] = AnnotationEnum.Account.ResetPassword.Success;
+        return RedirectToAction(nameof(Login));
+    }
+
     #endregion
 
     #region Verify Email
@@ -127,21 +203,21 @@ public class AccountController(
         ViewBag.Email = email;
 
         // seek one time code
-        var oneTimeCodeCacheKey = CacheKeyTool.Get(CacheKeyEnum.VerificationEmail, email);
+        var oneTimeCodeCacheKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
         var oneTimeCode = cache.Get<string>(oneTimeCodeCacheKey);
         cache.Remove(oneTimeCodeCacheKey);
 
         // no code? error
         if (oneTimeCode is null)
         {
-            ViewBag.Error = "Verification code has expired. Please, request a new one.";
+            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Expired; //OK
             return View();
         }
 
         // wrong input? error
         if (oneTimeCode != otp)
         {
-            ViewBag.Error = "Invalid verification code. Please, reenter or request a new one.";
+            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Invalid; //OK
             return View();
         }
 
@@ -157,6 +233,7 @@ public class AccountController(
         }
 
         // all good
+        TempData["LoginSuccess"] = AnnotationEnum.Account.VerifyEmail.Success;
         return RedirectToAction(nameof(Login));
     }
 
@@ -172,11 +249,11 @@ public class AccountController(
         if (mailError is not null)
         {
             ViewBag.Error = mailError;
-            return View();
+            return View("VerifyEmail");
         }
 
-        // all good        
-        ViewBag.Success = "A new verification code has been sent to your email.";
+        // all good
+        ViewBag.Success = AnnotationEnum.Account.VerifyEmail.Resent; //OK
         return View("VerifyEmail");
     }
 
@@ -211,7 +288,7 @@ public class AccountController(
         var existing = await userRepository.Get(new UserFilter { Email = model.Email });
         if (existing is not null)
         {
-            ViewBag.Error = "An account with this email address already exists.";
+            ViewBag.Error = AnnotationEnum.Account.Register.Exists; //OK
             return View(model);
         }
 
@@ -271,13 +348,6 @@ public class AccountController(
 
     #endregion
 
-    /// <summary>
-    /// Sends a verification email containing a one-time code to the specified email address.
-    /// </summary>
-    /// <remarks>The verification code is valid for 10 minutes. If the email cannot be sent, the returned
-    /// error message can be displayed to the user or logged for troubleshooting.</remarks>
-    /// <param name="email">The email address to which the verification code will be sent. Cannot be null or empty.</param>
-    /// <returns>An empty string if the email was sent successfully; otherwise, an error message describing the failure.</returns>
     private async Task<string?> SendVerificationEmail(string email)
     {
         // generate one-time code
@@ -285,9 +355,11 @@ public class AccountController(
 
         // cache the code for later verification
         cache.Set(
-            CacheKeyTool.Get(CacheKeyEnum.VerificationEmail, email),
+            CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email),
             oneTimeCode,
-            TimeSpan.FromMinutes(10)
+            TimeSpan.FromMinutes(
+                Convert.ToInt64(ConstantEnum.EmailVerificationTimeout)
+            )
         );
 
         // send email
@@ -298,7 +370,7 @@ public class AccountController(
             <p>Hello,</p>
             <p>Your Bewegdeal verification code is:</p>
             <p style="font-size:28px;font-weight:bold;letter-spacing:6px">{oneTimeCode}</p>
-            <p>This code expires in <strong>10 minutes</strong>.</p>
+            <p>This code expires in <strong>{ConstantEnum.EmailVerificationTimeout} minutes</strong>.</p>
             <p>If you did not register on Bewegdeal, please ignore this email.</p>
             """
         );
@@ -310,7 +382,46 @@ public class AccountController(
         }
 
         // something went wrong
-        return "We are sorry, we are unable to send you a verification email right now. Please, try again later or contact the site administration.";
+        return AnnotationEnum.Account.Email.Verification;
+    }
+
+    private async Task<string?> SendResetEmail(string email, string name)
+    {
+        // generate a token
+        var tokenBytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
+        var token = Convert.ToHexString(tokenBytes).ToLower();
+
+        // cache the token
+        cache.Set(
+            CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token),
+            email,
+            TimeSpan.FromMinutes(ConstantEnum.ResetPasswordTimeout)
+        );
+
+        // build reset link
+        var resetLink = Url.Action(nameof(ResetPassword), "Account", new { token }, Request.Scheme);
+
+        // send email
+        var result = await BrevoTool.Send(
+            email,
+            "Reset your Bewegdeal password",
+            $"""
+            <p>Hello {name},</p>
+            <p>We received a request to reset the password for your Bewegdeal account.</p>
+            <p><a href="{resetLink}" style="font-size:16px;font-weight:bold">Reset Password</a></p>
+            <p>This link expires in <strong>{ConstantEnum.ResetPasswordTimeout} minutes</strong>.</p>
+            <p>If you did not request a password reset, you can safely ignore this email.</p>
+            """
+        );
+
+        // all good
+        if (result == EmailStatusEnum.Sent)
+        {
+            return null;
+        }
+
+        // something went wrong
+        return AnnotationEnum.Account.Email.Reset;
     }
 
 }

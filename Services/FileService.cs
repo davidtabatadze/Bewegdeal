@@ -13,7 +13,7 @@ namespace Bewegdeal.Services
             {
                 return (
                     null,
-                    $"Only {string.Join(", ", allowedMimeTypes.Select(m => m.Split('/').Last().ToUpper()))} files are accepted."
+                    $"Invalid file type(s) uploaded. Accepted type(s): {string.Join(", ", allowedMimeTypes.Select(m => m.Split('/').Last().ToUpper()))}."
                 );
             }
 
