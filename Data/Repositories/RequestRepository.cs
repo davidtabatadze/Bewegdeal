@@ -1,4 +1,3 @@
-using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
 
 namespace Bewegdeal.Data.Repositories

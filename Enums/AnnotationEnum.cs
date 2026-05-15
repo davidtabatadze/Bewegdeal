@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-
-namespace Bewegdeal.Enums
+﻿namespace Bewegdeal.Enums
 {
     public class AnnotationEnum
     {
