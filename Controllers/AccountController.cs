@@ -298,7 +298,7 @@ public class AccountController(
         long? termsFileId = null;
         if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await fileService.Create(model.TermsFile, null, FileTypeEnum.PDF);
+            var file = await fileService.Create(model.TermsFile, null, null, [FileTypeEnum.PDF]);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;

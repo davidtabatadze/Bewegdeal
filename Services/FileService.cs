@@ -6,14 +6,24 @@ namespace Bewegdeal.Services
 {
     public class FileService(IFileStorageTool storageTool, IFileRepository fileRepository)
     {
-        public async Task<(long? Id, string? Error)> Create(IFormFile file, long? replaceId, params string[] allowedMimeTypes)
+
+        public async Task<(long? Id, string? Error)> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
         {
-            // validate
-            if (allowedMimeTypes.Length > 0 && !allowedMimeTypes.Contains(file.ContentType))
+            // validate type
+            if (allowedTypes.Length > 0 && !allowedTypes.Contains(file.ContentType))
             {
                 return (
                     null,
-                    $"Invalid file type(s) uploaded. Accepted type(s): {string.Join(", ", allowedMimeTypes.Select(m => m.Split('/').Last().ToUpper()))}."
+                    $"Invalid file type(s) uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
+                );
+            }
+
+            // validate size
+            if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < file.Length)
+            {
+                return (
+                    null,
+                    $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
                 );
             }
 
@@ -33,11 +43,22 @@ namespace Bewegdeal.Services
             // delete old
             if (replaceId.HasValue)
             {
-                await fileRepository.Delete(replaceId.Value);
+                await Delete(replaceId.Value);
             }
 
             // all good
             return (entity.Id, null);
         }
+
+        public async Task Delete(long id)
+        {
+            var record = await fileRepository.Get(id);
+            if (record is not null)
+            {
+                await fileRepository.Delete(record.Id);
+                await storageTool.Delete(record.Key);
+            }
+        }
+
     }
 }

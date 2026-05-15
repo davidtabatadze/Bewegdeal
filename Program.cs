@@ -61,6 +61,8 @@ namespace Bewegdeal
             builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
             builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
+            builder.Services.AddScoped<IRequestRepository, RequestRepository>();
+            builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
 
             // ── Storage ───────────────────────────────────────────────────────────
             // Files are stored on the local file system.

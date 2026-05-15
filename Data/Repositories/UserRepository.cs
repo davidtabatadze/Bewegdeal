@@ -96,6 +96,32 @@ namespace Bewegdeal.Data.Repositories
             return await query.ToListAsync();
         }
 
+        // ── Write ────────────────────────────────────────────────────────────────
+
+        public async Task<UserEntity> Create(UserEntity user)
+        {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task SetUserStatus(long id, string status)
+        {
+            await _context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
+        }
+
+        public async Task UpdatePassword(long id, string hash, string salt)
+        {
+            await _context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.Password, hash)
+                    .SetProperty(u => u.Salt, salt)
+                );
+        }
+
         // ── Helpers ──────────────────────────────────────────────────────────────
 
         private static IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
@@ -132,32 +158,6 @@ namespace Bewegdeal.Data.Repositories
             }
 
             return query;
-        }
-
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity> Create(UserEntity user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task SetUserStatus(long id, string status)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
-        }
-
-        public async Task UpdatePassword(long id, string hash, string salt)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Password, hash)
-                    .SetProperty(u => u.Salt, salt)
-                );
         }
     }
 }

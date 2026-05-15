@@ -16,6 +16,8 @@ namespace Bewegdeal.Data
         public DbSet<FileEntity> Files => Set<FileEntity>();
         public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
+        public DbSet<RequestEntity> Requests => Set<RequestEntity>();
+        public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
 
         #endregion
 
@@ -88,6 +90,8 @@ namespace Bewegdeal.Data
             ConfigureFiles(modelBuilder);
             ConfigureSettings(modelBuilder);
             ConfigureReferences(modelBuilder);
+            ConfigureRequests(modelBuilder);
+            ConfigureRequestFiles(modelBuilder);
         }
 
         private void ConfigureUsers(ModelBuilder modelBuilder)
@@ -162,6 +166,60 @@ namespace Bewegdeal.Data
 
                 e.Property(r => r.Type).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Name).IsRequired().HasMaxLength(16);
+            });
+        }
+
+        private void ConfigureRequests(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RequestEntity>(e =>
+            {
+                e.ToTable(_prefix + "Requests");
+
+                e.HasKey(r => r.Id);
+                e.Property(r => r.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(r => r.Code).IsUnique();
+                e.HasIndex(r => r.Status);
+                e.HasIndex(r => r.RequesterId);
+                e.HasIndex(r => r.ExecutorId);
+
+                e.Property(r => r.Code).IsRequired();
+                e.Property(r => r.Status).IsRequired().HasMaxLength(16);
+                e.Property(r => r.Service).IsRequired().HasMaxLength(16);
+                e.Property(r => r.Title).IsRequired().HasMaxLength(128);
+                e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
+                e.Property(r => r.SourceAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.DestinationAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.RequesterId).IsRequired();
+                e.Property(r => r.ExecutorId).IsRequired(false);
+                e.Property(r => r.ProposedCost).IsRequired().HasPrecision(18, 2);
+                e.Property(r => r.ProposedCurrency).IsRequired().HasMaxLength(4);
+                e.Property(r => r.ProposedASAP).IsRequired();
+                e.Property(r => r.ProposedDate).IsRequired(false);
+                e.Property(r => r.ProposedTime).IsRequired(false);
+                e.Property(r => r.AgreementDate).IsRequired(false);
+                e.Property(r => r.AgreedCost).IsRequired(false).HasPrecision(18, 2);
+                e.Property(r => r.AgreedCurrency).IsRequired(false).HasMaxLength(4);
+                e.Property(r => r.AgreedDate).IsRequired(false);
+                e.Property(r => r.AgreedTime).IsRequired(false);
+            });
+        }
+
+        private void ConfigureRequestFiles(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RequestFileEntity>(e =>
+            {
+                e.ToTable(_prefix + "RequestFiles");
+
+                e.HasKey(f => f.Id);
+                e.Property(f => f.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(f => f.RequestId);
+
+                e.Property(f => f.RequestId).IsRequired();
+                e.Property(f => f.FileId).IsRequired();
+                e.Property(f => f.IsMain).IsRequired();
+                e.Property(f => f.Type).IsRequired().HasMaxLength(8);
             });
         }
 
