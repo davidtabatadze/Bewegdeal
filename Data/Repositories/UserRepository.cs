@@ -23,6 +23,12 @@ namespace Bewegdeal.Data.Repositories
                 new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Administrator },
                 new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Customer },
                 new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Company },
+                
+                new UserEntity { Id = 5, Name = "Gio Admin",    Email = "gio.admin@bewegdeal.at",    Mobile = "+9955995538038",  Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 6, Name = "Gio Customer", Email = "gio.customer@bewegdeal.at", Mobile = "+9955995538038",  Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 7, Name = "Gio Company",  Email = "gio.company@bewegdeal.at",  Mobile = "+9955995538038",  Password = "asdASD123", Role = UserRoleEnum.Company },
+
+
             };
 
             foreach (var row in rows)
