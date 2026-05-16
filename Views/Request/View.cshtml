@@ -8,7 +8,6 @@
 
     ViewData["Title"] = req.Title;
 
-    // Service badge
     var (badge, icon, color, label) = req.Service switch
     {
         ServiceEnum.Moving => ("bg-label-success", "ri-truck-line", "success", "Moving"),
@@ -32,7 +31,6 @@
     <script src="~/js/request-view.js"></script>
 }
 
-<!-- Hour chart  -->
 <div class="card bg-transparent shadow-none border-0 mb-6">
     <div class="card-body row g-6 p-0 pb-4">
         <div class="col-12 col-md-8 card-separator">
@@ -82,8 +80,6 @@
         </div>
     </div>
 </div>
-<!-- Hour chart End  -->
-<!-- Topic and Instructors -->
 <div class="row g-5">
     <div class="col-lg-8">
         <div class="card h-100 bg-transparent shadow-none border-0">
@@ -136,46 +132,42 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-4">
         <div class="card h-100">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <div class="card-title mb-0">
+            <div class="card-header d-flex"> @* m-0 p-3 *@
+                <div class="card-title m-0">
                     <h5 class="m-0 me-2">Details</h5>
                 </div>
-                <div class="dropdown">
-                    <button class="btn text-body-secondary p-0" type="button" id="popularInstructors" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="icon-base ri ri-more-2-line icon-24px"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="popularInstructors">
-                        <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                    </div>
-                </div>
             </div>
-
-            
-
-            <div class="card-body pt-5">
-                <div class="d-none d-lg-flex vehicles-progress-labels mb-5">
-                    <div class="vehicles-progress-label on-the-way-text" style="width: 50%;">On the way</div>
-                    <div class="vehicles-progress-label unloading-text" style="width: 50%;">Unloading</div>
-                </div>
-                <div class="vehicles-overview-progress progress rounded bg-transparent mb-2" style="height: 46px;">
-                    <div class="progress-bar small fw-medium text-start rounded-start bg-lightest text-heading px-1 px-lg-4" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">adkjnawkjdaj  dkajd kwjda kajdna dkjd kj dka d kaj dka d akwd ak dakkakw a kk dkad ad</div>
-                    <div class="progress-bar small fw-medium text-start bg-primary px-1 px-lg-4" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
-                </div>
-            </div>
-
-            <div class="px-5 py-4 border border-start-0 border-end-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-heading text-uppercase">Instructors</small>
-                    <small class="text-heading text-uppercase">courses</small>
-                </div>
-            </div>
-            <div class="card-body pt-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="card-body p-5 pt-0">
+                <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-warning">
+                    <li class="list-group-item flex-fill p-3">
+                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
+                        <address class="text-body mb-0">
+                            <dl class="row mb-0">
+                                <dt class="col-8 fw-normal text-heading">As soon as possible</dt>
+                                <dd class="col-4 text-end"><strong>€</strong>1198.00</dd>
+                            </dl>
+                        </address>
+                    </li>
+                </ul>
+                <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-info">
+                    <li class="list-group-item flex-fill p-3">
+                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
+                        <address class="text-body mb-0">
+                            uawbd awduhawbd awd awudhb a  awsdua bwd wad aud wad auwd awd awud awd aud ad adad adawdadadad
+                        </address>
+                    </li>
+                </ul>
+                <ul class="list-group list-group-horizontal-md mt-1 mb-0 border border-info">
+                    <li class="list-group-item flex-fill p-3">
+                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
+                        <address class="text-body mb-0">
+                            uawbd awduhawbd awd awudhb a  awsdua bwd wad aud wad auwd awd awud awd aud ad adad adawdadadad
+                        </address>
+                    </li>
+                </ul>
+                @* <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="d-flex align-items-center">
                         <div class="avatar avatar me-4">
                             <img src="~/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
@@ -190,60 +182,11 @@
                     <div class="text-end">
                         <h6 class="mb-0">33</h6>
                     </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar me-4">
-                            <img src="~/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                            <div>
-                                <h6 class="mb-1 text-truncate">Bentlee Emblin</h6>
-                                <p class="mb-0 text-truncate">Digital Marketing</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <h6 class="mb-0">52</h6>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar me-4">
-                            <img src="~/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                            <div>
-                                <h6 class="mb-1 text-truncate">Benedetto Rossiter</h6>
-                                <p class="mb-0 text-truncate">UI/UX Design</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <h6 class="mb-0">12</h6>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar me-4">
-                            <img src="~/img/avatars/4.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                            <div>
-                                <h6 class="mb-1 text-truncate">Beverlie Krabbe</h6>
-                                <p class="mb-0 text-truncate">React Native</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <h6 class="mb-0">8</h6>
-                    </div>
-                </div>
+                </div> *@
             </div>
         </div>
     </div>
 </div>
-<!--  Topic and Instructors  End-->
 @if (!string.IsNullOrWhiteSpace(req.Description))
 {
     <div class="row g-5">
