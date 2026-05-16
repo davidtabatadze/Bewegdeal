@@ -2,10 +2,6 @@ using Bewegdeal.Data.Base;
 
 namespace Bewegdeal.Data.Entities
 {
-    /// <summary>
-    /// Represents a row in the Users table. Pure data object — no business logic.
-    /// Role and Status values come from <c>UserRoleEnum</c> and <c>UserStatusEnum</c>.
-    /// </summary>
     public class UserEntity : IEntity
     {
         public long Id { get; set; }

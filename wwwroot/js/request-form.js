@@ -1,5 +1,9 @@
 /**
- * Request Create
+ * Request Create / Edit
+ *
+ * Works for both the Create and Edit views.
+ * The Edit view defines `existingFiles` in an inline <script> block before this file loads.
+ * The Create view does not define it, so it defaults to [].
  */
 
 'use strict';
@@ -8,8 +12,9 @@ Dropzone.autoDiscover = false;
 
 (function () {
 
-  // imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize
-  // are declared as globals by the inline <script> block in PageScripts (before this file loads)
+  // imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize — always defined by the inline <script>.
+  // existingFiles — defined only by the Edit view; defaults to [] on Create.
+  const _existingFiles = (typeof existingFiles !== 'undefined') ? existingFiles : [];
 
   // ── Notyf ─────────────────────────────────────────────────────────────────
   const notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
@@ -35,6 +40,7 @@ Dropzone.autoDiscover = false;
   // ── Combined media Dropzone ───────────────────────────────────────────────
   let mediaDropzone = null;
   let mainImageFile = null;
+  let loadingExisting = _existingFiles.length > 0;
 
   const isImageFile = file => file.type.startsWith('image/');
 
@@ -53,6 +59,17 @@ Dropzone.autoDiscover = false;
 
     mediaDropzone.on('addedfile', function (file) {
       document.getElementById('mediaError')?.classList.add('d-none');
+
+      // Simulate instant upload completion for newly added files so the
+      // progress bar fills and the success mark appears (we never actually
+      // POST through Dropzone — files are collected on form submit).
+      if (!file._existing) {
+        mediaDropzone.emit('uploadprogress', file, 100, file.size);
+        file.status = Dropzone.SUCCESS;
+        mediaDropzone.emit('success', file);
+        mediaDropzone.emit('complete', file);
+      }
+
       if (!isImageFile(file)) { return; }
 
       // Append main badge to image thumbnails only
@@ -65,11 +82,13 @@ Dropzone.autoDiscover = false;
       });
       thumbnail.appendChild(badge);
 
-      // First image → auto-set as main
-      if (!mainImageFile) {
-        setMainFile(file);
-      } else {
-        updateMainBadges();
+      // Don't auto-set main while loading existing files — restored explicitly after
+      if (!loadingExisting) {
+        if (!mainImageFile) {
+          setMainFile(file);
+        } else {
+          updateMainBadges();
+        }
       }
     });
 
@@ -80,6 +99,40 @@ Dropzone.autoDiscover = false;
       }
       updateMainBadges();
     });
+
+    // ── Load existing files as mock entries (Edit only) ─────────────────────
+    _existingFiles.forEach(function (ef) {
+      const mockFile = {
+        name:      ef.fileName,
+        size:      ef.size,
+        type:      ef.type === 'image' ? 'image/jpeg' : 'video/mp4',
+        status:    Dropzone.ADDED,
+        accepted:  true,
+        _existing: true,
+        _fileId:   ef.fileId,
+        _isMain:   ef.isMain
+      };
+      mediaDropzone.files.push(mockFile);
+      mediaDropzone.emit('addedfile', mockFile);
+      if (ef.type === 'image') {
+        mediaDropzone.emit('thumbnail', mockFile, ef.url);
+      }
+      mockFile.status = Dropzone.SUCCESS;
+      mediaDropzone.emit('success', mockFile);
+      mediaDropzone.emit('complete', mockFile);
+    });
+
+    if (_existingFiles.length > 0) {
+      // Restore the main image that was saved on the server
+      const serverMain = mediaDropzone.files.find(f => f._existing && f._isMain && isImageFile(f));
+      if (serverMain) {
+        setMainFile(serverMain);
+      } else {
+        const firstImage = mediaDropzone.files.find(isImageFile);
+        if (firstImage) { setMainFile(firstImage); }
+      }
+      loadingExisting = false;
+    }
   }
 
   function setMainFile(file) {
@@ -90,7 +143,7 @@ Dropzone.autoDiscover = false;
   function updateMainBadges() {
     if (!mediaDropzone) { return; }
     mediaDropzone.files.filter(isImageFile).forEach(function (f) {
-      const badge = f.previewElement.querySelector('.dz-main-badge');
+      const badge = f.previewElement?.querySelector('.dz-main-badge');
       if (!badge) { return; }
       if (f === mainImageFile) {
         badge.textContent = '★ Main';
@@ -104,10 +157,9 @@ Dropzone.autoDiscover = false;
     });
   }
 
-  function getMainImageIndex() {
-    if (!mediaDropzone || !mainImageFile) { return 0; }
-    const images = mediaDropzone.files.filter(isImageFile);
-    const idx = images.indexOf(mainImageFile);
+  function getMainImageIndex(newImageFiles) {
+    if (!mainImageFile || mainImageFile._existing) { return 0; }
+    const idx = newImageFiles.indexOf(mainImageFile);
     return idx >= 0 ? idx : 0;
   }
 
@@ -159,13 +211,11 @@ Dropzone.autoDiscover = false;
 
   const costInput = document.getElementById('proposedCost');
   if (costInput) {
-    // Block characters that make no sense for a currency amount
     costInput.addEventListener('keydown', function (e) {
       if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
         e.preventDefault();
       }
     });
-    // Clamp to max while typing; strip extra decimal places; clear error
     costInput.addEventListener('input', function () {
       costInput.classList.remove('is-invalid');
       const dotIndex = costInput.value.indexOf('.');
@@ -177,7 +227,6 @@ Dropzone.autoDiscover = false;
         costInput.value = 10000;
       }
     });
-    // Clamp to min when leaving the field
     costInput.addEventListener('blur', function () {
       const val = parseFloat(costInput.value);
       if (!isNaN(val) && val < 1) {
@@ -193,8 +242,8 @@ Dropzone.autoDiscover = false;
   });
 
   // ── Form submission ───────────────────────────────────────────────────────
-  const form      = document.getElementById('requestCreateForm');
-  const submitBtn = document.getElementById('btnPlaceRequest');
+  const form      = document.getElementById('requestForm');
+  const submitBtn = document.getElementById('btnSubmitRequest');
   const cancelBtn = document.getElementById('btnCancel');
 
   if (cancelBtn) {
@@ -207,7 +256,7 @@ Dropzone.autoDiscover = false;
     submitBtn.addEventListener('click', async function () {
 
       // ── Clear previous validation errors ────────────────────────────────
-      document.querySelectorAll('#requestCreateForm .is-invalid').forEach(function (el) {
+      document.querySelectorAll('#requestForm .is-invalid').forEach(function (el) {
         el.classList.remove('is-invalid');
       });
       document.getElementById('serviceError').classList.add('d-none');
@@ -216,8 +265,12 @@ Dropzone.autoDiscover = false;
       mediaErrorEl.classList.add('d-none');
 
       // ── Collect files ───────────────────────────────────────────────────
-      const imageFiles = mediaDropzone ? mediaDropzone.files.filter(isImageFile) : [];
-      const videoFiles = mediaDropzone ? mediaDropzone.files.filter(f => !isImageFile(f)) : [];
+      const keptImages  = mediaDropzone ? mediaDropzone.files.filter(f =>  f._existing && isImageFile(f))  : [];
+      const keptVideos  = mediaDropzone ? mediaDropzone.files.filter(f =>  f._existing && !isImageFile(f)) : [];
+      const imageFiles  = mediaDropzone ? mediaDropzone.files.filter(f => !f._existing && isImageFile(f))  : [];
+      const videoFiles  = mediaDropzone ? mediaDropzone.files.filter(f => !f._existing && !isImageFile(f)) : [];
+      const totalImages = keptImages.length + imageFiles.length;
+      const totalVideos = keptVideos.length + videoFiles.length;
 
       // ── Client-side validation ──────────────────────────────────────────
       let hasErrors = false;
@@ -251,11 +304,11 @@ Dropzone.autoDiscover = false;
         hasErrors = true;
       }
 
-      if (imageFiles.length === 0) {
+      if (totalImages === 0) {
         mediaErrorEl.textContent = 'At least one image is required.';
         mediaErrorEl.classList.remove('d-none');
         hasErrors = true;
-      } else if (imageFiles.length > imageMaxCount) {
+      } else if (totalImages > imageMaxCount) {
         mediaErrorEl.textContent = `Maximum ${imageMaxCount} images allowed.`;
         mediaErrorEl.classList.remove('d-none');
         hasErrors = true;
@@ -272,7 +325,7 @@ Dropzone.autoDiscover = false;
       }
 
       if (mediaErrorEl.classList.contains('d-none')) {
-        if (videoFiles.length > videoMaxCount) {
+        if (totalVideos > videoMaxCount) {
           mediaErrorEl.textContent = `Maximum ${videoMaxCount} videos allowed.`;
           mediaErrorEl.classList.remove('d-none');
           hasErrors = true;
@@ -302,17 +355,27 @@ Dropzone.autoDiscover = false;
       }
 
       if (hasErrors) {
-        notyf.error('Please fill all required fields.');
+        notyf.error('Please, fill all required fields.');
         return;
       }
 
       // ── Build FormData ──────────────────────────────────────────────────
       const formData = new FormData(form);
 
+      // Existing files to keep (Edit only; empty on Create — harmless)
+      keptImages.concat(keptVideos).forEach(function (f) {
+        formData.append('keepFileIds', f._fileId);
+      });
+
+      // Main image: existing file or new upload
+      const mainIsExisting = mainImageFile?._existing ?? false;
+      formData.append('keepMainFileId', mainIsExisting ? mainImageFile._fileId : 0);
+
+      // New files
       imageFiles.forEach(function (file) {
         formData.append('images', file, file.name);
       });
-      formData.append('mainImageIndex', getMainImageIndex());
+      formData.append('mainImageIndex', getMainImageIndex(imageFiles));
 
       videoFiles.forEach(function (file) {
         formData.append('videos', file, file.name);

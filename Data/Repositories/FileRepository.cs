@@ -1,33 +1,46 @@
+using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    /// <summary>
-    /// EF Core implementation of <see cref="IFileRepository"/>.
-    /// Scoped per request. Interacts with the database only — no business logic.
-    /// </summary>
     public class FileRepository(SqlContext context) : IFileRepository
     {
-        private readonly SqlContext _context = context;
 
-        public async Task<FileEntity?> Get(long id)
-        {
-            return await _context.Files.FirstOrDefaultAsync(f => f.Id == id);
-        }
+        // ── Write ────────────────────────────────────────────────────────────────
 
         public async Task<FileEntity> Create(FileEntity file)
         {
-            _context.Files.Add(file);
-            await _context.SaveChangesAsync();
+            context.Files.Add(file);
+            await context.SaveChangesAsync();
             return file;
         }
 
+        // ── Read ─────────────────────────────────────────────────────────────────
+
+        public async Task<FileEntity?> Get(long id)
+        {
+            return await context.Files.FirstOrDefaultAsync(f => f.Id == id);
+        }
+
+        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
+        {
+            filter.Ids ??= [0];
+
+            return await context.Files
+                                .Where(i => filter.Ids.Contains(i.Id))
+                                .ToListAsync();
+        }
+
+        // ── Delete ───────────────────────────────────────────────────────────────
+
         public async Task Delete(long id)
         {
-            await _context.Files
+            await context.Files
                 .Where(f => f.Id == id)
                 .ExecuteDeleteAsync();
         }
+
     }
 }

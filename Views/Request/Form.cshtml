@@ -2,8 +2,10 @@
 @using Bewegdeal.Enums
 @{
     Layout = "_HomeLayout";
-    ViewData["Title"] = "New Request";
     var settings = (SettingsEntity)ViewBag.Settings;
+    var req      = ViewBag.Request as RequestEntity;
+    var isEdit   = req is not null;
+    ViewData["Title"] = isEdit ? "Edit Request" : "New Request";
 }
 
 @section VendorStyles {
@@ -22,12 +24,15 @@
 
 @section PageScripts {
     <script>
-        const imageMaxCount = @settings.RequestImageMaxCount;
-        const imageMaxSize  = @settings.RequestImageMaxSize;
-        const videoMaxCount = @settings.RequestVideoMaxCount;
-        const videoMaxSize  = @settings.RequestVideoMaxSize;
+        const imageMaxCount  = @settings.RequestImageMaxCount;
+        const imageMaxSize   = @settings.RequestImageMaxSize;
+        const videoMaxCount  = @settings.RequestVideoMaxCount;
+        const videoMaxSize   = @settings.RequestVideoMaxSize;
+        @if (isEdit) {
+            <text>const existingFiles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Files));</text>
+        }
     </script>
-    <script src="~/js/request-create.js"></script>
+    <script src="~/js/request-form.js"></script>
 }
 
 <div class="row">
@@ -36,15 +41,18 @@
 
             <!-- Sticky header -->
             <div class="card-header sticky-element bg-label-secondary d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
-                <h5 class="card-title mb-sm-0 me-2">New Request</h5>
+                <h5 class="card-title mb-sm-0 me-2">@(isEdit ? "Edit Request" : "New Request")</h5>
                 <div class="action-btns">
                     <button id="btnCancel" type="button" class="btn btn-outline-secondary me-4">Cancel</button>
-                    <button id="btnPlaceRequest" type="button" class="btn btn-primary">Place Request</button>
+                    <button id="btnSubmitRequest" type="button" class="btn btn-primary">@(isEdit ? "Save Changes" : "Place Request")</button>
                 </div>
             </div>
 
             <div class="card-body pt-5">
-                <form id="requestCreateForm" asp-controller="Request" asp-action="Create" method="post">
+                <form id="requestForm" asp-controller="Request" asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                    @if (isEdit) {
+                        <input type="hidden" name="Id" value="@req!.Id" />
+                    }
                     <div class="row">
                         <div class="col-lg-8 mx-auto">
 
@@ -59,7 +67,7 @@
                                                 <span class="custom-option-title mb-1">Moving</span>
                                                 <small>Household or office relocation</small>
                                             </span>
-                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Moving" id="serviceMoving" />
+                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Moving" id="serviceMoving" checked="@(isEdit && req!.Service == ServiceEnum.Moving ? "checked" : null)" />
                                         </label>
                                     </div>
                                 </div>
@@ -71,7 +79,7 @@
                                                 <span class="custom-option-title mb-1">Removal</span>
                                                 <small>Junk and waste removal</small>
                                             </span>
-                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Removal" id="serviceRemoval" />
+                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Removal" id="serviceRemoval" checked="@(isEdit && req!.Service == ServiceEnum.Removal ? "checked" : null)" />
                                         </label>
                                     </div>
                                 </div>
@@ -83,7 +91,7 @@
                                                 <span class="custom-option-title mb-1">Pickup</span>
                                                 <small>Store or warehouse pickup</small>
                                             </span>
-                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Pickup" id="servicePickup" />
+                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Pickup" id="servicePickup" checked="@(isEdit && req!.Service == ServiceEnum.Pickup ? "checked" : null)" />
                                         </label>
                                     </div>
                                 </div>
@@ -95,7 +103,7 @@
                                                 <span class="custom-option-title mb-1">Transport</span>
                                                 <small>Vehicle or cargo transport</small>
                                             </span>
-                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Transport" id="serviceTransport" />
+                                            <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Transport" id="serviceTransport" checked="@(isEdit && req!.Service == ServiceEnum.Transport ? "checked" : null)" />
                                         </label>
                                     </div>
                                 </div>
@@ -109,14 +117,14 @@
                             <div class="row g-6">
                                 <div class="col-12">
                                     <div class="form-floating form-floating-outline">
-                                        <input type="text" id="title" name="title" class="form-control" placeholder="" maxlength="128" />
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="" maxlength="128" value="@(isEdit ? req!.Title : "")" />
                                         <label for="title">Title</label>
                                         <div class="invalid-feedback">Title is required.</div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-floating form-floating-outline">
-                                        <textarea id="description" name="description" class="form-control" placeholder="" style="height: 100px;" maxlength="2048"></textarea>
+                                        <textarea id="description" name="description" class="form-control" placeholder="" style="height: 100px;" maxlength="2048">@(isEdit ? req!.Description : "")</textarea>
                                         <label for="description">Description <span class="text-muted">(optional)</span></label>
                                     </div>
                                 </div>
@@ -145,14 +153,14 @@
                             <div class="row g-6">
                                 <div class="col-12">
                                     <div class="form-floating form-floating-outline">
-                                        <input type="text" id="sourceAddress" name="sourceAddress" class="form-control" placeholder="" maxlength="512" />
+                                        <input type="text" id="sourceAddress" name="sourceAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.SourceAddress : "")" />
                                         <label for="sourceAddress">Source Address</label>
                                         <div class="invalid-feedback">Source address is required.</div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-floating form-floating-outline">
-                                        <input type="text" id="destinationAddress" name="destinationAddress" class="form-control" placeholder="" maxlength="512" />
+                                        <input type="text" id="destinationAddress" name="destinationAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.DestinationAddress : "")" />
                                         <label for="destinationAddress">Destination Address</label>
                                         <div class="invalid-feedback">Destination address is required.</div>
                                     </div>
@@ -167,7 +175,7 @@
                                 <div class="col-auto" style="width: 200px;">
                                     <div class="input-group input-group-merge">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="number" id="proposedCost" name="proposedCost" class="form-control" placeholder="" min="1" max="10000" step="0.01" />
+                                            <input type="number" id="proposedCost" name="proposedCost" class="form-control" placeholder="" min="1" max="10000" step="0.01" value="@(isEdit ? req!.ProposedCost : "")" />
                                             <label for="proposedCost">Cost</label>
                                             <div class="invalid-feedback">Cost is required.</div>
                                         </div>
@@ -182,27 +190,27 @@
                             <h5 class="mb-4">6. Desirable Timing</h5>
                             <div class="mb-4">
                                 <div class="form-check form-check-inline">
-                                    <input name="isASAP" class="form-check-input" type="radio" value="true" id="timingInstant" checked />
+                                    <input name="isASAP" class="form-check-input" type="radio" value="true" id="timingInstant" checked="@(!isEdit || req!.ProposedASAP ? "checked" : null)" />
                                     <label class="form-check-label" for="timingInstant">As soon as possible</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input name="isASAP" class="form-check-input" type="radio" value="false" id="timingSpecified" />
+                                    <input name="isASAP" class="form-check-input" type="radio" value="false" id="timingSpecified" checked="@(isEdit && !req!.ProposedASAP ? "checked" : null)" />
                                     <label class="form-check-label" for="timingSpecified">Specified date and time</label>
                                 </div>
                             </div>
 
-                            <div id="scheduled-fields" class="d-none">
+                            <div id="scheduled-fields" class="@(isEdit && !req!.ProposedASAP ? "" : "d-none")">
                                 <div class="row g-6">
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="text" id="proposedDate" name="proposedDate" class="form-control" placeholder="" />
+                                            <input type="text" id="proposedDate" name="proposedDate" class="form-control" placeholder="" value="@(isEdit ? req!.ProposedDate?.ToString("yyyy-MM-dd") : "")" />
                                             <label for="proposedDate">Date</label>
                                             <div class="invalid-feedback">Please select a date.</div>
                                         </div>
                                     </div>
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="text" id="proposedTime" name="proposedTime" class="form-control" placeholder="" />
+                                            <input type="text" id="proposedTime" name="proposedTime" class="form-control" placeholder="" value="@(isEdit ? req!.ProposedTime?.ToString("HH:mm") : "")" />
                                             <label for="proposedTime">Time</label>
                                             <div class="invalid-feedback">Please select a time.</div>
                                         </div>

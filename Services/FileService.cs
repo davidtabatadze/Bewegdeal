@@ -1,5 +1,5 @@
 ﻿using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Tools;
 
 namespace Bewegdeal.Services

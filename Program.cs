@@ -1,6 +1,7 @@
 using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Middleware;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;

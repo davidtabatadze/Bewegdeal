@@ -1,6 +1,6 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.Services;

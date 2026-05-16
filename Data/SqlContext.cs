@@ -8,7 +8,6 @@ namespace Bewegdeal.Data
 {
     public class SqlContext(DbContextOptions<SqlContext> options, IConfiguration configuration) : DbContext(options)
     {
-        // Table prefix read from Database:TablePrefix in appsettings.json (e.g. "dev_")
         private readonly string _prefix = configuration["Database:TablePrefix"] ?? "";
 
         #region DbSets
@@ -21,11 +20,6 @@ namespace Bewegdeal.Data
 
         #endregion
 
-        /// <summary>
-        /// Ensures the database and all tables exist on startup.
-        /// Uses IF NOT EXISTS for every DDL statement so the method is safe
-        /// to call on every run — existing tables and indexes are never touched.
-        /// </summary>
         public async Task EnsureTablesAsync()
         {
             var database = Database.GetService<IRelationalDatabaseCreator>();
@@ -80,10 +74,6 @@ namespace Bewegdeal.Data
             await connection.CloseAsync();
         }
 
-        /// <summary>
-        /// Called once per application lifetime when EF Core builds the model.
-        /// Each entity gets its own Configure* method for clarity.
-        /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureUsers(modelBuilder);
@@ -116,11 +106,9 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Email).IsRequired().HasMaxLength(32);
                 e.Property(u => u.Mobile).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
-
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
                 e.Property(u => u.TermsFileId).IsRequired(false);
-
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -195,13 +183,29 @@ namespace Bewegdeal.Data
                 e.Property(r => r.ProposedCost).IsRequired().HasPrecision(18, 2);
                 e.Property(r => r.ProposedCurrency).IsRequired().HasMaxLength(4);
                 e.Property(r => r.ProposedASAP).IsRequired();
-                e.Property(r => r.ProposedDate).IsRequired(false);
-                e.Property(r => r.ProposedTime).IsRequired(false);
+                e.Property(r => r.ProposedDate).IsRequired(false)
+                    .HasConversion(
+                        v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null //(DateOnly?)null
+                    );
+                e.Property(r => r.ProposedTime).IsRequired(false)
+                    .HasConversion(
+                        v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null //(TimeOnly?)null
+                    );
                 e.Property(r => r.AgreementDate).IsRequired(false);
                 e.Property(r => r.AgreedCost).IsRequired(false).HasPrecision(18, 2);
                 e.Property(r => r.AgreedCurrency).IsRequired(false).HasMaxLength(4);
-                e.Property(r => r.AgreedDate).IsRequired(false);
-                e.Property(r => r.AgreedTime).IsRequired(false);
+                e.Property(r => r.AgreedDate).IsRequired(false)
+                    .HasConversion(
+                        v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null //(DateOnly?)null
+                    );
+                e.Property(r => r.AgreedTime).IsRequired(false)
+                    .HasConversion(
+                        v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null //(TimeOnly?)null
+                    );
             });
         }
 

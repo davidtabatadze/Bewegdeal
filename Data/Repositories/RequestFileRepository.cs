@@ -1,37 +1,61 @@
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
     public class RequestFileRepository(SqlContext context) : IRequestFileRepository
     {
-        private readonly SqlContext _context = context;
 
-        // ── Write ─────────────────────────────────────────────────────────────────
+        // ── Write ────────────────────────────────────────────────────────────────
 
-        public async Task<RequestFileEntity> Create(RequestFileEntity file)
+        public async Task Create(List<RequestFileEntity> files)
         {
-            _context.RequestFiles.Add(file);
-            await _context.SaveChangesAsync();
-            return file;
+            context.RequestFiles.AddRange(files);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task SetMainImage(long requestId, long fileId)
+        {
+            var main = await context.RequestFiles
+                                    .Where(i =>
+                                        i.Type == RequestFileTypeEnum.Image &&
+                                        i.RequestId == requestId &&
+                                        i.FileId == fileId
+                                    )
+                                    .FirstOrDefaultAsync();
+            main ??= await context.RequestFiles
+                                  .Where(i =>
+                                      i.Type == RequestFileTypeEnum.Image &&
+                                      i.RequestId == requestId
+                                  )
+                                  .OrderBy(i => i.Id)
+                                  .FirstOrDefaultAsync();
+
+            if (main is not null)
+            {
+                main.IsMain = true;
+                await context.SaveChangesAsync();
+            }
         }
 
         // ── Read ─────────────────────────────────────────────────────────────────
 
         public async Task<List<RequestFileEntity>> Load(long requestId)
         {
-            return await _context.RequestFiles
-                                 .Where(f => f.RequestId == requestId)
-                                 .ToListAsync();
+            return await context.RequestFiles
+                                .Where(i => i.RequestId == requestId)
+                                .ToListAsync();
         }
 
-        // ── Delete ────────────────────────────────────────────────────────────────
+        // ── Delete ───────────────────────────────────────────────────────────────
 
-        public async Task Delete(long requestId)
+        public async Task Delete(List<long> ids)
         {
-            await _context.RequestFiles
-                          .Where(f => f.RequestId == requestId)
-                          .ExecuteDeleteAsync();
+            await context.RequestFiles
+                         .Where(i => ids.Contains(i.Id))
+                         .ExecuteDeleteAsync();
         }
     }
 }
