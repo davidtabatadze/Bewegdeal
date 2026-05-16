@@ -18,6 +18,10 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task SetMainImage(long requestId, long fileId)
         {
+            await context.RequestFiles
+                         .Where(i => i.RequestId == requestId)
+                         .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsMain, false));
+
             var main = await context.RequestFiles
                                     .Where(i =>
                                         i.Type == RequestFileTypeEnum.Image &&

@@ -86,6 +86,7 @@ Views/
 - `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
 - `SettingsController` — Settings (`Index`), Terms upload (`SaveTermAndConditionSettings`), request config (`SaveRequestSettings`); **admin only**
 - `FileController` — file download (`Download`); no auth required — files may be public
+- `RequestController` — Create and Edit a request; `[RequireLogin]`; Customer + Active status only; both actions share `Views/Request/Form.cshtml`
 
 ## Account Views
 
@@ -189,6 +190,7 @@ Two action filter attributes in `Filters/`:
 - `HomeController` — `[RequireLogin]` (any logged-in user)
 - `UserController` — `[RequireAdmin]`
 - `SettingsController` — `[RequireAdmin]`
+- `RequestController` — `[RequireLogin]`; additionally validates `Role == Customer && Status == Active` inside each action
 - `AccountController`, `FileController`, `LandingController` — no attribute (public)
 
 ### Project Structure
@@ -199,39 +201,55 @@ Data/
 │   ├── IEntity.cs               # Marker interface for all entities
 │   ├── IRepository.cs           # Marker interface for all repositories
 │   ├── IRepositorySeedable.cs   # Adds Task Seed() — implemented by repos that need initial data
-│   └── BaseFilter.cs            # Generic filter: Id<T>, SortField, SortDirection, Start, Length
+│   └── BaseFilter.cs            # Generic filter: Id<T>, Ids<List<T>>, SortField, SortDirection, Start, Length
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
 │   ├── FileEntity.cs            # Files table (metadata only — bytes on disk)
 │   ├── SettingsEntity.cs        # Settings table (single row, Id = 1, seeded at startup)
-│   └── ReferenceEntity.cs       # References table (lookup/reference data)
+│   ├── ReferenceEntity.cs       # References table (lookup/reference data)
+│   ├── RequestEntity.cs         # Requests table
+│   └── RequestFileEntity.cs     # RequestFiles table — links a request to its uploaded files
 ├── Filters/
-│   └── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
+│   ├── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
+│   └── FileFilter.cs            # Extends BaseFilter<long?>, adds Key
 ├── Repositories/
-│   ├── IUserRepository.cs       # Get, Load, Count, Create, Update, SetUserStatus
-│   ├── IReferenceRepository.cs  # Get, Load, Create, Update
-│   ├── IFileRepository.cs       # Get(long id), Create, Delete(long id)
-│   ├── ISettingsRepository.cs   # Get(), Update(entity)
-│   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (2 admin users)
+│   ├── Abstractions/
+│   │   ├── IUserRepository.cs       # Get, Load, Count, Create, SetUserStatus, UpdatePassword
+│   │   ├── IReferenceRepository.cs  # Get, Create, Update
+│   │   ├── IFileRepository.cs       # Get(id), Load(BaseFilter<long>), Create, Delete(id)
+│   │   ├── ISettingsRepository.cs   # Get(), Update(entity)
+│   │   ├── IRequestRepository.cs    # Get(id), Create, Update
+│   │   └── IRequestFileRepository.cs# Load(requestId), Create(List<>), SetMainImage, Delete(List<id>)
+│   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (4 seed users)
 │   │                            #   private ApplyFilters helper shared by Count and Load
 │   ├── ReferenceRepository.cs   # EF Core impl + IRepositorySeedable (7 reference rows)
 │   ├── FileRepository.cs        # EF Core impl; no seeding
-│   └── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, default values seeded)
-└── SqlContext.cs                # DbContext: Users + References DbSets, EF config, value converters
+│   ├── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, default values seeded)
+│   ├── RequestRepository.cs     # EF Core impl; no seeding
+│   └── RequestFileRepository.cs # EF Core impl; no seeding
+└── SqlContext.cs                # DbContext: all DbSets, EF config, value converters
+                                 #   DateOnly↔DateTime and TimeOnly↔TimeSpan converters for SQLite compat
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
-├── FileTypeEnum.cs              # MIME type constants: PDF = "application/pdf"
+├── FileTypeEnum.cs              # MIME type constants: PDF, PNG, JPEG, MP4, MOV
 ├── SortFieldEnum.cs             # "status" (add new fields here as new sortable columns are added)
 ├── SortDirectionEnum.cs         # "asc", "desc"
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
-└── EmailStatusEnum.cs           # "sent", "failed"
+├── EmailStatusEnum.cs           # "sent", "failed"
+├── RequestStatusEnum.cs         # "pending", "accepted", "completed", "cancelled"
+├── RequestFileTypeEnum.cs       # "image", "video"
+└── AnnotationEnum.cs            # Nested static string classes for user-facing messages (not DB values)
+                                 #   AnnotationEnum.Account.Login.*, .Register.*, .ForgotPassword.*, etc.
+                                 #   AnnotationEnum.Request.Requirement.*, .Media.*
+                                 #   Uses string.Format("{0}", field) pattern for parameterised messages
 Filters/
 ├── RequireLoginAttribute.cs     # Redirects to Login if no session UserId
 └── RequireAdminAttribute.cs     # Redirects to Login if not logged in; to Home if not administrator
 Models/
-└── GridResultViewModel.cs       # Generic server-side DataTables response envelope
+├── GridResultViewModel.cs       # Generic server-side DataTables response envelope
+└── RequestViewModel.cs          # Create + Edit request form model (Id=0 on Create, KeepFileIds=[] on Create)
 Services/
 └── FileService.cs               # Scoped — validate MIME type, upload bytes, persist metadata, optionally delete old file
 Storage/                         # Git-ignored. Local file storage root (configurable via Storage:Local:Path)
@@ -240,6 +258,14 @@ Tools/
 ├── BrevoTool.cs                 # Static, Configure(IConfiguration) at startup, Send() → EmailStatus string
 ├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
 └── FileStorageTool.cs           # Singleton local-filesystem impl; key = GUID + extension; base path from appsettings
+Views/
+└── Request/
+    └── Form.cshtml              # Single shared view for both Create and Edit
+                                 #   var req = ViewBag.Request as RequestEntity; var isEdit = req is not null
+wwwroot/js/
+└── request-form.js              # Dropzone (images + videos), flatpickr, jQuery Timepicker, inline validation,
+                                 #   FormData submit via fetch; works for both Create and Edit
+                                 #   Edit-only: loads existingFiles as Dropzone mock entries, tracks KeepFileIds/KeepMainFileId
 ```
 
 ### Entities
@@ -287,13 +313,48 @@ Tools/
 | Type | string | `ReferenceTypeEnum` value, max 16 |
 | Name | string | display name, max 16 |
 
+**RequestEntity** (`Requests` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| Code | Guid | unique, used for public-facing URLs |
+| Status | string | `RequestStatusEnum` value, max 16 |
+| Service | string | `ServiceEnum` value, max 16 |
+| Title | string | max 128 |
+| Description | string | max 2048 |
+| SourceAddress | string | max 512 |
+| DestinationAddress | string | max 512 |
+| RequesterId | long | FK to Users |
+| ExecutorId | long? | FK to Users |
+| ProposedCost | decimal | precision 18,2 |
+| ProposedCurrency | string | max 4, default "EUR" |
+| ProposedASAP | bool | true = ASAP, false = use ProposedDate/ProposedTime |
+| ProposedDate | DateOnly? | stored via DateTime converter for SQLite compat |
+| ProposedTime | TimeOnly? | stored via TimeSpan converter for SQLite compat |
+| AgreementDate | DateTime? | when negotiation was agreed |
+| AgreedCost | decimal? | precision 18,2 |
+| AgreedCurrency | string? | max 4 |
+| AgreedDate | DateOnly? | stored via DateTime converter for SQLite compat |
+| AgreedTime | TimeOnly? | stored via TimeSpan converter for SQLite compat |
+
+**RequestFileEntity** (`RequestFiles` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| RequestId | long | FK to Requests |
+| FileId | long | FK to Files |
+| IsMain | bool | true for the primary display image; only one per request |
+| Type | string | `RequestFileTypeEnum` value ("image" or "video"), max 8 |
+
 ### Filters
 
 Filters are criteria bags — only non-null/non-empty fields are applied in the query. Add new fields to extend lookup without adding new repository methods. Always guard with `!string.IsNullOrWhiteSpace()`, never bare null checks.
 
-- `BaseFilter<T>` — has `Id`, `SortField`, `SortDirection`, `Start` (int?), `Length` (int?) — the last four are used by DataTables server-side mode
+- `BaseFilter<T>` — has `Id`, `Ids` (List<T>?), `SortField`, `SortDirection`, `Start` (int?), `Length` (int?) — Start/Length/Sort used by DataTables server-side mode
 - `UserFilter : BaseFilter<long?>` — adds `Email`, `Search`, `Role`, `Status`
+- `FileFilter : BaseFilter<long?>` — adds `Key`
 - `ReferenceRepository` uses `BaseFilter<string>` directly (no dedicated filter class)
+- `FileRepository.Load(BaseFilter<long>)` uses `Ids` to bulk-fetch by a list of IDs
 
 ### Tools
 
@@ -351,7 +412,66 @@ Use `FileService` anywhere a controller needs to handle file uploads — never d
 
 References (7 rows): administrator/customer/company (type: user-role), active/pending/blocked/unverified (type: user-status)
 
-Users (2 rows): `admin@bewegdeal.at` and `david.tabatadze@outlook.com`, both Role=Administrator, Status=Active, password hashed at seed time.
+Users (4 rows, all Status=Active, passwords hashed at seed time):
+- `admin@bewegdeal.at` — Role=Administrator
+- `datiko.admin@bewegdeal.at` — Role=Administrator
+- `datiko.customer@bewegdeal.at` — Role=Customer
+- `datiko.company@bewegdeal.at` — Role=Company
+
+---
+
+## Request Feature
+
+### Access guard
+`RequestController` is `[RequireLogin]`. Each action additionally calls `ValidateUser()` which returns `null` (→ redirect to Dashboard) unless `Role == Customer && Status == Active`.
+
+### Create flow (`GET /Request/Create` → `POST /Request/Create`)
+1. GET: loads `ViewBag.Settings`, returns `Views/Request/Form.cshtml` (no `ViewBag.Request` → `isEdit = false`)
+2. POST: `ValidateRequirement` → `ValidateMedia` (existingFiles = []) → create `RequestEntity` → set `model.Id = request.Id` → `UploadMedia`
+
+### Edit flow (`GET /Request/Edit?id=` → `POST /Request/Edit`)
+1. GET: validates request exists, `RequesterId == userId`, `Status == Pending`; loads existing files via `requestFileRepository.Load(id)` + `fileRepository.Load(BaseFilter<long> { Ids = ... })`; sets `ViewBag.Request` + `ViewBag.Files`; returns `Form.cshtml` (`isEdit = true`)
+2. POST: same ownership/status guard → `ValidateRequirement` → load existingFiles → `ValidateMedia(existingFiles)` → update entity → `UploadMedia(existingFiles)`
+
+### UploadMedia helper
+- Deletes `RequestFileEntity` rows + storage for files not in `model.KeepFileIds`
+- Uploads new images (PNG/JPEG) and videos (MP4/MOV) via `FileService`
+- Inserts new `RequestFileEntity` rows
+- Calls `requestFileRepository.SetMainImage(requestId, keepMainFileId)` — first resets all image rows to `IsMain = false`, then sets the target (falls back to first image by Id if target not found)
+- Returns error string or null
+
+### RequestViewModel
+```csharp
+public long          Id                 // 0 on Create
+public string        Service            // ServiceEnum value
+public string        Title
+public string?       Description
+public string        SourceAddress
+public string        DestinationAddress
+public decimal       ProposedCost       // 1–10000
+public bool          IsASAP             // bound from radio value="true"/"false"
+public string?       ProposedDate       // "yyyy-MM-dd", required if !IsASAP
+public string?       ProposedTime       // "HH:mm", required if !IsASAP
+public IFormFile[]?  Images
+public IFormFile[]?  Videos
+public int           MainImageIndex     // index into new Images array
+public long[]        KeepFileIds        // existing file IDs to preserve ([] on Create)
+public long          KeepMainFileId     // existing FileId that is main (0 = main is a new upload)
+```
+
+### Form.cshtml rendering logic
+- `var req = ViewBag.Request as RequestEntity; var isEdit = req is not null;`
+- Title/button text, `asp-action`, hidden `Id` field, input `value=`, radio `checked`, `scheduled-fields` class, and `existingFiles` JS const all conditioned on `isEdit`
+- For `checked` on `isASAP` radios: `!isEdit || req!.ProposedASAP` → "ASAP" checked (covers both Create default and Edit restore)
+
+### request-form.js key behaviours
+- `Dropzone.autoDiscover = false` set before IIFE
+- `existingFiles` defaults to `[]` via `typeof existingFiles !== 'undefined'` guard (Create has no inline const)
+- New files: `addedfile` handler emits `uploadprogress(100%)` + `success` + `complete` to show progress bar and ✓ mark immediately (no actual POST through Dropzone)
+- Existing mock files: same three events emitted during load loop
+- `loadingExisting` flag prevents auto-setMainFile during mock-file population; server's `isMain` restored explicitly after loop
+- Inline validation: Bootstrap `is-invalid` + `invalid-feedback` for all fields; Notyf only for server errors + one summary toast on failed client-side submit
+- Cost input: blocks `- + e E` on keydown, clamps to 10000 on input, clamps to min 1 on blur, truncates to 2 decimal places
 
 ---
 

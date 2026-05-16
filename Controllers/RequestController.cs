@@ -89,7 +89,16 @@ public class RequestController(
         });
 
         // upload media
-        await UploadMedia(model, settings, []);
+        model.Id = request.Id;
+        var upload = await UploadMedia(model, settings, []);
+        if (upload is not null)
+        {
+            return Json(new
+            {
+                success = false,
+                error = upload
+            });
+        }
 
         // all good
         return Json(new
@@ -129,8 +138,8 @@ public class RequestController(
             url = Url.Action("Download", "File", new { key = i.Key }, Request.Scheme),
             fileName = i.FileName,
             size = i.Size,
-            isMain = requestFiles.First(rf => rf.Id == i.Id).IsMain,
-            type = requestFiles.First(rf => rf.Id == i.Id).Type
+            isMain = requestFiles.First(rf => rf.FileId == i.Id).IsMain,
+            type = requestFiles.First(rf => rf.FileId == i.Id).Type
         });
         return View("Form");
     }
@@ -186,7 +195,15 @@ public class RequestController(
         await requestRepository.Update(request);
 
         // upload media
-        await UploadMedia(model, settings, existingFiles);
+        var upload = await UploadMedia(model, settings, existingFiles);
+        if (upload is not null)
+        {
+            return Json(new
+            {
+                success = false,
+                error = upload
+            });
+        }
 
         // all good
         return Json(new
@@ -301,22 +318,22 @@ public class RequestController(
 
     private static string? ValidateRequirement(RequestViewModel model)
     {
-        var result =
+        var field =
             !new[] {
                 ServiceEnum.Moving,
                 ServiceEnum.Removal,
                 ServiceEnum.Pickup,
                 ServiceEnum.Transport
-            }.Contains(model.Service) ? "Service Type" :
-            string.IsNullOrWhiteSpace(model.Title) ? "Title" :
-            string.IsNullOrWhiteSpace(model.SourceAddress) ? "Source Address" :
-            string.IsNullOrWhiteSpace(model.DestinationAddress) ? "Destination Address" :
-            (model.ProposedCost < 1 || model.ProposedCost > 10000) ? "Proposed Cost (1 to 10,000)" :
-            (!model.IsASAP && !DateOnly.TryParse(model.ProposedDate, out var date)) ? "Proposed Date" :
-            (!model.IsASAP && !TimeOnly.TryParse(model.ProposedTime, out var time)) ? "Proposed Time" :
+            }.Contains(model.Service) ? AnnotationEnum.Request.Requirement.ServiceType :
+            string.IsNullOrWhiteSpace(model.Title) ? AnnotationEnum.Request.Requirement.Title :
+            string.IsNullOrWhiteSpace(model.SourceAddress) ? AnnotationEnum.Request.Requirement.SourceAddress :
+            string.IsNullOrWhiteSpace(model.DestinationAddress) ? AnnotationEnum.Request.Requirement.DestinationAddress :
+            (model.ProposedCost < 1 || model.ProposedCost > 10000) ? AnnotationEnum.Request.Requirement.ProposedCost :
+            (!model.IsASAP && !DateOnly.TryParse(model.ProposedDate, out _)) ? AnnotationEnum.Request.Requirement.ProposedDate :
+            (!model.IsASAP && !TimeOnly.TryParse(model.ProposedTime, out _)) ? AnnotationEnum.Request.Requirement.ProposedTime :
             null;
 
-        return result is null ? null : result + " field is required.";
+        return field is null ? null : string.Format(AnnotationEnum.Request.Requirement.Error, field);
     }
 
     private static string? ValidateMedia(RequestViewModel request, SettingsEntity settings, List<RequestFileEntity> existingFiles)
@@ -338,15 +355,15 @@ public class RequestController(
 
         if (totalImages == 0)
         {
-            return "Image field is required.";
+            return AnnotationEnum.Request.Media.ImageMinCount;
         }
         if (totalImages > settings.RequestImageMaxCount)
         {
-            return $"Maximum {settings.RequestImageMaxCount} images allowed.";
+            return string.Format(AnnotationEnum.Request.Media.ImageMaxCount, settings.RequestImageMaxCount);
         }
         if (totalVideos > settings.RequestVideoMaxCount)
         {
-            return $"Maximum {settings.RequestVideoMaxCount} videos allowed.";
+            return string.Format(AnnotationEnum.Request.Media.VideoMaxCount, settings.RequestVideoMaxCount);
         }
 
         return null;
