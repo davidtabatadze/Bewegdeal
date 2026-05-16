@@ -16,6 +16,7 @@ namespace Bewegdeal.Data
         public DbSet<FileEntity> Files => Set<FileEntity>();
         public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
+        public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
 
         #endregion
 
@@ -88,6 +89,7 @@ namespace Bewegdeal.Data
             ConfigureFiles(modelBuilder);
             ConfigureSettings(modelBuilder);
             ConfigureReferences(modelBuilder);
+            ConfigureFraudWords(modelBuilder);
         }
 
         private void ConfigureUsers(ModelBuilder modelBuilder)
@@ -162,6 +164,25 @@ namespace Bewegdeal.Data
 
                 e.Property(r => r.Type).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Name).IsRequired().HasMaxLength(16);
+            });
+        }
+
+        private void ConfigureFraudWords(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FraudWordEntity>(e =>
+            {
+                e.ToTable(_prefix + "FraudWords");
+
+                e.HasKey(w => w.Id);
+                e.Property(w => w.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(w => w.Status);
+
+                e.Property(w => w.Word).IsRequired().HasMaxLength(128);
+                e.Property(w => w.Description).IsRequired().HasMaxLength(512);
+                e.Property(w => w.Status).IsRequired().HasMaxLength(16);
+                e.Property(w => w.CreatedAt).IsRequired();
+                e.Property(w => w.CreatedByName).IsRequired().HasMaxLength(64);
             });
         }
 

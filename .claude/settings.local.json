@@ -47,7 +47,9 @@
       "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Admin.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Admin.cshtml\")",
       "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Company.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Company.cshtml\")",
       "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Customer.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Customer.cshtml\")",
-      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\" -Force)"
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\" -Force)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Software\\\\Templates\\\\Materio\\\\AspnetCoreMvcFull\\\\Views\" -Directory)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\giots\\\\OneDrive\\\\Documents\\\\VisualStudio2026\\\\Projects\\\\Bewegdeal\\\\Views\\\\FraudWord\")"
     ]
   }
 }
