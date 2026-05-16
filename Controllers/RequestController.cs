@@ -135,7 +135,7 @@ public class RequestController(
             fileName = f.FileName,
             isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
             type = requestFiles.First(rf => rf.FileId == f.Id).Type
-        }).OrderBy(f => f.type);
+        }).OrderBy(f => f.type).ThenByDescending(f => f.isMain);
         return View("View");
     }
 
