@@ -8,5 +8,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<RequestEntity> Create(RequestEntity request);
         Task Update(RequestEntity request);
         Task<RequestEntity?> Get(long id);
+        Task<RequestEntity?> Get(Guid code);
     }
 }

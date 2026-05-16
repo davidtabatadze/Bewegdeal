@@ -1,5 +1,6 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
@@ -25,6 +26,9 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<RequestEntity?> Get(long id) =>
             await context.Requests.FindAsync(id);
+
+        public async Task<RequestEntity?> Get(Guid code) =>
+            await context.Requests.FirstOrDefaultAsync(r => r.Code == code);
 
         // ── Delete ───────────────────────────────────────────────────────────────
         // ***

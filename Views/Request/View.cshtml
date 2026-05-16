@@ -1,0 +1,159 @@
+@using Bewegdeal.Data.Entities
+@using Bewegdeal.Enums
+@{
+    Layout = "_HomeLayout";
+    var req      = (RequestEntity)ViewBag.Request;
+    var files    = ((IEnumerable<dynamic>)ViewBag.Files).ToList();
+    var allMedia = files;
+
+    ViewData["Title"] = req.Title;
+
+    // Service badge
+    var (badgeClass, icon, serviceLabel) = req.Service switch
+    {
+        ServiceEnum.Moving    => ("bg-label-success", "ri-truck-line",        "Moving"),
+        ServiceEnum.Removal   => ("bg-label-danger",  "ri-delete-bin-2-line", "Removal"),
+        ServiceEnum.Pickup    => ("bg-label-warning",  "ri-store-2-line",      "Pickup"),
+        ServiceEnum.Transport => ("bg-label-info",     "ri-car-line",          "Transport"),
+        _                     => ("bg-label-secondary","ri-question-line",     req.Service)
+    };
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/swiper/swiper.css" />
+    <link rel="stylesheet" href="~/vendor/css/pages/ui-carousel.css" />
+}
+
+@section PageScripts {
+    <script>
+        const mediaCount = @allMedia.Count;
+    </script>
+    <script src="~/vendor/libs/swiper/swiper.js"></script>
+    <script src="~/js/request-view.js"></script>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-body pt-5">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+
+                        <!-- Service badge + Title -->
+                        <div class="d-flex align-items-center gap-3 mb-5">
+                            <span class="badge rounded-pill @badgeClass fs-6 px-3 py-2">
+                                <i class="icon-base ri @icon me-1"></i>@serviceLabel
+                            </span>
+                            <h4 class="mb-0">@req.Title</h4>
+                        </div>
+
+                        @if (allMedia.Count > 0)
+                        {
+                            <hr class="my-6" />
+
+                            <!-- Media Gallery -->
+                            <div id="swiper-gallery">
+                                <div class="swiper gallery-top" style="@(allMedia.Count == 1 ? "block-size:100%;" : "")">
+                                    <div class="swiper-wrapper">
+                                        @foreach (var f in allMedia)
+                                        {
+                                            if (f.type == RequestFileTypeEnum.Image)
+                                            {
+                                                <div class="swiper-slide" style="position:relative; overflow:hidden;">
+                                                    <div style="position:absolute; inset:0; background-image:url('@f.url'); background-size:cover; background-position:center; filter:blur(18px); transform:scale(1.1); opacity:0.75;"></div>
+                                                    <img src="@f.url" alt="@f.fileName" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;" />
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#000;">
+                                                    <video controls style="max-height:100%; max-width:100%; object-fit:contain;">
+                                                        <source src="@f.url" />
+                                                    </video>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                    <div class="swiper-button-next swiper-button-white"></div>
+                                    <div class="swiper-button-prev swiper-button-white"></div>
+                                </div>
+
+                                @if (allMedia.Count > 1)
+                                {
+                                    <div class="swiper gallery-thumbs">
+                                        <div class="swiper-wrapper">
+                                            @foreach (var f in allMedia)
+                                            {
+                                                if (f.type == RequestFileTypeEnum.Image)
+                                                {
+                                                    <div class="swiper-slide" style="background-image:url(@f.url)"></div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#111;">
+                                                        <i class="icon-base ri ri-play-circle-line text-white" style="font-size:1.75rem;"></i>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(req.Description))
+                        {
+                            <hr class="my-6" />
+
+                            <!-- Description -->
+                            <div class="alert alert-danger" role="alert">
+                                <h6 class="alert-heading d-flex align-items-center mb-2">
+                                    <i class="icon-base ri ri-information-line me-2"></i>Description
+                                </h6>
+                                <p class="mb-0">@req.Description</p>
+                            </div>
+                        }
+
+                        <hr class="my-6" />
+
+                        <!-- Details -->
+                        <div class="row g-4">
+                            <div class="col-sm-6">
+                                <p class="text-muted small mb-1">Source Address</p>
+                                <p class="mb-0 fw-medium">@req.SourceAddress</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-muted small mb-1">Destination Address</p>
+                                <p class="mb-0 fw-medium">@req.DestinationAddress</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-muted small mb-1">Proposed Cost</p>
+                                <p class="mb-0 fw-medium">@req.ProposedCost.ToString("0.##") @req.ProposedCurrency</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-muted small mb-1">Timing</p>
+                                @if (req.ProposedASAP)
+                                {
+                                    <p class="mb-0 fw-medium">As soon as possible</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 fw-medium">
+                                        @req.ProposedDate?.ToString("MMMM d, yyyy")
+                                        @if (req.ProposedTime.HasValue)
+                                        {
+                                            <span class="text-muted ms-1">at @req.ProposedTime.Value.ToString("HH:mm")</span>
+                                        }
+                                    </p>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

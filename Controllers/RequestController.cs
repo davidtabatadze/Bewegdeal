@@ -104,8 +104,39 @@ public class RequestController(
         return Json(new
         {
             success = true,
-            redirect = Url.Action("Index", "Dashboard")
+            redirect = Url.Action("View", "Request", new { code = request.Code })
         });
+    }
+
+    #endregion
+
+    #region View
+
+    [HttpGet]
+    [ActionName("View")]
+    public async Task<IActionResult> ViewRequest(Guid code)
+    {
+        var request = await requestRepository.Get(code);
+        if (request is null)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        var requestFiles = await requestFileRepository.Load(request.Id);
+        var files = await fileRepository.Load(new BaseFilter<long>
+        {
+            Ids = requestFiles.Select(rf => rf.FileId).ToList()
+        });
+
+        ViewBag.Request = request;
+        ViewBag.Files = files.Select(f => new
+        {
+            url = Url.Action("Download", "File", new { key = f.Key }, Request.Scheme),
+            fileName = f.FileName,
+            isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
+            type = requestFiles.First(rf => rf.FileId == f.Id).Type
+        }).OrderBy(f => f.type);
+        return View("View");
     }
 
     #endregion
@@ -209,7 +240,7 @@ public class RequestController(
         return Json(new
         {
             success = true,
-            redirect = Url.Action("Index", "Dashboard")
+            redirect = Url.Action("View", "Request", new { code = request.Code })
         });
     }
 
