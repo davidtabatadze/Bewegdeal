@@ -49,7 +49,9 @@
       "Bash(Move-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\\\\Customer.cshtml\" \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Dashboard\\\\Customer.cshtml\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Home\\\\Dashboard\" -Force)",
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Models\\\\CreateRequestViewModel.cs\" -Force)",
-      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Models\\\\EditRequestViewModel.cs\" -Force)"
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Models\\\\EditRequestViewModel.cs\" -Force)",
+      "Bash(cp -r \"C:/Software Templates/Materio/AspnetCoreMvcFull/wwwroot/vendor/libs/notiflix\" \"C:/Users/david.tabatadze/Sources/Bewegdeal/wwwroot/vendor/libs/notiflix\")",
+      "Bash(cp -r \"C:/Software Templates/Materio/AspnetCoreMvcFull/wwwroot/vendor/libs/spinkit\" \"C:/Users/david.tabatadze/Sources/Bewegdeal/wwwroot/vendor/libs/spinkit\")"
     ]
   }
 }

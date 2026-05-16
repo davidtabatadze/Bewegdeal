@@ -63,11 +63,15 @@ Dropzone.autoDiscover = false;
       // Simulate instant upload completion for newly added files so the
       // progress bar fills and the success mark appears (we never actually
       // POST through Dropzone — files are collected on form submit).
+      // Deferred with setTimeout so Dropzone's own addedfile → enqueueFile
+      // logic runs first (it requires file.status === ADDED at that point).
       if (!file._existing) {
-        mediaDropzone.emit('uploadprogress', file, 100, file.size);
-        file.status = Dropzone.SUCCESS;
-        mediaDropzone.emit('success', file);
-        mediaDropzone.emit('complete', file);
+        setTimeout(function () {
+          mediaDropzone.emit('uploadprogress', file, 100, file.size);
+          file.status = Dropzone.SUCCESS;
+          mediaDropzone.emit('success', file);
+          mediaDropzone.emit('complete', file);
+        }, 0);
       }
 
       if (!isImageFile(file)) { return; }
@@ -384,6 +388,37 @@ Dropzone.autoDiscover = false;
       // ── Submit ──────────────────────────────────────────────────────────
       submitBtn.disabled = true;
 
+      // Page blocking — Multiple Message style
+      const loadingMessages = ['Please wait...', 'Uploading files...', 'Almost done...'];
+      let loadingMsgIndex   = 0;
+
+      function setLoadingMessage(text) {
+        Loading.standard({
+          backgroundColor: 'rgba(' + window.Helpers.getCssVar('black-rgb') + ', 0.5)',
+          svgSize: '0px'
+        });
+        const loadingEl = document.querySelector('.notiflix-loading');
+        if (loadingEl) {
+          loadingEl.innerHTML = `
+            <div class="d-flex justify-content-center">
+              <p class="mb-0 text-white">${text}</p>
+              <div class="sk-wave m-0">
+                <div class="sk-rect sk-wave-rect"></div>
+                <div class="sk-rect sk-wave-rect"></div>
+                <div class="sk-rect sk-wave-rect"></div>
+                <div class="sk-rect sk-wave-rect"></div>
+                <div class="sk-rect sk-wave-rect"></div>
+              </div>
+            </div>`;
+        }
+      }
+
+      setLoadingMessage(loadingMessages[0]);
+      const loadingInterval = setInterval(function () {
+        loadingMsgIndex = (loadingMsgIndex + 1) % loadingMessages.length;
+        setLoadingMessage(loadingMessages[loadingMsgIndex]);
+      }, 1000);
+
       try {
         const response = await fetch(form.action, {
           method:  'POST',
@@ -393,13 +428,28 @@ Dropzone.autoDiscover = false;
 
         const result = await response.json();
 
+        clearInterval(loadingInterval);
+
         if (result.success) {
-          window.location.href = result.redirect;
+          Loading.standard({
+            backgroundColor: 'rgba(' + window.Helpers.getCssVar('black-rgb') + ', 0.5)',
+            svgSize: '0px'
+          });
+          const successEl = document.querySelector('.notiflix-loading');
+          if (successEl) {
+            successEl.innerHTML = `<div class="px-12 py-3 bg-success text-white">Success</div>`;
+          }
+          setTimeout(function () {
+            window.location.href = result.redirect;
+          }, 2000);
         } else {
+          Loading.remove();
           notyf.error(result.error ?? 'Something went wrong. Please try again.');
           submitBtn.disabled = false;
         }
       } catch {
+        clearInterval(loadingInterval);
+        Loading.remove();
         notyf.error('Something went wrong. Please try again.');
         submitBtn.disabled = false;
       }
