@@ -204,7 +204,7 @@ Dropzone.autoDiscover = false;
   }
 
   // ── Inline validation clearing ────────────────────────────────────────────
-  ['title', 'sourceAddress', 'destinationAddress'].forEach(function (id) {
+  ['title', 'pickupAddress', 'destinationAddress'].forEach(function (id) {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('input', function () {
@@ -239,11 +239,32 @@ Dropzone.autoDiscover = false;
     });
   }
 
+  const destAddressWrapper = document.getElementById('destinationAddress')?.closest('.col-12');
+
+  function toggleDestinationAddress(service) {
+    if (!destAddressWrapper) { return; }
+    const destInput = document.getElementById('destinationAddress');
+    if (service === 'removal') {
+      destAddressWrapper.classList.add('d-none');
+      if (destInput) {
+        destInput.value = '';
+        destInput.classList.remove('is-invalid');
+      }
+    } else {
+      destAddressWrapper.classList.remove('d-none');
+    }
+  }
+
   document.querySelectorAll('input[name="service"]').forEach(function (radio) {
     radio.addEventListener('change', function () {
       document.getElementById('serviceError').classList.add('d-none');
+      toggleDestinationAddress(this.value);
     });
   });
+
+  // Apply on page load (Edit mode may have Removal pre-selected)
+  const initialService = document.querySelector('input[name="service"]:checked')?.value;
+  if (initialService) { toggleDestinationAddress(initialService); }
 
   // ── Form submission ───────────────────────────────────────────────────────
   const form      = document.getElementById('requestForm');
@@ -290,14 +311,15 @@ Dropzone.autoDiscover = false;
         hasErrors = true;
       }
 
-      const sourceInput = document.getElementById('sourceAddress');
+      const sourceInput = document.getElementById('pickupAddress');
       if (!sourceInput.value.trim()) {
         sourceInput.classList.add('is-invalid');
         hasErrors = true;
       }
 
       const destInput = document.getElementById('destinationAddress');
-      if (!destInput.value.trim()) {
+      const selectedService = document.querySelector('input[name="service"]:checked')?.value;
+      if (selectedService !== 'removal' && !destInput.value.trim()) {
         destInput.classList.add('is-invalid');
         hasErrors = true;
       }

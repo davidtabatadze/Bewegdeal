@@ -42,11 +42,11 @@
             {
                 public const string Title = "Title";
                 public const string ServiceType = "Service Type";
-                public const string SourceAddress = "Source Address";
+                public const string PickupAddress = "Source Address";
                 public const string DestinationAddress = "Destination Address";
-                public const string ProposedCost = "Proposed Cost (1 to 10,000)";
-                public const string ProposedDate = "Proposed Date";
-                public const string ProposedTime = "Proposed Time";
+                public const string Cost = "Cost (1 to 10,000)";
+                public const string Date = "Date";
+                public const string Time = "Time";
                 public const string Error = "{0} field is required.";
             }
             public class Media

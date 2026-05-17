@@ -27,8 +27,8 @@ namespace Bewegdeal.Data.Repositories
         public async Task<RequestEntity?> Get(long id) =>
             await context.Requests.FindAsync(id);
 
-        public async Task<RequestEntity?> Get(Guid code) =>
-            await context.Requests.FirstOrDefaultAsync(r => r.Code == code);
+        public async Task<RequestEntity?> Get(string number) =>
+            await context.Requests.FirstOrDefaultAsync(r => r.Number == number);
 
         // ── Delete ───────────────────────────────────────────────────────────────
         // ***

@@ -323,7 +323,7 @@ public class AccountController(
             Salt = salt,
             Interests = [.. interests],
             Status = UserStatusEnum.Unverified,
-            TermsFileId = termsFileId
+            ServiceTermsFileId = termsFileId
         });
 
         // send verification email

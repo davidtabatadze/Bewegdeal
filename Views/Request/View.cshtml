@@ -88,22 +88,12 @@
                         <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
                         <address class="text-body mb-0">
                             <dl class="row mb-0">
-                                <dt class="col-8 fw-normal text-heading">As soon as possible</dt>
-                                <dd class="col-4 text-end"><strong>€</strong>1198.00</dd>
+                                <dt class="col-8 fw-normal text-heading">@(req.ASAP ? "As soon as possible" : req.Date?.ToString("MMMM d, yyyy") + (req.Time.HasValue ? " at " + req.Time.Value.ToString("HH:mm") : ""))</dt>
+                                <dd class="col-4 text-end"><strong>@req.Currency</strong> @req.Cost.ToString("0.##")</dd>
                             </dl>
                         </address>
                     </li>
                 </ul>
-                @* <div>
-                    <div>
-                        <h5 class="mb-1">Time Spendings</h5>
-                        <p class="mb-9">Weekly report</p>
-                    </div>
-                    <div class="time-spending-chart">
-                        <h5 class="mb-2">@req.Status</h5>
-                        <span class="badge bg-label-success rounded-pill">+18.4%</span>
-                    </div>
-                </div> *@
             </div>
         </div>
     </div>
@@ -174,8 +164,8 @@
                         <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
                         <address class="text-body mb-0">
                             <dl class="row mb-0">
-                                <dt class="col-8 fw-normal text-heading">As soon as possible</dt>
-                                <dd class="col-4 text-end"><strong>€</strong>1198.00</dd>
+                                <dt class="col-8 fw-normal text-heading">@(req.ASAP ? "As soon as possible" : req.Date?.ToString("MMMM d, yyyy") + (req.Time.HasValue ? " at " + req.Time.Value.ToString("HH:mm") : ""))</dt>
+                                <dd class="col-4 text-end"><strong>@req.Currency</strong> @req.Cost.ToString("0.##")</dd>
                             </dl>
                         </address>
                     </li>
@@ -183,17 +173,13 @@
                 <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-info">
                     <li class="list-group-item flex-fill p-3">
                         <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
-                        <address class="text-body mb-0">
-                            uawbd awduhawbd awd awudhb a  awsdua bwd wad aud wad auwd awd awud awd aud ad adad adawdadadad
-                        </address>
+                        <address class="text-body mb-0">@req.PickupAddress</address>
                     </li>
                 </ul>
                 <ul class="list-group list-group-horizontal-md mt-1 mb-0 border border-info">
                     <li class="list-group-item flex-fill p-3">
                         <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
-                        <address class="text-body mb-0">
-                            uawbd awduhawbd awd awudhb a  awsdua bwd wad aud wad auwd awd awud awd aud ad adad adawdadadad
-                        </address>
+                        <address class="text-body mb-0">@req.DestinationAddress</address>
                     </li>
                 </ul>
                 @* <div class="d-flex justify-content-between align-items-center mb-4">

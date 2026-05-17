@@ -17,6 +17,7 @@ namespace Bewegdeal.Data
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
+        public DbSet<RequestAgreementEntity> RequestAgreements => Set<RequestAgreementEntity>();
 
         #endregion
 
@@ -82,6 +83,7 @@ namespace Bewegdeal.Data
             ConfigureReferences(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
+            ConfigureRequestAgreements(modelBuilder);
         }
 
         private void ConfigureUsers(ModelBuilder modelBuilder)
@@ -108,7 +110,7 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
-                e.Property(u => u.TermsFileId).IsRequired(false);
+                e.Property(u => u.ServiceTermsFileId).IsRequired(false);
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -166,45 +168,66 @@ namespace Bewegdeal.Data
                 e.HasKey(r => r.Id);
                 e.Property(r => r.Id).ValueGeneratedOnAdd();
 
-                e.HasIndex(r => r.Code).IsUnique();
+                e.HasIndex(r => r.Number).IsUnique();
                 e.HasIndex(r => r.Status);
                 e.HasIndex(r => r.RequesterId);
                 e.HasIndex(r => r.ExecutorId);
+                e.HasIndex(r => r.AgreementId);
 
-                e.Property(r => r.Code).IsRequired();
+                e.Property(r => r.Number).IsRequired().HasMaxLength(36);
+                e.Property(r => r.CreateDate).IsRequired();
                 e.Property(r => r.Status).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Service).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Title).IsRequired().HasMaxLength(128);
                 e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
-                e.Property(r => r.SourceAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.PickupAddress).IsRequired().HasMaxLength(512);
                 e.Property(r => r.DestinationAddress).IsRequired().HasMaxLength(512);
                 e.Property(r => r.RequesterId).IsRequired();
                 e.Property(r => r.ExecutorId).IsRequired(false);
-                e.Property(r => r.ProposedCost).IsRequired().HasPrecision(18, 2);
-                e.Property(r => r.ProposedCurrency).IsRequired().HasMaxLength(4);
-                e.Property(r => r.ProposedASAP).IsRequired();
-                e.Property(r => r.ProposedDate).IsRequired(false)
+                e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);
+                e.Property(r => r.Currency).IsRequired().HasMaxLength(4);
+                e.Property(r => r.ASAP).IsRequired();
+                e.Property(r => r.Date).IsRequired(false)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
-                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null //(DateOnly?)null
+                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null
                     );
-                e.Property(r => r.ProposedTime).IsRequired(false)
+                e.Property(r => r.Time).IsRequired(false)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
-                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null //(TimeOnly?)null
+                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
                     );
-                e.Property(r => r.AgreementDate).IsRequired(false);
-                e.Property(r => r.AgreedCost).IsRequired(false).HasPrecision(18, 2);
-                e.Property(r => r.AgreedCurrency).IsRequired(false).HasMaxLength(4);
-                e.Property(r => r.AgreedDate).IsRequired(false)
+                e.Property(r => r.AgreementId).IsRequired(false);
+            });
+        }
+
+        private void ConfigureRequestAgreements(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RequestAgreementEntity>(e =>
+            {
+                e.ToTable(_prefix + "RequestAgreements");
+
+                e.HasKey(a => a.Id);
+                e.Property(a => a.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(a => a.Status);
+
+                e.Property(a => a.CreateDate).IsRequired();
+                e.Property(a => a.Cost).IsRequired().HasPrecision(18, 2);
+                e.Property(a => a.Currency).IsRequired().HasMaxLength(4);
+                e.Property(a => a.ServiceTermsFileId).IsRequired(false);
+                e.Property(a => a.Status).IsRequired().HasMaxLength(16);
+                e.Property(a => a.ReactionDate).IsRequired(false);
+                e.Property(a => a.ReactionReason).IsRequired(false).HasMaxLength(1024);
+                e.Property(a => a.Date).IsRequired(false)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
-                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null //(DateOnly?)null
+                        v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null
                     );
-                e.Property(r => r.AgreedTime).IsRequired(false)
+                e.Property(a => a.Time).IsRequired(false)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
-                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null //(TimeOnly?)null
+                        v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
                     );
             });
         }

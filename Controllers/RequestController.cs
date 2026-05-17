@@ -73,19 +73,20 @@ public class RequestController(
         // create request
         var request = await requestRepository.Create(new RequestEntity
         {
-            Code = Guid.NewGuid(),
+            Number = Guid.NewGuid().ToString(),
+            CreateDate = DateTime.UtcNow,
             Status = RequestStatusEnum.Pending,
             Service = model.Service,
             Title = model.Title.Trim(),
             Description = model.Description?.Trim() ?? "",
-            SourceAddress = model.SourceAddress.Trim(),
+            PickupAddress = model.PickupAddress.Trim(),
             DestinationAddress = model.DestinationAddress.Trim(),
             RequesterId = user.Id,
-            ProposedCost = model.ProposedCost,
-            ProposedCurrency = "EUR",
-            ProposedASAP = model.IsASAP,
-            ProposedDate = !model.IsASAP ? DateOnly.Parse(model.ProposedDate!) : null,
-            ProposedTime = !model.IsASAP ? TimeOnly.Parse(model.ProposedTime!) : null,
+            Cost = model.Cost,
+            Currency = "EUR",
+            ASAP = model.IsASAP,
+            Date = !model.IsASAP ? DateOnly.Parse(model.Date!) : null,
+            Time = !model.IsASAP ? TimeOnly.Parse(model.Time!) : null,
         });
 
         // upload media
@@ -104,7 +105,7 @@ public class RequestController(
         return Json(new
         {
             success = true,
-            redirect = Url.Action("View", "Request", new { code = request.Code })
+            redirect = Url.Action("View", "Request", new { number = request.Number })
         });
     }
 
@@ -114,9 +115,9 @@ public class RequestController(
 
     [HttpGet]
     [ActionName("View")]
-    public async Task<IActionResult> ViewRequest(Guid code)
+    public async Task<IActionResult> ViewRequest(string number)
     {
-        var request = await requestRepository.Get(code);
+        var request = await requestRepository.Get(number);
         if (request is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -216,13 +217,13 @@ public class RequestController(
         request.Service = model.Service;
         request.Title = model.Title.Trim();
         request.Description = model.Description?.Trim() ?? "";
-        request.SourceAddress = model.SourceAddress.Trim();
+        request.PickupAddress = model.PickupAddress.Trim();
         request.DestinationAddress = model.DestinationAddress.Trim();
-        request.ProposedCost = model.ProposedCost;
-        request.ProposedCurrency = "EUR";
-        request.ProposedASAP = model.IsASAP;
-        request.ProposedDate = !model.IsASAP ? DateOnly.Parse(model.ProposedDate!) : null;
-        request.ProposedTime = !model.IsASAP ? TimeOnly.Parse(model.ProposedTime!) : null;
+        request.Cost = model.Cost;
+        request.Currency = "EUR";
+        request.ASAP = model.IsASAP;
+        request.Date = !model.IsASAP ? DateOnly.Parse(model.Date!) : null;
+        request.Time = !model.IsASAP ? TimeOnly.Parse(model.Time!) : null;
         await requestRepository.Update(request);
 
         // upload media
@@ -240,7 +241,7 @@ public class RequestController(
         return Json(new
         {
             success = true,
-            redirect = Url.Action("View", "Request", new { code = request.Code })
+            redirect = Url.Action("View", "Request", new { number = request.Number })
         });
     }
 
@@ -357,11 +358,11 @@ public class RequestController(
                 ServiceEnum.Transport
             }.Contains(model.Service) ? AnnotationEnum.Request.Requirement.ServiceType :
             string.IsNullOrWhiteSpace(model.Title) ? AnnotationEnum.Request.Requirement.Title :
-            string.IsNullOrWhiteSpace(model.SourceAddress) ? AnnotationEnum.Request.Requirement.SourceAddress :
-            string.IsNullOrWhiteSpace(model.DestinationAddress) ? AnnotationEnum.Request.Requirement.DestinationAddress :
-            (model.ProposedCost < 1 || model.ProposedCost > 10000) ? AnnotationEnum.Request.Requirement.ProposedCost :
-            (!model.IsASAP && !DateOnly.TryParse(model.ProposedDate, out _)) ? AnnotationEnum.Request.Requirement.ProposedDate :
-            (!model.IsASAP && !TimeOnly.TryParse(model.ProposedTime, out _)) ? AnnotationEnum.Request.Requirement.ProposedTime :
+            string.IsNullOrWhiteSpace(model.PickupAddress) ? AnnotationEnum.Request.Requirement.PickupAddress :
+            (model.Service != ServiceEnum.Removal && string.IsNullOrWhiteSpace(model.DestinationAddress)) ? AnnotationEnum.Request.Requirement.DestinationAddress :
+            (model.Cost < 1 || model.Cost > 10000) ? AnnotationEnum.Request.Requirement.Cost :
+            (!model.IsASAP && !DateOnly.TryParse(model.Date, out _)) ? AnnotationEnum.Request.Requirement.Date :
+            (!model.IsASAP && !TimeOnly.TryParse(model.Time, out _)) ? AnnotationEnum.Request.Requirement.Time :
             null;
 
         return field is null ? null : string.Format(AnnotationEnum.Request.Requirement.Error, field);

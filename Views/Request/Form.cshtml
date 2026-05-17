@@ -156,8 +156,8 @@
                             <div class="row g-6">
                                 <div class="col-12">
                                     <div class="form-floating form-floating-outline">
-                                        <input type="text" id="sourceAddress" name="sourceAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.SourceAddress : "")" />
-                                        <label for="sourceAddress">Source Address</label>
+                                        <input type="text" id="pickupAddress" name="pickupAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.PickupAddress : "")" />
+                                        <label for="pickupAddress">Pickup Address</label>
                                         <div class="invalid-feedback">Source address is required.</div>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@
                                 <div class="col-auto" style="width: 200px;">
                                     <div class="input-group input-group-merge">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="number" id="proposedCost" name="proposedCost" class="form-control" placeholder="" min="1" max="10000" step="0.01" value="@(isEdit ? req!.ProposedCost : "")" />
+                                            <input type="number" id="proposedCost" name="cost" class="form-control" placeholder="" min="1" max="10000" step="0.01" value="@(isEdit ? req!.Cost : "")" />
                                             <label for="proposedCost">Cost</label>
                                             <div class="invalid-feedback">Cost is required.</div>
                                         </div>
@@ -193,27 +193,27 @@
                             <h5 class="mb-4">6. Desirable Timing</h5>
                             <div class="mb-4">
                                 <div class="form-check form-check-inline">
-                                    <input name="isASAP" class="form-check-input" type="radio" value="true" id="timingInstant" checked="@(!isEdit || req!.ProposedASAP ? "checked" : null)" />
+                                    <input name="isASAP" class="form-check-input" type="radio" value="true" id="timingInstant" checked="@(!isEdit || req!.ASAP ? "checked" : null)" />
                                     <label class="form-check-label" for="timingInstant">As soon as possible</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input name="isASAP" class="form-check-input" type="radio" value="false" id="timingSpecified" checked="@(isEdit && !req!.ProposedASAP ? "checked" : null)" />
+                                    <input name="isASAP" class="form-check-input" type="radio" value="false" id="timingSpecified" checked="@(isEdit && !req!.ASAP ? "checked" : null)" />
                                     <label class="form-check-label" for="timingSpecified">Specified date and time</label>
                                 </div>
                             </div>
 
-                            <div id="scheduled-fields" class="@(isEdit && !req!.ProposedASAP ? "" : "d-none")">
+                            <div id="scheduled-fields" class="@(isEdit && !req!.ASAP ? "" : "d-none")">
                                 <div class="row g-6">
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="text" id="proposedDate" name="proposedDate" class="form-control" placeholder="" value="@(isEdit ? req!.ProposedDate?.ToString("yyyy-MM-dd") : "")" />
+                                            <input type="text" id="proposedDate" name="date" class="form-control" placeholder="" value="@(isEdit ? req!.Date?.ToString("yyyy-MM-dd") : "")" />
                                             <label for="proposedDate">Date</label>
                                             <div class="invalid-feedback">Please select a date.</div>
                                         </div>
                                     </div>
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="form-floating form-floating-outline">
-                                            <input type="text" id="proposedTime" name="proposedTime" class="form-control" placeholder="" value="@(isEdit ? req!.ProposedTime?.ToString("HH:mm") : "")" />
+                                            <input type="text" id="proposedTime" name="time" class="form-control" placeholder="" value="@(isEdit ? req!.Time?.ToString("HH:mm") : "")" />
                                             <label for="proposedTime">Time</label>
                                             <div class="invalid-feedback">Please select a time.</div>
                                         </div>
