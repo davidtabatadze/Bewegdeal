@@ -1,5 +1,6 @@
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
@@ -24,13 +25,7 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        public async Task<SettingsEntity> Get()
-        {
-            // There is always exactly one row after seeding.
-            // The fallback with Id = 1 is a safety net for unexpected states.
-            return await context.Settings.FirstOrDefaultAsync()
-                ?? new SettingsEntity { Id = 1 };
-        }
+        // ── Write ────────────────────────────────────────────────────────────────
 
         public async Task Update(SettingsEntity settings)
         {
@@ -45,5 +40,16 @@ namespace Bewegdeal.Data.Repositories
                     .SetProperty(p => p.RequestVideoMaxSize, settings.RequestVideoMaxSize)
                 );
         }
+
+        // ── Read ─────────────────────────────────────────────────────────────────
+
+        public async Task<SettingsEntity> Get()
+        {
+            return await context.Settings.FirstOrDefaultAsync()
+                ?? new SettingsEntity { Id = 1 };
+        }
+
+        // ── Delete ───────────────────────────────────────────────────────────────
+        // ***
     }
 }

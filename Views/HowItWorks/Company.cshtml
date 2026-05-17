@@ -1,0 +1,30 @@
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "How It Works";
+    var showBar = (bool)ViewBag.ShowBar;
+}
+
+<div class="row flex-grow-1 h-100">
+    <div class="col-12 d-flex flex-column">
+        <div class="card flex-grow-1">
+
+            @if (showBar)
+            {
+                <!-- Sticky header -->
+                <div class="card-header sticky-element d-flex justify-content-center align-items-center">
+                    <form asp-controller="HowItWorks" asp-action="Acknowledge" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="icon-base ri ri-checkbox-circle-line me-1_5"></i>
+                            I understand, don't show again
+                        </button>
+                    </form>
+                </div>
+            }
+
+            <div class="card-body pt-5">
+                <p class="mb-0">Here will be the "How it works" instruction for company.</p>
+            </div>
+
+        </div>
+    </div>
+</div>

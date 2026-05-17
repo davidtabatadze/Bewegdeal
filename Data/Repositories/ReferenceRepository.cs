@@ -1,18 +1,13 @@
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    /// <summary>
-    /// EF Core implementation of <see cref="IReferenceRepository"/>.
-    /// Scoped per request. Interacts with the database only — no business logic.
-    /// </summary>
     public class ReferenceRepository(SqlContext context) : IReferenceRepository, IRepositorySeedable
     {
-        private readonly SqlContext _context = context;
-
         public async Task Seed()
         {
             var rows = new[]
@@ -28,7 +23,7 @@ namespace Bewegdeal.Data.Repositories
 
             foreach (var row in rows)
             {
-                if (await Get(new BaseFilter<string> { Id = row.Id }) != null)
+                if (await Get(row.Id) != null)
                 {
                     continue;
                 }
@@ -37,33 +32,30 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        // ── Read ─────────────────────────────────────────────────────────────────
-
-        public async Task<ReferenceEntity?> Get(BaseFilter<string> filter)
-        {
-            var query = _context.References.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(filter.Id))
-            {
-                query = query.Where(r => r.Id == filter.Id);
-            }
-
-            return await query.FirstOrDefaultAsync();
-        }
-
         // ── Write ────────────────────────────────────────────────────────────────
 
         public async Task<ReferenceEntity> Create(ReferenceEntity reference)
         {
-            _context.References.Add(reference);
-            await _context.SaveChangesAsync();
+            context.References.Add(reference);
+            await context.SaveChangesAsync();
             return reference;
         }
 
         public async Task Update(ReferenceEntity reference)
         {
-            _context.References.Update(reference);
-            await _context.SaveChangesAsync();
+            context.References.Update(reference);
+            await context.SaveChangesAsync();
         }
+
+        // ── Read ─────────────────────────────────────────────────────────────────
+
+        public async Task<ReferenceEntity?> Get(string id)
+        {
+            id ??= "-";
+            return await context.References.FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        // ── Delete ───────────────────────────────────────────────────────────────
+        // ***
     }
 }

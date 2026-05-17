@@ -1,5 +1,5 @@
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 
 namespace Bewegdeal.Middleware
 {

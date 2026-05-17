@@ -78,21 +78,21 @@ ajax: {
 
 `d.sortField` and `d.sortDirection` bind straight into `filter.SortField` and `filter.SortDirection` on the server (ASP.NET Core model binding is case-insensitive). `d.start` and `d.length` bind into `filter.Start` and `filter.Length`.
 
-### Server response shape — DataTablesResult<T>
+### Server response shape — GridResultViewModel<T>
 
-The controller returns `Json(new DataTablesResult<object>(draw, total, filtered, data))`.
+The controller returns `Json(new GridResultViewModel<object>(draw, total, filtered, data))`.
 
-`DataTablesResult<T>` lives in `Models/DataTablesResult.cs`:
+`GridResultViewModel<T>` lives in `Models/GridResultViewModel.cs`:
 
 ```csharp
-public class DataTablesResult<T>
+public class GridResultViewModel<T>
 {
     public int            Draw            { get; init; }
     public int            RecordsTotal    { get; init; }
     public int            RecordsFiltered { get; init; }
     public IEnumerable<T> Data            { get; init; }
 
-    public DataTablesResult(int draw, int recordsTotal, int recordsFiltered, IEnumerable<T> data)
+    public GridResultViewModel(int draw, int recordsTotal, int recordsFiltered, IEnumerable<T> data)
     {
         Draw            = draw;
         RecordsTotal    = recordsTotal;
@@ -126,7 +126,7 @@ public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQ
         // ... only fields the table needs
     });
 
-    return Json(new DataTablesResult<object>(draw, total, filtered, data));
+    return Json(new GridResultViewModel<object>(draw, total, filtered, data));
 }
 ```
 
@@ -234,7 +234,10 @@ Use **Notiflix `Block.pulse`** on the `.card-datatable` element. Do NOT use Data
 // In VendorScripts
 // <script src="~/vendor/libs/notiflix/notiflix.js"></script>
 
-// After DataTable initialization:
+// After DataTable initialization — call immediately for initial load,
+// because preXhr.dt does not fire for the very first request:
+Block.pulse('.card-datatable');
+
 dt.on('preXhr.dt', function () {
   Block.pulse('.card-datatable');
 });
@@ -543,7 +546,7 @@ table.on('xhr.dt',    function () { /* hide spinner */ });
 
 1. **Controller** — create a dedicated controller (e.g. `UserController`) with `[RequireLogin]`:
    - Page action (e.g. `List()`) — loads ViewBag stats, returns the view
-   - `[HttpGet] LoadXxx([FromQuery] XxxFilter filter, [FromQuery] int draw = 1)` — returns `DataTablesResult<object>`
+   - `[HttpGet] LoadXxx([FromQuery] XxxFilter filter, [FromQuery] int draw = 1)` — returns `GridResultViewModel<object>`
    - `[HttpPost] UpdateXxxStatus(long id)` — self-protection check first, then status logic
 
 2. **Repository** — ensure the filter class extends `BaseFilter<T>` (already has `SortField`, `SortDirection`, `Start`, `Length`). Add domain-specific filter fields. Implement:

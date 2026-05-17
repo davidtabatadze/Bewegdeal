@@ -1,5 +1,4 @@
-using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Services;
@@ -41,7 +40,7 @@ public class SettingsController(
 
         var settings = await settingsRepository.Get();
 
-        var (id, error) = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, FileTypeEnum.PDF);
+        var (id, error) = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
         if (error is not null || id is null)
         {
             TempData["TermsError"] = error;

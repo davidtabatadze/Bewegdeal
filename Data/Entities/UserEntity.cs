@@ -2,10 +2,6 @@ using Bewegdeal.Data.Base;
 
 namespace Bewegdeal.Data.Entities
 {
-    /// <summary>
-    /// Represents a row in the Users table. Pure data object — no business logic.
-    /// Role and Status values come from <c>UserRoleEnum</c> and <c>UserStatusEnum</c>.
-    /// </summary>
     public class UserEntity : IEntity
     {
         public long Id { get; set; }
@@ -19,6 +15,7 @@ namespace Bewegdeal.Data.Entities
         public string? Number { get; set; } = string.Empty;
         public string? Address { get; set; } = string.Empty;
         public string[] Interests { get; set; } = [];
-        public long? TermsFileId { get; set; }
+        public long? ServiceTermsFileId { get; set; }
+        public bool AcquaintedHIW { get; set; }
     }
 }

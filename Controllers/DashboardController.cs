@@ -12,9 +12,9 @@ namespace Bewegdeal.Controllers
             return HttpContext.Session.GetString("UserRole") switch
             {
                 UserRoleEnum.Administrator => View("Admin"),
-                UserRoleEnum.Company       => View("Company"),
-                UserRoleEnum.Customer      => View("Customer"),
-                _                          => RedirectToAction("Login", "Account")
+                UserRoleEnum.Company => View("Company"),
+                UserRoleEnum.Customer => View("Customer"),
+                _ => RedirectToAction("Login", "Account")
             };
         }
     }

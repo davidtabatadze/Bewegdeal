@@ -202,7 +202,9 @@ document.addEventListener('DOMContentLoaded', function () {
     responsive: false,
   });
 
-  // Loading indicator — Notiflix pulse block on the table card
+  // Loading indicator — also covers the initial load
+  Block.pulse('.card-datatable');
+
   dt_user.on('preXhr.dt', function () {
     Block.pulse('.card-datatable');
   });

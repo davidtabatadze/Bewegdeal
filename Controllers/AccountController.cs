@@ -1,6 +1,5 @@
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.Services;
@@ -15,8 +14,9 @@ public class AccountController(
     IUserRepository userRepository,
     ISettingsRepository settingsRepository,
     IFileRepository fileRepository,
-    IMemoryCache cache) : Controller
+    IMemoryCache cache) : XBaseController(userRepository)
 {
+    private readonly IUserRepository _userRepository = userRepository;
 
     #region Login
 
@@ -35,12 +35,12 @@ public class AccountController(
     public async Task<IActionResult> Login(string email, string password, bool rememberMe)
     {
         // seek user
-        var user = await userRepository.Get(new UserFilter { Email = email });
+        var user = await GetUser(email);
 
         // verify user existence and password
         if (user is null || !PasswordTool.Verify(password, user.Password, user.Salt))
         {
-            ViewBag.Error = AnnotationEnum.Account.Login.Credentials; //OK
+            ViewBag.Error = AnnotationEnum.Account.Login.Credentials;
             return View();
         }
 
@@ -49,14 +49,14 @@ public class AccountController(
         {
 
             case UserStatusEnum.Blocked:
-                ViewBag.Error = AnnotationEnum.Account.Login.Blocked; //OK
+                ViewBag.Error = AnnotationEnum.Account.Login.Blocked;
                 return View();
 
             case UserStatusEnum.Pending:
-                ViewBag.Error = AnnotationEnum.Account.Login.Pending; //OK
+                ViewBag.Error = AnnotationEnum.Account.Login.Pending;
                 return View();
 
-            case UserStatusEnum.Unverified: //OK
+            case UserStatusEnum.Unverified:
                 return RedirectToAction(nameof(VerifyEmail), new { email = user.Email });
 
         }
@@ -78,6 +78,13 @@ public class AccountController(
                 SameSite = SameSiteMode.Lax,
                 IsEssential = true
             });
+        }
+
+        // redirect to hiw
+        if (!user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
+        {
+            var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";
+            return RedirectToAction(action, "HowItWorks");
         }
 
         // all good
@@ -110,9 +117,7 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> ForgotPassword(string email)
     {
-        email = (email ?? "").Trim();
-
-        var user = await userRepository.Get(new UserFilter { Email = email });
+        var user = await GetUser(email);
 
         if (user is not null)
         {
@@ -158,7 +163,7 @@ public class AccountController(
         cache.Remove(emailKey);
 
         // load user
-        var user = await userRepository.Get(new UserFilter { Email = email });
+        var user = await GetUser(email);
 
         // validate
         if (user is null || lastToken != token)
@@ -169,7 +174,7 @@ public class AccountController(
 
         // update password and clear token
         var (hash, salt) = PasswordTool.HashPassword(password);
-        await userRepository.UpdatePassword(user.Id, hash, salt);
+        await _userRepository.UpdatePassword(user.Id, hash, salt);
 
         TempData["LoginSuccess"] = AnnotationEnum.Account.ResetPassword.Success;
         return RedirectToAction(nameof(Login));
@@ -191,7 +196,6 @@ public class AccountController(
     public async Task<IActionResult> VerifyEmail(string email, string otp)
     {
         // ready email
-        email = (email ?? "").Trim();
         ViewBag.Email = email;
 
         // seek one time code
@@ -202,22 +206,22 @@ public class AccountController(
         // no code? error
         if (oneTimeCode is null)
         {
-            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Expired; //OK
+            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Expired;
             return View();
         }
 
         // wrong input? error
         if (oneTimeCode != otp)
         {
-            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Invalid; //OK
+            ViewBag.Error = AnnotationEnum.Account.VerifyEmail.Invalid;
             return View();
         }
 
         // update user
-        var user = await userRepository.Get(new UserFilter { Email = email });
+        var user = await GetUser(email);
         if (user is not null)
         {
-            await userRepository.SetUserStatus(
+            await _userRepository.SetUserStatus(
                 user.Id,
                 user.Role == UserRoleEnum.Customer ?
                 UserStatusEnum.Active : UserStatusEnum.Pending
@@ -245,7 +249,7 @@ public class AccountController(
         }
 
         // all good
-        ViewBag.Success = AnnotationEnum.Account.VerifyEmail.Resent; //OK
+        ViewBag.Success = AnnotationEnum.Account.VerifyEmail.Resent;
         return View("VerifyEmail");
     }
 
@@ -277,10 +281,10 @@ public class AccountController(
         }
 
         // validate email uniqueness
-        var existing = await userRepository.Get(new UserFilter { Email = model.Email });
+        var existing = await GetUser(model.Email);
         if (existing is not null)
         {
-            ViewBag.Error = AnnotationEnum.Account.Register.Exists; //OK
+            ViewBag.Error = AnnotationEnum.Account.Register.Exists;
             return View(model);
         }
 
@@ -298,7 +302,7 @@ public class AccountController(
         long? termsFileId = null;
         if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await fileService.Create(model.TermsFile, null, FileTypeEnum.PDF);
+            var file = await fileService.Create(model.TermsFile, null, null, [FileTypeEnum.PDF]);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;
@@ -311,7 +315,7 @@ public class AccountController(
         var (hash, salt) = PasswordTool.HashPassword(model.Password);
 
         // do create user
-        var user = await userRepository.Create(new UserEntity
+        var user = await _userRepository.Create(new UserEntity
         {
             Role = model.Role,
             Name = model.Name,
@@ -323,7 +327,8 @@ public class AccountController(
             Salt = salt,
             Interests = [.. interests],
             Status = UserStatusEnum.Unverified,
-            TermsFileId = termsFileId
+            ServiceTermsFileId = termsFileId,
+            AcquaintedHIW = false
         });
 
         // send verification email

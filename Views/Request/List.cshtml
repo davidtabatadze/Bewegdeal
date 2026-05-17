@@ -1,0 +1,160 @@
+@using Bewegdeal.Enums
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Requests";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-request-list.js"></script>
+}
+
+<!-- Stat Cards -->
+<div class="row g-6 mb-6">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Total Requests</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.TotalCount</h4>
+                        </div>
+                        <small class="mb-0">All placed requests</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-primary rounded">
+                            <div class="icon-base ri ri-file-list-3-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Pending</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.PendingCount</h4>
+                        </div>
+                        <small class="mb-0">Awaiting executor</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <div class="icon-base ri ri-time-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Negotiation</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.NegotiationCount</h4>
+                        </div>
+                        <small class="mb-0">Under agreement</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-info rounded">
+                            <div class="icon-base ri ri-shake-hands-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Resolved</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.ResolvedCount</h4>
+                        </div>
+                        <small class="mb-0">Successfully completed</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-success rounded">
+                            <div class="icon-base ri ri-checkbox-circle-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Requests Table -->
+<div class="card">
+    <div class="card-header border-bottom">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                    <input type="text" id="requestsSearch" class="form-control" placeholder="Search requests..." />
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Statuses</option>
+                            <option data-divider="true"></option>
+                            <option value="@RequestStatusEnum.Pending">Pending</option>
+                            <option value="@RequestStatusEnum.Negotiation">Negotiation</option>
+                            <option value="@RequestStatusEnum.Agreed">Agreed</option>
+                            <option value="@RequestStatusEnum.Resolved">Resolved</option>
+                            <option value="@RequestStatusEnum.Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select id="filterService" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Services</option>
+                            <option data-divider="true"></option>
+                            <option value="@ServiceEnum.Moving">Moving Service</option>
+                            <option value="@ServiceEnum.Removal">Junk Removal</option>
+                            <option value="@ServiceEnum.Pickup">Store Pickup</option>
+                            <option value="@ServiceEnum.Transport">Vehicle Transport</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-datatable">
+        <table class="datatables-requests table">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Status</th>
+                    <th>Request</th>
+                    <th>Job</th>
+                    <th>Date</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>

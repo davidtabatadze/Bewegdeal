@@ -1,19 +1,15 @@
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Tools;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    /// <summary>
-    /// EF Core implementation of <see cref="IUserRepository"/>.
-    /// Scoped per request. Interacts with the database only — no business logic.
-    /// </summary>
     public class UserRepository(SqlContext context) : IUserRepository, IRepositorySeedable
     {
-        private readonly SqlContext _context = context;
 
         public async Task Seed()
         {
@@ -49,11 +45,44 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
+        // ── Write ────────────────────────────────────────────────────────────────
+
+        public async Task<UserEntity> Create(UserEntity user)
+        {
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task SetUserStatus(long id, string status)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
+        }
+
+        public async Task SetAcquaintedHIW(long id)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.AcquaintedHIW, true));
+        }
+
+        public async Task UpdatePassword(long id, string hash, string salt)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.Password, hash)
+                    .SetProperty(u => u.Salt, salt)
+                );
+        }
+
         // ── Read ─────────────────────────────────────────────────────────────────
 
         public async Task<UserEntity?> Get(UserFilter filter)
         {
-            var query = _context.Users.AsQueryable();
+            var query = context.Users.AsQueryable();
 
             if (filter.Id.HasValue)
             {
@@ -68,14 +97,12 @@ namespace Bewegdeal.Data.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<int> Count(UserFilter filter)
-        {
-            return await ApplyFilters(_context.Users.AsQueryable(), filter).CountAsync();
-        }
+        public async Task<int> Count(UserFilter filter) =>
+            await ApplyFilters(context.Users.AsQueryable(), filter).CountAsync();
 
         public async Task<List<UserEntity>> Load(UserFilter filter)
         {
-            var query = ApplyFilters(_context.Users.AsQueryable(), filter);
+            var query = ApplyFilters(context.Users.AsQueryable(), filter);
 
             if (!string.IsNullOrWhiteSpace(filter.SortDirection) && !string.IsNullOrWhiteSpace(filter.SortField))
             {
@@ -95,8 +122,6 @@ namespace Bewegdeal.Data.Repositories
 
             return await query.ToListAsync();
         }
-
-        // ── Helpers ──────────────────────────────────────────────────────────────
 
         private static IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
         {
@@ -134,30 +159,7 @@ namespace Bewegdeal.Data.Repositories
             return query;
         }
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity> Create(UserEntity user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task SetUserStatus(long id, string status)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
-        }
-
-        public async Task UpdatePassword(long id, string hash, string salt)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Password, hash)
-                    .SetProperty(u => u.Salt, salt)
-                );
-        }
+        // ── Delete ───────────────────────────────────────────────────────────────
+        // ***
     }
 }

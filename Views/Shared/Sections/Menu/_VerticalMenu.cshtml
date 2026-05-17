@@ -33,6 +33,17 @@
             </a>
         </li>
 
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
+        {
+            <!-- New Request -->
+            <li class='menu-item@(currentPage == "/Request/Create" ? " active" : "")'>
+                <a asp-controller="Request" asp-action="Create" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-add-circle-line"></i>
+                    <div data-i18n="New Request">New Request</div>
+                </a>
+            </li>
+        }
+
         @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Administrator)
         {
             <!-- Users -->
@@ -43,11 +54,41 @@
                 </a>
             </li>
 
+            <!-- Requests -->
+            <li class='menu-item@(currentPage == "/Request/List" ? " active" : "")'>
+                <a asp-controller="Request" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-file-list-3-line"></i>
+                    <div data-i18n="Requests">Requests</div>
+                </a>
+            </li>
+
             <!-- Settings -->
             <li class='menu-item@(currentPage == "/Settings" || currentPage == "/Settings/Index" ? " active" : "")'>
                 <a asp-controller="Settings" asp-action="Index" class="menu-link">
                     <i class="menu-icon icon-base ri ri-settings-4-line"></i>
                     <div data-i18n="Settings">Settings</div>
+                </a>
+            </li>
+        }
+
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
+        {
+            <!-- How It Works -->
+            <li class='menu-item@(currentPage == "/HowItWorks/Customer" ? " active" : "")'>
+                <a asp-controller="HowItWorks" asp-action="Customer" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-question-line"></i>
+                    <div data-i18n="How It Works">How It Works</div>
+                </a>
+            </li>
+        }
+
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Company)
+        {
+            <!-- How It Works -->
+            <li class='menu-item@(currentPage == "/HowItWorks/Company" ? " active" : "")'>
+                <a asp-controller="HowItWorks" asp-action="Company" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-question-line"></i>
+                    <div data-i18n="How It Works">How It Works</div>
                 </a>
             </li>
         }

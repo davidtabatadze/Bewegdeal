@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-
-namespace Bewegdeal.Enums
+﻿namespace Bewegdeal.Enums
 {
     public class AnnotationEnum
     {
@@ -36,6 +34,26 @@ namespace Bewegdeal.Enums
             {
                 public const string Verification = "We are sorry, we are unable to send you a verification email right now. Please, try again later or contact the site administration.";
                 public const string Reset = "We are sorry, we are unable to send you a password reset email right now. Please, try again later or contact the site administration.";
+            }
+        }
+        public class Request
+        {
+            public class Requirement
+            {
+                public const string Title = "Title";
+                public const string ServiceType = "Service Type";
+                public const string PickupAddress = "Source Address";
+                public const string DeliveryAddress = "Delivery Address";
+                public const string Cost = "Cost (1 to 10,000)";
+                public const string Date = "Date";
+                public const string Time = "Time";
+                public const string Error = "{0} field is required.";
+            }
+            public class Media
+            {
+                public const string ImageMinCount = "Image field is required.";
+                public const string ImageMaxCount = "Maximum {0} images allowed.";
+                public const string VideoMaxCount = "Maximum {0} videos allowed.";
             }
         }
     }
