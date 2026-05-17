@@ -204,7 +204,7 @@ Dropzone.autoDiscover = false;
   }
 
   // ── Inline validation clearing ────────────────────────────────────────────
-  ['title', 'pickupAddress', 'destinationAddress'].forEach(function (id) {
+  ['title', 'pickupAddress', 'deliveryAddress'].forEach(function (id) {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('input', function () {
@@ -239,11 +239,11 @@ Dropzone.autoDiscover = false;
     });
   }
 
-  const destAddressWrapper = document.getElementById('destinationAddress')?.closest('.col-12');
+  const destAddressWrapper = document.getElementById('deliveryAddress')?.closest('.col-12');
 
   function toggleDestinationAddress(service) {
     if (!destAddressWrapper) { return; }
-    const destInput = document.getElementById('destinationAddress');
+    const destInput = document.getElementById('deliveryAddress');
     if (service === 'removal') {
       destAddressWrapper.classList.add('d-none');
       if (destInput) {
@@ -317,7 +317,7 @@ Dropzone.autoDiscover = false;
         hasErrors = true;
       }
 
-      const destInput = document.getElementById('destinationAddress');
+      const destInput = document.getElementById('deliveryAddress');
       const selectedService = document.querySelector('input[name="service"]:checked')?.value;
       if (selectedService !== 'removal' && !destInput.value.trim()) {
         destInput.classList.add('is-invalid');

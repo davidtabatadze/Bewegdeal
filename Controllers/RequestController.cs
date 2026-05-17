@@ -80,7 +80,7 @@ public class RequestController(
             Title = model.Title.Trim(),
             Description = model.Description?.Trim() ?? "",
             PickupAddress = model.PickupAddress.Trim(),
-            DestinationAddress = model.DestinationAddress.Trim(),
+            DeliveryAddress = model.DeliveryAddress.Trim(),
             RequesterId = user.Id,
             Cost = model.Cost,
             Currency = "EUR",
@@ -218,7 +218,7 @@ public class RequestController(
         request.Title = model.Title.Trim();
         request.Description = model.Description?.Trim() ?? "";
         request.PickupAddress = model.PickupAddress.Trim();
-        request.DestinationAddress = model.DestinationAddress.Trim();
+        request.DeliveryAddress = model.DeliveryAddress.Trim();
         request.Cost = model.Cost;
         request.Currency = "EUR";
         request.ASAP = model.IsASAP;
@@ -359,7 +359,7 @@ public class RequestController(
             }.Contains(model.Service) ? AnnotationEnum.Request.Requirement.ServiceType :
             string.IsNullOrWhiteSpace(model.Title) ? AnnotationEnum.Request.Requirement.Title :
             string.IsNullOrWhiteSpace(model.PickupAddress) ? AnnotationEnum.Request.Requirement.PickupAddress :
-            (model.Service != ServiceEnum.Removal && string.IsNullOrWhiteSpace(model.DestinationAddress)) ? AnnotationEnum.Request.Requirement.DestinationAddress :
+            (model.Service != ServiceEnum.Removal && string.IsNullOrWhiteSpace(model.DeliveryAddress)) ? AnnotationEnum.Request.Requirement.DeliveryAddress :
             (model.Cost < 1 || model.Cost > 10000) ? AnnotationEnum.Request.Requirement.Cost :
             (!model.IsASAP && !DateOnly.TryParse(model.Date, out _)) ? AnnotationEnum.Request.Requirement.Date :
             (!model.IsASAP && !TimeOnly.TryParse(model.Time, out _)) ? AnnotationEnum.Request.Requirement.Time :

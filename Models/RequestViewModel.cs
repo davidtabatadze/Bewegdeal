@@ -7,7 +7,7 @@ namespace Bewegdeal.Models
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string PickupAddress { get; set; } = string.Empty;
-        public string DestinationAddress { get; set; } = string.Empty;
+        public string DeliveryAddress { get; set; } = string.Empty;
         public decimal Cost { get; set; }
         public bool IsASAP { get; set; } = true;
         public string? Date { get; set; }

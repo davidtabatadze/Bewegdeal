@@ -181,7 +181,7 @@ namespace Bewegdeal.Data
                 e.Property(r => r.Title).IsRequired().HasMaxLength(128);
                 e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
                 e.Property(r => r.PickupAddress).IsRequired().HasMaxLength(512);
-                e.Property(r => r.DestinationAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.DeliveryAddress).IsRequired().HasMaxLength(512);
                 e.Property(r => r.RequesterId).IsRequired();
                 e.Property(r => r.ExecutorId).IsRequired(false);
                 e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);

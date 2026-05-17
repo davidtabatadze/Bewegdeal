@@ -43,7 +43,7 @@
                 public const string Title = "Title";
                 public const string ServiceType = "Service Type";
                 public const string PickupAddress = "Source Address";
-                public const string DestinationAddress = "Destination Address";
+                public const string DeliveryAddress = "Delivery Address";
                 public const string Cost = "Cost (1 to 10,000)";
                 public const string Date = "Date";
                 public const string Time = "Time";
