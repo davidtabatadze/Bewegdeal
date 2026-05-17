@@ -8,6 +8,11 @@ namespace Bewegdeal.Controllers
 {
     public class XBaseController(IUserRepository userRepository) : Controller
     {
+        protected async Task<UserEntity?> GetUser(string email)
+        {
+            return await userRepository.Get(new UserFilter { Email = (email ?? "").Trim() });
+        }
+
         protected async Task<UserEntity?> GetUser(
             List<string>? roles = null,
             bool? active = null,

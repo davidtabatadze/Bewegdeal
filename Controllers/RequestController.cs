@@ -368,12 +368,12 @@ public class RequestController(
     private static RequestEntity BuildRequest(RequestEntity? entity, RequestViewModel request, long userId)
     {
         entity ??= new RequestEntity
-            {
-                Number = Guid.NewGuid().ToString("N"),
-                CreateDate = DateTime.UtcNow,
-                Status = RequestStatusEnum.Pending,
-                RequesterId = userId
-            };
+        {
+            Number = Guid.NewGuid().ToString("N"),
+            CreateDate = DateTime.UtcNow,
+            Status = RequestStatusEnum.Pending,
+            RequesterId = userId
+        };
 
         entity.Service = request.Service;
         entity.Title = request.Title.Trim();
