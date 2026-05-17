@@ -16,6 +16,14 @@
         ServiceEnum.Transport => ("bg-label-info", "ri-car-line", "info", "Transport"),
         _ => ("bg-label-secondary", "ri-question-line", "info", req.Service)
     };
+
+    var status = req.Status switch
+    {
+        RequestStatusEnum.Pending => "warning",
+        RequestStatusEnum.Cancelled => "dark",
+        RequestStatusEnum.Negotiation => "info",
+        _ => "success"
+    };
 }
 
 @section VendorStyles {
@@ -34,16 +42,26 @@
 <div class="card bg-transparent shadow-none border-0 mb-6">
     <div class="card-body row g-6 p-0 pb-4">
         <div class="col-12 col-md-8 card-separator">
-            <h5 class="mb-2"><small>#@req.Id,</small><span class="h4 fw-semibold"> @req.Title</span></h5>
+            <h5 class="mb-2 text-center">
+                <small>#@req.Id <span class="badge rounded-pill bg-label-@status">@req.Status.ToUpper()</span> </small>
+                <span class="h4 fw-semibold"> @req.Title</span>
+            </h5>
             <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
                 <div class="d-flex align-items-center gap-1">
-                    <p><i class="icon-base ri ri-arrow-left-s-line scaleX-n1-rtl icon-20px me-1_5"></i>Back to requests</p>
+                    <button type="button" class="btn btn-text-secondary">
+                        <span class="icon-base ri ri-arrow-left-s-line icon-16px me-1_5"></span>
+                        Back to requests
+                    </button>
                 </div>
                 <div class="d-flex align-items-center gap-1">
-                    <p>Go to edit<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-20px me-1_5"></i></p>
+                    <button type="button" class="btn btn-text-secondary">
+                        Go to edit
+                        <span class="icon-base ri ri-arrow-right-s-line icon-16px me-1_5"></span>
+                    </button>
                 </div>
             </div>
-            <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
+            <hr class="m-0" />
+            <div class="d-flex justify-content-between flex-wrap gap-4 me-0 mt-4">
                 <div class="d-flex align-items-center gap-1">
                     <span class="badge rounded-pill @badge fun-facts-icon p-2">
                         <i class="icon-base ri @icon icon-42px"></i>
@@ -63,9 +81,19 @@
             </div>
         </div>
         <div class="col-12 col-md-4 ps-md-4 ps-lg-6">
-            <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-outline-primary">Primary</button>
-                <span class="badge rounded-pill bg-label-warning">Warning</span>
+            <div class="d-flex">
+                
+                <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-warning">
+                    <li class="list-group-item flex-fill p-3">
+                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
+                        <address class="text-body mb-0">
+                            <dl class="row mb-0">
+                                <dt class="col-8 fw-normal text-heading">As soon as possible</dt>
+                                <dd class="col-4 text-end"><strong>€</strong>1198.00</dd>
+                            </dl>
+                        </address>
+                    </li>
+                </ul>
                 @* <div>
                     <div>
                         <h5 class="mb-1">Time Spendings</h5>
@@ -134,7 +162,8 @@
     </div>
     <div class="col-lg-4">
         <div class="card h-100">
-            <div class="card-header d-flex"> @* m-0 p-3 *@
+            <div class="card-header d-flex">
+                @* m-0 p-3 *@
                 <div class="card-title m-0">
                     <h5 class="m-0 me-2">Details</h5>
                 </div>
