@@ -8,6 +8,8 @@ namespace Bewegdeal.Controllers
     [RequireLogin]
     public class HowItWorksController(IUserRepository userRepository) : XBaseController(userRepository)
     {
+        private readonly IUserRepository _userRepository = userRepository;
+
         [HttpGet]
         public async Task<IActionResult> Customer()
         {
@@ -43,7 +45,7 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await userRepository.SetAcquaintedHIW(user.Id);
+            await _userRepository.SetAcquaintedHIW(user.Id);
             return RedirectToAction("Index", "Dashboard");
         }
     }
