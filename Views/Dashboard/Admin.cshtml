@@ -3,14 +3,171 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="row g-6">
-
-    <div class="col-12">
+<!-- Row 1: User Stats -->
+<div class="row g-6 mb-6">
+    <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Admin Dashboard</h5>
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Total Clients</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">1 284</h4>
+                        </div>
+                        <small class="mb-0">All registered clients</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-primary rounded">
+                            <div class="icon-base ri ri-group-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Total Company</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">347</h4>
+                        </div>
+                        <small class="mb-0">Registered service providers</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-info rounded">
+                            <div class="icon-base ri ri-building-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Pending Company</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">42</h4>
+                        </div>
+                        <small class="mb-0">Companies awaiting review</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <div class="icon-base ri ri-time-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Fraud Messages</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">17</h4>
+                        </div>
+                        <small class="mb-0">Flagged for review</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-danger rounded">
+                            <div class="icon-base ri ri-spam-2-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Row 2: Request Statuses -->
+<h5 class="mb-4">Requests Statuses</h5>
+<div class="row g-6 mb-6">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Active</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">203</h4>
+                        </div>
+                        <small class="mb-0">Currently active requests</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-success rounded">
+                            <div class="icon-base ri ri-play-circle-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">In Chat</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">89</h4>
+                        </div>
+                        <small class="mb-0">Requests in negotiation</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-info rounded">
+                            <div class="icon-base ri ri-chat-1-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Deal</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">156</h4>
+                        </div>
+                        <small class="mb-0">Deals in progress</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-primary rounded">
+                            <div class="icon-base ri ri-handshake-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Resolved</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">831</h4>
+                        </div>
+                        <small class="mb-0">Successfully completed</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-secondary rounded">
+                            <div class="icon-base ri ri-check-double-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
