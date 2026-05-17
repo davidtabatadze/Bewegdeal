@@ -80,6 +80,13 @@ public class AccountController(
             });
         }
 
+        // redirect to hiw
+        if (!user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
+        {
+            var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";
+            return RedirectToAction(action, "HowItWorks");
+        }
+
         // all good
         return RedirectToAction("Index", "Home");
     }
@@ -323,7 +330,8 @@ public class AccountController(
             Salt = salt,
             Interests = [.. interests],
             Status = UserStatusEnum.Unverified,
-            ServiceTermsFileId = termsFileId
+            ServiceTermsFileId = termsFileId,
+            AcquaintedHIW = false
         });
 
         // send verification email

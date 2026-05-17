@@ -71,6 +71,28 @@
             </li>
         }
 
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
+        {
+            <!-- How It Works -->
+            <li class='menu-item@(currentPage == "/HowItWorks/Customer" ? " active" : "")'>
+                <a asp-controller="HowItWorks" asp-action="Customer" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-question-line"></i>
+                    <div data-i18n="How It Works">How It Works</div>
+                </a>
+            </li>
+        }
+
+        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Company)
+        {
+            <!-- How It Works -->
+            <li class='menu-item@(currentPage == "/HowItWorks/Company" ? " active" : "")'>
+                <a asp-controller="HowItWorks" asp-action="Company" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-question-line"></i>
+                    <div data-i18n="How It Works">How It Works</div>
+                </a>
+            </li>
+        }
+
     </ul>
 </aside>
 <!-- / Menu -->

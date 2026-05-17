@@ -61,6 +61,13 @@ namespace Bewegdeal.Data.Repositories
                 .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
         }
 
+        public async Task SetAcquaintedHIW(long id)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.AcquaintedHIW, true));
+        }
+
         public async Task UpdatePassword(long id, string hash, string salt)
         {
             await context.Users

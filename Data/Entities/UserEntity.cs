@@ -16,5 +16,6 @@ namespace Bewegdeal.Data.Entities
         public string? Address { get; set; } = string.Empty;
         public string[] Interests { get; set; } = [];
         public long? ServiceTermsFileId { get; set; }
+        public bool AcquaintedHIW { get; set; }
     }
 }
