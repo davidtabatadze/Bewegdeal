@@ -46,14 +46,19 @@ Default route: `{controller=Landing}/{action=Index}` → public landing page at 
 
 Admin pages:
 - `/Dashboard` or `/Dashboard/Index` → Dashboard (role-dispatched: Admin / Company / Customer view)
-- `/Home` or `/Home/Index` → redirects to `/Dashboard`
+- `/Home` or `/Home/Index` → HIW check then redirects to `/Dashboard`
 - `/Settings` or `/Settings/Index` → Settings
 - `/User/List` → Users list
+- `/Request/List` → Requests list (admin only)
+- `/Request/View?number=` → Request detail view
+- `/HowItWorks/Customer` → How It Works for customers
+- `/HowItWorks/Company` → How It Works for companies
 
 Account pages live under `/Account`:
 - `/Account/Login`
 - `/Account/Register`
 - `/Account/ForgotPassword`
+- `/Account/ResetPassword`
 - `/Account/VerifyEmail`
 
 ## Partials
@@ -68,7 +73,7 @@ Views/
 │   ├── _BlankLayout.cshtml
 │   └── Sections/
 │       ├── Menu/
-│       │   └── _VerticalMenu.cshtml     # Dashboard, Users, Settings
+│       │   └── _VerticalMenu.cshtml     # Dashboard; Admin: Users+Requests; Customer: New Request+HowItWorks; Company: HowItWorks
 │       ├── Navbar/
 │       │   ├── _NavbarLanding.cshtml    # Public landing navbar
 │       │   └── _NavbarHome.cshtml       # Admin navbar (theme switcher + notifications + user dropdown)
@@ -79,26 +84,29 @@ Views/
 
 ## Controllers
 
+- `XBaseController` — base controller; provides `GetUser(roles, active, hiw)` (session-based) and `GetUser(email)` (email-based) helpers; all app controllers inherit from it
 - `LandingController` — public landing page
-- `HomeController` — redirects `Index` → `Dashboard/Index`; kept for backwards-compatible `/Home` URL
+- `HomeController` — `[RequireLogin]`; checks AcquaintedHIW and redirects to `HowItWorks` if needed, otherwise to `Dashboard/Index`
 - `DashboardController` — `Index()` dispatches to `Views/Dashboard/Admin`, `Company`, or `Customer` based on session role
+- `HowItWorksController` — `[RequireLogin]`; `Customer()` and `Company()` (role-gated); `Acknowledge()` sets `AcquaintedHIW = true`
 - `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
-- `AccountController` — auth pages (Login, Register, ForgotPassword, VerifyEmail)
+- `AccountController` — auth pages (Login, Register, ForgotPassword, ResetPassword, VerifyEmail, VerifyResend); HIW redirect after successful login
 - `SettingsController` — Settings (`Index`), Terms upload (`SaveTermAndConditionSettings`), request config (`SaveRequestSettings`); **admin only**
 - `FileController` — file download (`Download`); no auth required — files may be public
-- `RequestController` — Create and Edit a request; `[RequireLogin]`; Customer + Active status only; both actions share `Views/Request/Form.cshtml`
+- `RequestController` — `[RequireLogin]`; Create, Edit, View, List (admin-only List/LoadRequests); Create/Edit additionally validate `Role == Customer && Status == Active` via `GetUser()`
 
 ## Account Views
 
 All four auth views live in `Views/Account/` and use `Layout = "_BlankLayout"`.
 They share the same visual shell: `authentication-wrapper authentication-basic`, centered card with logo, tree decoration images.
 
-- `Login.cshtml` — email/password form, links to ForgotPassword and Register
+- `Login.cshtml` — email/password form, links to ForgotPassword and Register; on success redirects to HowItWorks if `!AcquaintedHIW && Role != Administrator`, otherwise to Home
 - `Register.cshtml` — 3-step bs-stepper (max-width: 740px); steps: **Role → General → Account**. Driven by `wwwroot/js/pages-auth-multisteps.js`
   - Step 1 `#roleSelectionValidation`: Customer/Company radio cards, no default selection, FormValidation `notEmpty` on `role`
   - Step 2 `#personalInfoValidation`: roleIndicator badge in header; fields: Name (required always), Phone (required always), IdentificationNumber + Address (required for Company only). Manual `is-invalid` pattern for phone/id/address — NOT in FormValidation
   - Step 3 `#accountDetailsValidation`: Email, agreeTerms checkbox (T&C link is dynamic — loaded from Settings via `ViewBag.TermsFileKey`, opens `/File/Download/{key}` in a new tab; renders as plain `<span>` if no file is configured), Password, ConfirmPassword, `#servicesSection` (Company only, d-none toggle, 2×2 grid: Moving/Junk/Pickup/Vehicle, at least one required), `#companyTermsUpload` (Company only, d-none toggle, PDF only, not mandatory)
-- `ForgotPassword.cshtml` — single email field, back to login link
+- `ForgotPassword.cshtml` — single email field, back to login link; always shows success — never reveals whether email exists
+- `ResetPassword.cshtml` — token-validated password reset form; token passed via query string
 - `VerifyEmail.cshtml` — 6-digit OTP input, driven by pages-auth-two-steps.js
 
 ## Settings Page
@@ -187,15 +195,45 @@ Two action filter attributes in `Filters/`:
 | `[RequireLogin]` | Session has `UserId` | Redirect → `Account/Login` |
 | `[RequireAdmin]` | Logged in **and** `UserRole == "administrator"` | Not logged in → `Account/Login`; wrong role → `Home/Index` |
 
-- `HomeController` — `[RequireLogin]` (any logged-in user)
+- `HomeController` — `[RequireLogin]`
+- `HowItWorksController` — `[RequireLogin]`; `Customer()`/`Company()` additionally gate by role via `GetUser(roles: [...])`
 - `UserController` — `[RequireAdmin]`
 - `SettingsController` — `[RequireAdmin]`
-- `RequestController` — `[RequireLogin]`; additionally validates `Role == Customer && Status == Active` inside each action
+- `RequestController` — `[RequireLogin]`; `List`/`LoadRequests` are additionally `[RequireAdmin]`; Create/Edit additionally validate `Role == Customer && Status == Active` via `GetUser(roles: [Customer], active: true)`
 - `AccountController`, `FileController`, `LandingController` — no attribute (public)
+
+### XBaseController Pattern
+
+All app controllers inherit from `XBaseController` (which itself inherits `Controller`). It provides two `GetUser` overloads:
+
+```csharp
+// Session-based — for logged-in user validation
+protected async Task<UserEntity?> GetUser(
+    List<string>? roles = null,
+    bool? active = null,
+    bool? hiw = null
+)
+
+// Email-based — for auth flows (login, register, password reset)
+protected async Task<UserEntity?> GetUser(string email)
+```
+
+Controllers that need `IUserRepository` for write operations (e.g. `AccountController`, `HowItWorksController`) keep their own `_userRepository` field — primary constructor parameter passed to `base(userRepository)` and also assigned to field.
 
 ### Project Structure
 
 ```
+Controllers/
+├── XBaseController.cs           # Base: GetUser(roles,active,hiw) session-based; GetUser(email) email-based
+├── LandingController.cs
+├── HomeController.cs            # [RequireLogin]; HIW check → redirect to HowItWorks or Dashboard
+├── HowItWorksController.cs      # [RequireLogin]; Customer(), Company(), Acknowledge()
+├── DashboardController.cs
+├── AccountController.cs         # Login, Register, ForgotPassword, ResetPassword, VerifyEmail, VerifyResend
+├── UserController.cs            # [RequireAdmin]; List, LoadUsers, UpdateUserStatus
+├── SettingsController.cs        # [RequireAdmin]; Index, SaveTermAndConditionSettings, SaveRequestSettings
+├── RequestController.cs         # [RequireLogin]; List/LoadRequests [RequireAdmin]; Create, Edit, View
+└── FileController.cs            # public; Download
 Data/
 ├── Base/
 │   ├── IEntity.cs               # Marker interface for all entities
@@ -211,21 +249,22 @@ Data/
 │   └── RequestFileEntity.cs     # RequestFiles table — links a request to its uploaded files
 ├── Filters/
 │   ├── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
-│   └── FileFilter.cs            # Extends BaseFilter<long?>, adds Key
+│   ├── FileFilter.cs            # Extends BaseFilter<long?>, adds Key
+│   └── RequestFilter.cs         # Extends BaseFilter<long?>, adds Search, Status, Service
 ├── Repositories/
 │   ├── Abstractions/
-│   │   ├── IUserRepository.cs       # Get, Load, Count, Create, SetUserStatus, UpdatePassword
+│   │   ├── IUserRepository.cs       # Get(filter), Load, Count, Create, SetUserStatus, SetAcquaintedHIW, UpdatePassword
 │   │   ├── IReferenceRepository.cs  # Get, Create, Update
 │   │   ├── IFileRepository.cs       # Get(id), Load(BaseFilter<long>), Create, Delete(id)
 │   │   ├── ISettingsRepository.cs   # Get(), Update(entity)
-│   │   ├── IRequestRepository.cs    # Get(id), Create, Update
-│   │   └── IRequestFileRepository.cs# Load(requestId), Create(List<>), SetMainImage, Delete(List<id>)
+│   │   ├── IRequestRepository.cs    # Get(id), Get(number), Count(filter), Load(filter), Create, Update
+│   │   └── IRequestFileRepository.cs# Load(requestId), LoadMainImages(List<long>), Create(List<>), SetMainImage, Delete(List<id>)
 │   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (4 seed users)
 │   │                            #   private ApplyFilters helper shared by Count and Load
 │   ├── ReferenceRepository.cs   # EF Core impl + IRepositorySeedable (7 reference rows)
 │   ├── FileRepository.cs        # EF Core impl; no seeding
 │   ├── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, default values seeded)
-│   ├── RequestRepository.cs     # EF Core impl; no seeding
+│   ├── RequestRepository.cs     # EF Core impl; no seeding; private ApplyFilters for Count/Load
 │   └── RequestFileRepository.cs # EF Core impl; no seeding
 └── SqlContext.cs                # DbContext: all DbSets, EF config, value converters
                                  #   DateOnly↔DateTime and TimeOnly↔TimeSpan converters for SQLite compat
@@ -238,10 +277,10 @@ Enums/
 ├── SortDirectionEnum.cs         # "asc", "desc"
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 ├── EmailStatusEnum.cs           # "sent", "failed"
-├── RequestStatusEnum.cs         # "pending", "accepted", "completed", "cancelled"
+├── RequestStatusEnum.cs         # "pending", "negotiation", "resolved", "cancelled"
 ├── RequestFileTypeEnum.cs       # "image", "video"
 └── AnnotationEnum.cs            # Nested static string classes for user-facing messages (not DB values)
-                                 #   AnnotationEnum.Account.Login.*, .Register.*, .ForgotPassword.*, etc.
+                                 #   AnnotationEnum.Account.Login.*, .Register.*, .ForgotPassword.*, .ResetPassword.*, etc.
                                  #   AnnotationEnum.Request.Requirement.*, .Media.*
                                  #   Uses string.Format("{0}", field) pattern for parameterised messages
 Filters/
@@ -259,13 +298,19 @@ Tools/
 ├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
 └── FileStorageTool.cs           # Singleton local-filesystem impl; key = GUID + extension; base path from appsettings
 Views/
+├── HowItWorks/
+│   ├── Customer.cshtml          # Full-height card, sticky transparent header with Acknowledge button (shown if !AcquaintedHIW)
+│   └── Company.cshtml           # Same structure as Customer.cshtml
 └── Request/
-    └── Form.cshtml              # Single shared view for both Create and Edit
-                                 #   var req = ViewBag.Request as RequestEntity; var isEdit = req is not null
+    ├── Form.cshtml              # Single shared view for both Create and Edit
+    │                            #   var req = ViewBag.Request as RequestEntity; var isEdit = req is not null
+    ├── View.cshtml              # Request detail view; description rendered with white-space:pre-wrap
+    └── List.cshtml              # Admin-only requests DataTable
 wwwroot/js/
-└── request-form.js              # Dropzone (images + videos), flatpickr, jQuery Timepicker, inline validation,
-                                 #   FormData submit via fetch; works for both Create and Edit
-                                 #   Edit-only: loads existingFiles as Dropzone mock entries, tracks KeepFileIds/KeepMainFileId
+├── request-form.js              # Dropzone (images + videos), flatpickr, jQuery Timepicker, inline validation,
+│                                #   FormData submit via fetch; works for both Create and Edit
+│                                #   Edit-only: loads existingFiles as Dropzone mock entries, tracks KeepFileIds/KeepMainFileId
+└── app-request-list.js          # Admin requests DataTable; default sort CreateDate desc
 ```
 
 ### Entities
@@ -284,7 +329,8 @@ wwwroot/js/
 | Number | string? | company identification number, max 16 |
 | Address | string? | max 512 |
 | Interests | string[] | serialized as comma-separated string, max 128; values from `ServiceEnum` |
-| TermsFileId | long? | FK to Files table — company terms of service PDF |
+| ServiceTermsFileId | long? | FK to Files table — company terms of service PDF |
+| AcquaintedHIW | bool | whether user has acknowledged the How It Works page; default false |
 
 **FileEntity** (`Files` table):
 | Field | Type | Notes |
@@ -317,25 +363,22 @@ wwwroot/js/
 | Field | Type | Notes |
 |-------|------|-------|
 | Id | long | PK, auto-increment |
-| Code | Guid | unique, used for public-facing URLs |
+| Number | string | unique human-readable identifier (Guid `"N"` format), used in URLs |
+| CreateDate | DateTime | UTC timestamp set at creation |
 | Status | string | `RequestStatusEnum` value, max 16 |
 | Service | string | `ServiceEnum` value, max 16 |
 | Title | string | max 128 |
 | Description | string | max 2048 |
-| SourceAddress | string | max 512 |
-| DestinationAddress | string | max 512 |
+| PickupAddress | string | max 512 |
+| DeliveryAddress | string | max 512; optional for `ServiceEnum.Removal` |
 | RequesterId | long | FK to Users |
 | ExecutorId | long? | FK to Users |
-| ProposedCost | decimal | precision 18,2 |
-| ProposedCurrency | string | max 4, default "EUR" |
-| ProposedASAP | bool | true = ASAP, false = use ProposedDate/ProposedTime |
-| ProposedDate | DateOnly? | stored via DateTime converter for SQLite compat |
-| ProposedTime | TimeOnly? | stored via TimeSpan converter for SQLite compat |
-| AgreementDate | DateTime? | when negotiation was agreed |
-| AgreedCost | decimal? | precision 18,2 |
-| AgreedCurrency | string? | max 4 |
-| AgreedDate | DateOnly? | stored via DateTime converter for SQLite compat |
-| AgreedTime | TimeOnly? | stored via TimeSpan converter for SQLite compat |
+| Cost | decimal | precision 18,2 |
+| Currency | string | max 4, default "EUR" |
+| ASAP | bool | true = ASAP, false = use Date/Time |
+| Date | DateOnly? | stored via DateTime converter for SQLite compat |
+| Time | TimeOnly? | stored via TimeSpan converter for SQLite compat |
+| AgreementId | long? | FK to a negotiation/agreement record |
 
 **RequestFileEntity** (`RequestFiles` table):
 | Field | Type | Notes |
@@ -423,7 +466,7 @@ Users (4 rows, all Status=Active, passwords hashed at seed time):
 ## Request Feature
 
 ### Access guard
-`RequestController` is `[RequireLogin]`. Each action additionally calls `ValidateUser()` which returns `null` (→ redirect to Dashboard) unless `Role == Customer && Status == Active`.
+`RequestController` is `[RequireLogin]`. Create/Edit additionally call `GetUser(roles: [UserRoleEnum.Customer], active: true)` — returns `null` (→ redirect to Dashboard) unless `Role == Customer && Status == Active`.
 
 ### Create flow (`GET /Request/Create` → `POST /Request/Create`)
 1. GET: loads `ViewBag.Settings`, returns `Views/Request/Form.cshtml` (no `ViewBag.Request` → `isEdit = false`)
@@ -446,12 +489,12 @@ public long          Id                 // 0 on Create
 public string        Service            // ServiceEnum value
 public string        Title
 public string?       Description
-public string        SourceAddress
-public string        DestinationAddress
-public decimal       ProposedCost       // 1–10000
+public string        PickupAddress
+public string        DeliveryAddress    // optional when Service == ServiceEnum.Removal
+public decimal       Cost               // 1–10000
 public bool          IsASAP             // bound from radio value="true"/"false"
-public string?       ProposedDate       // "yyyy-MM-dd", required if !IsASAP
-public string?       ProposedTime       // "HH:mm", required if !IsASAP
+public string?       Date               // "yyyy-MM-dd", required if !IsASAP
+public string?       Time               // "HH:mm", required if !IsASAP
 public IFormFile[]?  Images
 public IFormFile[]?  Videos
 public int           MainImageIndex     // index into new Images array
@@ -472,6 +515,30 @@ public long          KeepMainFileId     // existing FileId that is main (0 = mai
 - `loadingExisting` flag prevents auto-setMainFile during mock-file population; server's `isMain` restored explicitly after loop
 - Inline validation: Bootstrap `is-invalid` + `invalid-feedback` for all fields; Notyf only for server errors + one summary toast on failed client-side submit
 - Cost input: blocks `- + e E` on keydown, clamps to 10000 on input, clamps to min 1 on blur, truncates to 2 decimal places
+
+---
+
+## How It Works Feature
+
+### Purpose
+First-time onboarding page shown to Customer and Company users before they reach the dashboard. Administrators are exempt.
+
+### Flow
+1. After login (or remember-me auto-login via `HomeController.Index`): if `!user.AcquaintedHIW && user.Role != Administrator` → redirect to `HowItWorks/Customer` or `HowItWorks/Company`
+2. User reads the page; a sticky transparent header shows an "I understand, don't show again" button (only when `!AcquaintedHIW`, i.e. `ViewBag.ShowBar = true`)
+3. On `POST /HowItWorks/Acknowledge` → `userRepository.SetAcquaintedHIW(userId)` sets flag to true → redirect to Dashboard
+4. On subsequent visits the page is still accessible from the menu, but the button is hidden (`ViewBag.ShowBar = false`)
+
+### Views
+- `Views/HowItWorks/Customer.cshtml` / `Company.cshtml` — full-height card (`flex-grow-1 h-100`); sticky transparent card-header with centered Acknowledge button; card-body holds the instructional content
+
+### UserEntity field
+`AcquaintedHIW bool` — EF default false, set to true by `IUserRepository.SetAcquaintedHIW(long id)`
+
+### Vertical menu
+- Customer role: "How It Works" link → `/HowItWorks/Customer`
+- Company role: "How It Works" link → `/HowItWorks/Company`
+- Administrator: no menu entry
 
 ---
 
