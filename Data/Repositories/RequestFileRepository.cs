@@ -53,6 +53,13 @@ namespace Bewegdeal.Data.Repositories
                                 .ToListAsync();
         }
 
+        public async Task<List<RequestFileEntity>> LoadMainImages(List<long> requestIds)
+        {
+            return await context.RequestFiles
+                                .Where(f => requestIds.Contains(f.RequestId) && f.IsMain)
+                                .ToListAsync();
+        }
+
         // ── Delete ───────────────────────────────────────────────────────────────
 
         public async Task Delete(List<long> ids)

@@ -8,6 +8,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task Create(List<RequestFileEntity> files);
         Task SetMainImage(long requestId, long fileId);
         Task<List<RequestFileEntity>> Load(long requestId);
+        Task<List<RequestFileEntity>> LoadMainImages(List<long> requestIds);
         Task Delete(List<long> ids);
     }
 }

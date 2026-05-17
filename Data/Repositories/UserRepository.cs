@@ -90,10 +90,8 @@ namespace Bewegdeal.Data.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<int> Count(UserFilter filter)
-        {
-            return await ApplyFilters(context.Users.AsQueryable(), filter).CountAsync();
-        }
+        public async Task<int> Count(UserFilter filter) =>
+            await ApplyFilters(context.Users.AsQueryable(), filter).CountAsync();
 
         public async Task<List<UserEntity>> Load(UserFilter filter)
         {

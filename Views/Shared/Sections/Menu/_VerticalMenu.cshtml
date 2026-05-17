@@ -54,6 +54,14 @@
                 </a>
             </li>
 
+            <!-- Requests -->
+            <li class='menu-item@(currentPage == "/Request/List" ? " active" : "")'>
+                <a asp-controller="Request" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-file-list-3-line"></i>
+                    <div data-i18n="Requests">Requests</div>
+                </a>
+            </li>
+
             <!-- Settings -->
             <li class='menu-item@(currentPage == "/Settings" || currentPage == "/Settings/Index" ? " active" : "")'>
                 <a asp-controller="Settings" asp-action="Index" class="menu-link">

@@ -20,6 +20,63 @@ public class RequestController(
     FileService fileService) : Controller
 {
 
+    #region List
+
+    [HttpGet]
+    [RequireAdmin]
+    public async Task<IActionResult> List()
+    {
+        ViewBag.TotalCount = await requestRepository.Count(new RequestFilter() { Id = 0 });
+        ViewBag.PendingCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Pending });
+        ViewBag.NegotiationCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Negotiation });
+        ViewBag.ResolvedCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Resolved });
+        return View();
+    }
+
+    [HttpGet]
+    [RequireAdmin]
+    public async Task<IActionResult> LoadRequests([FromQuery] RequestFilter filter, [FromQuery] int draw = 1)
+    {
+        var requests = await requestRepository.Load(filter);
+        var filtered = await requestRepository.Count(filter);
+        var total = await requestRepository.Count(new RequestFilter());
+
+        var files = await requestFileRepository.LoadMainImages(
+            requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
+        );
+        var images = await fileRepository.Load(new BaseFilter<long>
+        {
+            Ids = files.Count == 0 ? [0] : [.. files.Select(f => f.FileId)]
+        });
+
+        var data = requests.Select(r =>
+        {
+            var image = images.FirstOrDefault(i =>
+                i.Id == files.FirstOrDefault(f => f.RequestId == r.Id)?.FileId
+            );
+
+            return (object)new
+            {
+                id = r.Id,
+                number = r.Number,
+                status = r.Status,
+                service = r.Service,
+                title = r.Title,
+                createDate = r.CreateDate.ToString("MMM d, yyyy"),
+                cost = r.Cost,
+                currency = r.Currency,
+                asap = r.ASAP,
+                date = r.Date?.ToString("MMM d, yyyy"),
+                time = r.Time?.ToString("HH:mm"),
+                imageUrl = image is null ? null : Url.Action("Download", "File", new { key = image.Key }, Request.Scheme)
+            };
+        });
+
+        return Json(new GridResultViewModel<object>(draw, total, filtered, data));
+    }
+
+    #endregion
+
     #region Create
 
     [HttpGet]
