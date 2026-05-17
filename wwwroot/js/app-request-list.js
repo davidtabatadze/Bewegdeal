@@ -69,12 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
         targets: 0,
         width: '60px',
         render: function (data, type, full) {
-          const url = '/Request/View?number=' + full['number'];
           return (
-            '<a href="' + url + '" class="btn btn-sm btn-text-secondary">' +
+            '<button type="button" class="btn btn-text-secondary view-request-btn"' +
+              ' data-number="' + full['number'] + '">' +
               '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
               '#' + full['id'] +
-            '</a>'
+            '</button>'
           );
         }
       },
@@ -187,7 +187,9 @@ document.addEventListener('DOMContentLoaded', function () {
     responsive: false
   });
 
-  // Loading indicator
+  // Loading indicator — also covers the initial load
+  Block.pulse('.card-datatable');
+
   dt.on('preXhr.dt', function () {
     Block.pulse('.card-datatable');
   });
@@ -209,6 +211,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('filterService').addEventListener('change', function () {
     dt.ajax.reload(null, true);
+  });
+
+  // View request — delegated click on the table wrapper
+  dt_table.addEventListener('click', function (e) {
+    const btn = e.target.closest('.view-request-btn');
+    if (!btn) { return; }
+    window.location.href = '/Request/View?number=' + btn.dataset.number;
+  });
+
+  // Middle-click — open in new tab
+  dt_table.addEventListener('auxclick', function (e) {
+    if (e.button !== 1) { return; }
+    const btn = e.target.closest('.view-request-btn');
+    if (!btn) { return; }
+    e.preventDefault();
+    window.open('/Request/View?number=' + btn.dataset.number, '_blank');
   });
 
   // Layout tweaks

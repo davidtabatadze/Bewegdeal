@@ -61,6 +61,11 @@ namespace Bewegdeal.Data.Repositories
 
         private static IQueryable<RequestEntity> ApplyFilters(IQueryable<RequestEntity> query, RequestFilter filter)
         {
+            if (filter.Id.HasValue)
+            {
+                query = query.Where(r => r.Id == filter.Id.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Status))
             {
                 query = query.Where(r => r.Status == filter.Status);
