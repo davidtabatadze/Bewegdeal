@@ -1,5 +1,3 @@
-using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
@@ -8,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HowItWorksController(IUserRepository userRepository) : Controller
+    public class HowItWorksController(IUserRepository userRepository) : XBaseController(userRepository)
     {
         [HttpGet]
         public async Task<IActionResult> Customer()
         {
-            var user = await GetUser();
-            if (user is null || user.Role != UserRoleEnum.Customer)
+            var user = await GetUser(roles: [UserRoleEnum.Customer]);
+            if (user is null)
             {
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -26,8 +24,8 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> Company()
         {
-            var user = await GetUser();
-            if (user is null || user.Role != UserRoleEnum.Company)
+            var user = await GetUser(roles: [UserRoleEnum.Company]);
+            if (user is null)
             {
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -39,23 +37,14 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> Acknowledge()
         {
-            if (!long.TryParse(HttpContext.Session.GetString("UserId"), out var userId))
+            var user = await GetUser();
+            if (user is null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            await userRepository.SetAcquaintedHIW(userId);
+            await userRepository.SetAcquaintedHIW(user.Id);
             return RedirectToAction("Index", "Dashboard");
-        }
-
-        private async Task<UserEntity?> GetUser()
-        {
-            if (!long.TryParse(HttpContext.Session.GetString("UserId"), out var userId))
-            {
-                return null;
-            }
-
-            return await userRepository.Get(new UserFilter { Id = userId });
         }
     }
 }

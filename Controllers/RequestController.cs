@@ -17,7 +17,7 @@ public class RequestController(
     IRequestRepository requestRepository,
     IRequestFileRepository requestFileRepository,
     IFileRepository fileRepository,
-    FileService fileService) : Controller
+    FileService fileService) : XBaseController(userRepository)
 {
 
     #region List
@@ -82,7 +82,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var user = await ValidateUser();
+        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -96,7 +96,7 @@ public class RequestController(
     public async Task<IActionResult> Create(RequestViewModel model)
     {
         // validate user
-        var user = await ValidateUser();
+        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -190,7 +190,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Edit(long id)
     {
-        var user = await ValidateUser();
+        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
         var request = await ValidateRequest(id, user?.Id ?? 0);
 
         if (user is null || request is null)
@@ -222,7 +222,7 @@ public class RequestController(
     [HttpPost]
     public async Task<IActionResult> Edit(RequestViewModel model)
     {
-        var user = await ValidateUser();
+        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
         var request = await ValidateRequest(model.Id, user?.Id ?? 0);
 
         if (user is null || request is null)
@@ -351,22 +351,6 @@ public class RequestController(
 
         // ...
         return null;
-    }
-
-    private async Task<UserEntity?> ValidateUser()
-    {
-        if (!long.TryParse(HttpContext.Session.GetString("UserId"), out var userId))
-        {
-            return null;
-        }
-
-        var user = await userRepository.Get(new UserFilter { Id = userId });
-        if (user is null || user.Role != UserRoleEnum.Customer || user.Status != UserStatusEnum.Active)
-        {
-            return null;
-        }
-
-        return user;
     }
 
     private async Task<RequestEntity?> ValidateRequest(long id, long userId)
