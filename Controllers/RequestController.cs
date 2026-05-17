@@ -71,23 +71,9 @@ public class RequestController(
         }
 
         // create request
-        var request = await requestRepository.Create(new RequestEntity
-        {
-            Number = Guid.NewGuid().ToString(),
-            CreateDate = DateTime.UtcNow,
-            Status = RequestStatusEnum.Pending,
-            Service = model.Service,
-            Title = model.Title.Trim(),
-            Description = model.Description?.Trim() ?? "",
-            PickupAddress = model.PickupAddress.Trim(),
-            DeliveryAddress = model.DeliveryAddress.Trim(),
-            RequesterId = user.Id,
-            Cost = model.Cost,
-            Currency = "EUR",
-            ASAP = model.IsASAP,
-            Date = !model.IsASAP ? DateOnly.Parse(model.Date!) : null,
-            Time = !model.IsASAP ? TimeOnly.Parse(model.Time!) : null,
-        });
+        var request = await requestRepository.Create(
+            BuildRequest(null, model, user.Id)
+        );
 
         // upload media
         model.Id = request.Id;
@@ -214,17 +200,7 @@ public class RequestController(
         }
 
         // update request fields
-        request.Service = model.Service;
-        request.Title = model.Title.Trim();
-        request.Description = model.Description?.Trim() ?? "";
-        request.PickupAddress = model.PickupAddress.Trim();
-        request.DeliveryAddress = model.DeliveryAddress.Trim();
-        request.Cost = model.Cost;
-        request.Currency = "EUR";
-        request.ASAP = model.IsASAP;
-        request.Date = !model.IsASAP ? DateOnly.Parse(model.Date!) : null;
-        request.Time = !model.IsASAP ? TimeOnly.Parse(model.Time!) : null;
-        await requestRepository.Update(request);
+        await requestRepository.Update(BuildRequest(request, model, user.Id));
 
         // upload media
         var upload = await UploadMedia(model, settings, existingFiles);
@@ -346,6 +322,33 @@ public class RequestController(
         }
 
         return request;
+    }
+
+    private static RequestEntity BuildRequest(RequestEntity? entity, RequestViewModel request, long userId)
+    {
+        if (entity is null)
+        {
+            entity = new RequestEntity
+            {
+                Number = Guid.NewGuid().ToString("N"),
+                CreateDate = DateTime.UtcNow,
+                Status = RequestStatusEnum.Pending,
+                RequesterId = userId
+            };
+        }
+
+        entity.Service = request.Service;
+        entity.Title = request.Title.Trim();
+        entity.Description = request.Description?.Trim() ?? "";
+        entity.PickupAddress = request.PickupAddress.Trim();
+        entity.DeliveryAddress = request.DeliveryAddress?.Trim() ?? "";
+        entity.Cost = request.Cost;
+        entity.Currency = "EUR";
+        entity.ASAP = request.IsASAP;
+        entity.Date = !request.IsASAP ? DateOnly.Parse(request.Date!) : null;
+        entity.Time = !request.IsASAP ? TimeOnly.Parse(request.Time!) : null;
+
+        return entity;
     }
 
     private static string? ValidateRequirement(RequestViewModel model)
