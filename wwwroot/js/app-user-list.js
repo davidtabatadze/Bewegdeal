@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Interest → icon + color + label
   const interestMap = {
     moving:    { icon: 'ri-truck-line',      color: 'bg-label-primary', title: 'Moving'    },
-    removal:   { icon: 'ri-delete-bin-line', color: 'bg-label-danger',  title: 'Removal'   },
-    pickup:    { icon: 'ri-store-2-line',    color: 'bg-label-success', title: 'Pickup'    },
+    removal:   { icon: 'ri-recycle-line',        color: 'bg-label-danger',  title: 'Removal'   },
+    pickup:    { icon: 'ri-shopping-bag-4-line', color: 'bg-label-success', title: 'Pickup'    },
     transport: { icon: 'ri-car-line',        color: 'bg-label-info',    title: 'Transport' }
   };
 

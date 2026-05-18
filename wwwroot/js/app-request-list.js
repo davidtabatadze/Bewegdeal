@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Service → icon HTML + label + text color
   const serviceMap = {
     moving:    { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success me-2"></i>', label: 'Moving Service',    color: 'text-success' },
-    removal:   { icon: '<i class="icon-base ri ri-delete-bin-2-line icon-22px text-danger  me-2"></i>', label: 'Junk Removal',      color: 'text-danger'  },
-    pickup:    { icon: '<i class="icon-base ri ri-store-2-line      icon-22px text-warning me-2"></i>', label: 'Store Pickup',      color: 'text-warning' },
+    removal:   { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger  me-2"></i>', label: 'Junk Removal',      color: 'text-danger'  },
+    pickup:    { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning me-2"></i>', label: 'Store Pickup',      color: 'text-warning' },
     transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info    me-2"></i>', label: 'Vehicle Transport', color: 'text-info'    }
   };
 
