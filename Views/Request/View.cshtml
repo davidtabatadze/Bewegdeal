@@ -48,7 +48,7 @@
             </h5>
             <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
                 <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-text-secondary">
+                    <button type="button" class="btn btn-text-secondary" onclick="window.location.href='/Request/List'">
                         <span class="icon-base ri ri-arrow-left-s-line icon-16px me-1_5"></span>
                         Back to requests
                     </button>
@@ -72,7 +72,7 @@
                 </div>
                 <div class="d-flex align-items-center gap-1">
                     <div class="content-right">
-                        <span class="text-dark mb-0 h5">@Context.Session.GetString("UserName")</span>
+                        <span class="text-dark mb-0 h5">@ViewBag.RequesterName</span>
                     </div>
                     <div class="avatar avatar-md">
                         <img src="~/img/avatars/1.png" alt="Avatar" class="rounded-circle" />

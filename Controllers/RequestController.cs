@@ -19,6 +19,7 @@ public class RequestController(
     IFileRepository fileRepository,
     FileService fileService) : XBaseController(userRepository)
 {
+    private readonly IUserRepository _userRepository = userRepository;
 
     #region List
 
@@ -179,10 +180,13 @@ public class RequestController(
         var requestFiles = await requestFileRepository.Load(request.Id);
         var files = await fileRepository.Load(new BaseFilter<long>
         {
-            Ids = requestFiles.Select(rf => rf.FileId).ToList()
+            Ids = [.. requestFiles.Select(rf => rf.FileId)]
         });
 
+        var requester = await _userRepository.Get(new UserFilter { Id = request.RequesterId });
+
         ViewBag.Request = request;
+        ViewBag.RequesterName = requester?.Name ?? "-";
         ViewBag.Files = files.Select(f => new
         {
             url = Url.Action("Download", "File", new { key = f.Key }, Request.Scheme),

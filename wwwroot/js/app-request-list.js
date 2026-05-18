@@ -34,9 +34,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (!dt_table) { return; }
 
+  // ── State persistence ────────────────────────────────────────────────────────
+  const STATE_KEY  = 'requestListState';
+  const RETURN_KEY = 'requestListReturn';
+
+  const isReturn = !!sessionStorage.getItem(RETURN_KEY);
+  sessionStorage.removeItem(RETURN_KEY);
+
+  let savedState = null;
+  if (isReturn) {
+    try { savedState = JSON.parse(sessionStorage.getItem(STATE_KEY)); } catch (e) {}
+  } else {
+    sessionStorage.removeItem(STATE_KEY);
+  }
+
+  // Restore filter inputs before the first DataTable draw
+  if (savedState) {
+    document.getElementById('requestsSearch').value = savedState.search || '';
+    $('#filterStatus').selectpicker('val',  savedState.status  || '');
+    $('#filterService').selectpicker('val', savedState.service || '');
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const dt = new DataTable(dt_table, {
     serverSide: true,
     scrollX: true,
+    displayStart: savedState ? (savedState.start || 0) : 0,
     ajax: {
       url: '/Request/LoadRequests',
       data: function (d) {
@@ -51,6 +74,14 @@ document.addEventListener('DOMContentLoaded', function () {
         d.search  = document.getElementById('requestsSearch').value;
         d.status  = document.getElementById('filterStatus').value;
         d.service = document.getElementById('filterService').value;
+
+        // Persist state on every draw
+        sessionStorage.setItem(STATE_KEY, JSON.stringify({
+          search:  d.search,
+          status:  d.status,
+          service: d.service,
+          start:   d.start
+        }));
 
         return d;
       }
@@ -105,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '<div class="d-flex align-items-center gap-3">' +
               img +
               '<div class="d-flex flex-column">' +
-                '<span class="text-heading fw-medium text-truncate" style="max-width:200px;">' + title + '</span>' +
+                '<span class="view-request-btn text-heading fw-medium text-truncate" style="max-width:200px;cursor:pointer;" data-number="' + full['number'] + '">' + title + '</span>' +
                 '<small class="' + (serviceObj.color || 'text-muted') + '">' + serviceObj.label + '</small>' +
               '</div>' +
             '</div>'
@@ -217,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
   dt_table.addEventListener('click', function (e) {
     const btn = e.target.closest('.view-request-btn');
     if (!btn) { return; }
+    sessionStorage.setItem(RETURN_KEY, '1');
     window.location.href = '/Request/View?number=' + btn.dataset.number;
   });
 
