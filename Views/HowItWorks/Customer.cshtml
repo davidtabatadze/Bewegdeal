@@ -10,7 +10,6 @@
 
             @if (showBar)
             {
-                <!-- Sticky header -->
                 <div class="card-header sticky-element d-flex justify-content-center align-items-center">
                     <form asp-controller="HowItWorks" asp-action="Acknowledge" method="post">
                         <button type="submit" class="btn btn-primary">
@@ -21,10 +20,125 @@
                 </div>
             }
 
-            <div class="card-body pt-5">
-                <p class="mb-0">Here will be the "How it works" instruction for customer.</p>
-            </div>
+            <div class="card-body p-6">
 
+                <div class="text-center mb-8">
+                    <span class="badge bg-label-primary rounded-pill px-4 py-2 mb-3">For Customers</span>
+                    <h3 class="mb-2">Get your job done in 4 simple steps</h3>
+                    <p class="text-muted mb-0">Post what you need — let the right company come to you.</p>
+                </div>
+
+                <div class="row g-5 mb-8">
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex gap-4">
+                            <div class="flex-shrink-0">
+                                <span class="badge rounded-pill bg-label-success p-3">
+                                    <i class="icon-base ri ri-file-add-line icon-28px"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">1. Post your request</h5>
+                                <p class="text-muted mb-0">
+                                    Describe the job — moving, junk removal, store pickup, or vehicle transport.
+                                    Add photos or videos, set your pickup and delivery address, name your price, and choose when you need it done.
+                                    The more detail you provide, the better offers you'll get.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex gap-4">
+                            <div class="flex-shrink-0">
+                                <span class="badge rounded-pill bg-label-info p-3">
+                                    <i class="icon-base ri ri-building-2-line icon-28px"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">2. Companies find you</h5>
+                                <p class="text-muted mb-0">
+                                    Your request goes live on the marketplace immediately.
+                                    Qualified companies browsing for work in their area will see it and reach out.
+                                    You don't have to search — they come to you.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex gap-4">
+                            <div class="flex-shrink-0">
+                                <span class="badge rounded-pill bg-label-warning p-3">
+                                    <i class="icon-base ri ri-wechat-line icon-28px"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">3. Negotiate the deal</h5>
+                                <p class="text-muted mb-0">
+                                    Chat directly with interested companies, compare offers, and agree on the final price,
+                                    date, and time that works for you. You stay in full control — no hidden fees, no surprises.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex gap-4">
+                            <div class="flex-shrink-0">
+                                <span class="badge rounded-pill bg-label-primary p-3">
+                                    <i class="icon-base ri ri-check-double-line icon-28px"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">4. Job done</h5>
+                                <p class="text-muted mb-0">
+                                    The company shows up and gets the work done. Once you're satisfied, mark the request
+                                    as resolved. That's it — no paperwork, no phone tag, no stress.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="my-6" />
+
+                <div class="row g-4">
+                    <div class="col-12">
+                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">What can you request?</h6>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border text-center p-4 h-100">
+                            <i class="icon-base ri ri-truck-line icon-36px text-success mb-2"></i>
+                            <strong>Moving Service</strong>
+                            <small class="text-muted d-block mt-1">Relocate belongings from A to B</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border text-center p-4 h-100">
+                            <i class="icon-base ri ri-delete-bin-2-line icon-36px text-danger mb-2"></i>
+                            <strong>Junk Removal</strong>
+                            <small class="text-muted d-block mt-1">Clear out what you no longer need</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border text-center p-4 h-100">
+                            <i class="icon-base ri ri-store-2-line icon-36px text-warning mb-2"></i>
+                            <strong>Store Pickup</strong>
+                            <small class="text-muted d-block mt-1">Pick up your purchase and deliver it</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border text-center p-4 h-100">
+                            <i class="icon-base ri ri-car-line icon-36px text-info mb-2"></i>
+                            <strong>Vehicle Transport</strong>
+                            <small class="text-muted d-block mt-1">Move your vehicle to a new location</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>

@@ -468,6 +468,29 @@ Users (4 rows, all Status=Active, passwords hashed at seed time):
 ### Access guard
 `RequestController` is `[RequireLogin]`. Create/Edit additionally call `GetUser(roles: [UserRoleEnum.Customer], active: true)` — returns `null` (→ redirect to Dashboard) unless `Role == Customer && Status == Active`.
 
+### Role-based list visibility
+`List` and `LoadRequests` use `ViewerRole` + `ViewerId` fields on `RequestFilter`. The controller sets them from the logged-in user; the repository `ApplyFilters` branches on role:
+- **Customer** → `WHERE RequesterId == viewerId` (own requests only)
+- **Company** → `WHERE ExecutorId == viewerId OR Status IN (pending, negotiation)` (assigned + open market)
+- **Administrator** → no extra filter (sees everything)
+
+`RequestFilter` fields: `Search`, `Status`, `Service`, `ViewerRole`, `ViewerId`
+
+Stats in `List()` (TotalCount, PendingCount, NegotiationCount, ResolvedCount) are all scoped to the viewer — each uses a fresh `RequestFilter` with only `ViewerId`/`ViewerRole` + optional `Status`, so counts reflect only what the viewer is allowed to see.
+
+### View flow (`GET /Request/View?number=`)
+- Loads request by `number` (string, not id)
+- Loads `requestFiles` + `files` for the media gallery
+- Loads requester via `userRepository.Get(new UserFilter { Id = request.RequesterId })` → `ViewBag.RequesterName`
+- `ViewBag.Request` = `RequestEntity`, `ViewBag.Files` = ordered anonymous list (images first, main image first within images)
+
+### List → View navigation & state persistence
+- `app-request-list.js` saves `{ search, status, service, start }` to `sessionStorage['requestListState']` on every DataTable draw
+- On click (number button or title), sets `sessionStorage['requestListReturn'] = '1'` then navigates
+- On list page load: if `requestListReturn` exists → restore filter inputs + `displayStart`; if not (fresh nav) → clear saved state
+- "Back to requests" button on View navigates to `/Request/List` (button `onclick`)
+- Title in REQUEST column is also clickable (`view-request-btn` class + `data-number`)
+
 ### Create flow (`GET /Request/Create` → `POST /Request/Create`)
 1. GET: loads `ViewBag.Settings`, returns `Views/Request/Form.cshtml` (no `ViewBag.Request` → `isEdit = false`)
 2. POST: `ValidateRequirement` → `ValidateMedia` (existingFiles = []) → create `RequestEntity` → set `model.Id = request.Id` → `UploadMedia`
@@ -505,7 +528,7 @@ public long          KeepMainFileId     // existing FileId that is main (0 = mai
 ### Form.cshtml rendering logic
 - `var req = ViewBag.Request as RequestEntity; var isEdit = req is not null;`
 - Title/button text, `asp-action`, hidden `Id` field, input `value=`, radio `checked`, `scheduled-fields` class, and `existingFiles` JS const all conditioned on `isEdit`
-- For `checked` on `isASAP` radios: `!isEdit || req!.ProposedASAP` → "ASAP" checked (covers both Create default and Edit restore)
+- For `checked` on `isASAP` radios: `!isEdit || req!.ASAP` → "ASAP" checked (covers both Create default and Edit restore)
 
 ### request-form.js key behaviours
 - `Dropzone.autoDiscover = false` set before IIFE
