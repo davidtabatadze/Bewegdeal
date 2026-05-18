@@ -23,23 +23,33 @@ public class RequestController(
     #region List
 
     [HttpGet]
-    [RequireAdmin]
     public async Task<IActionResult> List()
     {
-        ViewBag.TotalCount = await requestRepository.Count(new RequestFilter() { Id = 0 });
-        ViewBag.PendingCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Pending });
-        ViewBag.NegotiationCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Negotiation });
-        ViewBag.ResolvedCount = await requestRepository.Count(new RequestFilter { Id = 0, Status = RequestStatusEnum.Resolved });
+        var user = await GetUser();
+        var viewerId = user?.Id ?? 0;
+        var viewerRole = user?.Role ?? "-";
+
+        ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole });
+        ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
+        ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
+        ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
         return View();
     }
 
     [HttpGet]
-    [RequireAdmin]
     public async Task<IActionResult> LoadRequests([FromQuery] RequestFilter filter, [FromQuery] int draw = 1)
     {
+        var user = await GetUser();
+        filter.ViewerId = user?.Id ?? 0;
+        filter.ViewerRole = user?.Role ?? "-";
+
         var requests = await requestRepository.Load(filter);
         var filtered = await requestRepository.Count(filter);
-        var total = await requestRepository.Count(new RequestFilter());
+        var total = await requestRepository.Count(new RequestFilter
+        {
+            ViewerId = user?.Id ?? 0,
+            ViewerRole = user?.Role ?? "-"
+        });
 
         var files = await requestFileRepository.LoadMainImages(
             requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]

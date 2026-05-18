@@ -85,6 +85,31 @@ namespace Bewegdeal.Data.Repositories
                 );
             }
 
+            if (!string.IsNullOrWhiteSpace(filter.ViewerRole) && filter.ViewerId.HasValue)
+            {
+                var viewerId = filter.ViewerId.Value;
+                if (filter.ViewerRole == UserRoleEnum.Administrator)
+                {
+                    // ...
+                }
+                else if (filter.ViewerRole == UserRoleEnum.Customer)
+                {
+                    query = query.Where(r => r.RequesterId == viewerId);
+                }
+                else if (filter.ViewerRole == UserRoleEnum.Company)
+                {
+                    query = query.Where(r =>
+                        r.ExecutorId == viewerId ||
+                        r.Status == RequestStatusEnum.Pending ||
+                        r.Status == RequestStatusEnum.Negotiation
+                    );
+                }
+                else
+                {
+                    query = query.Where(r => r.Id == 0);
+                }
+            }
+
             return query;
         }
 
