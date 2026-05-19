@@ -67,7 +67,7 @@
                                         <label class="form-check-label custom-option-content" for="serviceMoving">
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-truck-line text-success"></i>
-                                                <span class="custom-option-title mb-1">Moving Service</span>
+                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Moving</span>
                                                 <small>Household or office relocation</small>
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Moving" id="serviceMoving" checked="@(isEdit && req!.Service == ServiceEnum.Moving ? "checked" : null)" />
@@ -79,7 +79,7 @@
                                         <label class="form-check-label custom-option-content" for="serviceRemoval">
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-recycle-line text-danger"></i>
-                                                <span class="custom-option-title mb-1">Junk Removal</span>
+                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Removal</span>
                                                 <small>Junk and waste removal</small>
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Removal" id="serviceRemoval" checked="@(isEdit && req!.Service == ServiceEnum.Removal ? "checked" : null)" />
@@ -91,7 +91,7 @@
                                         <label class="form-check-label custom-option-content" for="servicePickup">
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-shopping-bag-4-line text-warning"></i>
-                                                <span class="custom-option-title mb-1">Store Pickup</span>
+                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Pickup</span>
                                                 <small>Store or warehouse pickup</small>
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Pickup" id="servicePickup" checked="@(isEdit && req!.Service == ServiceEnum.Pickup ? "checked" : null)" />
@@ -103,7 +103,7 @@
                                         <label class="form-check-label custom-option-content" for="serviceTransport">
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-car-line text-info"></i>
-                                                <span class="custom-option-title mb-1">Vehicle Transport</span>
+                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Transport</span>
                                                 <small>Vehicle or cargo transport</small>
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Transport" id="serviceTransport" checked="@(isEdit && req!.Service == ServiceEnum.Transport ? "checked" : null)" />

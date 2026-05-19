@@ -10,10 +10,10 @@
 
     var (badge, icon, color, label) = req.Service switch
     {
-        ServiceEnum.Moving => ("bg-label-success", "ri-truck-line", "success", "Moving Service"),
-        ServiceEnum.Removal => ("bg-label-danger", "ri-recycle-line", "danger", "Junk Removal"),
-        ServiceEnum.Pickup => ("bg-label-warning", "ri-shopping-bag-4-line", "warning", "Store Pickup"),
-        ServiceEnum.Transport => ("bg-label-info", "ri-car-line", "info", "Vehicle Transport"),
+        ServiceEnum.Moving => ("bg-label-success", "ri-truck-line", "success", AnnotationEnum.General.Service.Moving),
+        ServiceEnum.Removal => ("bg-label-danger", "ri-recycle-line", "danger", AnnotationEnum.General.Service.Removal),
+        ServiceEnum.Pickup => ("bg-label-warning", "ri-shopping-bag-4-line", "warning", AnnotationEnum.General.Service.Pickup),
+        ServiceEnum.Transport => ("bg-label-info", "ri-car-line", "info", AnnotationEnum.General.Service.Transport),
         _ => ("bg-label-secondary", "ri-question-line", "info", req.Service)
     };
 

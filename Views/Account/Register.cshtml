@@ -241,7 +241,7 @@
                                                         <label class="form-check-label custom-option-content" for="serviceMoving">
                                                             <span class="custom-option-body">
                                                                 <i class="icon-base ri ri-truck-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">Moving Service</span>
+                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Moving</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="@ServiceEnum.Moving" checked="@(Model.ServiceMoving != null ? "checked" : null)" />
                                                         </label>
@@ -252,7 +252,7 @@
                                                         <label class="form-check-label custom-option-content" for="serviceJunk">
                                                             <span class="custom-option-body">
                                                                 <i class="icon-base ri ri-delete-bin-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">Junk Removal</span>
+                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Removal</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="@ServiceEnum.Removal" checked="@(Model.ServiceJunk != null ? "checked" : null)" />
                                                         </label>
@@ -263,7 +263,7 @@
                                                         <label class="form-check-label custom-option-content" for="serviceStorePickup">
                                                             <span class="custom-option-body">
                                                                 <i class="icon-base ri ri-shopping-bag-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">Store Pickup</span>
+                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Pickup</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="@ServiceEnum.Pickup" checked="@(Model.ServiceStorePickup != null ? "checked" : null)" />
                                                         </label>
@@ -274,7 +274,7 @@
                                                         <label class="form-check-label custom-option-content" for="serviceVehicle">
                                                             <span class="custom-option-body">
                                                                 <i class="icon-base ri ri-car-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">Vehicle Transport</span>
+                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Transport</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="@ServiceEnum.Transport" checked="@(Model.ServiceVehicle != null ? "checked" : null)" />
                                                         </label>

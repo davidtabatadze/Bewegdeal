@@ -2,6 +2,16 @@
 {
     public class AnnotationEnum
     {
+        public class General
+        {
+            public class Service
+            {
+                public const string Moving = "Moving Service";
+                public const string Removal = "Junk Removal";
+                public const string Pickup = "Store Pickup";
+                public const string Transport = "Vehicle Transport";
+            }
+        }
         public class Account
         {
             public class Login
