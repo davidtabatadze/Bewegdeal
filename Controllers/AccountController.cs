@@ -23,7 +23,7 @@ public class AccountController(
     [HttpGet]
     public IActionResult Login()
     {
-        if (HttpContext.Session.GetString("UserId") is not null)
+        if (HttpContext.Session.GetString(ConstantEnum.SessionUserId) is not null)
         {
             return RedirectToAction("Index", "Home");
         }
@@ -62,16 +62,16 @@ public class AccountController(
         }
 
         // fill up the session
-        HttpContext.Session.SetString("UserId", user.Id.ToString());
-        HttpContext.Session.SetString("UserRole", user.Role);
-        HttpContext.Session.SetString("UserName", user.Name);
-        HttpContext.Session.SetString("UserEmail", user.Email);
-        HttpContext.Session.SetString("UserTheme", user.Theme);
+        HttpContext.Session.SetString(ConstantEnum.SessionUserId, user.Id.ToString());
+        HttpContext.Session.SetString(ConstantEnum.SessionUserRole, user.Role);
+        HttpContext.Session.SetString(ConstantEnum.SessionUserName, user.Name);
+        HttpContext.Session.SetString(ConstantEnum.SessionUserEmail, user.Email);
+        HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, user.Theme);
 
         // set persistent cookie when "remember me" is checked
         if (rememberMe)
         {
-            Response.Cookies.Append("bewegdeal_remember", user.Id.ToString(), new CookieOptions
+            Response.Cookies.Append(ConstantEnum.CookieRemember, user.Id.ToString(), new CookieOptions
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
@@ -103,7 +103,7 @@ public class AccountController(
         HttpContext.Session.Clear();
 
         // remove the remember-me cookie
-        Response.Cookies.Delete("bewegdeal_remember");
+        Response.Cookies.Delete(ConstantEnum.CookieRemember);
 
         return RedirectToAction("Index", "Landing");
     }

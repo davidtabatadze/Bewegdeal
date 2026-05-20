@@ -15,13 +15,13 @@ namespace Bewegdeal.Filters
         {
             var session = context.HttpContext.Session;
 
-            if (session.GetString("UserId") is null)
+            if (session.GetString(ConstantEnum.SessionUserId) is null)
             {
                 context.Result = new RedirectToActionResult("Login", "Account", null);
                 return;
             }
 
-            if (session.GetString("UserRole") != UserRoleEnum.Administrator)
+            if (session.GetString(ConstantEnum.SessionUserRole) != UserRoleEnum.Administrator)
             {
                 context.Result = new RedirectToActionResult("Index", "Home", null);
             }

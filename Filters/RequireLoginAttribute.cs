@@ -1,3 +1,4 @@
+using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -11,7 +12,7 @@ namespace Bewegdeal.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var userId = context.HttpContext.Session.GetString("UserId");
+            var userId = context.HttpContext.Session.GetString(ConstantEnum.SessionUserId);
             if (userId is null)
             {
                 context.Result = new RedirectToActionResult("Login", "Account", null);

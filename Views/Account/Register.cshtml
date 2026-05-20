@@ -244,46 +244,46 @@
                                         <!-- Services -->
                                         <div id="servicesSection" class="col-12 mb-5 d-none">
                                             <p class="fw-medium mb-3">Your interests</p>
-                                            <div class="row g-4">
-                                                <div class="col-sm-6">
+                                            <div class="row gy-3">
+                                                <div class="col-6 col-sm-6 col-md-6">
                                                     <div class="form-check custom-option custom-option-icon">
                                                         <label class="form-check-label custom-option-content" for="serviceMoving">
                                                             <span class="custom-option-body">
-                                                                <i class="icon-base ri ri-truck-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Moving</span>
+                                                                <i class="icon-base ri ri-truck-line text-success"></i>
+                                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Moving</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="@ServiceEnum.Moving" checked="@(Model.ServiceMoving != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6">
+                                                <div class="col-6 col-sm-6 col-md-6">
                                                     <div class="form-check custom-option custom-option-icon">
                                                         <label class="form-check-label custom-option-content" for="serviceJunk">
                                                             <span class="custom-option-body">
-                                                                <i class="icon-base ri ri-delete-bin-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Removal</span>
+                                                                <i class="icon-base ri ri-recycle-line text-danger"></i>
+                                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Removal</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="@ServiceEnum.Removal" checked="@(Model.ServiceJunk != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6">
+                                                <div class="col-6 col-sm-6 col-md-6">
                                                     <div class="form-check custom-option custom-option-icon">
                                                         <label class="form-check-label custom-option-content" for="serviceStorePickup">
                                                             <span class="custom-option-body">
-                                                                <i class="icon-base ri ri-shopping-bag-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Pickup</span>
+                                                                <i class="icon-base ri ri-shopping-bag-4-line text-warning"></i>
+                                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Pickup</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="@ServiceEnum.Pickup" checked="@(Model.ServiceStorePickup != null ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-6">
+                                                <div class="col-6 col-sm-6 col-md-6">
                                                     <div class="form-check custom-option custom-option-icon">
                                                         <label class="form-check-label custom-option-content" for="serviceVehicle">
                                                             <span class="custom-option-body">
-                                                                <i class="icon-base ri ri-car-line icon-24px mb-1"></i>
-                                                                <span class="custom-option-title">@AnnotationEnum.General.Service.Transport</span>
+                                                                <i class="icon-base ri ri-car-line text-info"></i>
+                                                                <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Transport</span>
                                                             </span>
                                                             <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="@ServiceEnum.Transport" checked="@(Model.ServiceVehicle != null ? "checked" : null)" />
                                                         </label>

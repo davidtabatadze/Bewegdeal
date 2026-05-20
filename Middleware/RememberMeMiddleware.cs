@@ -1,5 +1,6 @@
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Enums;
 
 namespace Bewegdeal.Middleware
 {
@@ -9,13 +10,11 @@ namespace Bewegdeal.Middleware
     /// </summary>
     public class RememberMeMiddleware(RequestDelegate next)
     {
-        private const string CookieName = "bewegdeal_remember";
-
         public async Task InvokeAsync(HttpContext context)
         {
             // only act when session is empty and the remember-me cookie is present
-            var userId = context.Session.GetString("UserId");
-            var cookie = context.Request.Cookies[CookieName];
+            var userId = context.Session.GetString(ConstantEnum.SessionUserId);
+            var cookie = context.Request.Cookies[ConstantEnum.CookieRemember];
 
             if (userId is null && !string.IsNullOrWhiteSpace(cookie) && long.TryParse(cookie, out var id))
             {
@@ -25,14 +24,14 @@ namespace Bewegdeal.Middleware
 
                 if (user is not null)
                 {
-                    context.Session.SetString("UserId", user.Id.ToString());
-                    context.Session.SetString("UserRole", user.Role);
-                    context.Session.SetString("UserName", user.Name);
+                    context.Session.SetString(ConstantEnum.SessionUserId, user.Id.ToString());
+                    context.Session.SetString(ConstantEnum.SessionUserRole, user.Role);
+                    context.Session.SetString(ConstantEnum.SessionUserName, user.Name);
                 }
                 else
                 {
                     // cookie references a deleted/invalid user — clear it
-                    context.Response.Cookies.Delete(CookieName);
+                    context.Response.Cookies.Delete(ConstantEnum.CookieRemember);
                 }
             }
 

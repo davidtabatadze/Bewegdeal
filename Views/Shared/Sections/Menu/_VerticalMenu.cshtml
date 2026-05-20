@@ -41,7 +41,7 @@
             </a>
         </li>
 
-        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
+        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Customer)
         {
             <!-- New Request -->
             <li class='menu-item@(currentPage == "/Request/Create" ? " active" : "")'>
@@ -60,7 +60,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Administrator)
+        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Administrator)
         {
             <!-- Users -->
             <li class='menu-item@(currentPage == "/User/List" ? " active" : "")'>
@@ -95,7 +95,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
+        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Customer)
         {
             <!-- How It Works -->
             <li class='menu-item@(currentPage == "/HowItWorks/Customer" ? " active" : "")'>
@@ -106,7 +106,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Company)
+        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Company)
         {
             <!-- Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>

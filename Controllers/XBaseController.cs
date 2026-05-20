@@ -19,7 +19,7 @@ namespace Bewegdeal.Controllers
             bool? hiw = null
         )
         {
-            if (!long.TryParse(HttpContext.Session.GetString("UserId"), out var id))
+            if (!long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var id))
             {
                 return null;
             }

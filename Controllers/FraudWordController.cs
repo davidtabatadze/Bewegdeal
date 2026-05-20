@@ -50,7 +50,7 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var userId = long.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = long.Parse(HttpContext.Session.GetString(ConstantEnum.SessionUserId) ?? "0");
             var user = await _userRepo.Get(new UserFilter { Id = userId });
 
             await _fraudWordRepo.Create(new FraudWordEntity

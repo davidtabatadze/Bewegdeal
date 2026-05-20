@@ -60,7 +60,7 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateUserStatus(long id)
         {
-            if (id.ToString() == HttpContext.Session.GetString("UserId"))
+            if (id.ToString() == HttpContext.Session.GetString(ConstantEnum.SessionUserId))
             {
                 return BadRequest();
             }
@@ -161,13 +161,13 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveTheme(string theme)
         {
-            if (long.TryParse(HttpContext.Session.GetString("UserId"), out var userId))
+            if (long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId))
             {
                 await _userRepository.UpdateTheme(
                     userId,
                     theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
                 );
-                HttpContext.Session.SetString("UserTheme", theme);
+                HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, theme);
             }
 
             return Ok();
@@ -229,7 +229,7 @@ namespace Bewegdeal.Controllers
                 ServiceTermsFileId = serviceTermsFileId
             });
 
-            HttpContext.Session.SetString("UserName", model?.Name?.Trim() ?? "-");
+            HttpContext.Session.SetString(ConstantEnum.SessionUserName, model?.Name?.Trim() ?? "-");
 
             return RedirectToAction(nameof(Profile));
         }
