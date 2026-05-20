@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html lang="en"
       class="layout-menu-fixed layout-navbar-fixed"
-      data-skin="default" data-bs-theme="light"
+      data-skin="default" data-bs-theme="@(Context.Session.GetString("UserTheme") ?? "light")"
       data-assets-path="/" data-template="vertical-menu-template">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
   <title>@ViewData["Title"] - Bewegdeal</title>
 
-  <!-- Sync theme from landing page — must run before stylesheets to prevent flash -->
+  <!-- Keep localStorage in sync with the server-stored theme preference -->
   <script>
     (function () {
-      var stored = localStorage.getItem('templateCustomizer-front-page--Theme');
-      if (!stored) { return; }
-      localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', stored);
-      var resolved = stored === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : stored;
-      document.documentElement.setAttribute('data-bs-theme', resolved);
+      var serverTheme = '@(Context.Session.GetString("UserTheme") ?? "light")';
+      localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', serverTheme);
+      localStorage.setItem('templateCustomizer-front-page--Theme', serverTheme);
     })();
   </script>
 

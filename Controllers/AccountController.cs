@@ -66,6 +66,7 @@ public class AccountController(
         HttpContext.Session.SetString("UserRole", user.Role);
         HttpContext.Session.SetString("UserName", user.Name);
         HttpContext.Session.SetString("UserEmail", user.Email);
+        HttpContext.Session.SetString("UserTheme", user.Theme);
 
         // set persistent cookie when "remember me" is checked
         if (rememberMe)
@@ -302,13 +303,13 @@ public class AccountController(
         long? termsFileId = null;
         if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await fileService.Create(model.TermsFile, null, null, [FileTypeEnum.PDF]);
+            var file = await fileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;
                 return View(model);
             }
-            termsFileId = file!.Id;
+            termsFileId = file.Id;
         }
 
         // ready password

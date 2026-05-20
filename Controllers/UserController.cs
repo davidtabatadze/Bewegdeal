@@ -1,18 +1,31 @@
+using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Models;
+using Bewegdeal.Services;
+using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireAdmin]
-    public class UserController(IUserRepository userRepository) : Controller
+    public class UserController(
+        IUserRepository userRepository,
+        IFileRepository fileRepository,
+        FileService fileService
+    ) : XBaseController(userRepository)
     {
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IFileRepository _fileRepository = fileRepository;
+        private readonly FileService _fileService = fileService;
+
+        #region List
+
+        [RequireAdmin]
         public async Task<IActionResult> List()
         {
-            var users = await userRepository.Load(new UserFilter() { Id = 0 });
+            var users = await _userRepository.Load(new UserFilter() { Id = 0 });
             ViewBag.TotalCount = users.Count;
             ViewBag.CustomerCount = users.Count(u => u.Role == UserRoleEnum.Customer);
             ViewBag.CompanyCount = users.Count(u => u.Role == UserRoleEnum.Company);
@@ -20,12 +33,13 @@ namespace Bewegdeal.Controllers
             return View();
         }
 
+        [RequireAdmin]
         [HttpGet]
         public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQuery] int draw = 1)
         {
-            var users = await userRepository.Load(filter);
-            var filtered = await userRepository.Count(filter);
-            var total = await userRepository.Count(new UserFilter());
+            var users = await _userRepository.Load(filter);
+            var filtered = await _userRepository.Count(filter);
+            var total = await _userRepository.Count(new UserFilter());
 
             var data = users.Select(u => new
             {
@@ -42,6 +56,7 @@ namespace Bewegdeal.Controllers
             return Json(new GridResultViewModel<object>(draw, total, filtered, data));
         }
 
+        [RequireAdmin]
         [HttpPost]
         public async Task<IActionResult> UpdateUserStatus(long id)
         {
@@ -50,7 +65,7 @@ namespace Bewegdeal.Controllers
                 return BadRequest();
             }
 
-            var user = await userRepository.Get(new UserFilter { Id = id });
+            var user = await _userRepository.Get(new UserFilter { Id = id });
 
             if (user is null)
             {
@@ -65,8 +80,189 @@ namespace Bewegdeal.Controllers
                 _ => user.Status
             };
 
-            await userRepository.SetUserStatus(id, newStatus);
+            await _userRepository.SetUserStatus(id, newStatus);
             return Json(new { status = newStatus });
         }
+
+        #endregion
+
+        #region Profile
+
+        [RequireLogin]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await GetUser();
+            if (user is null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            FileEntity? picture = null;
+            if (user.ProfilePictureFileId.HasValue)
+            {
+                picture = await _fileRepository.Get(user.ProfilePictureFileId.Value);
+            }
+
+            FileEntity? serviceTermsFile = null;
+            if (user.Role == UserRoleEnum.Company && user.ServiceTermsFileId.HasValue)
+            {
+                serviceTermsFile = await _fileRepository.Get(user.ServiceTermsFileId.Value);
+            }
+
+            ViewBag.User = user;
+            ViewBag.PictureUrl = picture is not null
+                ? Url.Action("Download", "File", new { key = picture.Key })
+                : null;
+            ViewBag.ServiceTermsFile = serviceTermsFile;
+            ViewBag.ServiceTermsUrl = serviceTermsFile is not null
+                ? Url.Action("Download", "File", new { key = serviceTermsFile.Key })
+                : null;
+
+            return View();
+        }
+
+        [RequireLogin]
+        [HttpPost]
+        public async Task<IActionResult> SavePicture(IFormFile? picture)
+        {
+            var user = await GetUser();
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+
+            if (picture is null)
+            {
+                if (user.ProfilePictureFileId.HasValue)
+                {
+                    await _fileService.Delete(user.ProfilePictureFileId.Value);
+                    await _userRepository.UpdatePicture(user.Id, null);
+                }
+                return Ok();
+            }
+
+            var (id, error) = await _fileService.Create(
+                picture,
+                user.ProfilePictureFileId,
+                3,
+                [FileTypeEnum.PNG, FileTypeEnum.JPEG]
+            );
+
+            if (error is not null)
+            {
+                return BadRequest(new { error });
+            }
+
+            await _userRepository.UpdatePicture(user.Id, id);
+            return Ok();
+        }
+
+        [RequireLogin]
+        [HttpPost]
+        public async Task<IActionResult> SaveTheme(string theme)
+        {
+            if (long.TryParse(HttpContext.Session.GetString("UserId"), out var userId))
+            {
+                await _userRepository.UpdateTheme(
+                    userId,
+                    theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
+                );
+                HttpContext.Session.SetString("UserTheme", theme);
+            }
+
+            return Ok();
+        }
+
+        [RequireLogin]
+        [HttpPost]
+        public async Task<IActionResult> SavePersonal(SavePersonalViewModel model)
+        {
+            var user = await GetUser();
+            if (user is null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.IsNullOrWhiteSpace(model?.Name) || string.IsNullOrWhiteSpace(model?.Mobile))
+            {
+                TempData["PersonalError"] = "Name and phone number are required.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            // define service terms
+            var serviceTermsFileId = user.Role == UserRoleEnum.Company ? user.ServiceTermsFileId : null;
+            if (user.Role == UserRoleEnum.Company)
+            {
+                if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
+                {
+                    await _fileService.Delete(user.ServiceTermsFileId.Value);
+                    serviceTermsFileId = null;
+                }
+                if (model.ServiceTermsFile is not null)
+                {
+                    var file = await _fileService.Create(
+                        model.ServiceTermsFile,
+                        model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
+                        5,
+                        [FileTypeEnum.PDF]
+                    );
+                    if (file.Error is not null)
+                    {
+                        TempData["PersonalError"] = file.Error;
+                        return RedirectToAction(nameof(Profile));
+                    }
+                    serviceTermsFileId = file.Id;
+                }
+            }
+
+            var number = user.Role == UserRoleEnum.Company ? user.Number : model.Number;
+            var interests = user.Role == UserRoleEnum.Company ? model?.Interests ?? [] : [];
+
+            await _userRepository.UpdatePersonal(new UserEntity
+            {
+                Id = user.Id,
+                Number = number,
+                Interests = interests,
+                Name = model?.Name?.Trim() ?? "",
+                Mobile = model?.Mobile?.Trim() ?? "",
+                Address = model?.Address?.Trim(),
+                ServiceTermsFileId = serviceTermsFileId
+            });
+
+            HttpContext.Session.SetString("UserName", model?.Name?.Trim() ?? "-");
+
+            return RedirectToAction(nameof(Profile));
+        }
+
+        [RequireLogin]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string? newPassword, string? confirmPassword)
+        {
+            var user = await GetUser();
+            if (user is null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                TempData["PasswordError"] = "All password fields are required.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                TempData["PasswordError"] = "New passwords do not match.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            var (hash, salt) = PasswordTool.HashPassword(newPassword);
+            await _userRepository.UpdatePassword(user.Id, hash, salt);
+
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "Account");
+        }
+
+        #endregion
     }
 }

@@ -33,6 +33,14 @@
             </a>
         </li>
 
+        <!-- Profile -->
+        <li class='menu-item@(currentPage == "/User/Profile" ? " active" : "")'>
+            <a asp-controller="User" asp-action="Profile" class="menu-link">
+                <i class="menu-icon icon-base ri ri-account-circle-line"></i>
+                <div data-i18n="Profile">Profile</div>
+            </a>
+        </li>
+
         @if (Context.Session.GetString("UserRole") == Bewegdeal.Enums.UserRoleEnum.Customer)
         {
             <!-- New Request -->

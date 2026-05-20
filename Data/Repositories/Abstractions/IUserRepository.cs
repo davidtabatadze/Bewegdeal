@@ -10,6 +10,9 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task SetUserStatus(long id, string status);
         Task SetAcquaintedHIW(long id);
         Task UpdatePassword(long id, string hash, string salt);
+        Task UpdatePicture(long id, long? fileId);
+        Task UpdateTheme(long id, string theme);
+        Task UpdatePersonal(UserEntity user);
         Task<UserEntity?> Get(UserFilter filter);
         Task<int> Count(UserFilter filter);
         Task<List<UserEntity>> Load(UserFilter filter);

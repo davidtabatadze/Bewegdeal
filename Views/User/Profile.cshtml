@@ -1,0 +1,558 @@
+@using Bewegdeal.Data.Entities
+@using Bewegdeal.Enums
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
+}
+
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Profile";
+
+    var user = (UserEntity)ViewBag.User;
+    var pictureUrl = ViewBag.PictureUrl as string;
+
+    var nameParts = user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
+    var hasPicture = !string.IsNullOrWhiteSpace(pictureUrl);
+    var previewHide = hasPicture ? "" : "display:none;";
+    var initialsHide = hasPicture ? "display:none;" : "";
+    var numberDisabled = user.Role == UserRoleEnum.Company ? "disabled" : null;
+    var isCompany = user.Role == UserRoleEnum.Company;
+    var serviceTermsFile = ViewBag.ServiceTermsFile as FileEntity;
+    var serviceTermsUrl = ViewBag.ServiceTermsUrl as string;
+}
+
+<div class="row g-6">
+
+    <!-- 1. Picture -->
+    <div class="col-12 col-sm-6">
+        <form id="pictureForm" asp-controller="User" asp-action="SavePicture" method="post" enctype="multipart/form-data">
+            <div class="card h-100">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Picture</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex flex-column align-items-center gap-4">
+
+                        <img id="picturePreview" src="@(pictureUrl ?? "")" alt="Picture"
+                             class="rounded-circle"
+                             style="width:100px;height:100px;object-fit:cover;@previewHide" />
+                        <div id="pictureInitials" class="avatar" style="width:100px;height:100px;@initialsHide">
+                            <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                  style="font-size:2rem;">@initials</span>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <label for="pictureInput" class="btn btn-outline-primary">
+                                <i class="icon-base ri ri-upload-2-line me-1_5"></i>Choose File
+                            </label>
+                            <input type="file" id="pictureInput" name="picture" class="d-none" accept=".png,.jpg,.jpeg" />
+                            <button type="button" id="pictureRemoveBtn" class="btn btn-outline-danger@(hasPicture ? "" : " d-none")">
+                                <i class="icon-base ri ri-delete-bin-line me-1_5"></i>Remove
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. Theme -->
+    <div class="col-12 col-sm-6">
+        <form id="themeForm" asp-controller="User" asp-action="SaveTheme" method="post" class="h-100">
+            <div class="card h-100">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Theme</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row gy-3">
+
+                        <div class="col-6 col-md-6">
+                            <div class="form-check custom-option custom-option-icon">
+                                <label class="form-check-label custom-option-content" for="themeLight">
+                                    <span class="custom-option-body">
+                                        <i class="icon-base ri ri-sun-line text-warning"></i>
+                                        <span class="custom-option-title mb-1">Light</span>
+                                    </span>
+                                    <input name="theme" class="form-check-input" type="radio"
+                                           value="@UserThemeEnum.Light" id="themeLight"
+                                           checked="@(user.Theme == UserThemeEnum.Light ? "checked" : null)" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-6">
+                            <div class="form-check custom-option custom-option-icon">
+                                <label class="form-check-label custom-option-content" for="themeDark">
+                                    <span class="custom-option-body">
+                                        <i class="icon-base ri ri-moon-clear-line text-dark"></i>
+                                        <span class="custom-option-title mb-1">Dark</span>
+                                    </span>
+                                    <input name="theme" class="form-check-input" type="radio"
+                                           value="@UserThemeEnum.Dark" id="themeDark"
+                                           checked="@(user.Theme == UserThemeEnum.Dark ? "checked" : null)" />
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. Personal -->
+    <div class="col-12">
+        <form asp-controller="User" asp-action="SavePersonal" method="post" enctype="multipart/form-data">
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Personal</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (isCompany)
+                    {
+                        <p class="fw-medium mb-3">Your interests</p>
+                        <div class="row gy-3 mb-6">
+                            <div class="col-6 col-md-3">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="interestMoving">
+                                        <span class="custom-option-body">
+                                            <i class="icon-base ri ri-truck-line text-success"></i>
+                                            <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Moving</span>
+                                            @* <small>Household or office relocation</small> *@
+                                        </span>
+                                        <input class="form-check-input" type="checkbox" name="Interests" id="interestMoving"
+                                               value="@ServiceEnum.Moving"
+                                               checked="@(user.Interests.Contains(ServiceEnum.Moving) ? "checked" : null)" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="interestRemoval">
+                                        <span class="custom-option-body">
+                                            <i class="icon-base ri ri-recycle-line text-danger"></i>
+                                            <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Removal</span>
+                                            @* <small>Junk and waste removal</small> *@
+                                        </span>
+                                        <input class="form-check-input" type="checkbox" name="Interests" id="interestRemoval"
+                                               value="@ServiceEnum.Removal"
+                                               checked="@(user.Interests.Contains(ServiceEnum.Removal) ? "checked" : null)" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="interestPickup">
+                                        <span class="custom-option-body">
+                                            <i class="icon-base ri ri-shopping-bag-4-line text-warning"></i>
+                                            <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Pickup</span>
+                                            @* <small>Store or warehouse pickup</small> *@
+                                        </span>
+                                        <input class="form-check-input" type="checkbox" name="Interests" id="interestPickup"
+                                               value="@ServiceEnum.Pickup"
+                                               checked="@(user.Interests.Contains(ServiceEnum.Pickup) ? "checked" : null)" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="interestTransport">
+                                        <span class="custom-option-body">
+                                            <i class="icon-base ri ri-car-line text-info"></i>
+                                            <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Transport</span>
+                                            @* <small>Vehicle or cargo transport</small> *@
+                                        </span>
+                                        <input class="form-check-input" type="checkbox" name="Interests" id="interestTransport"
+                                               value="@ServiceEnum.Transport"
+                                               checked="@(user.Interests.Contains(ServiceEnum.Transport) ? "checked" : null)" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="interestsError" class="text-danger small d-none mt-n3 mb-3">Please select at least one interest.</div>
+                    }
+
+                    <div class="row g-5 mb-5">
+                        <div class="col-12 col-sm-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" id="name" name="name" class="form-control"
+                                       placeholder="" maxlength="32" value="@user.Name" />
+                                <label for="name">Name</label>
+                                <div class="invalid-feedback">Name is required.</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" id="number" name="number" class="form-control"
+                                       placeholder="" maxlength="16" value="@user.Number"
+                                       disabled="@numberDisabled" />
+                                <label for="number">Identification Number</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-5 mb-5">
+                        <div class="col-12 col-sm-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" id="mobile" name="mobile" class="form-control"
+                                       placeholder="" maxlength="16" value="@user.Mobile" />
+                                <label for="mobile">Phone Number</label>
+                                <div class="invalid-feedback">Phone number is required.</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" id="address" name="address" class="form-control"
+                                       placeholder="" maxlength="256" value="@user.Address" />
+                                <label for="address">Address</label>
+                                <div class="invalid-feedback">Address is required.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isCompany)
+                    {
+                        <div class="row g-5">
+                            <div class="col-12 col-sm-6 align-self-center text-center">
+                                @if (serviceTermsFile is null)
+                                {
+                                    <span class="text-muted">No service terms file uploaded.</span>
+                                }
+                                else
+                                {
+                                    <a id="serviceTermsLink" href="@serviceTermsUrl" target="_blank">
+                                        <i class="ri ri-file-pdf-line me-1"></i>@serviceTermsFile.FileName
+                                    </a>
+                                    <span id="serviceTermsRemovedLabel" class="text-muted d-none">File will be removed on save.</span>
+                                    <i id="serviceTermsRemoveBtn" class="ri ri-delete-bin-line text-danger" style="cursor:pointer;"></i>
+                                    <i id="serviceTermsUndoBtn" class="ri ri-arrow-go-back-line text-secondary d-none" style="cursor:pointer;"></i>
+                                }
+                            </div>
+                            <div class="col-12 col-sm-6 text-center">
+                                <button type="button" id="serviceTermsChooseBtn" class="btn btn-outline-primary">
+                                    <i class="icon-base ri ri-upload-2-line me-1_5"></i>Choose File (.pdf)
+                                </button>
+                                <input type="file" id="serviceTermsInput" name="ServiceTermsFile" class="d-none" accept=".pdf" />
+                                <span id="serviceTermsSelectedName" class="text-muted"></span>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- 4. Change Password -->
+    <div class="col-12">
+        <form asp-controller="User" asp-action="ChangePassword" method="post" id="passwordForm" novalidate>
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Change Password</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex flex-column align-items-center gap-4">
+
+                        <div class="alert alert-danger" role="alert" style="width:400px;">
+                            <span class="icon-base ri ri-information-line me-1_5"></span>
+                            Password change requires re-authorization — you will be signed out immediately after saving.
+                        </div>
+
+                        <div style="width:300px;">
+                            <div class="form-floating form-floating-outline">
+                                <input type="password" id="newPassword" name="newPassword"
+                                       class="form-control" placeholder="" />
+                                <label for="newPassword">New Password</label>
+                                <div class="invalid-feedback" id="newPasswordFeedback">New password is required.</div>
+                            </div>
+                        </div>
+
+                        <div style="width:300px;">
+                            <div class="form-floating form-floating-outline">
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                       class="form-control" placeholder="" />
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <div class="invalid-feedback" id="confirmFeedback">Please confirm your new password.</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Go</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+
+@section PageScripts {
+    <script>
+        var notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
+
+        @if (TempData["PersonalError"] is string personalError) {
+            <text>notyf.error(@Json.Serialize(personalError));</text>
+        }
+        @if (TempData["PasswordError"] is string passwordError) {
+            <text>notyf.error(@Json.Serialize(passwordError));</text>
+        }
+
+        // Picture — instant preview + upload + remove
+        (function () {
+            var form      = document.getElementById('pictureForm');
+            var token     = form.querySelector('input[name="__RequestVerificationToken"]').value;
+            var preview   = document.getElementById('picturePreview');
+            var initials  = document.getElementById('pictureInitials');
+            var removeBtn = document.getElementById('pictureRemoveBtn');
+
+            document.getElementById('pictureInput').addEventListener('change', function () {
+                var file = this.files[0];
+                if (!file) { return; }
+
+                // instant preview
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src            = e.target.result;
+                    preview.style.display  = '';
+                    initials.style.display = 'none';
+                    if (removeBtn) { removeBtn.classList.remove('d-none'); }
+                };
+                reader.readAsDataURL(file);
+
+                // upload
+                var fd = new FormData();
+                fd.append('__RequestVerificationToken', token);
+                fd.append('picture', file);
+                fetch(form.action, { method: 'POST', body: fd })
+                    .then(function (res) {
+                        if (!res.ok) {
+                            return res.json().then(function (data) {
+                                notyf.error(data.error ?? 'Something went wrong. Please try again.');
+                            });
+                        }
+                    })
+                    .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+            });
+
+            // optimistic remove
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function () {
+                    preview.src            = '';
+                    preview.style.display  = 'none';
+                    initials.style.display = '';
+                    removeBtn.classList.add('d-none');
+                    var fd = new FormData();
+                    fd.append('__RequestVerificationToken', token);
+                    fetch('@Url.Action("SavePicture", "User")', { method: 'POST', body: fd })
+                        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+                });
+            }
+        })();
+
+        // Theme — silent fetch, no page reload
+        (function () {
+        var form = document.getElementById('themeForm');
+        form.addEventListener('change', function () {
+        var data  = new FormData(form);
+        var theme = data.get('theme');
+
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', theme);
+        localStorage.setItem('templateCustomizer-front-page--Theme', theme);
+
+        fetch(form.action, { method: 'POST', body: data });
+        });
+        })();
+
+        // Personal — client-side validation
+        (function () {
+            var form      = document.querySelector('form[action*="SavePersonal"]');
+            var isCompany = @(isCompany ? "true" : "false");
+
+            function validate() {
+                var valid = true;
+
+                ['name', 'mobile', 'address'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) { el.classList.remove('is-invalid'); }
+                });
+                var interestsError = document.getElementById('interestsError');
+                if (interestsError) { interestsError.classList.add('d-none'); }
+
+                if (isCompany) {
+                    if (form.querySelectorAll('input[name="Interests"]:checked').length === 0) {
+                        interestsError.classList.remove('d-none');
+                        valid = false;
+                    }
+                }
+
+                if (!document.getElementById('name').value.trim()) {
+                    document.getElementById('name').classList.add('is-invalid');
+                    valid = false;
+                }
+
+                if (!document.getElementById('mobile').value.trim()) {
+                    document.getElementById('mobile').classList.add('is-invalid');
+                    valid = false;
+                }
+
+                if (isCompany && !document.getElementById('address').value.trim()) {
+                    document.getElementById('address').classList.add('is-invalid');
+                    valid = false;
+                }
+
+                return valid;
+            }
+
+            function watchField(id) {
+                var el = document.getElementById(id);
+                if (!el) { return; }
+                el.addEventListener('input', function () {
+                    this.classList.toggle('is-invalid', !this.value.trim());
+                });
+            }
+            watchField('name');
+            watchField('mobile');
+            if (isCompany) { watchField('address'); }
+
+            if (isCompany) {
+                form.querySelectorAll('input[name="Interests"]').forEach(function (cb) {
+                    cb.addEventListener('change', function () {
+                        if (form.querySelectorAll('input[name="Interests"]:checked').length > 0) {
+                            document.getElementById('interestsError').classList.add('d-none');
+                        }
+                    });
+                });
+            }
+
+            form.addEventListener('submit', function (e) {
+                if (!validate()) { e.preventDefault(); }
+            });
+        })();
+
+        // Service Terms — file name preview + Remove/Undo toggle
+        (function () {
+            var fileInput    = document.getElementById('serviceTermsInput');
+            if (!fileInput) { return; }
+
+            var personalForm = fileInput.closest('form');
+            var selectedName = document.getElementById('serviceTermsSelectedName');
+            var removeBtn    = document.getElementById('serviceTermsRemoveBtn');
+            var undoBtn      = document.getElementById('serviceTermsUndoBtn');
+            var link         = document.getElementById('serviceTermsLink');
+            var removedLabel = document.getElementById('serviceTermsRemovedLabel');
+            var deleteInput  = null;
+
+            document.getElementById('serviceTermsChooseBtn').addEventListener('click', function () {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                selectedName.textContent = this.files[0] ? this.files[0].name : '';
+            });
+
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function () {
+                    deleteInput = document.createElement('input');
+                    deleteInput.type  = 'hidden';
+                    deleteInput.name  = 'DeleteServiceTerms';
+                    deleteInput.value = 'true';
+                    personalForm.appendChild(deleteInput);
+
+                    link.classList.add('d-none');
+                    removedLabel.classList.remove('d-none');
+                    removeBtn.classList.add('d-none');
+                    undoBtn.classList.remove('d-none');
+                });
+
+                undoBtn.addEventListener('click', function () {
+                    if (deleteInput) { deleteInput.remove(); deleteInput = null; }
+
+                    link.classList.remove('d-none');
+                    removedLabel.classList.add('d-none');
+                    removeBtn.classList.remove('d-none');
+                    undoBtn.classList.add('d-none');
+                });
+            }
+        })();
+
+        // Password change
+        (function () {
+            var newPwd      = document.getElementById('newPassword');
+            var confirm     = document.getElementById('confirmPassword');
+            var newFeedback = document.getElementById('newPasswordFeedback');
+            var confFeedback = document.getElementById('confirmFeedback');
+
+            function validateNew() {
+                newPwd.classList.remove('is-invalid');
+                if (!newPwd.value) {
+                    newFeedback.textContent = 'New password is required.';
+                    newPwd.classList.add('is-invalid');
+                    return false;
+                }
+                if (newPwd.value.length < 6) {
+                    newFeedback.textContent = 'Password must be at least 6 characters.';
+                    newPwd.classList.add('is-invalid');
+                    return false;
+                }
+                return true;
+            }
+
+            function validateConfirm() {
+                confirm.classList.remove('is-invalid');
+                if (!confirm.value) {
+                    confFeedback.textContent = 'Please confirm your new password.';
+                    confirm.classList.add('is-invalid');
+                    return false;
+                }
+                if (newPwd.value !== confirm.value) {
+                    confFeedback.textContent = 'Passwords do not match.';
+                    confirm.classList.add('is-invalid');
+                    return false;
+                }
+                return true;
+            }
+
+            newPwd.addEventListener('input', validateNew);
+            confirm.addEventListener('input', validateConfirm);
+
+            document.getElementById('passwordForm').addEventListener('submit', function (e) {
+                var v1 = validateNew();
+                var v2 = validateConfirm();
+                if (!v1 || !v2) { e.preventDefault(); }
+            });
+        })();
+    </script>
+}

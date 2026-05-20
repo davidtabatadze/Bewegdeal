@@ -81,6 +81,34 @@ namespace Bewegdeal.Data.Repositories
                 );
         }
 
+        public async Task UpdatePicture(long id, long? fileId)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.ProfilePictureFileId, fileId));
+        }
+
+        public async Task UpdateTheme(long id, string theme)
+        {
+            await context.Users
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Theme, theme));
+        }
+
+        public async Task UpdatePersonal(UserEntity user)
+        {
+            await context.Users
+                .Where(u => u.Id == user.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.Name, user.Name)
+                    .SetProperty(u => u.Number, user.Number)
+                    .SetProperty(u => u.Mobile, user.Mobile)
+                    .SetProperty(u => u.Address, user.Address)
+                    .SetProperty(u => u.Interests, user.Interests)
+                    .SetProperty(u => u.ServiceTermsFileId, user.ServiceTermsFileId)
+                );
+        }
+
         // ── Read ─────────────────────────────────────────────────────────────────
 
         public async Task<UserEntity?> Get(UserFilter filter)
