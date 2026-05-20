@@ -68,6 +68,15 @@ public class AccountController(
         HttpContext.Session.SetString(ConstantEnum.SessionUserEmail, user.Email);
         HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, user.Theme);
 
+        if (user.ProfilePictureFileId.HasValue)
+        {
+            var pictureFile = await fileRepository.Get(user.ProfilePictureFileId.Value);
+            if (pictureFile is not null)
+            {
+                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureKey, pictureFile.Key);
+            }
+        }
+
         // set persistent cookie when "remember me" is checked
         if (rememberMe)
         {

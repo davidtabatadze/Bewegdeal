@@ -27,6 +27,16 @@ namespace Bewegdeal.Middleware
                     context.Session.SetString(ConstantEnum.SessionUserId, user.Id.ToString());
                     context.Session.SetString(ConstantEnum.SessionUserRole, user.Role);
                     context.Session.SetString(ConstantEnum.SessionUserName, user.Name);
+
+                    if (user.ProfilePictureFileId.HasValue)
+                    {
+                        var fileRepository = context.RequestServices.GetRequiredService<IFileRepository>();
+                        var pictureFile = await fileRepository.Get(user.ProfilePictureFileId.Value);
+                        if (pictureFile is not null)
+                        {
+                            context.Session.SetString(ConstantEnum.SessionUserPictureKey, pictureFile.Key);
+                        }
+                    }
                 }
                 else
                 {

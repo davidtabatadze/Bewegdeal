@@ -1,5 +1,16 @@
 @{
     string? currentPage = ViewContext.HttpContext.Request.Path;
+
+    var sessionName = Context.Session.GetString(ConstantEnum.SessionUserName) ?? "-";
+    var sessionEmail = Context.Session.GetString(ConstantEnum.SessionUserEmail) ?? "-";
+    var nameParts = sessionName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var userInitials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
+    if (string.IsNullOrEmpty(userInitials)) { userInitials = "?"; }
+
+    var pictureKey = Context.Session.GetString(ConstantEnum.SessionUserPictureKey);
+    var pictureUrl = !string.IsNullOrEmpty(pictureKey)
+        ? Url.Action("Download", "File", new { key = pictureKey })
+        : null;
 }
 
 <!-- Menu -->
@@ -20,9 +31,55 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        
+
         <!-- ------ -->
-        <li class="menu-header mt-7" style="padding-inline: 0 !important">
+        <li class="menu-header mt-3">
+            <span class="menu-header-text" data-i18n="User">User</span>
+        </li>
+
+        <!-- User badge -->
+        <li class='menu-item@(currentPage == "/User/Profile" ? " open" : "")'>
+            <a href="javascript:void(0);" class="menu-link menu-toggle" style="padding-inline-start: 0.75rem;">
+                @if (pictureUrl is not null)
+                {
+                    <img id="menuBadgeImg" src="@pictureUrl" alt="@sessionName"
+                         class="menu-icon rounded-circle" style="object-fit:cover;width:45px;height:45px;" />
+                    <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;display:none;">@userInitials</span>
+                }
+                else
+                {
+                    <img id="menuBadgeImg" src="" alt="" class="menu-icon rounded-circle"
+                         style="object-fit:cover;width:45px;height:45px;display:none;" />
+                    <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;">@userInitials</span>
+                }
+                @* <div data-i18n="@sessionName">@sessionName</div> margin-inline-end: 0px;  *@
+                @* <div>
+                    <h6 class="mb-0 small">@sessionName</h6>
+                    <small class="text-body-secondary">@sessionEmail</small>
+                </div> *@
+                <div data-i18n="@sessionName">@sessionName</div>
+            </a>
+            <ul class="menu-sub">
+                <li class='menu-item@(currentPage == "/User/Profile" ? " active" : "")'>
+                    <a asp-controller="User" asp-action="Profile" class="menu-link">
+                        <div>Profile</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="javascript:void(0);" style="background: rgba(var(--bs-danger-rgb), 0.08);" class="menu-link" onclick="document.getElementById('menuLogoutForm').submit();">
+                        <div class="text-danger">Logout</div>
+                        @* <i class="menu-icon icon-base ri ri-logout-box-r-line text-danger"></i> *@
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- / User badge -->
+
+        <!-- ------ -->
+        <li class="menu-header mt-2">
+            <span class="menu-header-text" data-i18n="Navigation">Navigation</span>
         </li>
 
         <!-- Dashboard -->
@@ -30,14 +87,6 @@
             <a asp-controller="Dashboard" asp-action="Index" class="menu-link">
                 <i class="menu-icon icon-base ri ri-home-smile-line"></i>
                 <div data-i18n="Dashboard">Dashboard</div>
-            </a>
-        </li>
-
-        <!-- Profile -->
-        <li class='menu-item@(currentPage == "/User/Profile" ? " active" : "")'>
-            <a asp-controller="User" asp-action="Profile" class="menu-link">
-                <i class="menu-icon icon-base ri ri-account-circle-line"></i>
-                <div data-i18n="Profile">Profile</div>
             </a>
         </li>
 
@@ -126,5 +175,6 @@
         }
 
     </ul>
+    <form id="menuLogoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-none"></form>
 </aside>
 <!-- / Menu -->

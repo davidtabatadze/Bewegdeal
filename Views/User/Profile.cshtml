@@ -123,7 +123,7 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Personal</h5>
+                    <h5 class="card-title m-0">Personal <span class="text-primary">@user.Email</span></h5>
                 </div>
 
                 <div class="card-body">
@@ -336,6 +336,18 @@
             var preview   = document.getElementById('picturePreview');
             var initials  = document.getElementById('pictureInitials');
             var removeBtn = document.getElementById('pictureRemoveBtn');
+            var badgeImg      = document.getElementById('menuBadgeImg');
+            var badgeInitials = document.getElementById('menuBadgeInitials');
+
+            function setBadgePicture(src) {
+                if (badgeImg)      { badgeImg.src = src; badgeImg.style.display = ''; }
+                if (badgeInitials) { badgeInitials.style.display = 'none'; }
+            }
+
+            function clearBadgePicture() {
+                if (badgeImg)      { badgeImg.src = ''; badgeImg.style.display = 'none'; }
+                if (badgeInitials) { badgeInitials.style.display = 'flex'; }
+            }
 
             document.getElementById('pictureInput').addEventListener('change', function () {
                 var file = this.files[0];
@@ -348,6 +360,7 @@
                     preview.style.display  = '';
                     initials.style.display = 'none';
                     if (removeBtn) { removeBtn.classList.remove('d-none'); }
+                    setBadgePicture(e.target.result);
                 };
                 reader.readAsDataURL(file);
 
@@ -373,6 +386,7 @@
                     preview.style.display  = 'none';
                     initials.style.display = '';
                     removeBtn.classList.add('d-none');
+                    clearBadgePicture();
                     var fd = new FormData();
                     fd.append('__RequestVerificationToken', token);
                     fetch('@Url.Action("SavePicture", "User")', { method: 'POST', body: fd })

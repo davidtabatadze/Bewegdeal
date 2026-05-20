@@ -138,6 +138,7 @@ namespace Bewegdeal.Controllers
                     await _fileService.Delete(user.ProfilePictureFileId.Value);
                     await _userRepository.UpdatePicture(user.Id, null);
                 }
+                HttpContext.Session.Remove(ConstantEnum.SessionUserPictureKey);
                 return Ok();
             }
 
@@ -154,6 +155,13 @@ namespace Bewegdeal.Controllers
             }
 
             await _userRepository.UpdatePicture(user.Id, id);
+
+            var file = await _fileRepository.Get(id!.Value);
+            if (file is not null)
+            {
+                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureKey, file.Key);
+            }
+
             return Ok();
         }
 
