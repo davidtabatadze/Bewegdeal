@@ -33,6 +33,8 @@ namespace Bewegdeal.Models
         [MaxLength(16)]
         public string Password { get; set; } = string.Empty;
 
+        public string Theme { get; set; } = UserThemeEnum.Light;
+
         public IFormFile? TermsFile { get; set; }
 
         // Each nullable property represents one service checkbox.

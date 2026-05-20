@@ -14,10 +14,7 @@
       var stored = localStorage.getItem('templateCustomizer-front-page--Theme');
       if (!stored) { return; }
       localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', stored);
-      var resolved = stored === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : stored;
-      document.documentElement.setAttribute('data-bs-theme', resolved);
+      document.documentElement.setAttribute('data-bs-theme', stored);
     })();
   </script>
 

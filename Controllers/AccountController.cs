@@ -202,7 +202,6 @@ public class AccountController(
         // seek one time code
         var oneTimeCodeCacheKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
         var oneTimeCode = cache.Get<string>(oneTimeCodeCacheKey);
-        cache.Remove(oneTimeCodeCacheKey);
 
         // no code? error
         if (oneTimeCode is null)
@@ -230,6 +229,7 @@ public class AccountController(
         }
 
         // all good
+        cache.Remove(oneTimeCodeCacheKey);
         TempData["LoginSuccess"] = AnnotationEnum.Account.VerifyEmail.Success;
         return RedirectToAction(nameof(Login));
     }
@@ -329,7 +329,8 @@ public class AccountController(
             Interests = [.. interests],
             Status = UserStatusEnum.Unverified,
             ServiceTermsFileId = termsFileId,
-            AcquaintedHIW = false
+            AcquaintedHIW = false,
+            Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light
         });
 
         // send verification email

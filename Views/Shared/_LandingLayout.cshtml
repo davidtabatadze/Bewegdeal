@@ -13,10 +13,7 @@
       var stored = localStorage.getItem('templateCustomizer-vertical-menu-template--Theme');
       if (!stored) { return; }
       localStorage.setItem('templateCustomizer-front-page--Theme', stored);
-      var resolved = stored === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : stored;
-      document.documentElement.setAttribute('data-bs-theme', resolved);
+      document.documentElement.setAttribute('data-bs-theme', stored);
     })();
   </script>
 
@@ -67,6 +64,29 @@
   @RenderSection("VendorScripts", required: false)
 
   <script src="~/js/front-main.js"></script>
+
+  <script>
+    (function () {
+      var icon = document.getElementById('themeToggleIcon');
+
+      function updateIcon(theme) {
+        icon.className = theme === 'dark'
+          ? 'icon-base ri ri-sun-line icon-24px'
+          : 'icon-base ri ri-moon-clear-line icon-24px';
+      }
+
+      updateIcon(document.documentElement.getAttribute('data-bs-theme') || 'light');
+
+      document.getElementById('themeToggleBtn').addEventListener('click', function () {
+        var current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        window.Helpers.setStoredTheme(window.templateName, next);
+        window.Helpers.setStoredTheme('vertical-menu-template', next);
+        window.Helpers.setTheme(next);
+        updateIcon(next);
+      });
+    })();
+  </script>
 
   @RenderSection("PageScripts", required: false)
 

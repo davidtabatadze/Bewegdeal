@@ -44,28 +44,10 @@
             <!-- Toolbar: Start -->
             <ul class="navbar-nav flex-row align-items-center ms-auto">
                 <!-- Style Switcher -->
-                <li class="nav-item dropdown-style-switcher dropdown me-2 me-xl-0">
-                    <a class="nav-link dropdown-toggle hide-arrow me-sm-2" id="nav-theme" href="javascript:void(0);" data-bs-toggle="dropdown">
-                        <i class="icon-base ri ri-sun-line icon-24px theme-icon-active"></i>
-                        <span class="d-none ms-2" id="nav-theme-text">Toggle theme</span>
+                <li class="nav-item me-2 me-xl-0">
+                    <a class="nav-link" id="themeToggleBtn" href="javascript:void(0);" title="Toggle theme">
+                        <i class="icon-base icon-24px" id="themeToggleIcon"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-theme-text">
-                        <li>
-                            <button type="button" class="dropdown-item align-items-center active" data-bs-theme-value="light" aria-pressed="false">
-                                <span><i class="icon-base ri ri-sun-line icon-24px me-3" data-icon="sun-line"></i>Light</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="dropdown-item align-items-center" data-bs-theme-value="dark" aria-pressed="true">
-                                <span><i class="icon-base ri ri-moon-clear-line icon-24px me-3" data-icon="moon-clear-line"></i>Dark</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="dropdown-item align-items-center" data-bs-theme-value="system" aria-pressed="false">
-                                <span><i class="icon-base ri ri-computer-line icon-24px me-3" data-icon="computer-line"></i>System</span>
-                            </button>
-                        </li>
-                    </ul>
                 </li>
                 <!-- / Style Switcher-->
                 <!-- navbar button: Start -->

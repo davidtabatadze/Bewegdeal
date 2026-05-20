@@ -28,6 +28,14 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js"></script>
+    <script>
+        (function () {
+            var stored = localStorage.getItem('templateCustomizer-front-page--Theme');
+            if (stored === 'light' || stored === 'dark') {
+                document.getElementById('registerTheme').value = stored;
+            }
+        })();
+    </script>
     @if (ViewBag.Error is string error)
     {
         <script>
@@ -94,6 +102,7 @@
 
                         <div class="bs-stepper-content">
                             <form id="multiStepsForm" method="post" enctype="multipart/form-data" asp-controller="Account" asp-action="Register" onsubmit="return false">
+                                <input type="hidden" name="Theme" id="registerTheme" value="@UserThemeEnum.Light" />
                                 <!-- Step 1: Role -->
                                 <div id="roleSelectionValidation" class="content">
                                     <div class="content-header mb-5">
