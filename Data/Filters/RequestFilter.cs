@@ -9,5 +9,8 @@ namespace Bewegdeal.Data.Filters
         public string? Service { get; set; }
         public string? ViewerRole { get; set; }
         public long? ViewerId { get; set; }
+        public long? ExecutorId { get; set; }
+        public DateTime? DateFrom { get; set; }
+        public DateTime? DateTo { get; set; }
     }
 }

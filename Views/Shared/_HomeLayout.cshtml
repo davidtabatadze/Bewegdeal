@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-      class="layout-menu-fixed layout-navbar-fixed"
+      class="layout-menu-fixed"
       data-skin="default" data-bs-theme="@(Context.Session.GetString(ConstantEnum.SessionUserTheme) ?? "light")"
       data-assets-path="/" data-template="vertical-menu-template">
 <head>
@@ -70,7 +70,7 @@
           @await Html.PartialAsync("Sections/Footer/_FooterHome")
           <!-- / Footer -->
 
-          <div class="content-backdrop fade"></div>
+          <div class="content-backdrop fade" style="pointer-events:none"></div>
         </div>
         <!-- / Content wrapper -->
 
