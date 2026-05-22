@@ -175,8 +175,9 @@ namespace Bewegdeal.Data
 
                 e.HasIndex(r => r.Number).IsUnique();
                 e.HasIndex(r => r.Status);
-                e.HasIndex(r => r.RequesterId);
+                e.HasIndex(r => r.Service);
                 e.HasIndex(r => r.ExecutorId);
+                e.HasIndex(r => r.RequesterId);
                 e.HasIndex(r => r.AgreementId);
 
                 e.Property(r => r.Number).IsRequired().HasMaxLength(36);

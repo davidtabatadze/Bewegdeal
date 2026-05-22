@@ -34,6 +34,8 @@ public class RequestController(
         ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
         ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
         ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
+        ViewBag.ViewerRole = viewerRole;
+        ViewBag.ViewerInterests = user?.Interests ?? [];
         return View();
     }
 
@@ -43,13 +45,15 @@ public class RequestController(
         var user = await GetUser();
         filter.ViewerId = user?.Id ?? 0;
         filter.ViewerRole = user?.Role ?? "-";
+        filter.ViewerInterests = user?.Interests ?? [];
 
         var requests = await requestRepository.Load(filter);
         var filtered = await requestRepository.Count(filter);
         var total = await requestRepository.Count(new RequestFilter
         {
             ViewerId = user?.Id ?? 0,
-            ViewerRole = user?.Role ?? "-"
+            ViewerRole = user?.Role ?? "-",
+            ViewerInterests = user?.Interests ?? []
         });
 
         var files = await requestFileRepository.LoadMainImages(

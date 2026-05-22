@@ -2,6 +2,21 @@
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Requests";
+
+    var viewerRole = ViewBag.ViewerRole as string ?? "";
+    var viewerInterests = (ViewBag.ViewerInterests as string[]) ?? [];
+
+    var allServices = new[]
+    {
+        (ServiceEnum.Moving,    AnnotationEnum.General.Service.Moving),
+        (ServiceEnum.Removal,   AnnotationEnum.General.Service.Removal),
+        (ServiceEnum.Pickup,    AnnotationEnum.General.Service.Pickup),
+        (ServiceEnum.Transport, AnnotationEnum.General.Service.Transport),
+    };
+
+    var serviceOptions = viewerRole == UserRoleEnum.Company
+        ? allServices.Where(s => viewerInterests.Contains(s.Item1)).ToArray()
+        : allServices;
 }
 
 @section VendorStyles {
@@ -111,10 +126,32 @@
     <div class="card-header border-bottom">
         <div class="row g-3 align-items-center">
             <div class="col-12 col-md-6">
-                <div class="input-group input-group-merge">
-                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
-                    <input type="text" id="requestsSearch" class="form-control" placeholder="Search requests..." />
-                </div>
+                @if (viewerRole == UserRoleEnum.Company)
+                {
+                    <div class="row g-3">
+                        <div class="col-8">
+                            <div class="input-group input-group-merge">
+                                <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                                <input type="text" id="requestsSearch" class="form-control" placeholder="Search requests..." />
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <select id="filterRequest" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                                <option value="">All Requests</option>
+                                <option data-divider="true"></option>
+                                <option value="@RequestViewerFocusEnum.Potential">Potential</option>
+                                <option value="@RequestViewerFocusEnum.Mine">Only Mine</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                        <input type="text" id="requestsSearch" class="form-control" placeholder="Search requests..." />
+                    </div>
+                }
             </div>
             <div class="col-12 col-md-6">
                 <div class="row g-3">
@@ -133,10 +170,10 @@
                         <select id="filterService" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                             <option value="">All Services</option>
                             <option data-divider="true"></option>
-                            <option value="@ServiceEnum.Moving">@AnnotationEnum.General.Service.Moving</option>
-                            <option value="@ServiceEnum.Removal">@AnnotationEnum.General.Service.Removal</option>
-                            <option value="@ServiceEnum.Pickup">@AnnotationEnum.General.Service.Pickup</option>
-                            <option value="@ServiceEnum.Transport">@AnnotationEnum.General.Service.Transport</option>
+                            @foreach (var (value, label) in serviceOptions)
+                            {
+                                <option value="@value">@label</option>
+                            }
                         </select>
                     </div>
                 </div>

@@ -52,8 +52,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Restore filter inputs before the first DataTable draw
   if (savedState) {
     document.getElementById('requestsSearch').value = savedState.search || '';
-    $('#filterStatus').selectpicker('val',  savedState.status  || '');
-    $('#filterService').selectpicker('val', savedState.service || '');
+    $('#filterStatus').selectpicker('val',   savedState.status   || '');
+    $('#filterService').selectpicker('val',  savedState.service  || '');
+    const filterRequest = document.getElementById('filterRequest');
+    if (filterRequest) { $('#filterRequest').selectpicker('val', savedState.viewerFocus || ''); }
   }
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -72,16 +74,19 @@ document.addEventListener('DOMContentLoaded', function () {
         delete d.columns;
         delete d.search;
 
-        d.search  = document.getElementById('requestsSearch').value;
-        d.status  = document.getElementById('filterStatus').value;
-        d.service = document.getElementById('filterService').value;
+        d.search      = document.getElementById('requestsSearch').value;
+        d.status      = document.getElementById('filterStatus').value;
+        d.service     = document.getElementById('filterService').value;
+        const filterRequest = document.getElementById('filterRequest');
+        d.viewerFocus = filterRequest ? filterRequest.value : '';
 
         // Persist state on every draw
         sessionStorage.setItem(STATE_KEY, JSON.stringify({
-          search:  d.search,
-          status:  d.status,
-          service: d.service,
-          start:   d.start
+          search:      d.search,
+          status:      d.status,
+          service:     d.service,
+          viewerFocus: d.viewerFocus,
+          start:       d.start
         }));
 
         return d;
@@ -244,6 +249,13 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('filterService').addEventListener('change', function () {
     dt.ajax.reload(null, true);
   });
+
+  const filterRequestEl = document.getElementById('filterRequest');
+  if (filterRequestEl) {
+    filterRequestEl.addEventListener('change', function () {
+      dt.ajax.reload(null, true);
+    });
+  }
 
   // View request — delegated click on the table wrapper
   dt_table.addEventListener('click', function (e) {

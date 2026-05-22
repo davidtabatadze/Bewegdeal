@@ -81,7 +81,9 @@ namespace Bewegdeal.Data.Repositories
                 var term = filter.Search.Trim().ToLower();
                 query = query.Where(r =>
                     r.Title.ToLower().Contains(term) ||
-                    r.Number.ToLower().Contains(term)
+                    r.Number.ToLower().Contains(term) ||
+                    r.Status.ToLower().Contains(term) ||
+                    r.Service.ToLower().Contains(term)
                 );
             }
 
@@ -98,11 +100,44 @@ namespace Bewegdeal.Data.Repositories
                 }
                 else if (filter.ViewerRole == UserRoleEnum.Company)
                 {
-                    query = query.Where(r =>
-                        r.ExecutorId == viewerId ||
-                        r.Status == RequestStatusEnum.Pending ||
-                        r.Status == RequestStatusEnum.Negotiation
-                    );
+                    var interests = filter.ViewerInterests;
+                    var hasMoving = interests.Contains(ServiceEnum.Moving);
+                    var hasPickup = interests.Contains(ServiceEnum.Pickup);
+                    var hasRemoval = interests.Contains(ServiceEnum.Removal);
+                    var hasTransport = interests.Contains(ServiceEnum.Transport);
+
+                    if (filter.ViewerFocus == RequestViewerFocusEnum.Mine)
+                    {
+                        query = query.Where(r => r.ExecutorId == viewerId);
+                    }
+                    else if (filter.ViewerFocus == RequestViewerFocusEnum.Potential)
+                    {
+                        query = query.Where(r =>
+                            r.ExecutorId != viewerId &&
+                            (r.Status == RequestStatusEnum.Pending || r.Status == RequestStatusEnum.Negotiation) &&
+                            (
+                                (hasMoving && r.Service == ServiceEnum.Moving) ||
+                                (hasPickup && r.Service == ServiceEnum.Pickup) ||
+                                (hasRemoval && r.Service == ServiceEnum.Removal) ||
+                                (hasTransport && r.Service == ServiceEnum.Transport)
+                            )
+                        );
+                    }
+                    else
+                    {
+                        query = query.Where(r =>
+                            r.ExecutorId == viewerId ||
+                            (
+                                (r.Status == RequestStatusEnum.Pending || r.Status == RequestStatusEnum.Negotiation) &&
+                                (
+                                    (hasMoving && r.Service == ServiceEnum.Moving) ||
+                                    (hasPickup && r.Service == ServiceEnum.Pickup) ||
+                                    (hasRemoval && r.Service == ServiceEnum.Removal) ||
+                                    (hasTransport && r.Service == ServiceEnum.Transport)
+                                )
+                            )
+                        );
+                    }
                 }
                 else
                 {

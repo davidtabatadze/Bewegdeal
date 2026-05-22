@@ -9,5 +9,7 @@ namespace Bewegdeal.Data.Filters
         public string? Service { get; set; }
         public string? ViewerRole { get; set; }
         public long? ViewerId { get; set; }
+        public string? ViewerFocus { get; set; }
+        public string[] ViewerInterests { get; set; } = [];
     }
 }
