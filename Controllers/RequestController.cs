@@ -197,8 +197,19 @@ public class RequestController(
 
         var requester = await _userRepository.Get(new UserFilter { Id = request.RequesterId });
 
+        var requesterPicture = requester?.ProfilePictureFileId.HasValue == true
+            ? await fileRepository.Get(requester.ProfilePictureFileId.Value)
+            : null;
+        var requesterNameParts = (requester?.Name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var requesterInitials = string.Concat(requesterNameParts.Take(2).Select(p => char.ToUpper(p[0])));
+        if (string.IsNullOrEmpty(requesterInitials)) { requesterInitials = "?"; }
+
         ViewBag.Request = request;
         ViewBag.RequesterName = requester?.Name ?? "-";
+        ViewBag.RequesterPictureUrl = requesterPicture is not null
+            ? Url.Action("Download", "File", new { key = requesterPicture.Key })
+            : null;
+        ViewBag.RequesterInitials = requesterInitials;
         ViewBag.Files = files.Select(f => new
         {
             url = Url.Action("Download", "File", new { key = f.Key }, Request.Scheme),

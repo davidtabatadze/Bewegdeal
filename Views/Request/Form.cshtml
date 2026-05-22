@@ -42,11 +42,9 @@
     <div class="col-12">
         <div class="card">
 
-            <!-- Sticky header -->
-            <div class="card-header sticky-element bg-label-secondary d-flex justify-content-sm-between align-items-sm-center flex-column flex-sm-row">
-                <h5 class="card-title mb-sm-0 me-2">@(isEdit ? "Edit Request" : "New Request")</h5>
+            <div class="card-header sticky-element d-flex justify-content-center align-items-center">
                 <div class="action-btns">
-                    <button id="btnCancel" type="button" class="btn btn-outline-secondary me-4">Cancel</button>
+                    <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
                     <button id="btnSubmitRequest" type="button" class="btn btn-primary">@(isEdit ? "Save Changes" : "Place Request")</button>
                 </div>
             </div>
@@ -62,7 +60,7 @@
                             <!-- 1. Service Type -->
                             <h5 class="mb-4">1. Service Type</h5>
                             <div class="row gy-3">
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-6 col-lg-3 col-md-6 col-sm-6">
                                     <div class="form-check custom-option custom-option-icon">
                                         <label class="form-check-label custom-option-content" for="serviceMoving">
                                             <span class="custom-option-body">
@@ -74,7 +72,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-6 col-lg-3 col-md-6 col-sm-6">
                                     <div class="form-check custom-option custom-option-icon">
                                         <label class="form-check-label custom-option-content" for="serviceRemoval">
                                             <span class="custom-option-body">
@@ -86,7 +84,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-6 col-lg-3 col-md-6 col-sm-6">
                                     <div class="form-check custom-option custom-option-icon">
                                         <label class="form-check-label custom-option-content" for="servicePickup">
                                             <span class="custom-option-body">
@@ -98,7 +96,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-6 col-lg-3 col-md-6 col-sm-6">
                                     <div class="form-check custom-option custom-option-icon">
                                         <label class="form-check-label custom-option-content" for="serviceTransport">
                                             <span class="custom-option-body">
