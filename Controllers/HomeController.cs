@@ -17,6 +17,11 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction(action, "HowItWorks");
             }
 
+            if (user?.Role == UserRoleEnum.Customer)
+            {
+                return RedirectToAction("List", "Request");
+            }
+
             return RedirectToAction("Index", "Dashboard");
         }
     }

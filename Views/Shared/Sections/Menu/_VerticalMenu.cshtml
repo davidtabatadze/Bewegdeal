@@ -83,28 +83,31 @@
         </li>
 
         <!-- Dashboard -->
-        <li class='menu-item@((currentPage == "/Dashboard/Index" || currentPage == "/Dashboard") ? " active" : "")'>
-            <a asp-controller="Dashboard" asp-action="Index" class="menu-link">
-                <i class="menu-icon icon-base ri ri-home-smile-line"></i>
-                <div data-i18n="Dashboard">Dashboard</div>
-            </a>
-        </li>
+        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) != UserRoleEnum.Customer)
+        {
+            <li class='menu-item@((currentPage == "/Dashboard/Index" || currentPage == "/Dashboard") ? " active" : "")'>
+                <a asp-controller="Dashboard" asp-action="Index" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-home-smile-line"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+            </li>
+        }
 
         @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Customer)
         {
-            <!-- New Request -->
-            <li class='menu-item@(currentPage == "/Request/Create" ? " active" : "")'>
-                <a asp-controller="Request" asp-action="Create" class="menu-link">
-                    <i class="menu-icon icon-base ri ri-add-circle-line"></i>
-                    <div data-i18n="New Request">New Request</div>
-                </a>
-            </li>
-
             <!-- My Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>
                 <a asp-controller="Request" asp-action="List" class="menu-link">
                     <i class="menu-icon icon-base ri ri-file-list-3-line"></i>
                     <div data-i18n="My Requests">My Requests</div>
+                </a>
+            </li>
+
+            <!-- New Request -->
+            <li class='menu-item@(currentPage == "/Request/Create" ? " active" : "")'>
+                <a asp-controller="Request" asp-action="Create" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-add-circle-line"></i>
+                    <div data-i18n="New Request">New Request</div>
                 </a>
             </li>
         }

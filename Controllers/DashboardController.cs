@@ -13,7 +13,7 @@ namespace Bewegdeal.Controllers
             {
                 UserRoleEnum.Administrator => View("Admin"),
                 UserRoleEnum.Company => View("Company"),
-                UserRoleEnum.Customer => View("Customer"),
+                UserRoleEnum.Customer => RedirectToAction("List", "Request"),
                 _ => RedirectToAction("Login", "Account")
             };
         }
