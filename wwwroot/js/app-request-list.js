@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
   // Status → icon HTML + label
   const statusMap = {
     pending:     { icon: '<i class="icon-base ri ri-timer-flash-line  icon-22px text-warning me-2"></i>', label: 'Pending'     },
-    cancelled:   { icon: '<i class="icon-base ri ri-hand-line         icon-22px text-dark    me-2"></i>', label: 'Cancelled'   },
+    cancelled:   { icon: '<i class="icon-base ri ri-hand              icon-22px text-danger  me-2"></i>', label: 'Cancelled'   },
     negotiation: { icon: '<i class="icon-base ri ri-wechat-line       icon-22px text-info    me-2"></i>', label: 'Negotiation' },
     agreed:      { icon: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success me-2"></i>', label: 'Agreed'      },
-    resolved:    { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success me-2"></i>', label: 'Resolved'    }
+    resolved:    { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success me-2"></i>', label: 'Resolved'    },
+    declined:    { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark me-2"></i>',    label: 'Declined'    },
   };
 
   // Service → icon HTML + label + text color

@@ -8,6 +8,17 @@
 
     ViewData["Title"] = req.Title;
 
+    string TimeAgo(DateTime date)
+    {
+        var diff = DateTime.UtcNow - date;
+        if (diff.TotalSeconds < 60) { return "just now"; }
+        if (diff.TotalMinutes < 60) { var m = (int)diff.TotalMinutes; return $"{m} minute{(m == 1 ? "" : "s")} ago"; }
+        if (diff.TotalHours < 24) { var h = (int)diff.TotalHours; return $"{h} hour{(h == 1 ? "" : "s")} ago"; }
+        if (diff.TotalDays < 30) { var d = (int)diff.TotalDays; return $"{d} day{(d == 1 ? "" : "s")} ago"; }
+        if (diff.TotalDays < 365) { var mo = (int)(diff.TotalDays / 30); return $"{mo} month{(mo == 1 ? "" : "s")} ago"; }
+        var yr = (int)(diff.TotalDays / 365); return $"{yr} year{(yr == 1 ? "" : "s")} ago";
+    }
+
     var (badge, icon, color, label) = req.Service switch
     {
         ServiceEnum.Moving => ("bg-label-success", "ri-truck-line", "success", AnnotationEnum.General.Service.Moving),
@@ -17,12 +28,15 @@
         _ => ("bg-label-secondary", "ri-question-line", "info", req.Service)
     };
 
-    var status = req.Status switch
+    var (statusStyle, statusIcon) = req.Status switch
     {
-        RequestStatusEnum.Pending => "warning",
-        RequestStatusEnum.Cancelled => "dark",
-        RequestStatusEnum.Negotiation => "info",
-        _ => "success"
+        RequestStatusEnum.Pending => ("warning", "timer-flash-line"),
+        RequestStatusEnum.Cancelled => ("danger", "hand"),
+        RequestStatusEnum.Negotiation => ("info", "wechat-line"),
+        RequestStatusEnum.Agreed => ("success", "shake-hands-line"),
+        RequestStatusEnum.Resolved => ("success", "check-double-line"),
+        RequestStatusEnum.Declined => ("dark", "rest-time-line"),
+        _ => ("", "")
     };
 }
 
@@ -43,20 +57,27 @@
     <div class="card-body row g-6 p-0 pb-4">
         <div class="col-12 col-md-8 card-separator">
             <h5 class="mb-2 text-center">
-                <small>#@req.Id <span class="badge rounded-pill bg-label-@status">@req.Status.ToUpper()</span> </small>
+                <small>
+                    <span class="badge rounded-pill bg-label-@statusStyle">
+                        <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@req.Status.ToUpper()
+                    </span>
+                </small>
                 <span class="h4 fw-semibold"> @req.Title</span>
             </h5>
             <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
                 <div class="d-flex align-items-center gap-1">
                     <button type="button" class="btn btn-text-secondary" onclick="window.location.href='/Request/List'">
-                        <span class="icon-base ri ri-arrow-left-s-line icon-16px me-1_5"></span>
+                        <span class="icon-base ri ri-arrow-left-s-line me-1_5"></span>
                         Back to requests
                     </button>
                 </div>
                 <div class="d-flex align-items-center gap-1">
                     <button type="button" class="btn btn-text-secondary">
-                        Go to edit
-                        <span class="icon-base ri ri-arrow-right-s-line icon-16px me-1_5"></span>
+                        #@req.Id
+                        <span class="icon-base ri ri-eye-fill ms-4"></span>
+                        100
+                        <span class="ri ri-circle-fill ms-2 me-2" style="font-size: 3px;"></span>
+                        @TimeAgo(req.CreateDate)
                     </button>
                 </div>
             </div>
@@ -80,9 +101,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-4 ps-md-4 ps-lg-6">
+        <div class="col-12 col-md-4">
             <div class="d-flex">
-                
+
                 <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-warning">
                     <li class="list-group-item flex-fill p-3">
                         <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
@@ -99,7 +120,7 @@
     </div>
 </div>
 <div class="row g-5">
-    <div class="col-lg-8">
+    <div class="col-12 col-md-8">
         <div class="card h-100 bg-transparent shadow-none border-0">
             <div id="swiper-gallery">
                 <div class="swiper gallery-top" style="@(allMedia.Count == 1 ? "block-size:100%;" : "")">
@@ -150,7 +171,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-12 col-md-4">
         <div class="card h-100">
             <div class="card-header d-flex">
                 @* m-0 p-3 *@

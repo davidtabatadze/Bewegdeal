@@ -7,5 +7,6 @@ namespace Bewegdeal.Enums
         public const string Agreed = "agreed";
         public const string Resolved = "resolved";
         public const string Cancelled = "cancelled";
+        public const string Declined = "declined";
     }
 }
