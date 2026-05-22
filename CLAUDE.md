@@ -26,11 +26,13 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 
 ### `_HomeLayout` — admin/app pages
 - Location: `Views/Shared/_HomeLayout.cshtml`
-- Used by: `Dashboard/Admin`, `Dashboard/Company`, `Dashboard/Customer`, `Settings/Index`, `User/List`
+- Used by: `Dashboard/Admin`, `Dashboard/Company`, `Settings/Index`, `User/List`, `Request/*`
 - Loads: Inter font, iconify-icons, node-waves, pickr-themes, core.css, demo.css, perfect-scrollbar.css, site.css, VendorStyles/PageStyles, then head scripts (helpers.js, **no template-customizer**, config.js)
 - Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts
-- Renders: vertical menu → `_NavbarHome` → body → `_FooterHome`
+- Renders: vertical menu → body → `_FooterHome` (**navbar is intentionally removed**)
+- `<html>` has class `layout-menu-fixed layout-navbar-hidden`; `.layout-page` has `padding-top: 0px !important`
 - Template Customizer is intentionally **not loaded** on admin pages
+- Mobile menu toggle is provided by the `<div class="menu-mobile-toggler d-xl-none rounded-1">` block at the bottom of `_VerticalMenu.cshtml` (template's built-in pattern for `layout-navbar-hidden`)
 
 ### `_BlankLayout` — authentication pages
 - Location: `Views/Shared/_BlankLayout.cshtml`
@@ -86,8 +88,8 @@ Views/
 
 - `XBaseController` — base controller; provides `GetUser(roles, active, hiw)` (session-based) and `GetUser(email)` (email-based) helpers; all app controllers inherit from it
 - `LandingController` — public landing page
-- `HomeController` — `[RequireLogin]`; checks AcquaintedHIW and redirects to `HowItWorks` if needed, otherwise to `Dashboard/Index`
-- `DashboardController` — `Index()` dispatches to `Views/Dashboard/Admin`, `Company`, or `Customer` based on session role
+- `HomeController` — `[RequireLogin]`; checks AcquaintedHIW and redirects to `HowItWorks` if needed; otherwise redirects Customer → `Request/List`, others → `Dashboard/Index`
+- `DashboardController` — inherits from `Controller` (not `XBaseController`); `Index()` dispatches to `Views/Dashboard/Admin` or `Company` based on session role; Customer role redirects to `Request/List`; `CompanyStats([HttpGet])` returns JSON stats for the company dashboard
 - `HowItWorksController` — `[RequireLogin]`; `Customer()` and `Company()` (role-gated); `Acknowledge()` sets `AcquaintedHIW = true`
 - `UserController` — Users list (`List`), DataTables endpoint (`LoadUsers`), status toggle (`UpdateUserStatus`)
 - `AccountController` — auth pages (Login, Register, ForgotPassword, ResetPassword, VerifyEmail, VerifyResend); HIW redirect after successful login
@@ -139,13 +141,24 @@ Navbar links (`_NavbarLanding.cshtml`): Home (tag helper), Services (`#services`
 
 Menu items are hardcoded in `_VerticalMenu.cshtml`. Active state is determined server-side by comparing `ViewContext.HttpContext.Request.Path`.
 
-**Users** and **Settings** items are wrapped in `@if (Context.Session.GetString("UserRole") == UserRoleEnum.Administrator)` — they are invisible to non-admin users.
+**User badge** — top of menu; shows profile picture (`menuBadgeImg`) or initials (`menuBadgeInitials`) depending on session `PictureKey`. Both elements always rendered, one hidden via `display:none`. Profile page JS (`User/Profile`) calls `setBadgePicture(src)` / `clearBadgePicture()` to sync the badge live without a page reload.
+
+**Role visibility rules:**
+- Dashboard item: hidden for `Customer` role (customers land on `Request/List`)
+- Users + Settings items: Administrator only
+- My Requests + New Request: Customer only
+- Requests (company label): Company only
+- How It Works: Customer → `/HowItWorks/Customer`; Company → `/HowItWorks/Company`; Administrator: no entry
+
+**Mobile toggler** — `<div class="menu-mobile-toggler d-xl-none rounded-1">` appended after `</aside>`. This is the template's built-in sibling-selector pattern that only activates when `layout-navbar-hidden` is on `<html>`. Do not remove it.
+
+**Logout** — hidden form `<form id="menuLogoutForm">` at bottom of `<aside>`; logout menu item calls `document.getElementById('menuLogoutForm').submit()`.
 
 To add a menu item:
 1. Add action to the appropriate controller (create a new dedicated controller if the feature is distinct)
 2. Create the view with `Layout = "_HomeLayout"`
 3. Add `<li>` entry to `_VerticalMenu.cshtml` with the correct path check (`ViewContext.HttpContext.Request.Path == "/Controller/Action"`)
-4. Wrap in the admin `@if` block if the page is admin-only
+4. Wrap in the appropriate role `@if` block
 
 ## Menu Behavior
 
@@ -298,19 +311,23 @@ Tools/
 ├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
 └── FileStorageTool.cs           # Singleton local-filesystem impl; key = GUID + extension; base path from appsettings
 Views/
+├── Dashboard/
+│   ├── Admin.cshtml             # Admin dashboard (placeholder / to be built)
+│   └── Company.cshtml           # Company dashboard: period filter + 6 stat cards (rating, completed, rejected, revenue, paid/pending invoices)
 ├── HowItWorks/
 │   ├── Customer.cshtml          # Full-height card, sticky transparent header with Acknowledge button (shown if !AcquaintedHIW)
 │   └── Company.cshtml           # Same structure as Customer.cshtml
 └── Request/
     ├── Form.cshtml              # Single shared view for both Create and Edit
     │                            #   var req = ViewBag.Request as RequestEntity; var isEdit = req is not null
-    ├── View.cshtml              # Request detail view; description rendered with white-space:pre-wrap
-    └── List.cshtml              # Admin-only requests DataTable
+    ├── View.cshtml              # Request detail view; Swiper gallery (400px); floating chat tab; requester avatar
+    └── List.cshtml              # Requests DataTable; empty state for customers with no requests; stat cards for non-customer roles
 wwwroot/js/
+├── app-company-dashboard.js     # Company dashboard: fetches /Dashboard/CompanyStats, renders Raty stars + service breakdowns
 ├── request-form.js              # Dropzone (images + videos), flatpickr, jQuery Timepicker, inline validation,
 │                                #   FormData submit via fetch; works for both Create and Edit
 │                                #   Edit-only: loads existingFiles as Dropzone mock entries, tracks KeepFileIds/KeepMainFileId
-└── app-request-list.js          # Admin requests DataTable; default sort CreateDate desc
+└── app-request-list.js          # Requests DataTable; sends viewerFocus param; default sort CreateDate desc
 ```
 
 ### Entities
@@ -469,20 +486,34 @@ Users (4 rows, all Status=Active, passwords hashed at seed time):
 `RequestController` is `[RequireLogin]`. Create/Edit additionally call `GetUser(roles: [UserRoleEnum.Customer], active: true)` — returns `null` (→ redirect to Dashboard) unless `Role == Customer && Status == Active`.
 
 ### Role-based list visibility
-`List` and `LoadRequests` use `ViewerRole` + `ViewerId` fields on `RequestFilter`. The controller sets them from the logged-in user; the repository `ApplyFilters` branches on role:
+`List` and `LoadRequests` use `ViewerRole`, `ViewerId`, `ViewerInterests`, and `ViewerFocus` fields on `RequestFilter`. The controller sets them from the logged-in user; the repository `ApplyFilters` branches on role:
 - **Customer** → `WHERE RequesterId == viewerId` (own requests only)
-- **Company** → `WHERE ExecutorId == viewerId OR Status IN (pending, negotiation)` (assigned + open market)
+- **Company** → filtered by `ViewerFocus`:
+  - `Mine` → `WHERE ExecutorId == viewerId`
+  - `Potential` → open market jobs matching interests, excluding own (`ExecutorId != viewerId`)
+  - _(default/all)_ → `ExecutorId == viewerId OR (Status IN (pending, negotiation) AND service in interests)`
+  - Interest matching uses individual `bool` variables per service (`hasMoving`, `hasRemoval`, etc.) — **never** use `interests.Contains()` directly in LINQ (EF Core SQLite cannot translate it)
 - **Administrator** → no extra filter (sees everything)
 
-`RequestFilter` fields: `Search`, `Status`, `Service`, `ViewerRole`, `ViewerId`
+`RequestFilter` fields: `Search`, `Status`, `Service`, `ViewerRole`, `ViewerId`, `ViewerInterests` (`string[]`), `ViewerFocus`
 
-Stats in `List()` (TotalCount, PendingCount, NegotiationCount, ResolvedCount) are all scoped to the viewer — each uses a fresh `RequestFilter` with only `ViewerId`/`ViewerRole` + optional `Status`, so counts reflect only what the viewer is allowed to see.
+`RequestViewerFocusEnum` — `"mine"`, `"potential"` (company list filter; no value = show all)
+
+Stats in `List()`:
+- Non-customer roles: `TotalCount`, `PendingCount`, `NegotiationCount`, `ResolvedCount` (all currently set to 0 / placeholder)
+- Customer role: `CustomerHasRequests` (`bool`) — used to show empty state when the customer has no requests yet; **separate from TotalCount**
 
 ### View flow (`GET /Request/View?number=`)
 - Loads request by `number` (string, not id)
 - Loads `requestFiles` + `files` for the media gallery
 - Loads requester via `userRepository.Get(new UserFilter { Id = request.RequesterId })` → `ViewBag.RequesterName`
+- Also sets `ViewBag.RequesterPictureUrl` (from `requester.ProfilePictureFileId` → file key → Download URL, or null) and `ViewBag.RequesterInitials` (up to 2 initials, fallback `"?"`)
 - `ViewBag.Request` = `RequestEntity`, `ViewBag.Files` = ordered anonymous list (images first, main image first within images)
+
+### View.cshtml notable details
+- Swiper gallery: `#swiper-gallery` height = **400px** (set in `wwwroot/vendor/css/pages/ui-carousel.css`); `.gallery-top` = 80% (320px), `.gallery-thumbs` = 20% (80px); single-media overrides `.gallery-top` to 100%
+- Floating chat tab: `position:fixed; right:1.5rem; bottom:3rem` (matches `menu-mobile-toggler` offset on the opposite side); opens `#requestChatOffcanvas` (Bootstrap offcanvas from right); currently shows "Chat coming soon" placeholder
+- Requester avatar: shows `<img>` if `ViewBag.RequesterPictureUrl` is set, otherwise `<span class="avatar-initial rounded-circle bg-label-primary">` with initials — same pattern as sidebar user badge
 
 ### List → View navigation & state persistence
 - `app-request-list.js` saves `{ search, status, service, start }` to `sessionStorage['requestListState']` on every DataTable draw
@@ -538,6 +569,40 @@ public long          KeepMainFileId     // existing FileId that is main (0 = mai
 - `loadingExisting` flag prevents auto-setMainFile during mock-file population; server's `isMain` restored explicitly after loop
 - Inline validation: Bootstrap `is-invalid` + `invalid-feedback` for all fields; Notyf only for server errors + one summary toast on failed client-side submit
 - Cost input: blocks `- + e E` on keydown, clamps to 10000 on input, clamps to min 1 on blur, truncates to 2 decimal places
+
+---
+
+## Company Dashboard
+
+### Controller
+`DashboardController` inherits from `Controller` (not `XBaseController` — no `GetUser()` needed).
+
+- `Index()` — dispatches by session role: Admin → `View("Admin")`, Company → `View("Company")`, Customer → `RedirectToAction("List", "Request")`
+- `CompanyStats([HttpGet], string? from, string? to)` — returns JSON; `from`/`to` are `"yyyy-MM-dd"` strings from the period filter
+
+### Company.cshtml
+- Period filter: two `<input type="month">` (`#monthFrom`, `#monthTo`) + "This Month" reset button (`#btnResetFilter`)
+- Six stat cards in `#dashboardStats`: Personal Rating, Total Completed, Total Rejected, Total Revenue, Paid Invoices, Invoices to Pay
+- Each card has a total value + per-service breakdown list rendered by JS
+
+### app-company-dashboard.js
+- On init: sets both month inputs to current month, then calls `loadStats()`
+- `loadStats()` fetches `/Dashboard/CompanyStats?from=...&to=...`, fades `#dashboardStats` to 0.4 opacity while loading
+- `updateWidgets(data)` populates all cards; `buildServiceList()` renders per-service rows with progress bars
+- Star rating uses **Raty** with `starType: 'i'` and Remixicon classes (`ri-star-fill`, `ri-star-half-line`, `ri-star-line`) — **never use image paths or data URLs for Raty stars** (causes `getAttribute` crash)
+- All errors previously silent (`.catch(function() {})`); `initRating` wrapped in try/catch so a Raty failure cannot block `loadStats()`
+
+### Raty usage rule
+Always initialise Raty with:
+```js
+new Raty(el, {
+    starType: 'i',
+    starOn:   'icon-base ri ri-star-fill text-warning',
+    starHalf: 'icon-base ri ri-star-half-line text-warning',
+    starOff:  'icon-base ri ri-star-line text-muted',
+    score: value, half: true, readOnly: true
+});
+```
 
 ---
 
