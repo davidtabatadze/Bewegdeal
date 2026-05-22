@@ -30,12 +30,20 @@ public class RequestController(
         var viewerId = user?.Id ?? 0;
         var viewerRole = user?.Role ?? "-";
 
-        ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole });
-        ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
-        ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
-        ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
         ViewBag.ViewerRole = viewerRole;
         ViewBag.ViewerInterests = user?.Interests ?? [];
+
+        if (viewerRole == UserRoleEnum.Customer)
+        {
+            ViewBag.CustomerHasRequests = await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole }) > 0;
+        }
+        else
+        {
+            ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, ViewerInterests = user?.Interests ?? [] });
+            ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
+            ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
+            ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
+        }
         return View();
     }
 
