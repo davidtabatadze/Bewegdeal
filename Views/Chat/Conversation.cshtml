@@ -1,0 +1,153 @@
+@using Bewegdeal.Enums
+@model Bewegdeal.Models.ChatHistoryViewModel
+
+@if (Model.Mode == ChatModeEnum.Initiate)
+{
+    <div id="chatConversation"
+         data-mode="@Model.Mode"
+         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column">
+        <div class="avatar avatar-lg mb-4">
+            @if (Model.OtherPartyPictureUrl is not null)
+            {
+                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                     style="object-fit:cover;width:100%;height:100%;"
+                     alt="@Model.OtherPartyName" />
+            }
+            else
+            {
+                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                      style="display:flex;align-items:center;justify-content:center;">@Model.OtherPartyInitials</span>
+            }
+        </div>
+        <h6 class="mb-1">@Model.OtherPartyName</h6>
+        <p class="text-muted small mb-5">Start a conversation about this request</p>
+        <button id="chatInitiateBtn" class="btn btn-primary">
+            <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
+        </button>
+    </div>
+}
+else
+{
+    <div id="chatConversation"
+         data-mode="@Model.Mode"
+         data-chat-key="@Model.ChatKey"
+         data-viewer-id="@Model.ViewerId"
+         data-viewer-initials="@Model.ViewerInitials"
+         data-viewer-picture="@(Model.ViewerPictureUrl ?? "")"
+         data-other-initials="@Model.OtherPartyInitials"
+         data-other-picture="@(Model.OtherPartyPictureUrl ?? "")"
+         class="col app-chat-history"
+         style="block-size:100%">
+        <div class="chat-history-wrapper" style="block-size:100%;display:flex;flex-direction:column;">
+            @* Header *@
+            <div class="chat-history-header border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex overflow-hidden align-items-center">
+                        <div class="flex-shrink-0 avatar avatar-online">
+                            @if (Model.OtherPartyPictureUrl is not null)
+                            {
+                                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                                     style="object-fit:cover;width:100%;height:100%;"
+                                     alt="@Model.OtherPartyName" />
+                            }
+                            else
+                            {
+                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
+                            }
+                        </div>
+                        <div class="chat-contact-info flex-grow-1 ms-4">
+                            <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
+                            <small class="user-status text-body">NextJS developer</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @* Message list *@
+            <div class="chat-history-body" style="flex:1;block-size:0;">
+                <ul class="list-unstyled chat-history" id="chatMessageList">
+                    @foreach (var msg in Model.Messages)
+                    {
+                        var isMine = msg.SenderId == Model.ViewerId;
+                        <li class="chat-message @(isMine ? "chat-message-right" : "") mb-2">
+                            <div class="d-flex overflow-hidden">
+                                @if (isMine)
+                                {
+                                    <div class="chat-message-wrapper flex-grow-1">
+                                        <div class="chat-message-text">
+                                            <p class="mb-0">@msg.Content</p>
+                                        </div>
+                                        <div class="text-end text-body-secondary mt-1">
+                                            <i class="icon-base ri ri-check-double-line icon-16px text-success me-1"></i>
+                                            <small>@msg.SentDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </div>
+                                    <div class="user-avatar flex-shrink-0 ms-4">
+                                        <div class="avatar avatar-sm">
+                                            @if (Model.ViewerPictureUrl is not null)
+                                            {
+                                                <img src="@Model.ViewerPictureUrl" class="rounded-circle"
+                                                     style="object-fit:cover;width:100%;height:100%;" alt="Me" />
+                                            }
+                                            else
+                                            {
+                                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.ViewerInitials</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="user-avatar flex-shrink-0 me-4">
+                                        <div class="avatar avatar-sm">
+                                            @if (Model.OtherPartyPictureUrl is not null)
+                                            {
+                                                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                                                     style="object-fit:cover;width:100%;height:100%;"
+                                                     alt="@Model.OtherPartyName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="chat-message-wrapper flex-grow-1">
+                                        <div class="chat-message-text">
+                                            <p class="mb-0">@msg.Content</p>
+                                        </div>
+                                        <div class="text-body-secondary mt-1">
+                                            <small>@msg.SentDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            @* Message input *@
+            <div class="chat-history-footer shadow-xs">
+                <form class="form-send-message d-flex justify-content-between align-items-center ">
+                    <input class="form-control message-input border-0 me-4 shadow-none" placeholder="Type your message here..." />
+                    <div class="message-actions d-flex align-items-center">
+                        <span class="btn btn-text-secondary btn-icon rounded-pill cursor-pointer">
+                            <i class="speech-to-text icon-base ri ri-mic-line icon-md text-heading"></i>
+                        </span>
+                        <label for="attach-doc" class="form-label mb-0">
+                            <span class="btn btn-text-secondary btn-icon rounded-pill cursor-pointer mx-1">
+                                <i class="icon-base ri ri-attachment-2 icon-md text-heading"></i>
+                            </span>
+                            <input type="file" id="attach-doc" hidden />
+                        </label>
+                        <button class="btn btn-primary send-msg-btn">
+                            <i class="icon-base ri ri-send-plane-line icon-sm ms-md-2 ms-0"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

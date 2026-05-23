@@ -4,6 +4,7 @@ namespace Bewegdeal.Models
 {
     public class ChatHistoryViewModel
     {
+        public string Mode { get; set; } = string.Empty;
         public string ChatKey { get; set; } = string.Empty;
         public string OtherPartyName { get; set; } = string.Empty;
         public string OtherPartyInitials { get; set; } = string.Empty;

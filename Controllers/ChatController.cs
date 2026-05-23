@@ -3,6 +3,7 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
@@ -86,53 +87,57 @@ public class ChatController(
 
 
     /// <summary>
-    /// Full chat context — party names, pictures, messages.
-    /// Called only when the offcanvas opens, while a spinner is visible.
+    /// Server-rendered conversation partial — handles both initiate and active modes.
+    /// Called when the offcanvas opens; returns HTML directly.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Context(string requestNumber)
+    public async Task<IActionResult> Conversation(string requestNumber)
     {
-        var user = await GetUser();
-        if (user is null) { return Json(new { }); }
+        var user = await GetUser(null, true, null);
+        if (user is null) { return Content(""); }
 
         var request = await requestRepository.Get(requestNumber);
-        if (request is null) { return Json(new { }); }
+        if (request is null) { return Content(""); }
 
         var activeChat = await chatRepository.GetActive(request.Id);
 
-        // viewer info (for message bubble avatars)
+        var mode = ChatModeEnum.None;
+        if (user.Role == UserRoleEnum.Company && request.Status == RequestStatusEnum.Pending)
+        {
+            mode = ChatModeEnum.Initiate;
+        }
+        else if (request.Status == RequestStatusEnum.Negotiation &&
+                 (activeChat?.CompanyId == user.Id || activeChat?.CustomerId == user.Id))
+        {
+            mode = ChatModeEnum.Active;
+        }
+
+        if (mode == ChatModeEnum.None) { return Content(""); }
+
         var (_, viewerInitials, viewerPictureUrl) = await ResolveParty(user);
 
-        // other party: for "initiate" it's the requester; for "active" it's whoever isn't the viewer
-        var isActive = activeChat is not null;
-        long otherPartyId = isActive
-            ? (user.Role == UserRoleEnum.Customer ? activeChat!.CompanyId : activeChat!.CustomerId)
+        long otherPartyId = activeChat is not null
+            ? (user.Role == UserRoleEnum.Customer ? activeChat.CompanyId : activeChat.CustomerId)
             : request.RequesterId;
 
         var otherParty = await _userRepository.Get(new UserFilter { Id = otherPartyId });
         var (otherPartyName, otherPartyInitials, otherPartyPictureUrl) = await ResolveParty(otherParty);
 
-        var messages = isActive
-            ? (await chatRepository.LoadMessages(activeChat!.Id))
-                .Select(m => new
-                {
-                    senderId = m.SenderId,
-                    content = m.Content,
-                    sentDate = m.SentDate.ToString("HH:mm")
-                })
-                .ToList<object>()
-            : new List<object>();
+        var messages = activeChat is not null
+            ? await chatRepository.LoadMessages(activeChat.Id)
+            : [];
 
-        return Json(new
+        return PartialView("Conversation", new ChatHistoryViewModel
         {
-            chatKey = activeChat?.Key ?? "",
-            viewerId = user.Id,
-            viewerInitials,
-            viewerPictureUrl,
-            otherPartyName,
-            otherPartyInitials,
-            otherPartyPictureUrl,
-            messages
+            Mode               = mode,
+            ChatKey            = activeChat?.Key ?? "",
+            ViewerId           = user.Id,
+            ViewerInitials     = viewerInitials,
+            ViewerPictureUrl   = viewerPictureUrl,
+            OtherPartyName     = otherPartyName,
+            OtherPartyInitials = otherPartyInitials,
+            OtherPartyPictureUrl = otherPartyPictureUrl,
+            Messages           = messages
         });
     }
 

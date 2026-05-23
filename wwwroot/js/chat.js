@@ -1,7 +1,7 @@
 /**
  * Request Chat
- * Phase 1 (page load)   — GET /Chat/Visibility  → show/hide the button
- * Phase 2 (canvas open) — GET /Chat/Context     → load party info + messages, render UI
+ * Phase 1 (page load)   — GET /Chat/Visibility    → show/hide the button
+ * Phase 2 (canvas open) — GET /Chat/Conversation  → server-rendered HTML, connect SignalR
  */
 'use strict';
 
@@ -33,7 +33,7 @@
         })
         .catch(function (e) { console.error('Chat visibility failed:', e); });
 
-    // ── Phase 2: full context (on offcanvas open) ─────────────────────────────
+    // ── Phase 2: load conversation (on offcanvas open) ────────────────────────
 
     offcanvas.addEventListener('show.bs.offcanvas', function () {
         if (contextLoaded) { return; }
@@ -45,34 +45,7 @@
             if (mode === ChatMode.Active && chatKey) { connectSignalR(chatKey); }
             return;
         }
-
-        fetch('/Chat/Context?requestNumber=' + encodeURIComponent(requestNumber))
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                contextLoaded = true;
-                cfg.viewerId          = data.viewerId;
-                cfg.viewerInitials    = data.viewerInitials    || '?';
-                cfg.viewerPictureUrl  = data.viewerPictureUrl  || '';
-                cfg.otherPartyName    = data.otherPartyName    || '';
-                cfg.otherPartyInitials   = data.otherPartyInitials   || '?';
-                cfg.otherPartyPictureUrl = data.otherPartyPictureUrl || '';
-                viewerId = data.viewerId || 0;
-
-                if (mode === ChatMode.Active) {
-                    chatKey = data.chatKey || '';
-                    renderActiveChatUI(chatKey, data.otherPartyName,
-                        data.otherPartyInitials, data.otherPartyPictureUrl,
-                        data.messages || []);
-                    connectSignalR(chatKey);
-                } else if (mode === ChatMode.Initiate) {
-                    renderInitiateUI(data.otherPartyName,
-                        data.otherPartyInitials, data.otherPartyPictureUrl);
-                }
-            })
-            .catch(function (e) {
-                console.error('Chat context failed:', e);
-                showError();
-            });
+        loadConversation();
     });
 
     offcanvas.addEventListener('hidden.bs.offcanvas', function () {
@@ -105,14 +78,8 @@
                         '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation';
                     return;
                 }
-                chatKey = data.chatKey;
-                mode    = ChatMode.Active;
-                cfg.otherPartyInitials   = data.otherPartyInitials   || cfg.otherPartyInitials;
-                cfg.otherPartyPictureUrl = data.otherPartyPictureUrl || cfg.otherPartyPictureUrl;
-
-                renderActiveChatUI(chatKey, data.otherPartyName,
-                    data.otherPartyInitials, data.otherPartyPictureUrl, []);
-                connectSignalR(chatKey);
+                contextLoaded = false;
+                loadConversation();
             })
             .catch(function () {
                 btn.disabled = false;
@@ -158,69 +125,46 @@
         scrollToBottom();
     }
 
-    // ── Rendering ─────────────────────────────────────────────────────────────
+    // ── Core ─────────────────────────────────────────────────────────────────
 
-    function showSpinner() {
-        body.innerHTML =
-            '<div class="d-flex align-items-center justify-content-center flex-grow-1">' +
-              '<div class="spinner-border text-primary" role="status">' +
-                '<span class="visually-hidden">Loading…</span>' +
-              '</div>' +
-            '</div>';
+    function loadConversation() {
+        showSpinner();
+        fetch('/Chat/Conversation?requestNumber=' + encodeURIComponent(requestNumber))
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                body.innerHTML = html;
+                contextLoaded  = true;
+
+                var conv = document.getElementById('chatConversation');
+                if (!conv) { return; }
+
+                mode     = conv.dataset.mode    || ChatMode.None;
+                chatKey  = conv.dataset.chatKey || '';
+                viewerId = parseInt(conv.dataset.viewerId || '0', 10);
+
+                if (mode === ChatMode.Active) {
+                    var historyBody = body.querySelector('.chat-history-body');
+                    if (historyBody) { new PerfectScrollbar(historyBody); }
+                    connectSignalR(chatKey);
+                    scrollToBottom();
+                }
+            })
+            .catch(function (e) {
+                console.error('Chat conversation failed:', e);
+                showError();
+            });
     }
 
-    function showError() {
-        body.innerHTML =
-            '<div class="d-flex align-items-center justify-content-center flex-grow-1 text-muted">' +
-              '<span>Failed to load chat. Please try again.</span>' +
-            '</div>';
-    }
-
-    function renderInitiateUI(name, initials, pictureUrl) {
-        body.innerHTML =
-            '<div class="d-flex flex-column align-items-center justify-content-center text-center flex-grow-1 p-6">' +
-              '<div class="avatar avatar-lg mb-4">' + buildAvatarHtml(pictureUrl, initials, name) + '</div>' +
-              '<h6 class="mb-1">' + esc(name) + '</h6>' +
-              '<p class="text-muted small mb-5">Start a conversation about this request</p>' +
-              '<button id="chatInitiateBtn" class="btn btn-primary">' +
-                '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation' +
-              '</button>' +
-            '</div>';
-    }
-
-    function renderActiveChatUI(key, name, initials, pictureUrl, messages) {
-        body.innerHTML =
-            '<div class="chat-history-wrapper d-flex flex-column h-100" data-chat-key="' + esc(key) + '">' +
-              '<div class="chat-history-header border-bottom px-4 py-3 flex-shrink-0">' +
-                '<div class="d-flex align-items-center gap-3">' +
-                  '<div class="avatar avatar-sm flex-shrink-0">' + buildAvatarHtml(pictureUrl, initials, name) + '</div>' +
-                  '<h6 class="mb-0">' + esc(name) + '</h6>' +
-                '</div>' +
-              '</div>' +
-              '<div class="chat-history-body flex-grow-1 overflow-auto p-4">' +
-                '<ul class="list-unstyled chat-history mb-0" id="chatMessageList"></ul>' +
-              '</div>' +
-              '<div class="chat-history-footer border-top px-4 py-3 flex-shrink-0">' +
-                '<form class="form-send-message d-flex gap-2 align-items-center">' +
-                  '<input type="text" class="form-control message-input border-0 shadow-none"' +
-                         ' placeholder="Type your message…" maxlength="2048" autocomplete="off" />' +
-                  '<button type="submit" class="btn btn-primary btn-icon flex-shrink-0">' +
-                    '<i class="icon-base ri ri-send-plane-line"></i>' +
-                  '</button>' +
-                '</form>' +
-              '</div>' +
-            '</div>';
-
-        messages.forEach(function (msg) { appendMessage(msg.senderId, msg.content, msg.sentDate); });
-    }
+    // ── Real-time message append ──────────────────────────────────────────────
 
     function appendMessage(senderId, content, time) {
         var list = document.getElementById('chatMessageList');
         if (!list) { return; }
 
+        var conv       = document.getElementById('chatConversation');
         var isMine     = senderId === viewerId;
-        var initials   = isMine ? (cfg.viewerInitials    || '?') : (cfg.otherPartyInitials    || '?');
-        var pictureUrl = isMine ? (cfg.viewerPictureUrl  || '')  : (cfg.otherPartyPictureUrl  || '');
+        var initials   = isMine ? (conv && conv.dataset.viewerInitials || '?') : (conv && conv.dataset.otherInitials || '?');
+        var pictureUrl = isMine ? (conv && conv.dataset.viewerPicture  || '')  : (conv && conv.dataset.otherPicture  || '');
         var avatarHtml = buildAvatarHtml(pictureUrl, initials);
 
         var li = document.createElement('li');
@@ -249,6 +193,8 @@
         list.appendChild(li);
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     function buildAvatarHtml(pictureUrl, initials, altText) {
         if (pictureUrl) {
             return '<img src="' + esc(pictureUrl) + '" class="rounded-circle"' +
@@ -258,6 +204,22 @@
         return '<span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"' +
                ' style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">' +
                esc(initials || '?') + '</span>';
+    }
+
+    function showSpinner() {
+        body.innerHTML =
+            '<div class="col d-flex align-items-center justify-content-center">' +
+              '<div class="spinner-border text-primary" role="status">' +
+                '<span class="visually-hidden">Loading…</span>' +
+              '</div>' +
+            '</div>';
+    }
+
+    function showError() {
+        body.innerHTML =
+            '<div class="col d-flex align-items-center justify-content-center text-muted">' +
+              '<span>Failed to load chat. Please try again.</span>' +
+            '</div>';
     }
 
     function scrollToBottom() {
