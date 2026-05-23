@@ -95,7 +95,8 @@ Views/
 - `AccountController` — auth pages (Login, Register, ForgotPassword, ResetPassword, VerifyEmail, VerifyResend); HIW redirect after successful login
 - `SettingsController` — Settings (`Index`), Terms upload (`SaveTermAndConditionSettings`), request config (`SaveRequestSettings`); **admin only**
 - `FileController` — file download (`Download`); no auth required — files may be public
-- `RequestController` — `[RequireLogin]`; Create, Edit, View, List (admin-only List/LoadRequests); Create/Edit additionally validate `Role == Customer && Status == Active` via `GetUser()`
+- `RequestController` — `[RequireLogin]`; Create, Edit, View, List (admin-only List/LoadRequests); Create/Edit additionally validate `Role == Customer && Status == Active` via `GetUser()`; View computes `ChatMode` and injects `IChatRepository`
+- `ChatController` — `[RequireLogin]`; `Initiate([HttpPost])` — Company only; transitions request Pending→Negotiation and creates the active chat; returns chat context JSON
 
 ## Account Views
 
@@ -246,7 +247,11 @@ Controllers/
 ├── UserController.cs            # [RequireAdmin]; List, LoadUsers, UpdateUserStatus
 ├── SettingsController.cs        # [RequireAdmin]; Index, SaveTermAndConditionSettings, SaveRequestSettings
 ├── RequestController.cs         # [RequireLogin]; List/LoadRequests [RequireAdmin]; Create, Edit, View
+├── ChatController.cs            # [RequireLogin]; Initiate [HttpPost] — Company only
 └── FileController.cs            # public; Download
+Hubs/
+└── ChatHub.cs                   # SignalR hub; JoinChat(chatKey), SendMessage(chatKey, content)
+                                 #   reads userId from session; verifies participant; broadcasts ReceiveMessage to group
 Data/
 ├── Base/
 │   ├── IEntity.cs               # Marker interface for all entities
@@ -271,19 +276,22 @@ Data/
 │   │   ├── IFileRepository.cs       # Get(id), Load(BaseFilter<long>), Create, Delete(id)
 │   │   ├── ISettingsRepository.cs   # Get(), Update(entity)
 │   │   ├── IRequestRepository.cs    # Get(id), Get(number), Count(filter), Load(filter), Create, Update
-│   │   └── IRequestFileRepository.cs# Load(requestId), LoadMainImages(List<long>), Create(List<>), SetMainImage, Delete(List<id>)
+│   │   ├── IRequestFileRepository.cs# Load(requestId), LoadMainImages(List<long>), Create(List<>), SetMainImage, Delete(List<id>)
+│   │   └── IChatRepository.cs   # Create, Get(id), Get(key), GetActive(requestId), CreateMessage, LoadMessages, MarkRead
 │   ├── UserRepository.cs        # EF Core impl + IRepositorySeedable (4 seed users)
 │   │                            #   private ApplyFilters helper shared by Count and Load
 │   ├── ReferenceRepository.cs   # EF Core impl + IRepositorySeedable (7 reference rows)
 │   ├── FileRepository.cs        # EF Core impl; no seeding
 │   ├── SettingsRepository.cs    # EF Core impl + IRepositorySeedable (1 row, Id = 1, default values seeded)
 │   ├── RequestRepository.cs     # EF Core impl; no seeding; private ApplyFilters for Count/Load
-│   └── RequestFileRepository.cs # EF Core impl; no seeding
+│   ├── RequestFileRepository.cs # EF Core impl; no seeding
+│   └── ChatRepository.cs        # EF Core impl; no seeding; handles both ChatEntity and ChatMessageEntity
 └── SqlContext.cs                # DbContext: all DbSets, EF config, value converters
                                  #   DateOnly↔DateTime and TimeOnly↔TimeSpan converters for SQLite compat
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
+├── ChatStatusEnum.cs            # "active", "cancelled", "resolved"
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
 ├── FileTypeEnum.cs              # MIME type constants: PDF, PNG, JPEG, MP4, MOV
 ├── SortFieldEnum.cs             # "status" (add new fields here as new sortable columns are added)
@@ -301,7 +309,8 @@ Filters/
 └── RequireAdminAttribute.cs     # Redirects to Login if not logged in; to Home if not administrator
 Models/
 ├── GridResultViewModel.cs       # Generic server-side DataTables response envelope
-└── RequestViewModel.cs          # Create + Edit request form model (Id=0 on Create, KeepFileIds=[] on Create)
+├── RequestViewModel.cs          # Create + Edit request form model (Id=0 on Create, KeepFileIds=[] on Create)
+└── ChatHistoryModel.cs          # Model for _ChatHistory.cshtml partial: ChatKey, OtherParty*, Viewer*, Messages
 Services/
 └── FileService.cs               # Scoped — validate MIME type, upload bytes, persist metadata, optionally delete old file
 Storage/                         # Git-ignored. Local file storage root (configurable via Storage:Local:Path)
@@ -320,14 +329,21 @@ Views/
 └── Request/
     ├── Form.cshtml              # Single shared view for both Create and Edit
     │                            #   var req = ViewBag.Request as RequestEntity; var isEdit = req is not null
-    ├── View.cshtml              # Request detail view; Swiper gallery (400px); floating chat tab; requester avatar
+    ├── View.cshtml              # Request detail view; Swiper gallery (400px); floating chat tab; requester avatar;
+    │                            #   chat button/offcanvas conditional on ViewBag.ChatMode ("none"|"initiate"|"active")
     └── List.cshtml              # Requests DataTable; empty state for customers with no requests; stat cards for non-customer roles
+Views/Shared/_Partials/
+└── _ChatHistory.cshtml          # Reusable chat history panel; @model ChatHistoryModel; header/body/footer layout;
+                                 #   used inside the request view chat offcanvas
 wwwroot/js/
 ├── app-company-dashboard.js     # Company dashboard: fetches /Dashboard/CompanyStats, renders Raty stars + service breakdowns
 ├── request-form.js              # Dropzone (images + videos), flatpickr, jQuery Timepicker, inline validation,
 │                                #   FormData submit via fetch; works for both Create and Edit
 │                                #   Edit-only: loads existingFiles as Dropzone mock entries, tracks KeepFileIds/KeepMainFileId
-└── app-request-list.js          # Requests DataTable; sends viewerFocus param; default sort CreateDate desc
+├── app-request-list.js          # Requests DataTable; sends viewerFocus param; default sort CreateDate desc
+└── chat.js                      # SignalR client for request chat; reads window.chatConfig; handles initiate/active modes
+wwwroot/vendor/libs/signalr/
+└── signalr.min.js               # @microsoft/signalr browser client (downloaded from CDN)
 ```
 
 ### Entities
@@ -405,6 +421,27 @@ wwwroot/js/
 | FileId | long | FK to Files |
 | IsMain | bool | true for the primary display image; only one per request |
 | Type | string | `RequestFileTypeEnum` value ("image" or "video"), max 8 |
+
+**ChatEntity** (`Chats` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| Key | string | unique GUID "N" format, max 32 — used as SignalR group name |
+| RequestId | long | FK to Requests |
+| CustomerId | long | FK to Users |
+| CompanyId | long | FK to Users |
+| Status | string | `ChatStatusEnum` value, max 16 |
+| CreateDate | DateTime | UTC |
+
+**ChatMessageEntity** (`ChatMessages` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| ChatId | long | FK to Chats |
+| SenderId | long | FK to Users |
+| Content | string | max 2048 |
+| SentDate | DateTime | UTC |
+| IsRead | bool | default false |
 
 ### Filters
 
@@ -676,3 +713,67 @@ Use `scrollX: true` and `responsive: false`. The Responsive extension conflicts 
 ### Materio layout tweaks
 
 Always apply the `setTimeout` class-adjustment block after initialization (see `app-user-list.js`).
+
+---
+
+## Chat Feature
+
+### Business rules
+- **One active chat per request** — exactly one `ChatEntity` with `Status = active` at a time per request
+- **Company initiates only** — customers cannot start a chat; they can only respond
+- **Chat button visibility** (determined client-side via `GET /Chat/Visibility`):
+  - Customer: shown only when `request.Status == Negotiation` AND an active chat exists
+  - Company: shown when `request.Status == Pending` OR (`request.Status == Negotiation` AND `activeChat.CompanyId == viewerId`)
+  - Admin: never shown (`showChatFeature = viewerRole != Administrator` gates the entire feature in the view)
+- **Initiate flow** (company on pending request): `POST /Chat/Initiate` → creates `ChatEntity {Status=active}`, transitions request `Pending→Negotiation`, sets `request.ExecutorId = company.Id`
+- **Cancel flow** (deferred): chat cancelled → `Status = cancelled`, request reverts to `Pending`
+
+### Two-phase loading
+Chat is loaded in two separate AJAX calls to keep page load fast:
+
+**Phase 1 — `GET /Chat/Visibility?requestNumber=`** (called on DOMContentLoaded):
+- Minimal DB work: checks user role + request status + optionally `GetActive(requestId)` for participant check
+- Returns `{ show: bool, mode: "none"|"initiate"|"active" }`
+- No party lookups, no picture URLs, no message loading
+- On success: reveals the floating chat button, stores `mode` in JS
+
+**Phase 2 — `GET /Chat/Context?requestNumber=`** (called only when offcanvas opens):
+- Full data load: resolves other party name/initials/picture, loads all messages
+- Returns `{ chatKey, viewerId, viewerInitials, viewerPictureUrl, otherPartyName, otherPartyInitials, otherPartyPictureUrl, messages[] }`
+- `contextLoaded` flag prevents re-fetching if user closes and reopens offcanvas
+- While in-flight: Bootstrap spinner visible in offcanvas body
+
+### SignalR
+- Server: registered via `builder.Services.AddSignalR()` + `app.MapHub<ChatHub>("/hubs/chat")`
+- Hub: `ChatHub` reads userId from session (`ConstantEnum.SessionUserId`) on each method call
+- Group name: `"chat-{chatKey}"` — one group per `ChatEntity`
+- `JoinChat(chatKey)` — validates participant, adds to group, marks incoming messages read
+- `SendMessage(chatKey, content)` — validates participant + active status, saves to DB, broadcasts `ReceiveMessage` to group
+- Client vendor lib: `wwwroot/vendor/libs/signalr/signalr.min.js` (copied from CDN)
+
+### View.cshtml chat setup
+- `window.chatConfig = { requestNumber: '...' }` — only `requestNumber` is injected server-side; all other data fetched via AJAX
+- Floating button: `<div id="chatFloatingBtn" style="display:none;">` — starts hidden; shown by `chat.js` after Visibility succeeds
+- Offcanvas: `<div id="requestChatOffcanvas">` with empty `<div id="chatOffcanvasBody" class="offcanvas-body p-0 d-flex flex-column">` — body fully populated by JS
+- Scripts (`signalr.min.js` + `chat.js`) and styles (`app-chat.css`) only loaded when `showChatFeature == true`
+
+### _ChatHistory.cshtml partial
+Location: `Views/Shared/_Partials/_ChatHistory.cshtml`
+Model: `ChatHistoryModel` — `ChatKey`, `OtherPartyName/Initials/PictureUrl`, `ViewerId/Initials/PictureUrl`, `Messages`
+Structure: header (other party avatar + name) → scrollable body (`ul#chatMessageList`) → footer (`form.form-send-message`)
+Right-aligned (`chat-message-right`) when `msg.SenderId == Model.ViewerId`, left-aligned otherwise.
+Available for future server-side rendering use cases; current flow is fully JS-rendered.
+
+### chat.js key behaviours
+- Wraps in IIFE; reads `window.chatConfig.requestNumber`; exits immediately if missing
+- **Phase 1**: `fetch /Chat/Visibility` on script load → stores `mode`, shows button if `data.show`
+- **Phase 2**: `show.bs.offcanvas` → `showSpinner()`; `shown.bs.offcanvas` → if `contextLoaded` reconnect only, else `fetch /Chat/Context` → render UI
+- `mode == 'active'` → `renderActiveChatUI(...)` then `connectSignalR(chatKey)`
+- `mode == 'initiate'` → `renderInitiateUI(...)` (no SignalR yet)
+- Initiate: body click delegation on `#chatInitiateBtn` → `POST /Chat/Initiate` → `renderActiveChatUI` + `connectSignalR`
+- SignalR connected on `shown.bs.offcanvas` (or after initiate); disconnected on `hidden.bs.offcanvas` (connection set to null)
+- Send: body submit delegation on `.form-send-message` → `connection.invoke('SendMessage', chatKey, content)`
+- `ReceiveMessage` handler: `appendMessage(msg.senderId, msg.content, msg.sentDate)` then `scrollToBottom()`
+- `appendMessage(senderId, content, time)` — builds `<li>` bubble; right-aligned when `senderId === viewerId`
+- `buildAvatarHtml(pictureUrl, initials, altText)` — `<img>` if URL present, else initials `<span>`
+- HTML escaping via `esc()` helper for all user content

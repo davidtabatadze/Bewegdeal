@@ -161,6 +161,11 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u => u.Id == filter.Id.Value);
             }
 
+            if (filter.Ids != null && filter.Ids.Count != 0)
+            {
+                query = query.Where(u => filter.Ids.Contains(u.Id));
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Email))
             {
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());

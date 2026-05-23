@@ -19,6 +19,8 @@ namespace Bewegdeal.Data
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
         public DbSet<RequestAgreementEntity> RequestAgreements => Set<RequestAgreementEntity>();
         public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
+        public DbSet<ChatEntity> Chats => Set<ChatEntity>();
+        public DbSet<ChatMessageEntity> ChatMessages => Set<ChatMessageEntity>();
 
         #endregion
 
@@ -86,6 +88,8 @@ namespace Bewegdeal.Data
             ConfigureRequestFiles(modelBuilder);
             ConfigureRequestAgreements(modelBuilder);
             ConfigureFraudWords(modelBuilder);
+            ConfigureChats(modelBuilder);
+            ConfigureChatMessages(modelBuilder);
         }
 
         private void ConfigureUsers(ModelBuilder modelBuilder)
@@ -272,6 +276,48 @@ namespace Bewegdeal.Data
                 e.Property(w => w.Status).IsRequired().HasMaxLength(16);
                 e.Property(w => w.CreatedAt).IsRequired();
                 e.Property(w => w.CreatedByName).IsRequired().HasMaxLength(64);
+            });
+        }
+
+        private void ConfigureChats(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChatEntity>(e =>
+            {
+                e.ToTable(_prefix + "Chats");
+
+                e.HasKey(c => c.Id);
+                e.Property(c => c.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(c => c.Key).IsUnique();
+                e.HasIndex(c => c.RequestId);
+                e.HasIndex(c => c.Status);
+
+                e.Property(c => c.Key).IsRequired().HasMaxLength(32);
+                e.Property(c => c.RequestId).IsRequired();
+                e.Property(c => c.CustomerId).IsRequired();
+                e.Property(c => c.CompanyId).IsRequired();
+                e.Property(c => c.Status).IsRequired().HasMaxLength(16);
+                e.Property(c => c.CreateDate).IsRequired();
+            });
+        }
+
+        private void ConfigureChatMessages(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChatMessageEntity>(e =>
+            {
+                e.ToTable(_prefix + "ChatMessages");
+
+                e.HasKey(m => m.Id);
+                e.Property(m => m.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(m => m.ChatId);
+                e.HasIndex(m => m.SenderId);
+
+                e.Property(m => m.ChatId).IsRequired();
+                e.Property(m => m.SenderId).IsRequired();
+                e.Property(m => m.Content).IsRequired().HasMaxLength(2048);
+                e.Property(m => m.SentDate).IsRequired();
+                e.Property(m => m.IsRead).IsRequired().HasDefaultValue(false);
             });
         }
 

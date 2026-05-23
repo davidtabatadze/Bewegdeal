@@ -18,6 +18,9 @@ namespace Bewegdeal
             // ── MVC ──────────────────────────────────────────────────────────────
             builder.Services.AddControllersWithViews();
 
+            // ── SignalR ───────────────────────────────────────────────────────────
+            builder.Services.AddSignalR();
+
             // ── Session ───────────────────────────────────────────────────────────
             // HttpOnly + SameAsRequest keeps the cookie secure without forcing HTTPS in dev.
             // 8-hour idle timeout matches a typical working day.
@@ -65,6 +68,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<IRequestRepository, RequestRepository>();
             builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
             builder.Services.AddScoped<IFraudWordRepository, FraudWordRepository>();
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
             // ── Storage ───────────────────────────────────────────────────────────
             // Files are stored on the local file system.
@@ -111,6 +115,7 @@ namespace Bewegdeal
             // ── Routes ────────────────────────────────────────────────────────────
             // Default route lands on the public landing page, not the admin dashboard.
             app.MapStaticAssets();
+            app.MapHub<Bewegdeal.Hubs.ChatHub>("/hubs/chat");
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Landing}/{action=Index}/{id?}")
