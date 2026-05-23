@@ -35,11 +35,6 @@
 
     // ── Phase 2: load conversation (on offcanvas open) ────────────────────────
 
-    offcanvas.addEventListener('show.bs.offcanvas', function () {
-        if (contextLoaded) { return; }
-        showSpinner();
-    });
-
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
         if (contextLoaded) {
             if (mode === ChatMode.Active && chatKey) { connectSignalR(chatKey); }
@@ -98,8 +93,9 @@
         var content = (input ? input.value : '').trim();
         if (!content || !connection) { return; }
 
+        input.value = '';
+
         connection.invoke('SendMessage', chatKey, content)
-            .then(function () { if (input) { input.value = ''; } })
             .catch(function (err) { console.error('Send error:', err); });
     });
 
@@ -128,10 +124,11 @@
     // ── Core ─────────────────────────────────────────────────────────────────
 
     function loadConversation() {
-        showSpinner();
+        Block.pulse('#chatCard');
         fetch('/Chat/Conversation?requestNumber=' + encodeURIComponent(requestNumber))
             .then(function (r) { return r.text(); })
             .then(function (html) {
+                Block.remove('#chatCard');
                 body.innerHTML = html;
                 contextLoaded  = true;
 
@@ -151,6 +148,7 @@
             })
             .catch(function (e) {
                 console.error('Chat conversation failed:', e);
+                Block.remove('#chatCard');
                 showError();
             });
     }
@@ -168,23 +166,23 @@
         var avatarHtml = buildAvatarHtml(pictureUrl, initials);
 
         var li = document.createElement('li');
-        li.className = 'chat-message' + (isMine ? ' chat-message-right' : '') + ' mb-4';
+        li.className = 'chat-message' + (isMine ? ' chat-message-right' : '') + ' mb-2';
 
         if (isMine) {
             li.innerHTML =
                 '<div class="d-flex overflow-hidden">' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
-                    '<div class="chat-message-text"><p class="mb-0" style="white-space:pre-wrap;">' + esc(content) + '</p></div>' +
+                    '<div class="chat-message-text"><p class="mb-0">' + esc(content) + '</p></div>' +
                     '<div class="text-end text-body-secondary mt-1"><small>' + esc(time) + '</small></div>' +
                   '</div>' +
-                  '<div class="user-avatar flex-shrink-0 ms-3"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
+                  '<div class="user-avatar flex-shrink-0 ms-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
                 '</div>';
         } else {
             li.innerHTML =
                 '<div class="d-flex overflow-hidden">' +
-                  '<div class="user-avatar flex-shrink-0 me-3"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
+                  '<div class="user-avatar flex-shrink-0 me-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
-                    '<div class="chat-message-text"><p class="mb-0" style="white-space:pre-wrap;">' + esc(content) + '</p></div>' +
+                    '<div class="chat-message-text"><p class="mb-0">' + esc(content) + '</p></div>' +
                     '<div class="text-body-secondary mt-1"><small>' + esc(time) + '</small></div>' +
                   '</div>' +
                 '</div>';
@@ -204,15 +202,6 @@
         return '<span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"' +
                ' style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">' +
                esc(initials || '?') + '</span>';
-    }
-
-    function showSpinner() {
-        body.innerHTML =
-            '<div class="col d-flex align-items-center justify-content-center">' +
-              '<div class="spinner-border text-primary" role="status">' +
-                '<span class="visually-hidden">Loading…</span>' +
-              '</div>' +
-            '</div>';
     }
 
     function showError() {

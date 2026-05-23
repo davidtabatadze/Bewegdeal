@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="~/vendor/libs/swiper/swiper.css" />
     <link rel="stylesheet" href="~/vendor/css/pages/ui-carousel.css" />
     <link rel="stylesheet" href="~/vendor/css/pages/app-chat.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
 }
 
 @section PageScripts {
@@ -51,6 +52,7 @@
         const mediaCount = @allMedia.Count;
     </script>
     <script src="~/vendor/libs/swiper/swiper.js"></script>
+    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
     <script src="~/js/request-view.js"></script>
     <script>
         window.chatConfig = { requestNumber: '@req.Number' };
@@ -273,7 +275,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-0">
-        <div class="app-chat card overflow-hidden h-100 m-0 rounded-0 border-0 shadow-none">
+        <div id="chatCard" class="app-chat card overflow-hidden h-100 m-0 rounded-0 border-0 shadow-none">
             <div class="row g-0 h-100" id="chatOffcanvasBody">
             </div>
         </div>
