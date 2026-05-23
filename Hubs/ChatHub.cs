@@ -20,8 +20,9 @@ namespace Bewegdeal.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(chatKey));
 
-            // mark incoming messages as read on join
+            // mark incoming messages as read on join, then notify the sender
             await chatRepository.MarkRead(chat.Id, userId);
+            await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
         }
 
         /// <summary>
@@ -57,6 +58,22 @@ namespace Bewegdeal.Hubs
                 content = message.Content,
                 sentDate = message.SentDate.ToString("HH:mm")
             });
+        }
+
+        /// <summary>
+        /// Marks all messages from the other party as read and notifies them.
+        /// Called by the receiver when a new message arrives while they are already in the chat.
+        /// </summary>
+        public async Task MarkRead(string chatKey)
+        {
+            var userId = GetUserId();
+            if (userId == 0) { return; }
+
+            var chat = await chatRepository.Get(chatKey);
+            if (chat is null || !IsParticipant(chat, userId)) { return; }
+
+            await chatRepository.MarkRead(chat.Id, userId);
+            await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────

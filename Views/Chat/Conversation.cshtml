@@ -78,7 +78,7 @@ else
                                             <p class="mb-0">@msg.Content</p>
                                         </div>
                                         <div class="text-end text-body-secondary mt-1">
-                                            <i class="icon-base ri ri-check-double-line icon-16px text-success me-1"></i>
+                                            <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-success" : "") me-1"></i>
                                             <small>@msg.SentDate.ToString("HH:mm")</small>
                                         </div>
                                     </div>

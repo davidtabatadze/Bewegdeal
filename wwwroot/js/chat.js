@@ -112,6 +112,16 @@
         connection.on('ReceiveMessage', function (msg) {
             appendMessage(msg.senderId, msg.content, msg.sentDate);
             scrollToBottom();
+            if (msg.senderId !== viewerId) {
+                connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
+            }
+        });
+
+        connection.on('MessagesRead', function () {
+            var icons = document.querySelectorAll('.msg-read-receipt');
+            for (var i = 0; i < icons.length; i++) {
+                icons[i].classList.add('text-success');
+            }
         });
 
         connection.start()
@@ -173,7 +183,10 @@
                 '<div class="d-flex overflow-hidden">' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
                     '<div class="chat-message-text"><p class="mb-0">' + esc(content) + '</p></div>' +
-                    '<div class="text-end text-body-secondary mt-1"><small>' + esc(time) + '</small></div>' +
+                    '<div class="text-end text-body-secondary mt-1">' +
+                      '<i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px me-1"></i>' +
+                      '<small>' + esc(time) + '</small>' +
+                    '</div>' +
                   '</div>' +
                   '<div class="user-avatar flex-shrink-0 ms-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
                 '</div>';
