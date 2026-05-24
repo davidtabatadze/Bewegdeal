@@ -16,11 +16,12 @@
     var body        = document.getElementById('chatOffcanvasBody');
     if (!floatingBtn || !offcanvas || !body) { return; }
 
-    var mode       = ChatMode.None;
-    var chatKey    = '';
-    var viewerId   = 0;
-    var connection = null;
-    var contextLoaded = false;
+    var mode            = ChatMode.None;
+    var chatKey         = '';
+    var viewerId        = 0;
+    var connection      = null;
+    var contextLoaded   = false;
+    var lastMessageDate = '';
 
     // ── Phase 1: visibility check (fast) ─────────────────────────────────────
 
@@ -110,7 +111,7 @@
             .build();
 
         connection.on('ReceiveMessage', function (msg) {
-            appendMessage(msg.senderId, msg.content, msg.sentDate);
+            appendMessage(msg.senderId, msg.content, msg.sentDate, msg.sentDay);
             scrollToBottom();
             if (msg.senderId !== viewerId) {
                 connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
@@ -152,6 +153,8 @@
                 if (mode === ChatMode.Active) {
                     var historyBody = body.querySelector('.chat-history-body');
                     if (historyBody) { new PerfectScrollbar(historyBody); }
+                    var separators = body.querySelectorAll('.chat-date-separator[data-date]');
+                    lastMessageDate = separators.length ? separators[separators.length - 1].getAttribute('data-date') : '';
                     connectSignalR(chatKey);
                     scrollToBottom();
                 }
@@ -165,9 +168,18 @@
 
     // ── Real-time message append ──────────────────────────────────────────────
 
-    function appendMessage(senderId, content, time) {
+    function appendMessage(senderId, content, time, sentDay) {
         var list = document.getElementById('chatMessageList');
         if (!list) { return; }
+
+        if (sentDay && sentDay !== lastMessageDate) {
+            lastMessageDate = sentDay;
+            var sep = document.createElement('li');
+            sep.className = 'chat-date-separator text-center my-6';
+            sep.setAttribute('data-date', sentDay);
+            sep.innerHTML = '<span class="badge bg-label-secondary px-3 py-1">' + getDateLabel(sentDay) + '</span>';
+            list.appendChild(sep);
+        }
 
         var conv       = document.getElementById('chatConversation');
         var isMine     = senderId === viewerId;
@@ -176,16 +188,18 @@
         var avatarHtml = buildAvatarHtml(pictureUrl, initials);
 
         var li = document.createElement('li');
-        li.className = 'chat-message' + (isMine ? ' chat-message-right' : '') + ' mb-2';
+        li.className = 'chat-message' + (isMine ? ' chat-message-right' : '') + ' mb-3';
 
         if (isMine) {
             li.innerHTML =
                 '<div class="d-flex overflow-hidden">' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
-                    '<div class="chat-message-text"><p class="mb-0">' + esc(content) + '</p></div>' +
-                    '<div class="text-end text-body-secondary mt-1">' +
-                      '<i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px me-1"></i>' +
-                      '<small>' + esc(time) + '</small>' +
+                    '<div class="chat-message-text p-2">' +
+                      '<p class="mb-0">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
+                      '<span class="chat-bubble-meta">' +
+                        '<i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px"></i>' +
+                        '<small>' + esc(time) + '</small>' +
+                      '</span>' +
                     '</div>' +
                   '</div>' +
                   '<div class="user-avatar flex-shrink-0 ms-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
@@ -195,8 +209,12 @@
                 '<div class="d-flex overflow-hidden">' +
                   '<div class="user-avatar flex-shrink-0 me-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
-                    '<div class="chat-message-text"><p class="mb-0">' + esc(content) + '</p></div>' +
-                    '<div class="text-body-secondary mt-1"><small>' + esc(time) + '</small></div>' +
+                    '<div class="chat-message-text p-2">' +
+                      '<p class="mb-0">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
+                      '<span class="chat-bubble-meta text-body-secondary">' +
+                        '<small>' + esc(time) + '</small>' +
+                      '</span>' +
+                    '</div>' +
                   '</div>' +
                 '</div>';
         }
@@ -205,6 +223,18 @@
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function getDateLabel(dateStr) {
+        var today     = new Date();
+        var yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        var todayStr     = today.toISOString().slice(0, 10);
+        var yesterdayStr = yesterday.toISOString().slice(0, 10);
+        if (dateStr === todayStr)     { return 'Today'; }
+        if (dateStr === yesterdayStr) { return 'Yesterday'; }
+        var d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
 
     function buildAvatarHtml(pictureUrl, initials, altText) {
         if (pictureUrl) {

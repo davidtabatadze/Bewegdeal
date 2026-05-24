@@ -56,7 +56,8 @@ namespace Bewegdeal.Hubs
                 id = message.Id,
                 senderId = message.SenderId,
                 content = message.Content,
-                sentDate = message.SentDate.ToString("HH:mm")
+                sentDate = message.SentDate.ToString("HH:mm"),
+                sentDay  = message.SentDate.ToString("yyyy-MM-dd")
             });
         }
 
