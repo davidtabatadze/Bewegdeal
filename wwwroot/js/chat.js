@@ -22,6 +22,8 @@
     var connection      = null;
     var contextLoaded   = false;
     var lastMessageDate = '';
+    var waitingForEcho  = false;
+    var echoTimer       = null;
 
     // ── Phase 1: visibility check (fast) ─────────────────────────────────────
 
@@ -89,16 +91,47 @@
     body.addEventListener('submit', function (e) {
         if (!e.target.classList.contains('form-send-message')) { return; }
         e.preventDefault();
+        sendMessage(e.target);
+    });
 
-        var input   = e.target.querySelector('.message-input');
+    body.addEventListener('keydown', function (e) {
+        var input = e.target;
+        if (!input.classList.contains('message-input')) { return; }
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            var form = input.closest('.form-send-message');
+            if (form) { sendMessage(form); }
+        }
+    });
+
+    body.addEventListener('input', function (e) {
+        var input = e.target;
+        if (!input.classList.contains('message-input')) { return; }
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + 'px';
+    });
+
+    function sendMessage(form) {
+        var input   = form.querySelector('.message-input');
         var content = (input ? input.value : '').trim();
         if (!content || !connection) { return; }
 
         input.value = '';
+        input.style.height = 'auto';
+
+        waitingForEcho = true;
+        echoTimer = setTimeout(function () {
+            if (waitingForEcho) { Block.pulse('.chat-history-footer'); }
+        }, 1000);
 
         connection.invoke('SendMessage', chatKey, content)
-            .catch(function (err) { console.error('Send error:', err); });
-    });
+            .catch(function (err) {
+                clearTimeout(echoTimer);
+                Block.remove('.chat-history-footer');
+                waitingForEcho = false;
+                console.error('Send error:', err);
+            });
+    }
 
     // ── SignalR ───────────────────────────────────────────────────────────────
 
@@ -111,6 +144,11 @@
             .build();
 
         connection.on('ReceiveMessage', function (msg) {
+            if (msg.senderId === viewerId && waitingForEcho) {
+                clearTimeout(echoTimer);
+                Block.remove('.chat-history-footer');
+                waitingForEcho = false;
+            }
             appendMessage(msg.senderId, msg.content, msg.sentDate, msg.sentDay);
             scrollToBottom();
             if (msg.senderId !== viewerId) {
@@ -195,7 +233,7 @@
                 '<div class="d-flex overflow-hidden">' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
                     '<div class="chat-message-text p-2">' +
-                      '<p class="mb-0">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
+                      '<p class="mb-0" style="white-space:pre-wrap;">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
                       '<span class="chat-bubble-meta">' +
                         '<i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px"></i>' +
                         '<small>' + esc(time) + '</small>' +
@@ -210,7 +248,7 @@
                   '<div class="user-avatar flex-shrink-0 me-4"><div class="avatar avatar-sm">' + avatarHtml + '</div></div>' +
                   '<div class="chat-message-wrapper flex-grow-1">' +
                     '<div class="chat-message-text p-2">' +
-                      '<p class="mb-0">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
+                      '<p class="mb-0" style="white-space:pre-wrap;">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
                       '<span class="chat-bubble-meta text-body-secondary">' +
                         '<small>' + esc(time) + '</small>' +
                       '</span>' +
