@@ -53,6 +53,41 @@
         }
     });
 
+    // ── Cancel flow ──────────────────────────────────────────────────────────
+
+    body.addEventListener('click', function (e) {
+        if (!e.target.closest('#chatCancelBtn')) { return; }
+
+        Swal.fire({
+            title: 'End negotiation?',
+            text: 'Sure you want to cancel negotiation?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, end it',
+            cancelButtonText: 'No',
+            customClass: {
+                confirmButton: 'btn btn-danger me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            Block.pulse('#chatCard');
+            fetch('/Chat/Cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'requestNumber=' + encodeURIComponent(requestNumber)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) { window.location.reload(); }
+                    else { Block.remove('#chatCard'); }
+                })
+                .catch(function () { Block.remove('#chatCard'); });
+        });
+    });
+
     // ── Initiate flow ─────────────────────────────────────────────────────────
 
     body.addEventListener('click', function (e) {
@@ -154,6 +189,10 @@
             if (msg.senderId !== viewerId) {
                 connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
             }
+        });
+
+        connection.on('ChatCancelled', function () {
+            window.location.reload();
         });
 
         connection.on('MessagesRead', function () {

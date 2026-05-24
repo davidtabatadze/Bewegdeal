@@ -12,5 +12,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<ChatMessageEntity> CreateMessage(ChatMessageEntity message);
         Task<List<ChatMessageEntity>> LoadMessages(long chatId);
         Task MarkRead(long chatId, long viewerId);
+        Task Cancel(long chatId);
     }
 }

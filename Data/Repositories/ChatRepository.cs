@@ -58,5 +58,13 @@ namespace Bewegdeal.Data.Repositories
                 await context.SaveChangesAsync();
             }
         }
+
+        public async Task Cancel(long chatId)
+        {
+            var chat = await context.Chats.FindAsync(chatId);
+            if (chat is null) { return; }
+            chat.Status = ChatStatusEnum.Cancelled;
+            await context.SaveChangesAsync();
+        }
     }
 }

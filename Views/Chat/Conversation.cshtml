@@ -2,17 +2,33 @@
 @model Bewegdeal.Models.ChatHistoryViewModel
 
 <style>
-    .chat-bubble-tail { display: inline-block; width: 45px; }
-    .chat-message-right .chat-bubble-tail { width: 65px; }
-    .chat-bubble-meta { float: right; margin-top: -1.25em; line-height: 1.2; white-space: nowrap; }
+    .chat-bubble-tail {
+        display: inline-block;
+        width: 45px;
+    }
+
+    .chat-message-right .chat-bubble-tail {
+        width: 65px;
+    }
+
+    .chat-bubble-meta {
+        float: right;
+        margin-top: -1.25em;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
 </style>
 
 @if (Model.Mode == ChatModeEnum.Initiate)
 {
     <div id="chatConversation"
          data-mode="@Model.Mode"
+         style="block-size:100%"
          class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column">
-        <div class="avatar avatar-lg mb-4">
+        <div class="bg-label-primary p-8 rounded-circle">
+            <i class="icon-base ri ri-wechat-line icon-48px"></i>
+        </div>
+        @* <div class="avatar avatar-lg mb-4">
             @if (Model.OtherPartyPictureUrl is not null)
             {
                 <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
@@ -26,7 +42,8 @@
             }
         </div>
         <h6 class="mb-1">@Model.OtherPartyName</h6>
-        <p class="text-muted small mb-5">Start a conversation about this request</p>
+        <p class="text-muted small mb-5">Start a conversation about this request?</p> *@
+        <p class="my-4">Start a conversation about this request?</p>
         <button id="chatInitiateBtn" class="btn btn-primary">
             <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
         </button>
@@ -163,7 +180,7 @@ else
                         <span class="btn btn-text-success btn-icon rounded-pill cursor-pointer">
                             <i class="icon-base ri ri-shake-hands-line icon-md text-success"></i>
                         </span>
-                        <span class="btn btn-text-danger btn-icon rounded-pill cursor-pointer">
+                        <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer">
                             <i class="icon-base ri ri-hand icon-md text-danger"></i>
                         </span>
                         <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">

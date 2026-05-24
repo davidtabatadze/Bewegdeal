@@ -3,8 +3,10 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Hubs;
 using Bewegdeal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Bewegdeal.Controllers;
 
@@ -13,7 +15,8 @@ public class ChatController(
     IUserRepository userRepository,
     IFileRepository fileRepository,
     IRequestRepository requestRepository,
-    IChatRepository chatRepository) : XBaseController(userRepository)
+    IChatRepository chatRepository,
+    IHubContext<ChatHub> hubContext) : XBaseController(userRepository)
 {
     private readonly IUserRepository _userRepository = userRepository;
 
@@ -142,6 +145,56 @@ public class ChatController(
     }
 
 
+
+    [HttpPost]
+    public async Task<IActionResult> Cancel(string requestNumber)
+    {
+        var user = await GetUser(null, true, null);
+        if (user is null) { return Json(new { success = false }); }
+
+        var request = await requestRepository.Get(requestNumber);
+        if (request is null) { return Json(new { success = false }); }
+
+        var chat = await chatRepository.GetActive(request.Id);
+        if (chat is null) { return Json(new { success = false }); }
+
+        if (chat.CompanyId != user.Id && chat.CustomerId != user.Id)
+        {
+            return Json(new { success = false });
+        }
+
+        // automated farewell message
+        var message = await chatRepository.CreateMessage(new ChatMessageEntity
+        {
+            ChatId    = chat.Id,
+            SenderId  = user.Id,
+            Content   = "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.",
+            SentDate  = DateTime.UtcNow,
+            IsRead    = false
+        });
+
+        // cancel chat and revert request to pending
+        await chatRepository.Cancel(chat.Id);
+        request.Status     = RequestStatusEnum.Pending;
+        request.ExecutorId = null;
+        await requestRepository.Update(request);
+
+        var group = "chat-" + chat.Key;
+
+        // broadcast the automated message then signal cancellation to both parties
+        await hubContext.Clients.Group(group).SendAsync("ReceiveMessage", new
+        {
+            id       = message.Id,
+            senderId = message.SenderId,
+            content  = message.Content,
+            sentDate = message.SentDate.ToString("HH:mm"),
+            sentDay  = message.SentDate.ToString("yyyy-MM-dd")
+        });
+
+        await hubContext.Clients.Group(group).SendAsync("ChatCancelled");
+
+        return Json(new { success = true });
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
