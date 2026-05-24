@@ -1,5 +1,4 @@
-@using Bewegdeal.Data.Entities
-@model SettingsEntity
+@model Bewegdeal.Data.Entities.SettingsEntity
 
 @{
     Layout = "_HomeLayout";
@@ -28,11 +27,11 @@
                         <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
                     }
 
-                    @if (ViewBag.TermsFile is FileEntity termsFile)
+                    @if (ViewBag.TermsFileUrl is string termsFileUrl)
                     {
                         <div class="text-center">
-                            <a href="@Url.Action("Download", "File", new { key = termsFile.Key })" target="_blank" class="fw-semibold fs-5">
-                                <i class="ri ri-file-pdf-line me-1"></i>T&amp;C@* @termsFile.FileName *@
+                            <a href="@termsFileUrl" target="_blank" class="fw-semibold fs-5">
+                                <i class="ri ri-file-pdf-line me-1"></i>T&amp;C
                             </a>
                         </div>
 

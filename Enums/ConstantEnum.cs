@@ -10,7 +10,7 @@
         public const string SessionUserRole = "UserRole";
         public const string SessionUserEmail = "UserEmail";
         public const string SessionUserTheme = "UserTheme";
-        public const string SessionUserPictureKey = "UserPictureKey";
+        public const string SessionUserPictureId = "UserPictureId";
 
         public const string CookieRemember = "bewegdeal_remember";
     }

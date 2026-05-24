@@ -1,4 +1,5 @@
-﻿using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Base;
+using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Tools;
 
@@ -50,6 +51,20 @@ namespace Bewegdeal.Services
             return (entity.Id, null);
         }
 
+        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
+        {
+            return await fileRepository.Load(filter);
+        }
+
+        public async Task<FileEntity?> Get(long? id)
+        {
+            if (id is not null)
+            {
+                return await fileRepository.Get(id.Value);
+            }
+            return null;
+        }
+
         public async Task Delete(long id)
         {
             var record = await fileRepository.Get(id);
@@ -58,6 +73,19 @@ namespace Bewegdeal.Services
                 await fileRepository.Delete(record.Id);
                 await storageTool.Delete(record.Key);
             }
+        }
+
+        public async Task<string?> GetFileUrl(long? fileId, string? baseUrl = null)
+        {
+            var file = await Get(fileId);
+            return GetFileUrl(file, baseUrl);
+        }
+
+        public string? GetFileUrl(FileEntity? file, string? baseUrl = null)
+        {
+            if (file is null) { return null; }
+            var relative = storageTool.GetUrl(file.Key);
+            return string.IsNullOrWhiteSpace(baseUrl) ? relative : $"{baseUrl}{relative}";
         }
 
     }

@@ -212,9 +212,9 @@
                                                 <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" />
                                                 <label class="form-check-label" for="agreeTerms">
                                                     I agree
-                                                    @if (ViewBag.TermsFileKey is string termsKey)
+                                                    @if (ViewBag.TermsFileUrl is string termsUrl)
                                                     {
-                                                        <a href="@Url.Action("Download", "File", new { key = termsKey })" target="_blank">Terms &amp; Conditions</a>
+                                                        <a href="@termsUrl" target="_blank">Terms &amp; Conditions</a>
                                                     }
                                                     else
                                                     {

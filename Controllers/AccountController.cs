@@ -13,10 +13,8 @@ public class AccountController(
     FileService fileService,
     IUserRepository userRepository,
     ISettingsRepository settingsRepository,
-    IFileRepository fileRepository,
-    IMemoryCache cache) : XBaseController(userRepository)
+    IMemoryCache cache) : XBaseController(fileService, userRepository)
 {
-    private readonly IUserRepository _userRepository = userRepository;
 
     #region Login
 
@@ -70,10 +68,10 @@ public class AccountController(
 
         if (user.ProfilePictureFileId.HasValue)
         {
-            var pictureFile = await fileRepository.Get(user.ProfilePictureFileId.Value);
+            var pictureFile = await FileService.Get(user.ProfilePictureFileId.Value);
             if (pictureFile is not null)
             {
-                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureKey, pictureFile.Key);
+                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, pictureFile.Id.ToString());
             }
         }
 
@@ -184,7 +182,7 @@ public class AccountController(
 
         // update password and clear token
         var (hash, salt) = PasswordTool.HashPassword(password);
-        await _userRepository.UpdatePassword(user.Id, hash, salt);
+        await UserRepository.UpdatePassword(user.Id, hash, salt);
 
         TempData["LoginSuccess"] = AnnotationEnum.Account.ResetPassword.Success;
         return RedirectToAction(nameof(Login));
@@ -230,7 +228,7 @@ public class AccountController(
         var user = await GetUser(email);
         if (user is not null)
         {
-            await _userRepository.SetUserStatus(
+            await UserRepository.SetUserStatus(
                 user.Id,
                 user.Role == UserRoleEnum.Customer ?
                 UserStatusEnum.Active : UserStatusEnum.Pending
@@ -271,8 +269,8 @@ public class AccountController(
     public async Task<IActionResult> Register()
     {
         var settings = await settingsRepository.Get();
-        var file = await fileRepository.Get(settings.TermsAndConditionsFileId);
-        ViewBag.TermsFileKey = file?.Key;
+        var file = await FileService.Get(settings.TermsAndConditionsFileId);
+        ViewBag.TermsFileUrl = FileService.GetFileUrl(file);
 
         return View(new RegisterViewModel());
     }
@@ -312,7 +310,7 @@ public class AccountController(
         long? termsFileId = null;
         if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await fileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
+            var file = await FileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;
@@ -325,7 +323,7 @@ public class AccountController(
         var (hash, salt) = PasswordTool.HashPassword(model.Password);
 
         // do create user
-        var user = await _userRepository.Create(new UserEntity
+        var user = await UserRepository.Create(new UserEntity
         {
             Role = model.Role,
             Name = model.Name,

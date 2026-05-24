@@ -1,11 +1,8 @@
 @inject Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository _footerSettingsRepo
-@inject Bewegdeal.Data.Repositories.Abstractions.IFileRepository _footerFileRepo
+@inject Bewegdeal.Services.FileService _footerFileService
 @{
     var _footerSettings = await _footerSettingsRepo.Get();
-    var _footerTcFile = await _footerFileRepo.Get(_footerSettings.TermsAndConditionsFileId);
-    var _footerTcUrl = _footerTcFile is not null
-        ? Url.Action("Download", "File", new { key = _footerTcFile.Key })
-        : null;
+    var _footerTcUrl = await _footerFileService.GetFileUrl(_footerSettings.TermsAndConditionsFileId);
 }
 <!-- Footer -->
 <footer class="content-footer footer bg-footer-theme">

@@ -34,7 +34,7 @@ namespace Bewegdeal.Middleware
                         var pictureFile = await fileRepository.Get(user.ProfilePictureFileId.Value);
                         if (pictureFile is not null)
                         {
-                            context.Session.SetString(ConstantEnum.SessionUserPictureKey, pictureFile.Key);
+                            context.Session.SetString(ConstantEnum.SessionUserPictureId, pictureFile.Id.ToString());
                         }
                     }
                 }

@@ -1,14 +1,15 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HowItWorksController(IUserRepository userRepository) : XBaseController(userRepository)
+    public class HowItWorksController(FileService fileService, IUserRepository userRepository)
+        : XBaseController(fileService, userRepository)
     {
-        private readonly IUserRepository _userRepository = userRepository;
 
         [HttpGet]
         public async Task<IActionResult> Customer()
@@ -45,7 +46,7 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await _userRepository.SetAcquaintedHIW(user.Id);
+            await UserRepository.SetAcquaintedHIW(user.Id);
             return RedirectToAction("Index", "Dashboard");
         }
     }

@@ -1,12 +1,13 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HomeController(IUserRepository userRepository) : XBaseController(userRepository)
+    public class HomeController(FileService fileService, IUserRepository userRepository) : XBaseController(fileService, userRepository)
     {
         public async Task<IActionResult> Index()
         {

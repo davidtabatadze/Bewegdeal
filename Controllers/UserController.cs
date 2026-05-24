@@ -10,22 +10,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    public class UserController(
-        IUserRepository userRepository,
-        IFileRepository fileRepository,
-        FileService fileService
-    ) : XBaseController(userRepository)
+    public class UserController(IUserRepository userRepository, FileService fileService)
+        : XBaseController(fileService, userRepository)
     {
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly IFileRepository _fileRepository = fileRepository;
-        private readonly FileService _fileService = fileService;
 
         #region List
 
         [RequireAdmin]
         public async Task<IActionResult> List()
         {
-            var users = await _userRepository.Load(new UserFilter() { Id = 0 });
+            var users = await UserRepository.Load(new UserFilter() { Id = 0 });
             ViewBag.TotalCount = users.Count;
             ViewBag.CustomerCount = users.Count(u => u.Role == UserRoleEnum.Customer);
             ViewBag.CompanyCount = users.Count(u => u.Role == UserRoleEnum.Company);
@@ -37,9 +31,9 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQuery] int draw = 1)
         {
-            var users = await _userRepository.Load(filter);
-            var filtered = await _userRepository.Count(filter);
-            var total = await _userRepository.Count(new UserFilter());
+            var users = await UserRepository.Load(filter);
+            var filtered = await UserRepository.Count(filter);
+            var total = await UserRepository.Count(new UserFilter());
 
             var data = users.Select(u => new
             {
@@ -65,7 +59,7 @@ namespace Bewegdeal.Controllers
                 return BadRequest();
             }
 
-            var user = await _userRepository.Get(new UserFilter { Id = id });
+            var user = await UserRepository.Get(new UserFilter { Id = id });
 
             if (user is null)
             {
@@ -80,7 +74,7 @@ namespace Bewegdeal.Controllers
                 _ => user.Status
             };
 
-            await _userRepository.SetUserStatus(id, newStatus);
+            await UserRepository.SetUserStatus(id, newStatus);
             return Json(new { status = newStatus });
         }
 
@@ -97,26 +91,12 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            FileEntity? picture = null;
-            if (user.ProfilePictureFileId.HasValue)
-            {
-                picture = await _fileRepository.Get(user.ProfilePictureFileId.Value);
-            }
-
-            FileEntity? serviceTermsFile = null;
-            if (user.Role == UserRoleEnum.Company && user.ServiceTermsFileId.HasValue)
-            {
-                serviceTermsFile = await _fileRepository.Get(user.ServiceTermsFileId.Value);
-            }
-
             ViewBag.User = user;
-            ViewBag.PictureUrl = picture is not null
-                ? Url.Action("Download", "File", new { key = picture.Key })
-                : null;
+            ViewBag.PictureUrl = await FileService.GetFileUrl(user.ProfilePictureFileId);
+
+            var serviceTermsFile = await FileService.Get(user.ServiceTermsFileId);
             ViewBag.ServiceTermsFile = serviceTermsFile;
-            ViewBag.ServiceTermsUrl = serviceTermsFile is not null
-                ? Url.Action("Download", "File", new { key = serviceTermsFile.Key })
-                : null;
+            ViewBag.ServiceTermsUrl = FileService.GetFileUrl(serviceTermsFile);
 
             return View();
         }
@@ -135,14 +115,14 @@ namespace Bewegdeal.Controllers
             {
                 if (user.ProfilePictureFileId.HasValue)
                 {
-                    await _fileService.Delete(user.ProfilePictureFileId.Value);
-                    await _userRepository.UpdatePicture(user.Id, null);
+                    await FileService.Delete(user.ProfilePictureFileId.Value);
+                    await UserRepository.UpdatePicture(user.Id, null);
                 }
-                HttpContext.Session.Remove(ConstantEnum.SessionUserPictureKey);
+                HttpContext.Session.Remove(ConstantEnum.SessionUserPictureId);
                 return Ok();
             }
 
-            var (id, error) = await _fileService.Create(
+            var (id, error) = await FileService.Create(
                 picture,
                 user.ProfilePictureFileId,
                 3,
@@ -154,12 +134,12 @@ namespace Bewegdeal.Controllers
                 return BadRequest(new { error });
             }
 
-            await _userRepository.UpdatePicture(user.Id, id);
+            await UserRepository.UpdatePicture(user.Id, id);
 
-            var file = await _fileRepository.Get(id!.Value);
+            var file = await FileService.Get(id);
             if (file is not null)
             {
-                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureKey, file.Key);
+                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, file.Id.ToString());
             }
 
             return Ok();
@@ -171,7 +151,7 @@ namespace Bewegdeal.Controllers
         {
             if (long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId))
             {
-                await _userRepository.UpdateTheme(
+                await UserRepository.UpdateTheme(
                     userId,
                     theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
                 );
@@ -203,12 +183,12 @@ namespace Bewegdeal.Controllers
             {
                 if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
                 {
-                    await _fileService.Delete(user.ServiceTermsFileId.Value);
+                    await FileService.Delete(user.ServiceTermsFileId.Value);
                     serviceTermsFileId = null;
                 }
                 if (model.ServiceTermsFile is not null)
                 {
-                    var file = await _fileService.Create(
+                    var file = await FileService.Create(
                         model.ServiceTermsFile,
                         model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
                         5,
@@ -226,7 +206,7 @@ namespace Bewegdeal.Controllers
             var number = user.Role == UserRoleEnum.Company ? user.Number : model.Number;
             var interests = user.Role == UserRoleEnum.Company ? model?.Interests ?? [] : [];
 
-            await _userRepository.UpdatePersonal(new UserEntity
+            await UserRepository.UpdatePersonal(new UserEntity
             {
                 Id = user.Id,
                 Number = number,
@@ -265,7 +245,7 @@ namespace Bewegdeal.Controllers
             }
 
             var (hash, salt) = PasswordTool.HashPassword(newPassword);
-            await _userRepository.UpdatePassword(user.Id, hash, salt);
+            await UserRepository.UpdatePassword(user.Id, hash, salt);
 
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");

@@ -16,11 +16,8 @@ public class RequestController(
     ISettingsRepository settingsRepository,
     IRequestRepository requestRepository,
     IRequestFileRepository requestFileRepository,
-    IFileRepository fileRepository,
-    FileService fileService) : XBaseController(userRepository)
+    FileService fileService) : XBaseController(fileService, userRepository)
 {
-    private readonly IUserRepository _userRepository = userRepository;
-
     #region List
 
     [HttpGet]
@@ -67,7 +64,7 @@ public class RequestController(
         var files = await requestFileRepository.LoadMainImages(
             requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
         );
-        var images = await fileRepository.Load(new BaseFilter<long>
+        var images = await FileService.Load(new BaseFilter<long>
         {
             Ids = files.Count == 0 ? [0] : [.. files.Select(f => f.FileId)]
         });
@@ -91,7 +88,7 @@ public class RequestController(
                 asap = r.ASAP,
                 date = r.Date?.ToString("MMM d, yyyy"),
                 time = r.Time?.ToString("HH:mm"),
-                imageUrl = image is null ? null : Url.Action("Download", "File", new { key = image.Key }, Request.Scheme)
+                imageUrl = FileService.GetFileUrl(image, BaseUrl)
             };
         });
 
@@ -190,29 +187,25 @@ public class RequestController(
         }
 
         var requestFiles = await requestFileRepository.Load(request.Id);
-        var files = await fileRepository.Load(new BaseFilter<long>
+        var files = await FileService.Load(new BaseFilter<long>
         {
             Ids = [.. requestFiles.Select(rf => rf.FileId)]
         });
 
-        var requester = await _userRepository.Get(new UserFilter { Id = request.RequesterId });
+        var requester = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
 
-        var requesterPicture = requester?.ProfilePictureFileId.HasValue == true
-            ? await fileRepository.Get(requester.ProfilePictureFileId.Value)
-            : null;
         var requesterNameParts = (requester?.Name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var requesterInitials = string.Concat(requesterNameParts.Take(2).Select(p => char.ToUpper(p[0])));
         if (string.IsNullOrEmpty(requesterInitials)) { requesterInitials = "?"; }
 
         ViewBag.Request = request;
         ViewBag.RequesterName = requester?.Name ?? "-";
-        ViewBag.RequesterPictureUrl = requesterPicture is not null
-            ? Url.Action("Download", "File", new { key = requesterPicture.Key })
-            : null;
+        ViewBag.RequesterPictureUrl = await FileService.GetFileUrl(requester?.ProfilePictureFileId);
+
         ViewBag.RequesterInitials = requesterInitials;
         ViewBag.Files = files.Select(f => new
         {
-            url = Url.Action("Download", "File", new { key = f.Key }, Request.Scheme),
+            url = FileService.GetFileUrl(f, BaseUrl),
             fileName = f.FileName,
             isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
             type = requestFiles.First(rf => rf.FileId == f.Id).Type
@@ -237,7 +230,7 @@ public class RequestController(
 
         var settings = await settingsRepository.Get();
         var requestFiles = await requestFileRepository.Load(id);
-        var files = await fileRepository.Load(new BaseFilter<long>
+        var files = await FileService.Load(new BaseFilter<long>
         {
             Ids = requestFiles.Select(rf => rf.FileId).ToList()
         });
@@ -247,7 +240,7 @@ public class RequestController(
         ViewBag.Files = files.Select(i => new
         {
             fileId = i.Id,
-            url = Url.Action("Download", "File", new { key = i.Key }, Request.Scheme),
+            url = FileService.GetFileUrl(i, BaseUrl),
             fileName = i.FileName,
             size = i.Size,
             isMain = requestFiles.First(rf => rf.FileId == i.Id).IsMain,
@@ -331,13 +324,13 @@ public class RequestController(
         await requestFileRepository.Delete([.. deletions.Select(i => i.Id)]);
         foreach (var file in deletions)
         {
-            await fileService.Delete(file.FileId);
+            await FileService.Delete(file.FileId);
         }
 
         // add new images ...
         for (var i = 0; i < request.Images.Length; i++)
         {
-            var file = await fileService.Create(
+            var file = await FileService.Create(
                 request.Images[i],
                 null,
                 settings.RequestImageMaxSize,
@@ -362,7 +355,7 @@ public class RequestController(
         // add new videos ...
         foreach (var vid in request.Videos)
         {
-            var file = await fileService.Create(
+            var file = await FileService.Create(
                 vid,
                 null,
                 settings.RequestVideoMaxSize,

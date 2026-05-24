@@ -5,6 +5,7 @@ using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Hubs;
 using Bewegdeal.Models;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,13 +13,12 @@ namespace Bewegdeal.Controllers;
 
 [RequireLogin]
 public class ChatController(
+    FileService fileService,
     IUserRepository userRepository,
-    IFileRepository fileRepository,
     IRequestRepository requestRepository,
     IChatRepository chatRepository,
-    IHubContext<ChatHub> hubContext) : XBaseController(userRepository)
+    IHubContext<ChatHub> hubContext) : XBaseController(fileService, userRepository)
 {
-    private readonly IUserRepository _userRepository = userRepository;
 
     [HttpGet]
     public async Task<IActionResult> Visibility(string requestNumber)
@@ -75,7 +75,7 @@ public class ChatController(
         await requestRepository.Update(request);
 
         // load customer info so the company can see who they're chatting with
-        var customer = await _userRepository.Get(new UserFilter { Id = request.RequesterId });
+        var customer = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
         var (name, initials, pictureUrl) = await ResolveParty(customer);
 
         return Json(new
@@ -123,7 +123,7 @@ public class ChatController(
             ? (user.Role == UserRoleEnum.Customer ? activeChat.CompanyId : activeChat.CustomerId)
             : request.RequesterId;
 
-        var otherParty = await _userRepository.Get(new UserFilter { Id = otherPartyId });
+        var otherParty = await UserRepository.Get(new UserFilter { Id = otherPartyId });
         var (otherPartyName, otherPartyInitials, otherPartyPictureUrl) = await ResolveParty(otherParty);
 
         var messages = activeChat is not null
@@ -132,15 +132,15 @@ public class ChatController(
 
         return PartialView("Conversation", new ChatHistoryViewModel
         {
-            Mode               = mode,
-            ChatKey            = activeChat?.Key ?? "",
-            ViewerId           = user.Id,
-            ViewerInitials     = viewerInitials,
-            ViewerPictureUrl   = viewerPictureUrl,
-            OtherPartyName     = otherPartyName,
+            Mode = mode,
+            ChatKey = activeChat?.Key ?? "",
+            ViewerId = user.Id,
+            ViewerInitials = viewerInitials,
+            ViewerPictureUrl = viewerPictureUrl,
+            OtherPartyName = otherPartyName,
             OtherPartyInitials = otherPartyInitials,
             OtherPartyPictureUrl = otherPartyPictureUrl,
-            Messages           = messages
+            Messages = messages
         });
     }
 
@@ -166,16 +166,16 @@ public class ChatController(
         // automated farewell message
         var message = await chatRepository.CreateMessage(new ChatMessageEntity
         {
-            ChatId    = chat.Id,
-            SenderId  = user.Id,
-            Content   = "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.",
-            SentDate  = DateTime.UtcNow,
-            IsRead    = false
+            ChatId = chat.Id,
+            SenderId = user.Id,
+            Content = "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.",
+            SentDate = DateTime.UtcNow,
+            IsRead = false
         });
 
         // cancel chat and revert request to pending
         await chatRepository.Cancel(chat.Id);
-        request.Status     = RequestStatusEnum.Pending;
+        request.Status = RequestStatusEnum.Pending;
         request.ExecutorId = null;
         await requestRepository.Update(request);
 
@@ -184,11 +184,11 @@ public class ChatController(
         // broadcast the automated message then signal cancellation to both parties
         await hubContext.Clients.Group(group).SendAsync("ReceiveMessage", new
         {
-            id       = message.Id,
+            id = message.Id,
             senderId = message.SenderId,
-            content  = message.Content,
+            content = message.Content,
             sentDate = message.SentDate.ToString("HH:mm"),
-            sentDay  = message.SentDate.ToString("yyyy-MM-dd")
+            sentDay = message.SentDate.ToString("yyyy-MM-dd")
         });
 
         await hubContext.Clients.Group(group).SendAsync("ChatCancelled");
@@ -204,16 +204,7 @@ public class ChatController(
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var initials = string.Concat(parts.Take(2).Select(p => char.ToUpper(p[0])));
         if (string.IsNullOrEmpty(initials)) { initials = "?"; }
-
-        string? pictureUrl = null;
-        if (user?.ProfilePictureFileId.HasValue == true)
-        {
-            var file = await fileRepository.Get(user.ProfilePictureFileId.Value);
-            if (file is not null)
-            {
-                pictureUrl = Url.Action("Download", "File", new { key = file.Key });
-            }
-        }
+        string? pictureUrl = await FileService.GetFileUrl(user?.ProfilePictureFileId);
 
         return (name, initials, pictureUrl);
     }

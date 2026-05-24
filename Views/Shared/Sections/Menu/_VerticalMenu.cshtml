@@ -1,3 +1,4 @@
+@inject Bewegdeal.Services.FileService _menuFileService
 @{
     string? currentPage = ViewContext.HttpContext.Request.Path;
 
@@ -7,10 +8,8 @@
     var userInitials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
     if (string.IsNullOrEmpty(userInitials)) { userInitials = "?"; }
 
-    var pictureKey = Context.Session.GetString(ConstantEnum.SessionUserPictureKey);
-    var pictureUrl = !string.IsNullOrEmpty(pictureKey)
-        ? Url.Action("Download", "File", new { key = pictureKey })
-        : null;
+    long.TryParse(Context.Session.GetString(ConstantEnum.SessionUserPictureId), out var pictureFileId);
+    var pictureUrl = pictureFileId > 0 ? await _menuFileService.GetFileUrl(pictureFileId) : null;
 }
 
 <!-- Menu -->
