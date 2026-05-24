@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="~/css/demo.css" />
   <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
   <link rel="stylesheet" href="~/css/site.css" />
+  <link rel="stylesheet" href="~/vendor/libs/animate-css/animate.css" />
 
   @RenderSection("VendorStyles", required: false)
   @RenderSection("PageStyles", required: false)
@@ -111,8 +112,8 @@
   <script src="~/vendor/libs/signalr/signalr.min.js"></script>
   <script src="~/js/notifications.js"></script>
 
-  <!-- Toast container -->
-  <div class="toast-container position-fixed top-0 end-0 p-3" id="notifToastContainer" style="z-index:9999;"></div>
+  <!-- Notification toast container (bottom-right) -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifToastContainer" style="z-index:9999;"></div>
 
 </body>
 </html>

@@ -41,27 +41,24 @@
         if (!container) { return; }
 
         var el = document.createElement('div');
-        el.className = 'toast';
+        el.className = 'bs-toast toast animate__animated animate__bounceInUp';
         el.setAttribute('role', 'alert');
         el.setAttribute('aria-live', 'assertive');
         el.setAttribute('aria-atomic', 'true');
         el.innerHTML =
             '<div class="toast-header">' +
-                '<i class="icon-base ri ri-wechat-line me-2 text-primary"></i>' +
-                '<strong class="me-auto">' + esc(senderName) + '</strong>' +
+                '<i class="icon-base ri ri-wechat-line icon-sm text-primary me-2"></i>' +
+                '<div class="me-auto fw-medium">' + esc(senderName) + '</div>' +
                 '<small class="text-body-secondary">just now</small>' +
                 '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
             '</div>' +
             '<div class="toast-body">' +
-                '<p class="mb-2" style="white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
+                '<p class="mb-2" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
                 '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '" class="btn btn-sm btn-primary">View request</a>' +
             '</div>';
 
         container.appendChild(el);
-        var toast = new bootstrap.Toast(el, {
-            delay: 10000,
-            position: { x: 'right', y: 'bottom' },
-        });
+        var toast = new bootstrap.Toast(el, { delay: 8000 });
         toast.show();
         el.addEventListener('hidden.bs.toast', function () { el.remove(); });
     }
