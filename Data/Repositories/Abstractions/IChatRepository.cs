@@ -1,5 +1,6 @@
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Models;
 
 namespace Bewegdeal.Data.Repositories.Abstractions
 {
@@ -13,5 +14,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<List<ChatMessageEntity>> LoadMessages(long chatId);
         Task MarkRead(long chatId, long viewerId);
         Task Cancel(long chatId);
+        Task<List<ChatUnreadSummary>> LoadUnreadForUser(long userId);
     }
 }

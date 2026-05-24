@@ -39,6 +39,7 @@
     // ── Phase 2: load conversation (on offcanvas open) ────────────────────────
 
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
+        window.chatOpen = true;
         if (contextLoaded) {
             if (mode === ChatMode.Active && chatKey) { connectSignalR(chatKey); }
             return;
@@ -47,6 +48,7 @@
     });
 
     offcanvas.addEventListener('hidden.bs.offcanvas', function () {
+        window.chatOpen = false;
         if (connection) {
             connection.stop();
             connection = null;
