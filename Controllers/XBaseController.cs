@@ -2,20 +2,17 @@
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     public class XBaseController : Controller
     {
-        public XBaseController(FileService fileService, IUserRepository userRepository)
+        public XBaseController(IUserRepository userRepository)
         {
-            FileService = fileService;
             UserRepository = userRepository;
         }
 
-        protected readonly FileService FileService;
         protected readonly IUserRepository UserRepository;
         protected string BaseUrl => $"{Request.Scheme}://{Request.Host}";
 

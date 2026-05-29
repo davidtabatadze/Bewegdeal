@@ -13,7 +13,7 @@ public class AccountController(
     FileService fileService,
     IUserRepository userRepository,
     ISettingsRepository settingsRepository,
-    IMemoryCache cache) : XBaseController(fileService, userRepository)
+    IMemoryCache cache) : XBaseController(userRepository)
 {
 
     #region Login
@@ -68,7 +68,7 @@ public class AccountController(
 
         if (user.ProfilePictureFileId.HasValue)
         {
-            var pictureFile = await FileService.Get(user.ProfilePictureFileId.Value);
+            var pictureFile = await fileService.Get(user.ProfilePictureFileId.Value);
             if (pictureFile is not null)
             {
                 HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, pictureFile.Id.ToString());
@@ -269,8 +269,8 @@ public class AccountController(
     public async Task<IActionResult> Register()
     {
         var settings = await settingsRepository.Get();
-        var file = await FileService.Get(settings.TermsAndConditionsFileId);
-        ViewBag.TermsFileUrl = FileService.GetFileUrl(file);
+        var file = await fileService.Get(settings.TermsAndConditionsFileId);
+        ViewBag.TermsFileUrl = fileService.GetFileUrl(file);
 
         return View(new RegisterViewModel());
     }
@@ -310,7 +310,7 @@ public class AccountController(
         long? termsFileId = null;
         if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
         {
-            var file = await FileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
+            var file = await fileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
             if (file.Error is not null)
             {
                 ViewBag.Error = file.Error;

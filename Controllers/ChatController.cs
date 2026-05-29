@@ -17,7 +17,7 @@ public class ChatController(
     IUserRepository userRepository,
     IRequestRepository requestRepository,
     IChatRepository chatRepository,
-    IHubContext<ChatHub> hubContext) : XBaseController(fileService, userRepository)
+    IHubContext<ChatHub> hubContext) : XBaseController(userRepository)
 {
 
     [HttpGet]
@@ -204,7 +204,7 @@ public class ChatController(
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var initials = string.Concat(parts.Take(2).Select(p => char.ToUpper(p[0])));
         if (string.IsNullOrEmpty(initials)) { initials = "?"; }
-        string? pictureUrl = await FileService.GetFileUrl(user?.ProfilePictureFileId);
+        string? pictureUrl = await fileService.GetFileUrl(user?.ProfilePictureFileId);
 
         return (name, initials, pictureUrl);
     }

@@ -1,14 +1,13 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
-using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HowItWorksController(FileService fileService, IUserRepository userRepository)
-        : XBaseController(fileService, userRepository)
+    public class HowItWorksController(IUserRepository userRepository)
+        : XBaseController(userRepository)
     {
 
         [HttpGet]

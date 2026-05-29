@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers
 {
     public class UserController(IUserRepository userRepository, FileService fileService)
-        : XBaseController(fileService, userRepository)
+        : XBaseController(userRepository)
     {
 
         #region List
@@ -92,11 +92,11 @@ namespace Bewegdeal.Controllers
             }
 
             ViewBag.User = user;
-            ViewBag.PictureUrl = await FileService.GetFileUrl(user.ProfilePictureFileId);
+            ViewBag.PictureUrl = await fileService.GetFileUrl(user.ProfilePictureFileId);
 
-            var serviceTermsFile = await FileService.Get(user.ServiceTermsFileId);
+            var serviceTermsFile = await fileService.Get(user.ServiceTermsFileId);
             ViewBag.ServiceTermsFile = serviceTermsFile;
-            ViewBag.ServiceTermsUrl = FileService.GetFileUrl(serviceTermsFile);
+            ViewBag.ServiceTermsUrl = fileService.GetFileUrl(serviceTermsFile);
 
             return View();
         }
@@ -115,14 +115,14 @@ namespace Bewegdeal.Controllers
             {
                 if (user.ProfilePictureFileId.HasValue)
                 {
-                    await FileService.Delete(user.ProfilePictureFileId.Value);
+                    await fileService.Delete(user.ProfilePictureFileId.Value);
                     await UserRepository.UpdatePicture(user.Id, null);
                 }
                 HttpContext.Session.Remove(ConstantEnum.SessionUserPictureId);
                 return Ok();
             }
 
-            var (id, error) = await FileService.Create(
+            var (id, error) = await fileService.Create(
                 picture,
                 user.ProfilePictureFileId,
                 3,
@@ -136,7 +136,7 @@ namespace Bewegdeal.Controllers
 
             await UserRepository.UpdatePicture(user.Id, id);
 
-            var file = await FileService.Get(id);
+            var file = await fileService.Get(id);
             if (file is not null)
             {
                 HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, file.Id.ToString());
@@ -183,12 +183,12 @@ namespace Bewegdeal.Controllers
             {
                 if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
                 {
-                    await FileService.Delete(user.ServiceTermsFileId.Value);
+                    await fileService.Delete(user.ServiceTermsFileId.Value);
                     serviceTermsFileId = null;
                 }
                 if (model.ServiceTermsFile is not null)
                 {
-                    var file = await FileService.Create(
+                    var file = await fileService.Create(
                         model.ServiceTermsFile,
                         model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
                         5,

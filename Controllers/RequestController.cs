@@ -16,7 +16,7 @@ public class RequestController(
     ISettingsRepository settingsRepository,
     IRequestRepository requestRepository,
     IRequestFileRepository requestFileRepository,
-    FileService fileService) : XBaseController(fileService, userRepository)
+    FileService fileService) : XBaseController(userRepository)
 {
     #region List
 
@@ -64,7 +64,7 @@ public class RequestController(
         var files = await requestFileRepository.LoadMainImages(
             requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
         );
-        var images = await FileService.Load(new BaseFilter<long>
+        var images = await fileService.Load(new BaseFilter<long>
         {
             Ids = files.Count == 0 ? [0] : [.. files.Select(f => f.FileId)]
         });
@@ -88,7 +88,7 @@ public class RequestController(
                 asap = r.ASAP,
                 date = r.Date?.ToString("MMM d, yyyy"),
                 time = r.Time?.ToString("HH:mm"),
-                imageUrl = FileService.GetFileUrl(image, BaseUrl)
+                imageUrl = fileService.GetFileUrl(image, BaseUrl)
             };
         });
 
@@ -187,7 +187,7 @@ public class RequestController(
         }
 
         var requestFiles = await requestFileRepository.Load(request.Id);
-        var files = await FileService.Load(new BaseFilter<long>
+        var files = await fileService.Load(new BaseFilter<long>
         {
             Ids = [.. requestFiles.Select(rf => rf.FileId)]
         });
@@ -200,12 +200,12 @@ public class RequestController(
 
         ViewBag.Request = request;
         ViewBag.RequesterName = requester?.Name ?? "-";
-        ViewBag.RequesterPictureUrl = await FileService.GetFileUrl(requester?.ProfilePictureFileId);
+        ViewBag.RequesterPictureUrl = await fileService.GetFileUrl(requester?.ProfilePictureFileId);
 
         ViewBag.RequesterInitials = requesterInitials;
         ViewBag.Files = files.Select(f => new
         {
-            url = FileService.GetFileUrl(f, BaseUrl),
+            url = fileService.GetFileUrl(f, BaseUrl),
             fileName = f.FileName,
             isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
             type = requestFiles.First(rf => rf.FileId == f.Id).Type
@@ -230,7 +230,7 @@ public class RequestController(
 
         var settings = await settingsRepository.Get();
         var requestFiles = await requestFileRepository.Load(id);
-        var files = await FileService.Load(new BaseFilter<long>
+        var files = await fileService.Load(new BaseFilter<long>
         {
             Ids = requestFiles.Select(rf => rf.FileId).ToList()
         });
@@ -240,7 +240,7 @@ public class RequestController(
         ViewBag.Files = files.Select(i => new
         {
             fileId = i.Id,
-            url = FileService.GetFileUrl(i, BaseUrl),
+            url = fileService.GetFileUrl(i, BaseUrl),
             fileName = i.FileName,
             size = i.Size,
             isMain = requestFiles.First(rf => rf.FileId == i.Id).IsMain,
@@ -324,13 +324,13 @@ public class RequestController(
         await requestFileRepository.Delete([.. deletions.Select(i => i.Id)]);
         foreach (var file in deletions)
         {
-            await FileService.Delete(file.FileId);
+            await fileService.Delete(file.FileId);
         }
 
         // add new images ...
         for (var i = 0; i < request.Images.Length; i++)
         {
-            var file = await FileService.Create(
+            var file = await fileService.Create(
                 request.Images[i],
                 null,
                 settings.RequestImageMaxSize,
@@ -355,7 +355,7 @@ public class RequestController(
         // add new videos ...
         foreach (var vid in request.Videos)
         {
-            var file = await FileService.Create(
+            var file = await fileService.Create(
                 vid,
                 null,
                 settings.RequestVideoMaxSize,

@@ -10,7 +10,7 @@ namespace Bewegdeal.Controllers;
 public class SettingsController(
     ISettingsRepository settingsRepository,
     IUserRepository userRepository,
-    FileService fileService) : XBaseController(fileService, userRepository)
+    FileService fileService) : XBaseController(userRepository)
 {
 
     #region Index
@@ -20,7 +20,7 @@ public class SettingsController(
     {
         var settings = await settingsRepository.Get();
 
-        ViewBag.TermsFileUrl = await FileService.GetFileUrl(settings.TermsAndConditionsFileId);
+        ViewBag.TermsFileUrl = await fileService.GetFileUrl(settings.TermsAndConditionsFileId);
 
         return View(settings);
     }
@@ -40,7 +40,7 @@ public class SettingsController(
 
         var settings = await settingsRepository.Get();
 
-        var (id, error) = await FileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
+        var (id, error) = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
         if (error is not null || id is null)
         {
             TempData["TermsError"] = error;
