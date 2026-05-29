@@ -1,5 +1,6 @@
 @using Bewegdeal.Data.Entities
 @using Bewegdeal.Enums
+@using Bewegdeal.Models
 
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
@@ -14,10 +15,9 @@
     ViewData["Title"] = "Profile";
 
     var user = (UserEntity)ViewBag.User;
-    var pictureUrl = ViewBag.PictureUrl as string;
-
-    var nameParts = user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var initials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
+    var avatar = (UserAvatarViewModel)ViewBag.Avatar;
+    var pictureUrl = avatar.Url;
+    var initials = avatar.Initials;
     var hasPicture = !string.IsNullOrWhiteSpace(pictureUrl);
     var previewHide = hasPicture ? "" : "display:none;";
     var initialsHide = hasPicture ? "display:none;" : "";

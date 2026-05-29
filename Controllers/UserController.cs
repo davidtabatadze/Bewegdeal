@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    public class UserController(IUserRepository userRepository, FileService fileService)
+    public class UserController(IUserRepository userRepository, FileService fileService, UserService userService)
         : XBaseController(userRepository)
     {
 
@@ -92,7 +92,7 @@ namespace Bewegdeal.Controllers
             }
 
             ViewBag.User = user;
-            ViewBag.PictureUrl = await fileService.GetFileUrl(user.ProfilePictureFileId);
+            ViewBag.Avatar = await userService.GetAvatar(user);
 
             var serviceTermsFile = await fileService.Get(user.ServiceTermsFileId);
             ViewBag.ServiceTermsFile = serviceTermsFile;

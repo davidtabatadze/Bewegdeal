@@ -16,7 +16,8 @@ public class RequestController(
     ISettingsRepository settingsRepository,
     IRequestRepository requestRepository,
     IRequestFileRepository requestFileRepository,
-    FileService fileService) : XBaseController(userRepository)
+    FileService fileService,
+    UserService userService) : XBaseController(userRepository)
 {
     #region List
 
@@ -193,16 +194,12 @@ public class RequestController(
         });
 
         var requester = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
-
-        var requesterNameParts = (requester?.Name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var requesterInitials = string.Concat(requesterNameParts.Take(2).Select(p => char.ToUpper(p[0])));
-        if (string.IsNullOrEmpty(requesterInitials)) { requesterInitials = "?"; }
+        var requesterAvatar = await userService.GetAvatar(requester);
 
         ViewBag.Request = request;
-        ViewBag.RequesterName = requester?.Name ?? "-";
-        ViewBag.RequesterPictureUrl = await fileService.GetFileUrl(requester?.ProfilePictureFileId);
-
-        ViewBag.RequesterInitials = requesterInitials;
+        ViewBag.RequesterName = requesterAvatar.Name;
+        ViewBag.RequesterPictureUrl = requesterAvatar.Url;
+        ViewBag.RequesterInitials = requesterAvatar.Initials;
         ViewBag.Files = files.Select(f => new
         {
             url = fileService.GetFileUrl(f, BaseUrl),

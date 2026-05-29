@@ -1,15 +1,9 @@
-@inject Bewegdeal.Services.FileService _menuFileService
+@inject Bewegdeal.Services.UserService _menuUserService
 @{
     string? currentPage = ViewContext.HttpContext.Request.Path;
 
-    var sessionName = Context.Session.GetString(ConstantEnum.SessionUserName) ?? "-";
-    var sessionEmail = Context.Session.GetString(ConstantEnum.SessionUserEmail) ?? "-";
-    var nameParts = sessionName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var userInitials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
-    if (string.IsNullOrEmpty(userInitials)) { userInitials = "?"; }
-
-    long.TryParse(Context.Session.GetString(ConstantEnum.SessionUserPictureId), out var pictureFileId);
-    var pictureUrl = pictureFileId > 0 ? await _menuFileService.GetFileUrl(pictureFileId) : null;
+    long.TryParse(Context.Session.GetString(ConstantEnum.SessionUserId), out var _menuUserId);
+    var _menuAvatar = await _menuUserService.GetAvatar(_menuUserId > 0 ? (long?)_menuUserId : null);
 }
 
 <!-- Menu -->
@@ -39,26 +33,21 @@
         <!-- User badge -->
         <li class='menu-item@(currentPage == "/User/Profile" ? " open" : "")'>
             <a href="javascript:void(0);" class="menu-link menu-toggle" style="padding-inline-start: 0.75rem;">
-                @if (pictureUrl is not null)
+                @if (_menuAvatar.Url is not null)
                 {
-                    <img id="menuBadgeImg" src="@pictureUrl" alt="@sessionName"
+                    <img id="menuBadgeImg" src="@_menuAvatar.Url" alt="@_menuAvatar.Name"
                          class="menu-icon rounded-circle" style="object-fit:cover;width:45px;height:45px;" />
                     <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
-                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;display:none;">@userInitials</span>
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;display:none;">@_menuAvatar.Initials</span>
                 }
                 else
                 {
                     <img id="menuBadgeImg" src="" alt="" class="menu-icon rounded-circle"
                          style="object-fit:cover;width:45px;height:45px;display:none;" />
                     <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
-                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;">@userInitials</span>
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;">@_menuAvatar.Initials</span>
                 }
-                @* <div data-i18n="@sessionName">@sessionName</div> margin-inline-end: 0px;  *@
-                @* <div>
-                    <h6 class="mb-0 small">@sessionName</h6>
-                    <small class="text-body-secondary">@sessionEmail</small>
-                </div> *@
-                <div data-i18n="@sessionName">@sessionName</div>
+                <div data-i18n="@_menuAvatar.Name">@_menuAvatar.Name</div>
             </a>
             <ul class="menu-sub">
                 <li class='menu-item@(currentPage == "/User/Profile" ? " active" : "")'>

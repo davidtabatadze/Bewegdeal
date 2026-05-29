@@ -13,7 +13,7 @@ namespace Bewegdeal.Controllers;
 
 [RequireLogin]
 public class ChatController(
-    FileService fileService,
+    UserService userService,
     IUserRepository userRepository,
     IRequestRepository requestRepository,
     IChatRepository chatRepository,
@@ -76,15 +76,15 @@ public class ChatController(
 
         // load customer info so the company can see who they're chatting with
         var customer = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
-        var (name, initials, pictureUrl) = await ResolveParty(customer);
+        var customerAvatar = await userService.GetAvatar(customer);
 
         return Json(new
         {
             success = true,
             chatKey = chat.Key,
-            otherPartyName = name,
-            otherPartyInitials = initials,
-            otherPartyPictureUrl = pictureUrl
+            otherPartyName = customerAvatar.Name,
+            otherPartyInitials = customerAvatar.Initials,
+            otherPartyPictureUrl = customerAvatar.Url
         });
     }
 
@@ -117,14 +117,14 @@ public class ChatController(
 
         if (mode == ChatModeEnum.None) { return Content(""); }
 
-        var (_, viewerInitials, viewerPictureUrl) = await ResolveParty(user);
+        var viewerAvatar = await userService.GetAvatar(user);
 
         long otherPartyId = activeChat is not null
             ? (user.Role == UserRoleEnum.Customer ? activeChat.CompanyId : activeChat.CustomerId)
             : request.RequesterId;
 
         var otherParty = await UserRepository.Get(new UserFilter { Id = otherPartyId });
-        var (otherPartyName, otherPartyInitials, otherPartyPictureUrl) = await ResolveParty(otherParty);
+        var otherPartyAvatar = await userService.GetAvatar(otherParty);
 
         var messages = activeChat is not null
             ? await chatRepository.LoadMessages(activeChat.Id)
@@ -135,11 +135,11 @@ public class ChatController(
             Mode = mode,
             ChatKey = activeChat?.Key ?? "",
             ViewerId = user.Id,
-            ViewerInitials = viewerInitials,
-            ViewerPictureUrl = viewerPictureUrl,
-            OtherPartyName = otherPartyName,
-            OtherPartyInitials = otherPartyInitials,
-            OtherPartyPictureUrl = otherPartyPictureUrl,
+            ViewerInitials = viewerAvatar.Initials,
+            ViewerPictureUrl = viewerAvatar.Url,
+            OtherPartyName = otherPartyAvatar.Name,
+            OtherPartyInitials = otherPartyAvatar.Initials,
+            OtherPartyPictureUrl = otherPartyAvatar.Url,
             Messages = messages
         });
     }
@@ -196,16 +196,4 @@ public class ChatController(
         return Json(new { success = true });
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private async Task<(string Name, string Initials, string? PictureUrl)> ResolveParty(UserEntity? user)
-    {
-        var name = user?.Name ?? "-";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var initials = string.Concat(parts.Take(2).Select(p => char.ToUpper(p[0])));
-        if (string.IsNullOrEmpty(initials)) { initials = "?"; }
-        string? pictureUrl = await fileService.GetFileUrl(user?.ProfilePictureFileId);
-
-        return (name, initials, pictureUrl);
-    }
 }

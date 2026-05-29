@@ -78,6 +78,7 @@ namespace Bewegdeal
             // ── Services ──────────────────────────────────────────────────────────
             // Scoped because FileService wraps IFileRepository (also scoped).
             builder.Services.AddScoped<FileService>();
+            builder.Services.AddScoped<UserService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
