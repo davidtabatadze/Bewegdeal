@@ -1,6 +1,3 @@
-﻿using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,54 +5,9 @@ namespace Bewegdeal.Controllers
 {
     public class XBaseController : Controller
     {
-        public XBaseController(IUserRepository userRepository)
-        {
-            UserRepository = userRepository;
-        }
-
-        protected readonly IUserRepository UserRepository;
-        protected string BaseUrl => $"{Request.Scheme}://{Request.Host}";
-
-        protected async Task<UserEntity?> GetUser(string email)
-        {
-            return await UserRepository.Get(new UserFilter { Email = (email ?? "").Trim() });
-        }
-
-        protected async Task<UserEntity?> GetUser(
-            List<string>? roles = null,
-            bool? active = null,
-            bool? hiw = null
-        )
-        {
-            if (!long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var id))
-            {
-                return null;
-            }
-
-            var user = await UserRepository.Get(new UserFilter { Id = id });
-
-            if (user is null)
-            {
-                return null;
-            }
-
-            if (roles is not null && !roles.Contains(user.Role))
-            {
-                return null;
-            }
-
-            if (hiw is not null && user.AcquaintedHIW != hiw)
-            {
-                return null;
-            }
-
-            if (active is not null && user.Status != UserStatusEnum.Active)
-            {
-                return null;
-            }
-
-            return user;
-        }
-
+        public string BaseUrl => $"{Request.Scheme}://{Request.Host}";
+        public string? UserId => HttpContext.Session.GetString(ConstantEnum.SessionUserId)?.Trim();
+        public string? UserRole => HttpContext.Session.GetString(ConstantEnum.SessionUserRole)?.Trim();
+        public string? UserEmail => HttpContext.Session.GetString(ConstantEnum.SessionUserEmail)?.Trim();
     }
 }

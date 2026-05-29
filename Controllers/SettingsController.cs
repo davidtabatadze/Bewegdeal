@@ -7,10 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers;
 
 [RequireAdmin]
-public class SettingsController(
-    ISettingsRepository settingsRepository,
-    IUserRepository userRepository,
-    FileService fileService) : XBaseController(userRepository)
+public class SettingsController(ISettingsRepository settingsRepository, FileService fileService) : XBaseController
 {
 
     #region Index

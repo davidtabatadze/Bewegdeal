@@ -1,6 +1,5 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Models;
@@ -10,8 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    public class UserController(IUserRepository userRepository, FileService fileService, UserService userService)
-        : XBaseController(userRepository)
+    public class UserController(FileService fileService, UserService userService) : XBaseController
     {
 
         #region List
@@ -19,7 +17,7 @@ namespace Bewegdeal.Controllers
         [RequireAdmin]
         public async Task<IActionResult> List()
         {
-            var users = await UserRepository.Load(new UserFilter() { Id = 0 });
+            var users = await userService.Load(new UserFilter() { Id = 0 });
             ViewBag.TotalCount = users.Count;
             ViewBag.CustomerCount = users.Count(u => u.Role == UserRoleEnum.Customer);
             ViewBag.CompanyCount = users.Count(u => u.Role == UserRoleEnum.Company);
@@ -31,9 +29,9 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQuery] int draw = 1)
         {
-            var users = await UserRepository.Load(filter);
-            var filtered = await UserRepository.Count(filter);
-            var total = await UserRepository.Count(new UserFilter());
+            var users = await userService.Load(filter);
+            var filtered = await userService.Count(filter);
+            var total = await userService.Count(new UserFilter());
 
             var data = users.Select(u => new
             {
@@ -59,7 +57,7 @@ namespace Bewegdeal.Controllers
                 return BadRequest();
             }
 
-            var user = await UserRepository.Get(new UserFilter { Id = id });
+            var user = await userService.GetUser(id);
 
             if (user is null)
             {
@@ -74,7 +72,7 @@ namespace Bewegdeal.Controllers
                 _ => user.Status
             };
 
-            await UserRepository.SetUserStatus(id, newStatus);
+            await userService.SetUserStatus(id, newStatus);
             return Json(new { status = newStatus });
         }
 
@@ -85,7 +83,7 @@ namespace Bewegdeal.Controllers
         [RequireLogin]
         public async Task<IActionResult> Profile()
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is null)
             {
                 return RedirectToAction("Index", "Home");
@@ -105,7 +103,7 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> SavePicture(IFormFile? picture)
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is null)
             {
                 return Unauthorized();
@@ -116,7 +114,7 @@ namespace Bewegdeal.Controllers
                 if (user.ProfilePictureFileId.HasValue)
                 {
                     await fileService.Delete(user.ProfilePictureFileId.Value);
-                    await UserRepository.UpdatePicture(user.Id, null);
+                    await userService.UpdatePicture(user.Id, null);
                 }
                 HttpContext.Session.Remove(ConstantEnum.SessionUserPictureId);
                 return Ok();
@@ -134,7 +132,7 @@ namespace Bewegdeal.Controllers
                 return BadRequest(new { error });
             }
 
-            await UserRepository.UpdatePicture(user.Id, id);
+            await userService.UpdatePicture(user.Id, id);
 
             var file = await fileService.Get(id);
             if (file is not null)
@@ -151,7 +149,7 @@ namespace Bewegdeal.Controllers
         {
             if (long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId))
             {
-                await UserRepository.UpdateTheme(
+                await userService.UpdateTheme(
                     userId,
                     theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
                 );
@@ -165,7 +163,7 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> SavePersonal(SavePersonalViewModel model)
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is null)
             {
                 return RedirectToAction("Index", "Home");
@@ -206,7 +204,7 @@ namespace Bewegdeal.Controllers
             var number = user.Role == UserRoleEnum.Company ? user.Number : model.Number;
             var interests = user.Role == UserRoleEnum.Company ? model?.Interests ?? [] : [];
 
-            await UserRepository.UpdatePersonal(new UserEntity
+            await userService.UpdatePersonal(new UserEntity
             {
                 Id = user.Id,
                 Number = number,
@@ -226,7 +224,7 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangePassword(string? newPassword, string? confirmPassword)
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is null)
             {
                 return RedirectToAction("Index", "Home");
@@ -245,7 +243,7 @@ namespace Bewegdeal.Controllers
             }
 
             var (hash, salt) = PasswordTool.HashPassword(newPassword);
-            await UserRepository.UpdatePassword(user.Id, hash, salt);
+            await userService.UpdatePassword(user.Id, hash, salt);
 
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");

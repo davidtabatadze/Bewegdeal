@@ -1,16 +1,16 @@
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HomeController(IUserRepository userRepository) : XBaseController(userRepository)
+    public class HomeController(UserService userService) : XBaseController
     {
         public async Task<IActionResult> Index()
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is not null && !user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
             {
                 var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";

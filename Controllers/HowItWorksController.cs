@@ -1,19 +1,18 @@
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class HowItWorksController(IUserRepository userRepository)
-        : XBaseController(userRepository)
+    public class HowItWorksController(UserService userService) : XBaseController
     {
 
         [HttpGet]
         public async Task<IActionResult> Customer()
         {
-            var user = await GetUser(roles: [UserRoleEnum.Customer]);
+            var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
             if (user is null)
             {
                 return RedirectToAction("Index", "Dashboard");
@@ -26,7 +25,7 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> Company()
         {
-            var user = await GetUser(roles: [UserRoleEnum.Company]);
+            var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Company]);
             if (user is null)
             {
                 return RedirectToAction("Index", "Dashboard");
@@ -39,13 +38,13 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> Acknowledge()
         {
-            var user = await GetUser();
+            var user = await userService.GetValidUser(UserId);
             if (user is null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            await UserRepository.SetAcquaintedHIW(user.Id);
+            await userService.SetAcquaintedHIW(user.Id);
             return RedirectToAction("Index", "Dashboard");
         }
     }

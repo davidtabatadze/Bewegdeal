@@ -11,9 +11,9 @@ namespace Bewegdeal.Controllers;
 
 public class AccountController(
     FileService fileService,
-    IUserRepository userRepository,
+    UserService userService,
     ISettingsRepository settingsRepository,
-    IMemoryCache cache) : XBaseController(userRepository)
+    IMemoryCache cache) : XBaseController
 {
 
     #region Login
@@ -33,7 +33,7 @@ public class AccountController(
     public async Task<IActionResult> Login(string email, string password, bool rememberMe)
     {
         // seek user
-        var user = await GetUser(email);
+        var user = await userService.GetUser(email);
 
         // verify user existence and password
         if (user is null || !PasswordTool.Verify(password, user.Password, user.Salt))
@@ -125,7 +125,7 @@ public class AccountController(
     [HttpPost]
     public async Task<IActionResult> ForgotPassword(string email)
     {
-        var user = await GetUser(email);
+        var user = await userService.GetUser(email);
 
         if (user is not null)
         {
@@ -171,7 +171,7 @@ public class AccountController(
         cache.Remove(emailKey);
 
         // load user
-        var user = await GetUser(email);
+        var user = await userService.GetUser(email);
 
         // validate
         if (user is null || lastToken != token)
@@ -182,7 +182,7 @@ public class AccountController(
 
         // update password and clear token
         var (hash, salt) = PasswordTool.HashPassword(password);
-        await UserRepository.UpdatePassword(user.Id, hash, salt);
+        await userService.UpdatePassword(user.Id, hash, salt);
 
         TempData["LoginSuccess"] = AnnotationEnum.Account.ResetPassword.Success;
         return RedirectToAction(nameof(Login));
@@ -225,10 +225,10 @@ public class AccountController(
         }
 
         // update user
-        var user = await GetUser(email);
+        var user = await userService.GetUser(email);
         if (user is not null)
         {
-            await UserRepository.SetUserStatus(
+            await userService.SetUserStatus(
                 user.Id,
                 user.Role == UserRoleEnum.Customer ?
                 UserStatusEnum.Active : UserStatusEnum.Pending
@@ -289,7 +289,7 @@ public class AccountController(
         }
 
         // validate email uniqueness
-        var existing = await GetUser(model.Email);
+        var existing = await userService.GetUser(model.Email ?? "");
         if (existing is not null)
         {
             ViewBag.Error = AnnotationEnum.Account.Register.Exists;
@@ -323,7 +323,7 @@ public class AccountController(
         var (hash, salt) = PasswordTool.HashPassword(model.Password);
 
         // do create user
-        var user = await UserRepository.Create(new UserEntity
+        var user = await userService.Create(new UserEntity
         {
             Role = model.Role,
             Name = model.Name,

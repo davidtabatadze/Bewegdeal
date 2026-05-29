@@ -1,13 +1,12 @@
-using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    public class LandingController : Controller
+    public class LandingController : XBaseController
     {
         public IActionResult Index()
         {
-            if (HttpContext.Session.GetString(ConstantEnum.SessionUserId) is not null)
+            if (UserId is not null)
             {
                 return RedirectToAction("Index", "Home");
             }

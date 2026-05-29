@@ -1,5 +1,4 @@
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
@@ -14,16 +13,15 @@ namespace Bewegdeal.Controllers;
 [RequireLogin]
 public class ChatController(
     UserService userService,
-    IUserRepository userRepository,
     IRequestRepository requestRepository,
     IChatRepository chatRepository,
-    IHubContext<ChatHub> hubContext) : XBaseController(userRepository)
+    IHubContext<ChatHub> hubContext) : XBaseController
 {
 
     [HttpGet]
     public async Task<IActionResult> Visibility(string requestNumber)
     {
-        var user = await GetUser(null, true, null);
+        var user = await userService.GetValidUser(UserId, active: true);
 
         var request = await requestRepository.Get(requestNumber);
 
@@ -47,16 +45,16 @@ public class ChatController(
     [HttpPost]
     public async Task<IActionResult> Initiate(string requestNumber)
     {
-        var user = await GetUser(roles: [UserRoleEnum.Company], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Company], active: true);
         if (user is null)
         {
-            return Json(new { success = false, error = "Access denied." });
+            return Json(ResultResponseModel.Fail("Access denied."));
         }
 
         var request = await requestRepository.Get(requestNumber);
         if (request is null || request.Status != RequestStatusEnum.Pending)
         {
-            return Json(new { success = false, error = "This request is no longer available." });
+            return Json(ResultResponseModel.Fail("This request is no longer available."));
         }
 
         // create the active chat
@@ -75,7 +73,7 @@ public class ChatController(
         await requestRepository.Update(request);
 
         // load customer info so the company can see who they're chatting with
-        var customer = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
+        var customer = await userService.GetUser(request.RequesterId);
         var customerAvatar = await userService.GetAvatar(customer);
 
         return Json(new
@@ -96,7 +94,7 @@ public class ChatController(
     [HttpGet]
     public async Task<IActionResult> Conversation(string requestNumber)
     {
-        var user = await GetUser(null, true, null);
+        var user = await userService.GetValidUser(UserId, active: true);
         if (user is null) { return Content(""); }
 
         var request = await requestRepository.Get(requestNumber);
@@ -123,7 +121,7 @@ public class ChatController(
             ? (user.Role == UserRoleEnum.Customer ? activeChat.CompanyId : activeChat.CustomerId)
             : request.RequesterId;
 
-        var otherParty = await UserRepository.Get(new UserFilter { Id = otherPartyId });
+        var otherParty = await userService.GetUser(otherPartyId);
         var otherPartyAvatar = await userService.GetAvatar(otherParty);
 
         var messages = activeChat is not null
@@ -149,18 +147,18 @@ public class ChatController(
     [HttpPost]
     public async Task<IActionResult> Cancel(string requestNumber)
     {
-        var user = await GetUser(null, true, null);
-        if (user is null) { return Json(new { success = false }); }
+        var user = await userService.GetValidUser(UserId, active: true);
+        if (user is null) { return Json(ResultResponseModel.Fail()); }
 
         var request = await requestRepository.Get(requestNumber);
-        if (request is null) { return Json(new { success = false }); }
+        if (request is null) { return Json(ResultResponseModel.Fail()); }
 
         var chat = await chatRepository.GetActive(request.Id);
-        if (chat is null) { return Json(new { success = false }); }
+        if (chat is null) { return Json(ResultResponseModel.Fail()); }
 
         if (chat.CompanyId != user.Id && chat.CustomerId != user.Id)
         {
-            return Json(new { success = false });
+            return Json(ResultResponseModel.Fail());
         }
 
         // automated farewell message
@@ -193,7 +191,7 @@ public class ChatController(
 
         await hubContext.Clients.Group(group).SendAsync("ChatCancelled");
 
-        return Json(new { success = true });
+        return Json(ResultResponseModel.Ok());
     }
 
 }

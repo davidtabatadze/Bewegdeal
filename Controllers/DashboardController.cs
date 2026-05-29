@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers
 {
     [RequireLogin]
-    public class DashboardController : Controller
+    public class DashboardController : XBaseController
     {
         public IActionResult Index()
         {
-            return HttpContext.Session.GetString(ConstantEnum.SessionUserRole) switch
+            return UserRole switch
             {
                 UserRoleEnum.Administrator => View("Admin"),
                 UserRoleEnum.Company => View("Company"),

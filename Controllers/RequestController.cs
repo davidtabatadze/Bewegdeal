@@ -12,19 +12,18 @@ namespace Bewegdeal.Controllers;
 
 [RequireLogin]
 public class RequestController(
-    IUserRepository userRepository,
     ISettingsRepository settingsRepository,
     IRequestRepository requestRepository,
     IRequestFileRepository requestFileRepository,
     FileService fileService,
-    UserService userService) : XBaseController(userRepository)
+    UserService userService) : XBaseController
 {
     #region List
 
     [HttpGet]
     public async Task<IActionResult> List()
     {
-        var user = await GetUser();
+        var user = await userService.GetValidUser(UserId);
         var viewerId = user?.Id ?? 0;
         var viewerRole = user?.Role ?? "-";
 
@@ -48,7 +47,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> LoadRequests([FromQuery] RequestFilter filter, [FromQuery] int draw = 1)
     {
-        var user = await GetUser();
+        var user = await userService.GetValidUser(UserId);
         filter.ViewerId = user?.Id ?? 0;
         filter.ViewerRole = user?.Role ?? "-";
         filter.ViewerInterests = user?.Interests ?? [];
@@ -103,7 +102,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -117,7 +116,7 @@ public class RequestController(
     public async Task<IActionResult> Create(RequestViewModel model)
     {
         // validate user
-        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -193,7 +192,7 @@ public class RequestController(
             Ids = [.. requestFiles.Select(rf => rf.FileId)]
         });
 
-        var requester = await UserRepository.Get(new UserFilter { Id = request.RequesterId });
+        var requester = await userService.GetUser(request.RequesterId);
         var requesterAvatar = await userService.GetAvatar(requester);
 
         ViewBag.Request = request;
@@ -217,7 +216,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Edit(long id)
     {
-        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
         var request = await ValidateRequest(id, user?.Id ?? 0);
 
         if (user is null || request is null)
@@ -249,7 +248,7 @@ public class RequestController(
     [HttpPost]
     public async Task<IActionResult> Edit(RequestViewModel model)
     {
-        var user = await GetUser(roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
         var request = await ValidateRequest(model.Id, user?.Id ?? 0);
 
         if (user is null || request is null)

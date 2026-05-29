@@ -51,10 +51,7 @@ namespace Bewegdeal.Services
             return (entity.Id, null);
         }
 
-        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
-        {
-            return await fileRepository.Load(filter);
-        }
+        #region Repository
 
         public async Task<FileEntity?> Get(long? id)
         {
@@ -64,6 +61,15 @@ namespace Bewegdeal.Services
             }
             return null;
         }
+
+        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
+        {
+            return await fileRepository.Load(filter);
+        }
+
+        #endregion
+
+
 
         public async Task Delete(long id)
         {

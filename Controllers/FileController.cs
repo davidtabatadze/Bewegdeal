@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.StaticFiles;
 
 namespace Bewegdeal.Controllers
 {
-    /// <summary>
-    /// Serves files stored by LocalFileStorageService.
-    /// Not used when the R2 provider is active — R2 files are served directly via their public URL.
-    /// </summary>
-    public class FileController(IConfiguration configuration, IWebHostEnvironment environment) : Controller
+    public class FileController(IConfiguration configuration, IWebHostEnvironment environment) : XBaseController
     {
         private readonly string _basePath = Path.IsPathRooted(configuration["Storage:Local:Path"] ?? "")
             ? configuration["Storage:Local:Path"]!
@@ -16,7 +12,6 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public IActionResult Download(string key)
         {
-            // Reject keys containing path separators or traversal sequences
             if (string.IsNullOrWhiteSpace(key) ||
                 key.Contains('/') ||
                 key.Contains('\\') ||
