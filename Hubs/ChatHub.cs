@@ -1,14 +1,14 @@
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bewegdeal.Hubs
 {
     public class ChatHub(
         IChatRepository chatRepository,
-        IUserRepository userRepository,
+        UserService userService,
         IRequestRepository requestRepository) : Hub
     {
         /// <summary>
@@ -91,7 +91,7 @@ namespace Bewegdeal.Hubs
 
             // notify the recipient's personal group (for other-page toast / browser notification)
             var recipientId = userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            var sender = await userRepository.Get(new UserFilter { Id = userId });
+            var sender = await userService.GetUser(userId);
             var request = await requestRepository.Get(chat.RequestId);
             var preview = content.Length > 80 ? content[..80] + "…" : content;
 

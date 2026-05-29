@@ -1,6 +1,5 @@
-using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
+using Bewegdeal.Services;
 
 namespace Bewegdeal.Middleware
 {
@@ -18,9 +17,8 @@ namespace Bewegdeal.Middleware
 
             if (userId is null && !string.IsNullOrWhiteSpace(cookie) && long.TryParse(cookie, out var id))
             {
-                // resolve scoped repository within this request scope
-                var userRepository = context.RequestServices.GetRequiredService<IUserRepository>();
-                var user = await userRepository.Get(new UserFilter { Id = id });
+                var userService = context.RequestServices.GetRequiredService<UserService>();
+                var user = await userService.GetUser(id);
 
                 if (user is not null)
                 {
@@ -30,12 +28,7 @@ namespace Bewegdeal.Middleware
 
                     if (user.ProfilePictureFileId.HasValue)
                     {
-                        var fileRepository = context.RequestServices.GetRequiredService<IFileRepository>();
-                        var pictureFile = await fileRepository.Get(user.ProfilePictureFileId.Value);
-                        if (pictureFile is not null)
-                        {
-                            context.Session.SetString(ConstantEnum.SessionUserPictureId, pictureFile.Id.ToString());
-                        }
+                        context.Session.SetString(ConstantEnum.SessionUserPictureId, user.ProfilePictureFileId.Value.ToString());
                     }
                 }
                 else

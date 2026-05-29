@@ -339,12 +339,12 @@ public class RequestController(
             fileEntities.Add(new RequestFileEntity
             {
                 RequestId = request.Id,
-                FileId = file.Id ?? 0,
+                FileId = file.ObjectId ?? 0,
                 Type = RequestFileTypeEnum.Image
             });
             if (i == request.MainImageIndex)
             {
-                request.KeepMainFileId = file.Id ?? 0;
+                request.KeepMainFileId = file.ObjectId ?? 0;
             }
         }
 
@@ -364,7 +364,7 @@ public class RequestController(
             fileEntities.Add(new RequestFileEntity
             {
                 RequestId = request.Id,
-                FileId = file.Id ?? 0,
+                FileId = file.ObjectId ?? 0,
                 Type = RequestFileTypeEnum.Video
             });
         }

@@ -120,25 +120,21 @@ namespace Bewegdeal.Controllers
                 return Ok();
             }
 
-            var (id, error) = await fileService.Create(
+            var file = await fileService.Create(
                 picture,
                 user.ProfilePictureFileId,
                 3,
                 [FileTypeEnum.PNG, FileTypeEnum.JPEG]
             );
 
-            if (error is not null)
+            if (file.Error is not null)
             {
-                return BadRequest(new { error });
+                return BadRequest(new { file.Error });
             }
 
-            await userService.UpdatePicture(user.Id, id);
+            await userService.UpdatePicture(user.Id, file.ObjectId);
 
-            var file = await fileService.Get(id);
-            if (file is not null)
-            {
-                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, file.Id.ToString());
-            }
+            HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, (file.ObjectId ?? 0).ToString());
 
             return Ok();
         }
@@ -197,7 +193,7 @@ namespace Bewegdeal.Controllers
                         TempData["PersonalError"] = file.Error;
                         return RedirectToAction(nameof(Profile));
                     }
-                    serviceTermsFileId = file.Id;
+                    serviceTermsFileId = file.ObjectId;
                 }
             }
 

@@ -316,7 +316,7 @@ public class AccountController(
                 ViewBag.Error = file.Error;
                 return View(model);
             }
-            termsFileId = file.Id;
+            termsFileId = file.ObjectId;
         }
 
         // ready password

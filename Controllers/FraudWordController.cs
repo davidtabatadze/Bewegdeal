@@ -1,19 +1,18 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Models;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
     [RequireAdmin]
-    public class FraudWordController(IFraudWordRepository fraudWordRepo, IUserRepository userRepo) : Controller
+    public class FraudWordController(IFraudWordRepository fraudWordRepo, UserService userService) : Controller
     {
         private readonly IFraudWordRepository _fraudWordRepo = fraudWordRepo;
-        private readonly IUserRepository _userRepo = userRepo;
 
         [HttpGet]
         public IActionResult Index()
@@ -50,8 +49,8 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var userId = long.Parse(HttpContext.Session.GetString(ConstantEnum.SessionUserId) ?? "0");
-            var user = await _userRepo.Get(new UserFilter { Id = userId });
+            long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId);
+            var user = await userService.GetUser(userId);
 
             await _fraudWordRepo.Create(new FraudWordEntity
             {

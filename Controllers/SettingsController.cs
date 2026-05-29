@@ -37,14 +37,14 @@ public class SettingsController(ISettingsRepository settingsRepository, FileServ
 
         var settings = await settingsRepository.Get();
 
-        var (id, error) = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
-        if (error is not null || id is null)
+        var file = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
+        if (file.Error is not null || file.ObjectId is null)
         {
-            TempData["TermsError"] = error;
+            TempData["TermsError"] = file.Error;
             return RedirectToAction(nameof(Index));
         }
 
-        settings.TermsAndConditionsFileId = id.Value;
+        settings.TermsAndConditionsFileId = file.ObjectId.Value;
         await settingsRepository.Update(settings);
 
         TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";

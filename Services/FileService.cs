@@ -1,6 +1,7 @@
 ﻿using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Models;
 using Bewegdeal.Tools;
 
 namespace Bewegdeal.Services
@@ -8,23 +9,39 @@ namespace Bewegdeal.Services
     public class FileService(IFileStorageTool storageTool, IFileRepository fileRepository)
     {
 
-        public async Task<(long? Id, string? Error)> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
+        #region Repository
+
+        public async Task<FileEntity?> Get(long? id)
+        {
+            if (id is not null)
+            {
+                return await fileRepository.Get(id.Value);
+            }
+            return null;
+        }
+
+        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
+        {
+            return await fileRepository.Load(filter);
+        }
+
+        #endregion
+
+        public async Task<ResultResponseModel> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
         {
             // validate type
             if (allowedTypes.Length > 0 && !allowedTypes.Contains(file.ContentType))
             {
-                return (
-                    null,
-                    $"Invalid file type(s) uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
+                return ResultResponseModel.Fail(
+                     $"Invalid file type uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
                 );
             }
 
             // validate size
             if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < file.Length)
             {
-                return (
-                    null,
-                    $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
+                return ResultResponseModel.Fail(
+                     $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
                 );
             }
 
@@ -48,28 +65,8 @@ namespace Bewegdeal.Services
             }
 
             // all good
-            return (entity.Id, null);
+            return ResultResponseModel.Ok(entity.Id);
         }
-
-        #region Repository
-
-        public async Task<FileEntity?> Get(long? id)
-        {
-            if (id is not null)
-            {
-                return await fileRepository.Get(id.Value);
-            }
-            return null;
-        }
-
-        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
-        {
-            return await fileRepository.Load(filter);
-        }
-
-        #endregion
-
-
 
         public async Task Delete(long id)
         {
