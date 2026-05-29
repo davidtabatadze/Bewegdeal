@@ -93,8 +93,8 @@ namespace Bewegdeal.Data.Repositories
                 if (latest is null) { continue; }
 
                 var senderId = latest.SenderId;
-                var sender   = await context.Users.FindAsync(senderId);
-                var request  = await context.Requests.FindAsync(chat.RequestId);
+                var sender = await context.Users.FindAsync(senderId);
+                var request = await context.Requests.FindAsync(chat.RequestId);
 
                 var preview = latest.Content.Length > 80
                     ? latest.Content[..80] + "…"
@@ -102,8 +102,8 @@ namespace Bewegdeal.Data.Repositories
 
                 results.Add(new ChatUnreadSummary
                 {
-                    SenderName    = sender?.Name ?? "Someone",
-                    Preview       = preview,
+                    SenderName = sender?.Name ?? "Someone",
+                    Preview = preview,
                     RequestNumber = request?.Number ?? ""
                 });
             }

@@ -29,8 +29,8 @@ namespace Bewegdeal.Hubs
             {
                 await Clients.Caller.SendAsync("NewMessageNotification", new
                 {
-                    senderName    = summary.SenderName,
-                    preview       = summary.Preview,
+                    senderName = summary.SenderName,
+                    preview = summary.Preview,
                     requestNumber = summary.RequestNumber
                 });
             }
@@ -86,19 +86,19 @@ namespace Bewegdeal.Hubs
                 senderId = message.SenderId,
                 content = message.Content,
                 sentDate = message.SentDate.ToString("HH:mm"),
-                sentDay  = message.SentDate.ToString("yyyy-MM-dd")
+                sentDay = message.SentDate.ToString("yyyy-MM-dd")
             });
 
             // notify the recipient's personal group (for other-page toast / browser notification)
             var recipientId = userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            var sender      = await userRepository.Get(new UserFilter { Id = userId });
-            var request     = await requestRepository.Get(chat.RequestId);
-            var preview     = content.Length > 80 ? content[..80] + "…" : content;
+            var sender = await userRepository.Get(new UserFilter { Id = userId });
+            var request = await requestRepository.Get(chat.RequestId);
+            var preview = content.Length > 80 ? content[..80] + "…" : content;
 
             await Clients.Group("user-" + recipientId).SendAsync("NewMessageNotification", new
             {
-                senderName    = sender?.Name ?? "Someone",
-                preview       = preview,
+                senderName = sender?.Name ?? "Someone",
+                preview = preview,
                 requestNumber = request?.Number ?? ""
             });
         }
