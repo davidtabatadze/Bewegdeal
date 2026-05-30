@@ -145,6 +145,21 @@ namespace Bewegdeal.Data.Repositories
                 }
             }
 
+            if (filter.ExecutorId.HasValue)
+            {
+                query = query.Where(r => r.ExecutorId == filter.ExecutorId.Value);
+            }
+
+            if (filter.DateFrom.HasValue)
+            {
+                query = query.Where(r => r.CreateDate >= filter.DateFrom.Value);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                query = query.Where(r => r.CreateDate <= filter.DateTo.Value);
+            }
+
             return query;
         }
 

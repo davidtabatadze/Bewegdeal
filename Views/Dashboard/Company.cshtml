@@ -1,16 +1,113 @@
+@using Bewegdeal.Enums
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="row g-6">
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/raty-js/raty-js.css" />
+}
 
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Company Dashboard</h5>
+@section VendorScripts {
+    <script src="~/vendor/libs/raty-js/raty-js.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-company-dashboard.js"></script>
+}
+
+<!-- Period Filter -->
+<div class="card mb-4">
+    <div class="card-body py-3 px-4">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <span class="fw-semibold text-heading">Period</span>
+            <input type="month" id="monthFrom" style="padding:5px 10px;border:1px solid #ccc;border-radius:6px;font-size:0.875rem" />
+            <span class="text-muted">—</span>
+            <input type="month" id="monthTo" style="padding:5px 10px;border:1px solid #ccc;border-radius:6px;font-size:0.875rem" />
+            <button id="btnResetFilter" type="button" class="btn btn-outline-secondary btn-sm">This Month</button>
+        </div>
+    </div>
+</div>
+
+<div id="dashboardStats">
+
+    <!-- Row 1: Rating · Completed · Rejected -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Personal Rating</p>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 id="ratingValue" class="mb-0">0.0</h5>
+                        <div id="companyRating" class="d-flex align-items-center"></div>
+                    </div>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Based on <span id="ratingCount">0</span> closed requests</p>
+                    <ul class="p-0 m-0 list-unstyled" id="ratingByService"></ul>
+                </div>
             </div>
         </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Total Completed</p>
+                    <h5 id="completedTotal" class="mb-1">0</h5>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Across all services</p>
+                    <ul class="p-0 m-0 list-unstyled" id="completedByService"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Total Rejected</p>
+                    <h5 id="rejectedTotal" class="mb-1">0</h5>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Across all services</p>
+                    <ul class="p-0 m-0 list-unstyled" id="rejectedByService"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Row 2: Revenue · Paid Invoices · Invoices to Pay -->
+    <div class="row g-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Total Revenue</p>
+                    <h5 id="revenueTotal" class="mb-1">€ 0.00</h5>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Across all services</p>
+                    <ul class="p-0 m-0 list-unstyled" id="revenueByService"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Paid Invoices</p>
+                    <h5 id="paidTotal" class="mb-1">0</h5>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Across all services</p>
+                    <ul class="p-0 m-0 list-unstyled" id="paidByService"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <p class="text-heading mb-1 fw-semibold small">Invoices to Pay</p>
+                    <h5 id="pendingTotal" class="mb-1">0</h5>
+                    <p class="text-muted mb-2" style="font-size:0.75rem">Active engagements</p>
+                    <ul class="p-0 m-0 list-unstyled" id="pendingByService"></ul>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>

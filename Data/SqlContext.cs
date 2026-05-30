@@ -73,7 +73,38 @@ namespace Bewegdeal.Data
                 }
             }
 
+            await EnsureColumnsAsync(connection, isMySql);
+
             await connection.CloseAsync();
+        }
+
+        private async Task EnsureColumnsAsync(System.Data.Common.DbConnection connection, bool isMySql)
+        {
+            var columns = new[]
+            {
+                (_prefix + "Users", "ProfilePictureFileId", "BIGINT NULL",                         "INTEGER NULL"),
+                (_prefix + "Users", "Theme",                "VARCHAR(8) NOT NULL DEFAULT 'light'", "TEXT NOT NULL DEFAULT 'light'")
+            };
+
+            foreach (var (table, column, mysqlType, sqliteType) in columns)
+            {
+                if (isMySql)
+                {
+                    using var checkCmd = connection.CreateCommand();
+                    checkCmd.CommandText =
+                        $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                        $"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{table}' AND COLUMN_NAME = '{column}'";
+                    var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
+                    if (count > 0) { continue; }
+                }
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = isMySql
+                    ? $"ALTER TABLE `{table}` ADD COLUMN `{column}` {mysqlType}"
+                    : $"ALTER TABLE \"{table}\" ADD COLUMN \"{column}\" {sqliteType}";
+                try { await cmd.ExecuteNonQueryAsync(); }
+                catch { /* SQLite: duplicate column name — column already exists */ }
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
