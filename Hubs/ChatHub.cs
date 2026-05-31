@@ -91,8 +91,8 @@ namespace Bewegdeal.Hubs
 
             // notify the recipient's personal group (for other-page toast / browser notification)
             var recipientId = userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            var sender = await userService.GetUser(userId);
-            var request = await requestRepository.Get(chat.RequestId);
+            var sender = await userService.Get(userId);
+            var request = await requestRepository.Get<RequestEntity>(chat.RequestId);
             var preview = content.Length > 80 ? content[..80] + "…" : content;
 
             await Clients.Group("user-" + recipientId).SendAsync("NewMessageNotification", new

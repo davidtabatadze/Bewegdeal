@@ -21,7 +21,7 @@ public class ChatController(
     [HttpGet]
     public async Task<IActionResult> Visibility(string requestNumber)
     {
-        var user = await userService.GetValidUser(UserId, active: true);
+        var user = await userService.GetValidUser(UserId);
 
         var request = await requestRepository.Get(requestNumber);
 
@@ -45,16 +45,16 @@ public class ChatController(
     [HttpPost]
     public async Task<IActionResult> Initiate(string requestNumber)
     {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Company], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Company]);
         if (user is null)
         {
-            return Json(ResultResponseModel.Fail("Access denied."));
+            return Json(ResultModel.Fail("Access denied."));
         }
 
         var request = await requestRepository.Get(requestNumber);
         if (request is null || request.Status != RequestStatusEnum.Pending)
         {
-            return Json(ResultResponseModel.Fail("This request is no longer available."));
+            return Json(ResultModel.Fail("This request is no longer available."));
         }
 
         // create the active chat
@@ -73,7 +73,7 @@ public class ChatController(
         await requestRepository.Update(request);
 
         // load customer info so the company can see who they're chatting with
-        var customer = await userService.GetUser(request.RequesterId);
+        var customer = await userService.Get(request.RequesterId);
         var customerAvatar = await userService.GetAvatar(customer);
 
         return Json(new
@@ -94,7 +94,7 @@ public class ChatController(
     [HttpGet]
     public async Task<IActionResult> Conversation(string requestNumber)
     {
-        var user = await userService.GetValidUser(UserId, active: true);
+        var user = await userService.GetValidUser(UserId);
         if (user is null) { return Content(""); }
 
         var request = await requestRepository.Get(requestNumber);
@@ -121,7 +121,7 @@ public class ChatController(
             ? (user.Role == UserRoleEnum.Customer ? activeChat.CompanyId : activeChat.CustomerId)
             : request.RequesterId;
 
-        var otherParty = await userService.GetUser(otherPartyId);
+        var otherParty = await userService.Get(otherPartyId);
         var otherPartyAvatar = await userService.GetAvatar(otherParty);
 
         var messages = activeChat is not null
@@ -147,18 +147,18 @@ public class ChatController(
     [HttpPost]
     public async Task<IActionResult> Cancel(string requestNumber)
     {
-        var user = await userService.GetValidUser(UserId, active: true);
-        if (user is null) { return Json(ResultResponseModel.Fail()); }
+        var user = await userService.GetValidUser(UserId);
+        if (user is null) { return Json(ResultModel.Fail()); }
 
         var request = await requestRepository.Get(requestNumber);
-        if (request is null) { return Json(ResultResponseModel.Fail()); }
+        if (request is null) { return Json(ResultModel.Fail()); }
 
         var chat = await chatRepository.GetActive(request.Id);
-        if (chat is null) { return Json(ResultResponseModel.Fail()); }
+        if (chat is null) { return Json(ResultModel.Fail()); }
 
         if (chat.CompanyId != user.Id && chat.CustomerId != user.Id)
         {
-            return Json(ResultResponseModel.Fail());
+            return Json(ResultModel.Fail());
         }
 
         // automated farewell message
@@ -191,7 +191,7 @@ public class ChatController(
 
         await hubContext.Clients.Group(group).SendAsync("ChatCancelled");
 
-        return Json(ResultResponseModel.Ok());
+        return Json(ResultModel.Ok());
     }
 
 }

@@ -1,16 +1,16 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class FraudWordRepository(SqlContext context) : IFraudWordRepository
+    public class FraudWordRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IFraudWordRepository
     {
-        private readonly SqlContext _context = context;
 
         public async Task<FraudWordEntity?> Get(FraudWordFilter filter)
         {
-            var query = _context.FraudWords.AsQueryable();
+            var query = Context.FraudWords.AsQueryable();
 
             if (filter.Id.HasValue)
             {
@@ -22,12 +22,12 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<int> Count(FraudWordFilter filter)
         {
-            return await ApplyFilters(_context.FraudWords.AsQueryable(), filter).CountAsync();
+            return await ApplyFilters(Context.FraudWords.AsQueryable(), filter).CountAsync();
         }
 
         public async Task<List<FraudWordEntity>> Load(FraudWordFilter filter)
         {
-            var query = ApplyFilters(_context.FraudWords.AsQueryable(), filter);
+            var query = ApplyFilters(Context.FraudWords.AsQueryable(), filter);
 
             query = query.OrderByDescending(w => w.CreatedAt);
 
@@ -39,16 +39,11 @@ namespace Bewegdeal.Data.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<FraudWordEntity> Create(FraudWordEntity entity)
-        {
-            _context.FraudWords.Add(entity);
-            await _context.SaveChangesAsync();
-            return entity;
-        }
+
 
         public async Task Update(long id, string word, string description)
         {
-            await _context.FraudWords
+            await Context.FraudWords
                 .Where(w => w.Id == id)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(w => w.Word, word)
@@ -58,17 +53,12 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task SetStatus(long id, string status)
         {
-            await _context.FraudWords
+            await Context.FraudWords
                 .Where(w => w.Id == id)
                 .ExecuteUpdateAsync(s => s.SetProperty(w => w.Status, status));
         }
 
-        public async Task Delete(long id)
-        {
-            await _context.FraudWords
-                .Where(w => w.Id == id)
-                .ExecuteDeleteAsync();
-        }
+
 
         private static IQueryable<FraudWordEntity> ApplyFilters(IQueryable<FraudWordEntity> query, FraudWordFilter filter)
         {

@@ -6,33 +6,24 @@ using Bewegdeal.Tools;
 
 namespace Bewegdeal.Services
 {
-    public class FileService(IFileStorageTool storageTool, IFileRepository fileRepository)
+    public class FileService(IFileRepository FileRepository, IFileStorageTool StorageTool)
     {
 
-        #region Repository
+        public async Task<List<FileEntity>> Load(BaseFilter filter)
+            => await FileRepository.Load(filter);
 
-        public async Task<FileEntity?> Get(long? id)
-        {
-            if (id is not null)
-            {
-                return await fileRepository.Get(id.Value);
-            }
-            return null;
-        }
+        public async Task<FileEntity?> Get(long? id, string[]? properties = null)
+            => id is not null ? await FileRepository.Get<FileEntity>(id.Value, properties) : null;
 
-        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
-        {
-            return await fileRepository.Load(filter);
-        }
+        public async Task<string?> GetUrl(long? id, string? baseUrl = null)
+            => GetUrl(await Get(id, [nameof(FileEntity.Key)]), baseUrl);
 
-        #endregion
-
-        public async Task<ResultResponseModel> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
+        public async Task<ResultModel> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
         {
             // validate type
             if (allowedTypes.Length > 0 && !allowedTypes.Contains(file.ContentType))
             {
-                return ResultResponseModel.Fail(
+                return ResultModel.Fail(
                      $"Invalid file type uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
                 );
             }
@@ -40,17 +31,17 @@ namespace Bewegdeal.Services
             // validate size
             if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < file.Length)
             {
-                return ResultResponseModel.Fail(
+                return ResultModel.Fail(
                      $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
                 );
             }
 
             // upload
             using var stream = file.OpenReadStream();
-            var key = await storageTool.Create(stream, file.FileName, file.ContentType);
+            var key = await StorageTool.Create(stream, file.FileName, file.ContentType);
 
             // create new
-            var entity = await fileRepository.Create(new FileEntity
+            var entity = await FileRepository.Create(new FileEntity
             {
                 Key = key,
                 FileName = file.FileName,
@@ -65,29 +56,23 @@ namespace Bewegdeal.Services
             }
 
             // all good
-            return ResultResponseModel.Ok(entity.Id);
+            return ResultModel.Ok(entity.Id);
         }
 
         public async Task Delete(long id)
         {
-            var record = await fileRepository.Get(id);
+            var record = await Get(id, [nameof(FileEntity.Key)]);
             if (record is not null)
             {
-                await fileRepository.Delete(record.Id);
-                await storageTool.Delete(record.Key);
+                await FileRepository.Delete<FileEntity>(id);
+                await StorageTool.Delete(record.Key);
             }
         }
 
-        public async Task<string?> GetFileUrl(long? fileId, string? baseUrl = null)
-        {
-            var file = await Get(fileId);
-            return GetFileUrl(file, baseUrl);
-        }
-
-        public string? GetFileUrl(FileEntity? file, string? baseUrl = null)
+        public string? GetUrl(FileEntity? file, string? baseUrl = null)
         {
             if (file is null) { return null; }
-            var relative = storageTool.GetUrl(file.Key);
+            var relative = StorageTool.GetUrl(file.Key);
             return string.IsNullOrWhiteSpace(baseUrl) ? relative : $"{baseUrl}{relative}";
         }
 

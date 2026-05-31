@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class UserRepository(SqlContext context) : IUserRepository, IRepositorySeedable
+    public class UserRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IUserRepository, IRepositorySeedable
     {
 
         public async Task Seed()
@@ -48,113 +48,41 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity> Create(UserEntity user)
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
         {
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task SetUserStatus(long id, string status)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
-        }
-
-        public async Task SetAcquaintedHIW(long id)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.AcquaintedHIW, true));
-        }
-
-        public async Task UpdatePassword(long id, string hash, string salt)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Password, hash)
-                    .SetProperty(u => u.Salt, salt)
-                );
-        }
-
-        public async Task UpdatePicture(long id, long? fileId)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.ProfilePictureFileId, fileId));
-        }
-
-        public async Task UpdateTheme(long id, string theme)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Theme, theme));
-        }
-
-        public async Task UpdatePersonal(UserEntity user)
-        {
-            await context.Users
-                .Where(u => u.Id == user.Id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Name, user.Name)
-                    .SetProperty(u => u.Number, user.Number)
-                    .SetProperty(u => u.Mobile, user.Mobile)
-                    .SetProperty(u => u.Address, user.Address)
-                    .SetProperty(u => u.Interests, user.Interests)
-                    .SetProperty(u => u.ServiceTermsFileId, user.ServiceTermsFileId)
-                );
-        }
-
-        // ── Read ─────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity?> Get(UserFilter filter)
-        {
-            var query = context.Users.AsQueryable();
-
-            if (filter.Id.HasValue)
+            switch (area)
             {
-                query = query.Where(u => u.Id == filter.Id.Value);
-            }
 
-            if (!string.IsNullOrWhiteSpace(filter.Email))
-            {
-                query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
-            }
+                case UserUpdateAreaEnum.Status:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Status, update.Status)
+                                       );
+                    break;
 
-            return await query.FirstOrDefaultAsync();
+                case UserUpdateAreaEnum.Password:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u => u
+                                           .SetProperty(p => p.Password, update.Password)
+                                           .SetProperty(p => p.Salt, update.Salt)
+                                       );
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid update area", nameof(area));
+            }
         }
 
-        public async Task<int> Count(UserFilter filter) =>
-            await ApplyFilters(context.Users.AsQueryable(), filter).CountAsync();
+        public async Task<UserEntity?> Get(UserFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).Select(BuildSelect<UserEntity>(properties)).FirstOrDefaultAsync();
 
         public async Task<List<UserEntity>> Load(UserFilter filter)
-        {
-            var query = ApplyFilters(context.Users.AsQueryable(), filter);
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).ToListAsync();
 
-            if (!string.IsNullOrWhiteSpace(filter.SortDirection) && !string.IsNullOrWhiteSpace(filter.SortField))
-            {
-                var desc = filter.SortDirection == SortDirectionEnum.Desc;
-                query = filter.SortField switch
-                {
-                    SortFieldEnum.Status => desc ? query.OrderByDescending(u => u.Status) : query.OrderBy(u => u.Status),
-                    _ => desc ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id)
-                };
-            }
+        public async Task<int> Count(UserFilter filter)
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).CountAsync();
 
-            if (filter.Start.HasValue && filter.Length.HasValue)
-            {
-                query = query.Skip(filter.Start.Value);
-                query = query.Take(filter.Length.Value);
-            }
-
-            return await query.ToListAsync();
-        }
-
-        private static IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
+        private IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
         {
             if (filter.Id.HasValue)
             {
@@ -192,10 +120,12 @@ namespace Bewegdeal.Data.Repositories
                 );
             }
 
+            query = ApplySorting(query, filter);
+            query = ApplyPaging(query, filter);
+
+
             return query;
         }
 
-        // ── Delete ───────────────────────────────────────────────────────────────
-        // ***
     }
 }

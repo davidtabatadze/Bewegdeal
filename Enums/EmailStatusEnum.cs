@@ -1,8 +1,11 @@
 ﻿namespace Bewegdeal.Enums
 {
-    public class EmailStatusEnum
+    public readonly struct EmailStatusEnum
     {
-        public const string Sent = "sent";
-        public const string Failed = "failed";
+        public string Value { get; }
+        private EmailStatusEnum(string value) => Value = value;
+
+        public static readonly EmailStatusEnum Sent = new("sent");
+        public static readonly EmailStatusEnum Failed = new("failed");
     }
 }

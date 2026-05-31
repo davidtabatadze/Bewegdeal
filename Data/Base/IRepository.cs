@@ -2,5 +2,9 @@
 {
     public interface IRepository
     {
+        Task<T> Create<T>(T entity) where T : class, IEntity;
+        Task Update<T>(T entity) where T : class, IEntity;
+        Task Delete<T>(long id) where T : class, IEntity;
+        Task<T?> Get<T>(long id, string[]? properties = null) where T : class, IEntity;
     }
 }

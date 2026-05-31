@@ -17,7 +17,6 @@ namespace Bewegdeal.Models
         [MaxLength(16)]
         public string Mobile { get; set; } = string.Empty;
 
-        // Max length mirrors SqlContext ConfigureUsers
         [MaxLength(16)]
         public string? Number { get; set; }
 
@@ -37,9 +36,6 @@ namespace Bewegdeal.Models
 
         public IFormFile? TermsFile { get; set; }
 
-        // Each nullable property represents one service checkbox.
-        // null = unchecked; non-null = checked (value is the ServiceEnum constant).
-        // Company only — Customer always results in an empty Interests array.
         public string? ServiceMoving { get; set; }
         public string? ServiceJunk { get; set; }
         public string? ServiceStorePickup { get; set; }

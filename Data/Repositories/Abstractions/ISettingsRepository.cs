@@ -5,7 +5,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
 {
     public interface ISettingsRepository : IRepository
     {
-        Task Update(SettingsEntity settings);
         Task<SettingsEntity> Get();
     }
 }

@@ -1,6 +1,6 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Filters;
 using Bewegdeal.Models;
@@ -37,7 +37,7 @@ namespace Bewegdeal.Controllers
                 createdByName = w.CreatedByName
             });
 
-            return Json(new GridResultViewModel<object>(draw, total, filtered, data.Cast<object>()));
+            return Json(new GridResultViewModel<object> { }); //new GridResultViewModel<object>(draw, total, filtered, data.Cast<object>()));
         }
 
         [HttpPost]
@@ -50,7 +50,7 @@ namespace Bewegdeal.Controllers
             }
 
             long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId);
-            var user = await userService.GetUser(userId);
+            var user = await userService.Get(userId);
 
             await _fraudWordRepo.Create(new FraudWordEntity
             {
@@ -97,7 +97,7 @@ namespace Bewegdeal.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(long id)
         {
-            await _fraudWordRepo.Delete(id);
+            // await _fraudWordRepo.Delete(id);
             return Ok();
         }
     }

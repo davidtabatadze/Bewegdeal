@@ -6,89 +6,81 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class UserService(IUserRepository userRepository, FileService fileService)
+    public class UserService(IUserRepository UserRepository, FileService fileService)
     {
 
         #region Repository
 
         public async Task<UserEntity> Create(UserEntity user)
-        {
-            return await userRepository.Create(user);
-        }
-        public async Task SetUserStatus(long id, string status)
-        {
-            await userRepository.SetUserStatus(id, status);
-        }
-        public async Task SetAcquaintedHIW(long id)
-        {
-            await userRepository.SetAcquaintedHIW(id);
-        }
-        public async Task UpdatePassword(long id, string hash, string salt)
-        {
-            await userRepository.UpdatePassword(id, hash, salt);
-        }
-        public async Task UpdatePicture(long id, long? fileId)
-        {
-            await userRepository.UpdatePicture(id, fileId);
-        }
-        public async Task UpdateTheme(long id, string theme)
-        {
-            await userRepository.UpdateTheme(id, theme);
-        }
-        public async Task UpdatePersonal(UserEntity user)
-        {
-            await userRepository.UpdatePersonal(user);
-        }
-        public async Task<UserEntity?> Get(UserFilter filter)
-        {
-            return await userRepository.Get(filter);
-        }
+            => await UserRepository.Create(user);
+
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
+            => await UserRepository.Update(area, update);
+
+        //public async Task SetUserStatus(long id, string status)
+        //{
+        //    await UserRepository.SetUserStatus(id, status);
+        //}
+        //public async Task SetAcquaintedHIW(long id)
+        //{
+        //    await UserRepository.SetAcquaintedHIW(id);
+        //}
+        //public async Task UpdatePassword(long id, string hash, string salt)
+        //{
+        //    await UserRepository.UpdatePassword(id, hash, salt);
+        //}
+        //public async Task UpdatePicture(long id, long? fileId)
+        //{
+        //    await UserRepository.UpdatePicture(id, fileId);
+        //}
+        //public async Task UpdateTheme(long id, string theme)
+        //{
+        //    await UserRepository.UpdateTheme(id, theme);
+        //}
+        //public async Task UpdatePersonal(UserEntity user)
+        //{
+        //    await UserRepository.UpdatePersonal(user);
+        //}
+
+
+        public async Task<UserEntity?> Get(long id, string[]? properties = null)
+            => await UserRepository.Get<UserEntity>(id, properties);
+
+        public async Task<UserEntity?> Get(string email, string[]? properties = null)
+            => await UserRepository.Get(new UserFilter { Email = (email ?? "-").Trim() }, properties);
+
         public async Task<int> Count(UserFilter filter)
-        {
-            return await userRepository.Count(filter);
-        }
+            => await UserRepository.Count(filter);
+
         public async Task<List<UserEntity>> Load(UserFilter filter)
-        {
-            return await userRepository.Load(filter);
-        }
+            => await UserRepository.Load(filter);
 
         #endregion
 
-        public async Task<UserEntity?> GetUser(long id)
+        public async Task<UserEntity?> GetValidUser(long? id, List<string>? roles = null, bool? hiw = null)
         {
-            return await userRepository.Get(new UserFilter { Id = id });
-        }
+            var checkHIW = hiw is not null;
+            var checkRole = roles is not null && roles.Count > 0;
 
-        public async Task<UserEntity?> GetUser(string email)
-        {
-            return await userRepository.Get(new UserFilter { Email = (email ?? "").Trim() });
-        }
+            var properties = new List<string> {
+                nameof(UserEntity.Id)
+            };
 
-        public async Task<UserEntity?> GetValidUser(string? key, List<string>? roles = null, bool? active = null, bool? hiw = null)
-        {
-            if (string.IsNullOrWhiteSpace(key) || !long.TryParse(key, out var id))
+            if (checkHIW)
             {
-                return null;
+                properties.Add(nameof(UserEntity.AcquaintedHIW));
+            }
+            if (checkRole)
+            {
+                properties.Add(nameof(UserEntity.Role));
             }
 
-            var user = await GetUser(id);
+            var user = await UserRepository.Get(
+                new UserFilter { Id = id ?? 0, Status = UserStatusEnum.Active },
+                [.. properties]
+            );
 
-            if (user is null)
-            {
-                return null;
-            }
-
-            if (roles is not null && !roles.Contains(user.Role))
-            {
-                return null;
-            }
-
-            if (hiw is not null && user.AcquaintedHIW != hiw)
-            {
-                return null;
-            }
-
-            if (active is not null && user.Status != UserStatusEnum.Active)
+            if (user is null || (checkHIW && user.AcquaintedHIW != hiw) || (checkRole && !(roles ?? []).Contains(user.Role)))
             {
                 return null;
             }
@@ -97,10 +89,10 @@ namespace Bewegdeal.Services
         }
 
         public async Task<UserAvatarViewModel> GetAvatar(long? userId)
-        {
-            var user = await userRepository.Get(new UserFilter { Id = userId ?? 0 });
-            return await GetAvatar(user);
-        }
+            => await GetAvatar(await Get(
+                userId ?? 0,
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.ProfilePictureFileId)]
+            ));
 
         public async Task<UserAvatarViewModel> GetAvatar(UserEntity? user)
         {
@@ -121,10 +113,35 @@ namespace Bewegdeal.Services
                                  .Take(2).Select(p => char.ToUpper(p[0]))
                     );
                 }
-                avatar.Url = await fileService.GetFileUrl(user.ProfilePictureFileId);
+                avatar.Url = await fileService.GetUrl(user.ProfilePictureFileId);
             }
 
             return avatar;
+        }
+
+        public async Task<GridResultViewModel<object>> LoadGrid(UserFilter filter, int draw)
+        {
+            var users = await Load(filter);
+            var filtered = await Count(filter);
+            var total = await Count(new UserFilter());
+
+            return new GridResultViewModel<object>
+            {
+                Draw = draw,
+                RecordsTotal = total,
+                RecordsFiltered = filtered,
+                Data = users.Select(u => new
+                {
+                    id = u.Id,
+                    name = u.Name,
+                    email = u.Email,
+                    mobile = u.Mobile,
+                    address = u.Address,
+                    role = u.Role,
+                    status = u.Status,
+                    interests = u.Interests
+                })
+            };
         }
 
     }

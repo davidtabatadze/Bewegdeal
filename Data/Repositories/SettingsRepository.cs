@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class SettingsRepository(SqlContext context) : ISettingsRepository, IRepositorySeedable
+    public class SettingsRepository(SqlContext SqlContext) : BaseRepository(SqlContext), ISettingsRepository, IRepositorySeedable
     {
+
         public async Task Seed()
         {
-            if (!await context.Settings.AnyAsync())
+            if (!await Context.Settings.AnyAsync())
             {
-                await context.Settings.AddAsync(new SettingsEntity
+                await Create(new SettingsEntity
                 {
                     Id = 1,
                     RequestImageMaxCount = 5,
@@ -21,35 +22,13 @@ namespace Bewegdeal.Data.Repositories
                     RequestNegotiationMinutes = 60,
                     TermsAndConditionsFileId = 1
                 });
-                await context.SaveChangesAsync();
             }
         }
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task Update(SettingsEntity settings)
-        {
-            await context.Settings
-                .Where(s => s.Id == settings.Id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(p => p.TermsAndConditionsFileId, settings.TermsAndConditionsFileId)
-                    .SetProperty(p => p.RequestNegotiationMinutes, settings.RequestNegotiationMinutes)
-                    .SetProperty(p => p.RequestImageMaxCount, settings.RequestImageMaxCount)
-                    .SetProperty(p => p.RequestImageMaxSize, settings.RequestImageMaxSize)
-                    .SetProperty(p => p.RequestVideoMaxCount, settings.RequestVideoMaxCount)
-                    .SetProperty(p => p.RequestVideoMaxSize, settings.RequestVideoMaxSize)
-                );
-        }
-
-        // ── Read ─────────────────────────────────────────────────────────────────
-
         public async Task<SettingsEntity> Get()
         {
-            return await context.Settings.FirstOrDefaultAsync()
-                ?? new SettingsEntity { Id = 1 };
+            return await Get<SettingsEntity>(1) ?? new SettingsEntity { Id = 1 };
         }
 
-        // ── Delete ───────────────────────────────────────────────────────────────
-        // ***
     }
 }

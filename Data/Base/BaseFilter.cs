@@ -1,9 +1,9 @@
 ﻿namespace Bewegdeal.Data.Base
 {
-    public class BaseFilter<T>
+    public class BaseFilter
     {
-        public T? Id { get; set; }
-        public List<T>? Ids { get; set; }
+        public long? Id { get; set; }
+        public List<long>? Ids { get; set; }
         public string? SortField { get; set; }
         public string? SortDirection { get; set; }
         public int? Start { get; set; }

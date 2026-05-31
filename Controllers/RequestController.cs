@@ -64,7 +64,7 @@ public class RequestController(
         var files = await requestFileRepository.LoadMainImages(
             requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
         );
-        var images = await fileService.Load(new BaseFilter<long>
+        var images = await fileService.Load(new BaseFilter
         {
             Ids = files.Count == 0 ? [0] : [.. files.Select(f => f.FileId)]
         });
@@ -88,11 +88,11 @@ public class RequestController(
                 asap = r.ASAP,
                 date = r.Date?.ToString("MMM d, yyyy"),
                 time = r.Time?.ToString("HH:mm"),
-                imageUrl = fileService.GetFileUrl(image, BaseUrl)
+                imageUrl = fileService.GetUrl(image, BaseUrl)
             };
         });
 
-        return Json(new GridResultViewModel<object>(draw, total, filtered, data));
+        return Json(new GridResultViewModel<object> { });//new GridResultViewModel<object>(draw, total, filtered, data));
     }
 
     #endregion
@@ -102,7 +102,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -116,7 +116,7 @@ public class RequestController(
     public async Task<IActionResult> Create(RequestViewModel model)
     {
         // validate user
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
         if (user is null)
         {
             return RedirectToAction("Index", "Dashboard");
@@ -187,12 +187,12 @@ public class RequestController(
         }
 
         var requestFiles = await requestFileRepository.Load(request.Id);
-        var files = await fileService.Load(new BaseFilter<long>
+        var files = await fileService.Load(new BaseFilter
         {
             Ids = [.. requestFiles.Select(rf => rf.FileId)]
         });
 
-        var requester = await userService.GetUser(request.RequesterId);
+        var requester = await userService.Get(request.RequesterId);
         var requesterAvatar = await userService.GetAvatar(requester);
 
         ViewBag.Request = request;
@@ -201,7 +201,7 @@ public class RequestController(
         ViewBag.RequesterInitials = requesterAvatar.Initials;
         ViewBag.Files = files.Select(f => new
         {
-            url = fileService.GetFileUrl(f, BaseUrl),
+            url = fileService.GetUrl(f, BaseUrl),
             fileName = f.FileName,
             isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
             type = requestFiles.First(rf => rf.FileId == f.Id).Type
@@ -216,7 +216,7 @@ public class RequestController(
     [HttpGet]
     public async Task<IActionResult> Edit(long id)
     {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
         var request = await ValidateRequest(id, user?.Id ?? 0);
 
         if (user is null || request is null)
@@ -226,7 +226,7 @@ public class RequestController(
 
         var settings = await settingsRepository.Get();
         var requestFiles = await requestFileRepository.Load(id);
-        var files = await fileService.Load(new BaseFilter<long>
+        var files = await fileService.Load(new BaseFilter
         {
             Ids = requestFiles.Select(rf => rf.FileId).ToList()
         });
@@ -236,7 +236,7 @@ public class RequestController(
         ViewBag.Files = files.Select(i => new
         {
             fileId = i.Id,
-            url = fileService.GetFileUrl(i, BaseUrl),
+            url = fileService.GetUrl(i, BaseUrl),
             fileName = i.FileName,
             size = i.Size,
             isMain = requestFiles.First(rf => rf.FileId == i.Id).IsMain,
@@ -248,7 +248,7 @@ public class RequestController(
     [HttpPost]
     public async Task<IActionResult> Edit(RequestViewModel model)
     {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer], active: true);
+        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
         var request = await ValidateRequest(model.Id, user?.Id ?? 0);
 
         if (user is null || request is null)
@@ -332,9 +332,9 @@ public class RequestController(
                 settings.RequestImageMaxSize,
                 [FileTypeEnum.PNG, FileTypeEnum.JPEG]
             );
-            if (file.Error is not null)
+            if (file.Message is not null)
             {
-                return file.Error;
+                return file.Message;
             }
             fileEntities.Add(new RequestFileEntity
             {
@@ -357,9 +357,9 @@ public class RequestController(
                 settings.RequestVideoMaxSize,
                 [FileTypeEnum.MP4, FileTypeEnum.MOV]
             );
-            if (file.Error is not null)
+            if (file.Message is not null)
             {
-                return file.Error;
+                return file.Message;
             }
             fileEntities.Add(new RequestFileEntity
             {
@@ -381,7 +381,7 @@ public class RequestController(
 
     private async Task<RequestEntity?> ValidateRequest(long id, long userId)
     {
-        var request = await requestRepository.Get(id);
+        var request = await requestRepository.Get<RequestEntity>(id);
 
         if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
         {

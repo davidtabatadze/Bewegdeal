@@ -18,7 +18,7 @@ namespace Bewegdeal.Middleware
             if (userId is null && !string.IsNullOrWhiteSpace(cookie) && long.TryParse(cookie, out var id))
             {
                 var userService = context.RequestServices.GetRequiredService<UserService>();
-                var user = await userService.GetUser(id);
+                var user = await userService.Get(id);
 
                 if (user is not null)
                 {

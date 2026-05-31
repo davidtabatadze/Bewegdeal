@@ -38,7 +38,7 @@ namespace Bewegdeal.Tools
         /// <param name="text">The plain text version of the email message. Optional; if not provided, only the HTML content will be sent.</param>
         /// <returns>A task that represents the asynchronous operation. The task result is a string indicating the status of the
         /// email send operation. Returns "Sent" if the email was sent successfully; otherwise, returns "Failed".</returns>
-        public static async Task<string> Send(
+        public static async Task<EmailStatusEnum> Send(
             string email,
             string subject,
             string content,

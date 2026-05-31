@@ -2,7 +2,7 @@
 @inject Bewegdeal.Services.FileService _footerFileService
 @{
     var _footerSettings = await _footerSettingsRepo.Get();
-    var _footerTcUrl = await _footerFileService.GetFileUrl(_footerSettings.TermsAndConditionsFileId);
+    var _footerTcUrl = await _footerFileService.GetUrl(_footerSettings.TermsAndConditionsFileId);
 }
 <!-- Footer -->
 <footer class="content-footer footer bg-footer-theme">

@@ -6,25 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class ChatRepository(SqlContext context) : IChatRepository
+    public class ChatRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IChatRepository
     {
         // ── Chat ─────────────────────────────────────────────────────────────────
 
-        public async Task<ChatEntity> Create(ChatEntity chat)
-        {
-            context.Chats.Add(chat);
-            await context.SaveChangesAsync();
-            return chat;
-        }
-
-        public async Task<ChatEntity?> Get(long id) =>
-            await context.Chats.FindAsync(id);
 
         public async Task<ChatEntity?> Get(string key) =>
-            await context.Chats.FirstOrDefaultAsync(c => c.Key == key);
+            await Context.Chats.FirstOrDefaultAsync(c => c.Key == key);
 
         public async Task<ChatEntity?> GetActive(long requestId) =>
-            await context.Chats.FirstOrDefaultAsync(c =>
+            await Context.Chats.FirstOrDefaultAsync(c =>
                 c.RequestId == requestId &&
                 c.Status == ChatStatusEnum.Active);
 
@@ -32,20 +23,20 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<ChatMessageEntity> CreateMessage(ChatMessageEntity message)
         {
-            context.ChatMessages.Add(message);
-            await context.SaveChangesAsync();
+            Context.ChatMessages.Add(message);
+            await Context.SaveChangesAsync();
             return message;
         }
 
         public async Task<List<ChatMessageEntity>> LoadMessages(long chatId) =>
-            await context.ChatMessages
+            await Context.ChatMessages
                 .Where(m => m.ChatId == chatId)
                 .OrderBy(m => m.SentDate)
                 .ToListAsync();
 
         public async Task MarkRead(long chatId, long viewerId)
         {
-            var unread = await context.ChatMessages
+            var unread = await Context.ChatMessages
                 .Where(m => m.ChatId == chatId && m.SenderId != viewerId && !m.IsRead)
                 .ToListAsync();
 
@@ -56,16 +47,16 @@ namespace Bewegdeal.Data.Repositories
 
             if (unread.Count > 0)
             {
-                await context.SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
         public async Task Cancel(long chatId)
         {
-            var chat = await context.Chats.FindAsync(chatId);
+            var chat = await Context.Chats.FindAsync(chatId);
             if (chat is null) { return; }
             chat.Status = ChatStatusEnum.Cancelled;
-            await context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -75,7 +66,7 @@ namespace Bewegdeal.Data.Repositories
         public async Task<List<ChatUnreadSummary>> LoadUnreadForUser(long userId)
         {
             // Find active chats where the user is a participant and has at least one unread message
-            var chats = await context.Chats
+            var chats = await Context.Chats
                 .Where(c => c.Status == ChatStatusEnum.Active &&
                             (c.CustomerId == userId || c.CompanyId == userId))
                 .ToListAsync();
@@ -85,7 +76,7 @@ namespace Bewegdeal.Data.Repositories
             foreach (var chat in chats)
             {
                 // Latest unread message sent by the OTHER party
-                var latest = await context.ChatMessages
+                var latest = await Context.ChatMessages
                     .Where(m => m.ChatId == chat.Id && m.SenderId != userId && !m.IsRead)
                     .OrderByDescending(m => m.SentDate)
                     .FirstOrDefaultAsync();
@@ -93,8 +84,8 @@ namespace Bewegdeal.Data.Repositories
                 if (latest is null) { continue; }
 
                 var senderId = latest.SenderId;
-                var sender = await context.Users.FindAsync(senderId);
-                var request = await context.Requests.FindAsync(chat.RequestId);
+                var sender = await Context.Users.FindAsync(senderId);
+                var request = await Context.Requests.FindAsync(chat.RequestId);
 
                 var preview = latest.Content.Length > 80
                     ? latest.Content[..80] + "…"

@@ -44,7 +44,7 @@ namespace Bewegdeal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await userService.SetAcquaintedHIW(user.Id);
+            // await userService.SetAcquaintedHIW(user.Id);
             return RedirectToAction("Index", "Dashboard");
         }
     }

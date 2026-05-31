@@ -2,7 +2,7 @@ using Bewegdeal.Data.Base;
 
 namespace Bewegdeal.Data.Filters
 {
-    public class UserFilter : BaseFilter<long?>
+    public class UserFilter : BaseFilter
     {
         public string? Email { get; set; }
         public string? Search { get; set; }

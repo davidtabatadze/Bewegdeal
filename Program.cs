@@ -62,7 +62,6 @@ namespace Bewegdeal
             // ── Repositories ──────────────────────────────────────────────────────
             // Scoped per request — each request gets its own DbContext and repository instance.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
             builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
             builder.Services.AddScoped<IRequestRepository, RequestRepository>();
@@ -77,8 +76,11 @@ namespace Bewegdeal
 
             // ── Services ──────────────────────────────────────────────────────────
             // Scoped because FileService wraps IFileRepository (also scoped).
+            builder.Services.AddScoped<MailService>();
             builder.Services.AddScoped<FileService>();
+            builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<AccountService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
@@ -95,7 +97,6 @@ namespace Bewegdeal
                 var context = scope.ServiceProvider.GetRequiredService<SqlContext>();
                 await context.EnsureTablesAsync();
 
-                await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IReferenceRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
             }

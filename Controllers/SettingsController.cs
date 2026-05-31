@@ -17,7 +17,7 @@ public class SettingsController(ISettingsRepository settingsRepository, FileServ
     {
         var settings = await settingsRepository.Get();
 
-        ViewBag.TermsFileUrl = await fileService.GetFileUrl(settings.TermsAndConditionsFileId);
+        ViewBag.TermsFileUrl = await fileService.GetUrl(settings.TermsAndConditionsFileId);
 
         return View(settings);
     }
@@ -38,9 +38,9 @@ public class SettingsController(ISettingsRepository settingsRepository, FileServ
         var settings = await settingsRepository.Get();
 
         var file = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
-        if (file.Error is not null || file.ObjectId is null)
+        if (file.Message is not null || file.ObjectId is null)
         {
-            TempData["TermsError"] = file.Error;
+            TempData["TermsError"] = file.Message;
             return RedirectToAction(nameof(Index));
         }
 

@@ -19,6 +19,7 @@
                 public const string Credentials = "Invalid email or password.";
                 public const string Blocked = "Your account has been blocked. Please, contact support.";
                 public const string Pending = "Your account is pending approval. Please, wait for confirmation.";
+                public const string Unverified = "Your email address is not verified. Please, verify your email to log in.";
             }
             public class ForgotPassword
             {
