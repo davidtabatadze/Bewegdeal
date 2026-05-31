@@ -17,6 +17,7 @@ namespace Bewegdeal.Tools
         private static string _apiKey = string.Empty;
         private static string _fromEmail = string.Empty;
         private static string _fromName = string.Empty;
+        private static string _smsFrom = string.Empty;
 
         /// <summary>
         /// Reads Brevo settings from <c>appsettings.json</c> (section <c>Brevo</c>).
@@ -27,6 +28,7 @@ namespace Bewegdeal.Tools
             _apiKey = configuration["Brevo:ApiKey"] ?? throw new InvalidOperationException("Brevo:ApiKey is not configured.");
             _fromEmail = configuration["Brevo:FromEmail"] ?? throw new InvalidOperationException("Brevo:FromEmail is not configured.");
             _fromName = configuration["Brevo:FromName"] ?? throw new InvalidOperationException("Brevo:FromName is not configured.");
+            _smsFrom = configuration["Brevo:SmsFrom"] ?? throw new InvalidOperationException("Brevo:SmsFrom is not configured.");
         }
 
         /// <summary>
@@ -65,6 +67,43 @@ namespace Bewegdeal.Tools
             {
                 // TODO: do log here
                 return EmailStatusEnum.Failed;
+            }
+        }
+
+        /// <summary>
+        /// Sends a transactional SMS using Brevo.
+        /// </summary>
+        /// <param name="phone">Recipient phone number in E.164 format (e.g. +43123456789).</param>
+        /// <param name="message">Plain-text SMS body.</param>
+        /// <returns>Status ("sent" or "failed") and the Brevo error body if failed (null on success).</returns>
+        public static async Task<(string Status, string? ErrorBody)> SendSms(string phone, string message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Serialize(new
+                {
+                    sender = _smsFrom,
+                    recipient = phone,
+                    content = message
+                });
+
+                using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.brevo.com/v3/transactionalSMS/sms");
+                request.Headers.Add("api-key", _apiKey);
+                request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                var response = await Http.SendAsync(request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                {
+                    return (EmailStatusEnum.Sent, null);
+                }
+
+                var body = await response.Content.ReadAsStringAsync();
+                return (EmailStatusEnum.Failed, $"HTTP {(int)response.StatusCode}: {body}");
+            }
+            catch (Exception ex)
+            {
+                return (EmailStatusEnum.Failed, ex.Message);
             }
         }
 

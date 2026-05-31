@@ -125,6 +125,11 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
             }
 
+            if (!string.IsNullOrWhiteSpace(filter.Mobile))
+            {
+                query = query.Where(u => u.Mobile == filter.Mobile);
+            }
+
             return await query.FirstOrDefaultAsync();
         }
 
@@ -164,6 +169,11 @@ namespace Bewegdeal.Data.Repositories
             if (!string.IsNullOrWhiteSpace(filter.Email))
             {
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Mobile))
+            {
+                query = query.Where(u => u.Mobile == filter.Mobile);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Role))

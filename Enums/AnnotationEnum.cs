@@ -39,11 +39,23 @@
             public class Register
             {
                 public const string Exists = "An account with this email address already exists. You may sign in instead.";
+                public const string MobileExists = "An account with this phone number already exists. You may sign in instead.";
+            }
+            public class VerifyMobile
+            {
+                public const string Expired = "Verification code has expired. Please, request a new one.";
+                public const string Invalid = "Invalid verification code. Please, reenter or request a new one.";
+                public const string Success = "Your phone number has been verified. Please verify your email to continue.";
+                public const string Resent = "A new verification code has been sent to your phone.";
             }
             public class Email
             {
                 public const string Verification = "We are sorry, we are unable to send you a verification email right now. Please, try again later or contact the site administration.";
                 public const string Reset = "We are sorry, we are unable to send you a password reset email right now. Please, try again later or contact the site administration.";
+            }
+            public class Sms
+            {
+                public const string Verification = "We are sorry, we are unable to send you a verification SMS right now. Please, try again later or contact the site administration.";
             }
         }
         public class Request

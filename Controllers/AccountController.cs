@@ -1,4 +1,5 @@
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
@@ -265,6 +266,76 @@ public class AccountController(
 
     #endregion
 
+    #region Verify Mobile
+
+    [HttpGet]
+    public IActionResult VerifyMobile(string mobile, string email)
+    {
+        ViewBag.Mobile = (mobile ?? "").Trim();
+        ViewBag.Email = (email ?? "").Trim();
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifyMobile(string mobile, string email, string otp)
+    {
+        ViewBag.Mobile = mobile;
+        ViewBag.Email = email;
+
+        // seek one time code
+        var cacheKey = CacheKeyTool.Get(CacheKeyEnum.MobileVerification, mobile);
+        var oneTimeCode = cache.Get<string>(cacheKey);
+
+        // no code? error
+        if (oneTimeCode is null)
+        {
+            ViewBag.Error = AnnotationEnum.Account.VerifyMobile.Expired;
+            return View();
+        }
+
+        // wrong input? error
+        if (oneTimeCode != otp)
+        {
+            ViewBag.Error = AnnotationEnum.Account.VerifyMobile.Invalid;
+            return View();
+        }
+
+        // clear cache
+        cache.Remove(cacheKey);
+
+        // send verification email and proceed
+        var mailError = await SendVerificationEmail(email);
+        if (mailError is not null)
+        {
+            ViewBag.Error = mailError;
+            return View();
+        }
+
+        // all good
+        TempData["VerifyEmailSuccess"] = AnnotationEnum.Account.VerifyMobile.Success;
+        return RedirectToAction(nameof(VerifyEmail), new { email });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifyMobileResend(string mobile, string email)
+    {
+        mobile = (mobile ?? "").Trim();
+        ViewBag.Mobile = mobile;
+        ViewBag.Email = (email ?? "").Trim();
+
+        var smsError = await SendVerificationSms(mobile);
+        if (smsError is not null)
+        {
+            ViewBag.Error = smsError;
+            return View("VerifyMobile");
+        }
+
+        ViewBag.Success = AnnotationEnum.Account.VerifyMobile.Resent;
+        return View("VerifyMobile");
+    }
+
+    #endregion
+
     #region Register
 
     [HttpGet]
@@ -295,6 +366,14 @@ public class AccountController(
         if (existing is not null)
         {
             ViewBag.Error = AnnotationEnum.Account.Register.Exists;
+            return View(model);
+        }
+
+        // validate mobile uniqueness
+        var existingMobile = await _userRepository.Get(new UserFilter { Mobile = model.Mobile });
+        if (existingMobile is not null)
+        {
+            ViewBag.Error = AnnotationEnum.Account.Register.MobileExists;
             return View(model);
         }
 
@@ -342,19 +421,47 @@ public class AccountController(
             Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light
         });
 
-        // send verification email
-        var mailError = await SendVerificationEmail(user.Email);
-        if (mailError is not null)
+        // send verification sms
+        var smsError = await SendVerificationSms(user.Mobile);
+        if (smsError is not null)
         {
-            ViewBag.Error = mailError;
+            ViewBag.Error = smsError;
             return View(model);
         }
 
         // all done
-        return RedirectToAction(nameof(VerifyEmail), new { email = user.Email });
+        return RedirectToAction(nameof(VerifyMobile), new { mobile = user.Mobile, email = user.Email });
     }
 
     #endregion
+
+    private async Task<string?> SendVerificationSms(string mobile)
+    {
+        // generate one-time code
+        var oneTimeCode = Random.Shared.Next(100000, 1000000).ToString();
+
+        // cache the code for later verification
+        cache.Set(
+            CacheKeyTool.Get(CacheKeyEnum.MobileVerification, mobile),
+            oneTimeCode,
+            TimeSpan.FromMinutes(ConstantEnum.MobileVerificationTimeout)
+        );
+
+        // send sms
+        var (status, errorBody) = await BrevoTool.SendSms(
+            mobile,
+            $"Your Bewegdeal verification code is: {oneTimeCode}. Expires in {ConstantEnum.MobileVerificationTimeout} minutes."
+        );
+
+        // all good
+        if (status == EmailStatusEnum.Sent)
+        {
+            return null;
+        }
+
+        // something went wrong — surface the Brevo error detail for debugging
+        return $"{AnnotationEnum.Account.Sms.Verification} Detail: {errorBody}";
+    }
 
     private async Task<string?> SendVerificationEmail(string email)
     {

@@ -3,6 +3,7 @@
     public class ConstantEnum
     {
         public const long EmailVerificationTimeout = 5;
+        public const long MobileVerificationTimeout = 5;
         public const long ResetPasswordTimeout = 5;
 
         public const string SessionUserId = "UserId";

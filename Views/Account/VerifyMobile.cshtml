@@ -1,6 +1,6 @@
 @{
     Layout = "_BlankLayout";
-    ViewData["Title"] = "Two-Step Verification";
+    ViewData["Title"] = "Verify Phone Number";
 }
 
 @section VendorStyles {
@@ -35,12 +35,6 @@
             new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(success));
         </script>
     }
-    @if (TempData["VerifyEmailSuccess"] is string veSuccess)
-    {
-        <script>
-            new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(veSuccess));
-        </script>
-    }
 }
 
 <div class="position-relative">
@@ -57,15 +51,16 @@
                 <!-- /Logo -->
 
                 <div class="card-body mt-1">
-                    <h4 class="mb-1">Two Step Verification 💬</h4>
+                    <h4 class="mb-1">Phone Verification 📱</h4>
                     <p class="text-start mb-1">
-                        We have sent a verification code to <strong>@ViewBag.Email</strong>
+                        We have sent a verification code to <strong>@ViewBag.Mobile</strong>
                     </p>
-                    <p class="mb-5 text-muted small">The code expires in @Bewegdeal.Enums.ConstantEnum.EmailVerificationTimeout minutes.</p>
+                    <p class="mb-5 text-muted small">The code expires in @Bewegdeal.Enums.ConstantEnum.MobileVerificationTimeout minutes.</p>
 
                     <p class="mb-0">Type your 6 digit security code</p>
 
-                    <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyEmail">
+                    <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyMobile">
+                        <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
                         <input type="hidden" name="email" value="@ViewBag.Email" />
                         <div class="mb-5 form-control-validation">
                             <div class="auth-input-wrapper d-flex align-items-center justify-content-between numeral-mask-wrapper">
@@ -78,10 +73,11 @@
                             </div>
                             <input type="hidden" name="otp" />
                         </div>
-                        <button class="btn btn-primary d-grid w-100 mb-5">Verify my account</button>
+                        <button class="btn btn-primary d-grid w-100 mb-5">Verify my phone number</button>
                     </form>
 
-                    <form id="resendForm" method="post" asp-controller="Account" asp-action="VerifyResend">
+                    <form id="resendForm" method="post" asp-controller="Account" asp-action="VerifyMobileResend">
+                        <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
                         <input type="hidden" name="email" value="@ViewBag.Email" />
                     </form>
 
