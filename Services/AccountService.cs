@@ -220,7 +220,8 @@ namespace Bewegdeal.Services
                 ServiceTermsFileId = termsFileId,
                 AcquaintedHIW = false,
                 Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light,
-                CreateDate = DateTime.Now
+                CreateDate = DateTime.Now,
+                TermsAndConditionsAcceptDate = DateTime.Now
             });
 
             // send verification email

@@ -44,7 +44,8 @@ namespace Bewegdeal.Data.Repositories
                     Address = row.Address,
                     Password = hash,
                     Salt = salt,
-                    CreateDate = DateTime.Now
+                    CreateDate = DateTime.Now,
+                    TermsAndConditionsAcceptDate = DateTime.Now
                 });
             }
         }

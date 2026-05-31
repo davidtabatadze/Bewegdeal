@@ -1,9 +1,9 @@
-using System.Security.Claims;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Services;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Bewegdeal.Hubs
 {

@@ -119,6 +119,7 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");
                 e.Property(u => u.AcquaintedHIW).IsRequired().HasDefaultValue(false);
                 e.Property(u => u.CreateDate).IsRequired();
+                e.Property(u => u.TermsAndConditionsAcceptDate).IsRequired();
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -314,6 +315,7 @@ namespace Bewegdeal.Data
                 e.Property(s => s.Id).ValueGeneratedNever();
 
                 e.Property(s => s.TermsAndConditionsFileId).IsRequired();
+                e.Property(s => s.TermsAndConditionsFileDate).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();

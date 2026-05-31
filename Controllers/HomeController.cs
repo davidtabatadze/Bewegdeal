@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Bewegdeal.Controllers
 {

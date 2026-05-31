@@ -20,5 +20,6 @@ namespace Bewegdeal.Data.Entities
         public string Theme { get; set; } = "light";
         public bool AcquaintedHIW { get; set; }
         public DateTime CreateDate { get; set; }
+        public DateTime TermsAndConditionsAcceptDate { get; set; }
     }
 }

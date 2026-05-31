@@ -15,6 +15,7 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new SettingsEntity
                 {
                     Id = 1,
+                    TermsAndConditionsFileDate = DateTime.Now,
                     RequestImageMaxCount = 5,
                     RequestImageMaxSize = 4,
                     RequestVideoMaxCount = 1,

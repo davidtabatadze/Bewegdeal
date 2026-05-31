@@ -1,10 +1,10 @@
-using System.Security.Claims;
 using Bewegdeal.Data.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 namespace Bewegdeal.Tools
 {
-    public static class ClaimsTool
+    public static class UserIdentityTool
     {
         public static ClaimsPrincipal BuildPrincipal(UserEntity user, string? pictureUrl = null)
         {

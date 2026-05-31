@@ -42,7 +42,7 @@ public class AccountController(AccountService AccountService, SettingService Set
         var user = result.Object!;
 
         var pictureUrl = await FileService.GetUrl(user.ProfilePictureFileId);
-        var principal = ClaimsTool.BuildPrincipal(user, pictureUrl);
+        var principal = UserIdentityTool.BuildPrincipal(user, pictureUrl);
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal,

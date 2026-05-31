@@ -57,37 +57,6 @@ namespace Bewegdeal.Services
 
         #endregion
 
-        public async Task<UserEntity?> GetValidUser(long? id, List<string>? roles = null, bool? hiw = null)
-        {
-            var checkHIW = hiw is not null;
-            var checkRole = roles is not null && roles.Count > 0;
-
-            var properties = new List<string> {
-                nameof(UserEntity.Id)
-            };
-
-            if (checkHIW)
-            {
-                properties.Add(nameof(UserEntity.AcquaintedHIW));
-            }
-            if (checkRole)
-            {
-                properties.Add(nameof(UserEntity.Role));
-            }
-
-            var user = await UserRepository.Get(
-                new UserFilter { Id = id ?? 0, Status = UserStatusEnum.Active },
-                [.. properties]
-            );
-
-            if (user is null || (checkHIW && user.AcquaintedHIW != hiw) || (checkRole && !(roles ?? []).Contains(user.Role)))
-            {
-                return null;
-            }
-
-            return user;
-        }
-
         public async Task<UserAvatarViewModel> GetAvatar(long? userId)
             => await GetAvatar(await Get(
                 userId ?? 0,
