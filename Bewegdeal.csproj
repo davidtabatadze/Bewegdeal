@@ -15,4 +15,13 @@
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="MailTemplates\PasswordReset.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MailTemplates\VerifyAccount.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

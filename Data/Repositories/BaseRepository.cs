@@ -27,7 +27,7 @@ namespace Bewegdeal.Data.Repositories
             => await Context.Set<T>().Where(f => f.Id == id).ExecuteDeleteAsync();
 
         public async Task<T?> Get<T>(long id, string[]? properties = null) where T : class, IEntity
-            => await Context.Set<T>().Select(BuildSelect<T>(properties)).FirstOrDefaultAsync(f => f.Id == id);
+            => await Context.Set<T>().Where(i => i.Id == id).Select(BuildSelect<T>(properties)).FirstOrDefaultAsync();
 
         public Expression<Func<T, T>> BuildSelect<T>(string[]? properties) where T : class, IEntity
         {
