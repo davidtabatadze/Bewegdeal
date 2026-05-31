@@ -219,7 +219,8 @@ namespace Bewegdeal.Services
                 Status = UserStatusEnum.Unverified,
                 ServiceTermsFileId = termsFileId,
                 AcquaintedHIW = false,
-                Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light
+                Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light,
+                CreateDate = DateTime.Now
             });
 
             // send verification email

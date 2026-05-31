@@ -43,7 +43,8 @@ namespace Bewegdeal.Data.Repositories
                     Mobile = row.Mobile,
                     Address = row.Address,
                     Password = hash,
-                    Salt = salt
+                    Salt = salt,
+                    CreateDate = DateTime.Now
                 });
             }
         }

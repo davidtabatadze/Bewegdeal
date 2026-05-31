@@ -13,7 +13,6 @@ namespace Bewegdeal.Data
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<FileEntity> Files => Set<FileEntity>();
-        public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
@@ -83,7 +82,6 @@ namespace Bewegdeal.Data
             ConfigureUsers(modelBuilder);
             ConfigureFiles(modelBuilder);
             ConfigureSettings(modelBuilder);
-            ConfigureReferences(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
             ConfigureRequestAgreements(modelBuilder);
@@ -120,6 +118,7 @@ namespace Bewegdeal.Data
                 e.Property(u => u.ProfilePictureFileId).IsRequired(false);
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");
                 e.Property(u => u.AcquaintedHIW).IsRequired().HasDefaultValue(false);
+                e.Property(u => u.CreateDate).IsRequired();
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -149,22 +148,6 @@ namespace Bewegdeal.Data
                 e.Property(f => f.Key).IsRequired().HasMaxLength(64);
                 e.Property(f => f.MimeType).IsRequired().HasMaxLength(16);
                 e.Property(f => f.FileName).IsRequired().HasMaxLength(256);
-            });
-        }
-
-        private void ConfigureReferences(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReferenceEntity>(e =>
-            {
-                e.ToTable(_prefix + "References");
-
-                e.HasKey(r => r.Id);
-                e.HasIndex(r => r.Id).IsUnique();
-                e.HasIndex(r => r.Type);
-                e.Property(r => r.Id).ValueGeneratedNever().HasMaxLength(16);
-
-                e.Property(r => r.Type).IsRequired().HasMaxLength(16);
-                e.Property(r => r.Name).IsRequired().HasMaxLength(16);
             });
         }
 

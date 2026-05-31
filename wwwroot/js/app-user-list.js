@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // Column index → sort field name sent to the server (only orderable columns listed)
-  const columnToField = { 0: 'status' };
+  const columnToField = { 0: 'status', 4: 'createDate' };
 
   if (!dt_user_table) { return; }
 
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
       data: function (d) {
         // Map DT's nested order to the flat sortField/sortDirection the filter expects
         const order       = d.order && d.order[0];
-        d.sortField     = columnToField[order ? order.column : 0] || 'status';
+        d.sortField     = columnToField[order ? order.column : 5] || 'createDate';
         d.sortDirection = order ? order.dir : 'desc';
 
         // Remove DT's auto-generated nested params — controller doesn't use them
@@ -60,11 +60,12 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     },
     columns: [
-      { data: 'status'    },   // 0 — status (sortable)
-      { data: 'role'      },   // 1 — role
-      { data: 'name'      },   // 2 — user cell
-      { data: 'mobile'    },   // 3 — contact
-      { data: 'interests' },   // 4 — interests
+      { data: 'status'     },   // 0 — status (sortable)
+      { data: 'role'       },   // 1 — role
+      { data: 'name'       },   // 2 — user cell
+      { data: 'mobile'     },   // 3 — contact
+      { data: 'createDate' },   // 4 — date (sortable)
+      { data: 'interests'  },   // 5 — interests
     ],
     columnDefs: [
       {
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       {
         // Interests
-        targets: 4,
+        targets: 5,
         width: '120px',
         orderable: false,
         searchable: false,
@@ -143,6 +144,12 @@ document.addEventListener('DOMContentLoaded', function () {
           }).join('');
           return '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' + items + '</ul>';
         }
+      },
+      {
+        // Date
+        targets: 4,
+        width: '130px',
+        render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
       },
       {
         // Status button
@@ -173,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
       },
     ],
     pageLength: 10,
-    order: [[0, 'desc']],
+    order: [[4, 'desc']],
     drawCallback: function () {
       document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
         if (!bootstrap.Tooltip.getInstance(el)) {

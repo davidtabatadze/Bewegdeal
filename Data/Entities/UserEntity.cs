@@ -19,5 +19,6 @@ namespace Bewegdeal.Data.Entities
         public long? ProfilePictureFileId { get; set; }
         public string Theme { get; set; } = "light";
         public bool AcquaintedHIW { get; set; }
+        public DateTime CreateDate { get; set; }
     }
 }

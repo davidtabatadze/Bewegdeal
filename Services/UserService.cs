@@ -139,7 +139,8 @@ namespace Bewegdeal.Services
                     address = u.Address,
                     role = u.Role,
                     status = u.Status,
-                    interests = u.Interests
+                    interests = u.Interests,
+                    createDate = u.CreateDate.ToString("yyyy-MM-dd HH:mm")
                 })
             };
         }
