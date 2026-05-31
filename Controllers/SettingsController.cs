@@ -1,12 +1,12 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
 using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
-[RequireAdmin]
+[Authorize(Roles = UserRoleEnum.Administrator)]
 public class SettingsController(ISettingsRepository settingsRepository, FileService fileService) : XBaseController
 {
 

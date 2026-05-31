@@ -6,7 +6,7 @@ namespace Bewegdeal.Controllers
     {
         public IActionResult Index()
         {
-            if (UserId is not null)
+            if (User.Identity!.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }

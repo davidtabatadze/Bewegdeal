@@ -1,23 +1,21 @@
+using System.Security.Claims;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
-using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireLogin]
-    public class HomeController(UserService userService) : XBaseController
+    [Authorize]
+    public class HomeController : XBaseController
     {
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var user = await userService.GetValidUser(UserId);
-            if (user is not null && !user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
+            if (!HasClaim("AcquaintedHIW", true) && !User.IsInRole(UserRoleEnum.Administrator))
             {
-                var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";
-                return RedirectToAction(action, "HowItWorks");
+                return RedirectToAction(GetClaim<string>(ClaimTypes.Role), "HowItWorks");
             }
 
-            if (user?.Role == UserRoleEnum.Customer)
+            if (User.IsInRole(UserRoleEnum.Customer))
             {
                 return RedirectToAction("List", "Request");
             }

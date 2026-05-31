@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
@@ -121,11 +122,8 @@ namespace Bewegdeal.Hubs
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 
-        private long GetUserId()
-        {
-            var session = Context.GetHttpContext()?.Session;
-            return long.TryParse(session?.GetString(ConstantEnum.SessionUserId), out var id) ? id : 0;
-        }
+        private long GetUserId() =>
+            long.TryParse(Context.User?.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
 
         private static bool IsParticipant(ChatEntity chat, long userId) =>
             chat.CustomerId == userId || chat.CompanyId == userId;

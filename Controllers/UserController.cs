@@ -1,10 +1,11 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
 using Bewegdeal.Models;
 using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Bewegdeal.Controllers
 {
@@ -13,7 +14,7 @@ namespace Bewegdeal.Controllers
 
         #region List
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         public async Task<IActionResult> List()
         {
             ViewBag.TotalCount = 0;
@@ -23,14 +24,14 @@ namespace Bewegdeal.Controllers
             return View();
         }
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpGet]
         public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQuery] int draw = 1)
         {
             return Json(await UserService.LoadGrid(filter, draw));
         }
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpPost]
         public async Task<IActionResult> UpdateUserStatus(long id)
         {
@@ -41,7 +42,7 @@ namespace Bewegdeal.Controllers
                 return NotFound();
             }
 
-            if (user.Id == UserId)
+            if (HasClaim(ClaimTypes.NameIdentifier, user.Id))
             {
                 return BadRequest();
             }
@@ -67,7 +68,7 @@ namespace Bewegdeal.Controllers
 
         #region Profile
 
-        [RequireLogin]
+        [Authorize]
         public async Task<IActionResult> Profile()
         {
             //var user = await userService.GetValidUser(UserId);
@@ -86,7 +87,7 @@ namespace Bewegdeal.Controllers
             return View();
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> SavePicture(IFormFile? picture)
         {
@@ -126,7 +127,7 @@ namespace Bewegdeal.Controllers
             return Ok();
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> SaveTheme(string theme)
         {
@@ -142,7 +143,7 @@ namespace Bewegdeal.Controllers
             return Ok();
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> SavePersonal(SavePersonalViewModel model)
         {
@@ -203,7 +204,7 @@ namespace Bewegdeal.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(string? newPassword, string? confirmPassword)
         {

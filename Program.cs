@@ -5,6 +5,7 @@ using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Middleware;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal
@@ -21,18 +22,21 @@ namespace Bewegdeal
             // ── SignalR ───────────────────────────────────────────────────────────
             builder.Services.AddSignalR();
 
-            // ── Session ───────────────────────────────────────────────────────────
-            // HttpOnly + SameAsRequest keeps the cookie secure without forcing HTTPS in dev.
-            // 8-hour idle timeout matches a typical working day.
+            // ── Authentication ────────────────────────────────────────────────────
+            // Cookie auth is the primary scheme for in-scope controllers ([Authorize]).
+            // AccessDeniedPath mirrors the old RequireAdminAttribute redirect target.
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(o =>
+                {
+                    o.LoginPath = "/Account/Login";
+                    o.AccessDeniedPath = "/Home/Index";
+                    o.ExpireTimeSpan = TimeSpan.FromHours(8);
+                    o.SlidingExpiration = true;
+                });
+
+            // ── Cache ─────────────────────────────────────────────────────────────
+            // Used by StatusRefreshMiddleware to throttle per-user DB status checks.
             builder.Services.AddMemoryCache();
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-                options.IdleTimeout = TimeSpan.FromHours(8);
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-            });
 
             // ── Database ──────────────────────────────────────────────────────────
             // Provider and connection strings are read from Database section in appsettings.json.
@@ -110,8 +114,8 @@ namespace Bewegdeal
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseSession();
-            app.UseMiddleware<RememberMeMiddleware>();
+            app.UseAuthentication();
+            app.UseMiddleware<StatusRefreshMiddleware>();
             app.UseAuthorization();
 
             // ── Routes ────────────────────────────────────────────────────────────

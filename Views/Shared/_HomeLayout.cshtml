@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
       class="layout-menu-fixed layout-navbar-hidden"
-      data-skin="default" data-bs-theme="@(Context.Session.GetString(ConstantEnum.SessionUserTheme) ?? "light")"
+      data-skin="default" data-bs-theme="@(User.FindFirstValue("Theme") ?? "light")"
       data-assets-path="/" data-template="vertical-menu-template">
 <head>
   <meta charset="utf-8" />
@@ -11,7 +11,7 @@
   <!-- Keep localStorage in sync with the server-stored theme preference -->
   <script>
     (function () {
-      var serverTheme = '@(Context.Session.GetString(ConstantEnum.SessionUserTheme) ?? "light")';
+      var serverTheme = '@(User.FindFirstValue("Theme") ?? "light")';
       localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', serverTheme);
       localStorage.setItem('templateCustomizer-front-page--Theme', serverTheme);
     })();
@@ -107,7 +107,7 @@
 
   <!-- Global notifications -->
   <script>
-      window.notificationConfig = { userId: '@Context.Session.GetString(ConstantEnum.SessionUserId)' };
+      window.notificationConfig = { userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)' };
   </script>
   <script src="~/vendor/libs/signalr/signalr.min.js"></script>
   <script src="~/js/notifications.js"></script>

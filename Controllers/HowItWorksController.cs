@@ -1,50 +1,34 @@
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
-using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireLogin]
-    public class HowItWorksController(UserService userService) : XBaseController
+    [Authorize]
+    public class HowItWorksController : XBaseController
     {
 
         [HttpGet]
-        public async Task<IActionResult> Customer()
+        [Authorize(Roles = UserRoleEnum.Customer)]
+        public IActionResult Customer()
         {
-            var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
-            if (user is null)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            ViewBag.ShowBar = !user.AcquaintedHIW;
+            ViewBag.ShowBar = !HasClaim("AcquaintedHIW", true);
             return View();
         }
 
         [HttpGet]
-        public async Task<IActionResult> Company()
+        [Authorize(Roles = UserRoleEnum.Company)]
+        public IActionResult Company()
         {
-            var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Company]);
-            if (user is null)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            ViewBag.ShowBar = !user.AcquaintedHIW;
+            ViewBag.ShowBar = !HasClaim("AcquaintedHIW", true);
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Acknowledge()
         {
-            var user = await userService.GetValidUser(UserId);
-            if (user is null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            // await userService.SetAcquaintedHIW(user.Id);
+            // await userService.SetAcquaintedHIW(UserId!.Value);
+            await RefreshClaim("AcquaintedHIW", true);
             return RedirectToAction("Index", "Dashboard");
         }
     }

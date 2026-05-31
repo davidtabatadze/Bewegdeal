@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\ChatController.cs" />
+    <Compile Remove="Controllers\FraudWordController.cs" />
+    <Compile Remove="Controllers\RequestController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Storage\" />
   </ItemGroup>
 

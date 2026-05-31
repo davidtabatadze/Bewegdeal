@@ -1,12 +1,15 @@
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.Services;
+using Bewegdeal.Tools;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 
 namespace Bewegdeal.Controllers;
 
-public class AccountController(AccountService AccountService, SettingService SettingService) : XBaseController
+public class AccountController(AccountService AccountService, SettingService SettingService, FileService FileService) : XBaseController
 {
 
     #region Login
@@ -14,7 +17,7 @@ public class AccountController(AccountService AccountService, SettingService Set
     [HttpGet]
     public IActionResult Login()
     {
-        if (UserId.HasValue)
+        if (User.Identity!.IsAuthenticated)
         {
             return RedirectToAction("Index", "Home");
         }
@@ -38,30 +41,17 @@ public class AccountController(AccountService AccountService, SettingService Set
 
         var user = result.Object!;
 
-        HttpContext.Session.SetString(ConstantEnum.SessionUserId, user.Id.ToString());
-        HttpContext.Session.SetString(ConstantEnum.SessionUserRole, user.Role);
-        HttpContext.Session.SetString(ConstantEnum.SessionUserName, user.Name);
-        HttpContext.Session.SetString(ConstantEnum.SessionUserEmail, user.Email);
-        HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, user.Theme);
-        if (user.ProfilePictureFileId.HasValue)
-        {
-            HttpContext.Session.SetString(
-                ConstantEnum.SessionUserPictureId,
-                user.ProfilePictureFileId.Value.ToString()
-            );
-        }
-
-        if (rememberMe)
-        {
-            Response.Cookies.Append(ConstantEnum.CookieRemember, user.Id.ToString(), new CookieOptions
+        var pictureUrl = await FileService.GetUrl(user.ProfilePictureFileId);
+        var principal = ClaimsTool.BuildPrincipal(user, pictureUrl);
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
             {
-                HttpOnly = true,
-                Secure = Request.IsHttps,
-                Expires = DateTimeOffset.UtcNow.AddDays(30),
-                SameSite = SameSiteMode.Lax,
-                IsEssential = true
-            });
-        }
+                IsPersistent = rememberMe,
+                ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : null
+            }
+        );
 
         if (!user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
         {
@@ -77,10 +67,9 @@ public class AccountController(AccountService AccountService, SettingService Set
     #region Logout
 
     [HttpPost]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
-        HttpContext.Session.Clear();
-        Response.Cookies.Delete(ConstantEnum.CookieRemember);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Landing");
     }
 
