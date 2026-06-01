@@ -314,8 +314,8 @@ namespace Bewegdeal.Data
                 e.HasKey(s => s.Id);
                 e.Property(s => s.Id).ValueGeneratedNever();
 
-                e.Property(s => s.TermsAndConditionsFileId).IsRequired();
-                e.Property(s => s.TermsAndConditionsFileDate).IsRequired();
+                e.Property(s => s.TermsAndConditionsContent).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDate).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();

@@ -1,0 +1,31 @@
+@inject Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository _termsRepo
+@{
+    var _termsContent = (await _termsRepo.Get()).TermsAndConditionsContent;
+    var _acceptMode = ViewData["AcceptMode"] as bool? == true;
+}
+
+@if (!string.IsNullOrWhiteSpace(_termsContent))
+{
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms &amp; Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="termsModalBody">
+                    @Html.Raw(_termsContent)
+                </div>
+                @if (_acceptMode)
+                {
+                    <div class="modal-footer justify-content-center">
+                        <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                        <button type="button" class="btn btn-primary" id="termsAcceptBtn" disabled>
+                            I Accept
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

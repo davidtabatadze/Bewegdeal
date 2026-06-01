@@ -1,13 +1,12 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
 [Authorize(Roles = UserRoleEnum.Administrator)]
-public class SettingsController(ISettingsRepository settingsRepository, FileService fileService) : XBaseController
+public class SettingsController(ISettingsRepository settingsRepository) : XBaseController
 {
 
     #region Index
@@ -15,11 +14,7 @@ public class SettingsController(ISettingsRepository settingsRepository, FileServ
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var settings = await settingsRepository.Get();
-
-        ViewBag.TermsFileUrl = await fileService.GetUrl(settings.TermsAndConditionsFileId);
-
-        return View(settings);
+        return View(await settingsRepository.Get());
     }
 
     #endregion
@@ -27,24 +22,11 @@ public class SettingsController(ISettingsRepository settingsRepository, FileServ
     #region Save Term And Condition Settings
 
     [HttpPost]
-    public async Task<IActionResult> SaveTermAndConditionSettings(IFormFile? termsFile)
+    public async Task<IActionResult> SaveTermAndConditionSettings(string? termsContent)
     {
-        if (termsFile is null)
-        {
-            TempData["TermsError"] = "Please select a PDF file to upload.";
-            return RedirectToAction(nameof(Index));
-        }
-
         var settings = await settingsRepository.Get();
-
-        var file = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
-        if (file.Message is not null || file.ObjectId is null)
-        {
-            TempData["TermsError"] = file.Message;
-            return RedirectToAction(nameof(Index));
-        }
-
-        settings.TermsAndConditionsFileId = file.ObjectId.Value;
+        settings.TermsAndConditionsContent = termsContent ?? string.Empty;
+        settings.TermsAndConditionsContentDate = DateTime.Now;
         await settingsRepository.Update(settings);
 
         TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";

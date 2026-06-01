@@ -15,13 +15,13 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new SettingsEntity
                 {
                     Id = 1,
-                    TermsAndConditionsFileDate = DateTime.Now,
+                    TermsAndConditionsContent = "This is a free T&C",
+                    TermsAndConditionsContentDate = DateTime.Now,
                     RequestImageMaxCount = 5,
                     RequestImageMaxSize = 4,
                     RequestVideoMaxCount = 1,
                     RequestVideoMaxSize = 20,
-                    RequestNegotiationMinutes = 60,
-                    TermsAndConditionsFileId = 1
+                    RequestNegotiationMinutes = 60
                 });
             }
         }

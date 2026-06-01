@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace Bewegdeal.Controllers;
 
-public class AccountController(AccountService AccountService, SettingService SettingService, FileService FileService) : XBaseController
+public class AccountController(AccountService AccountService, FileService FileService) : XBaseController
 {
 
     #region Login
@@ -176,9 +176,8 @@ public class AccountController(AccountService AccountService, SettingService Set
     #region Register
 
     [HttpGet]
-    public async Task<IActionResult> Register()
+    public IActionResult Register()
     {
-        ViewBag.TermsFileUrl = await SettingService.GetTermsAndConditionsUrl();
         return View(new RegisterViewModel());
     }
 
