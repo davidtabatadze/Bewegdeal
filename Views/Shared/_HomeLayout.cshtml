@@ -115,5 +115,23 @@
   <!-- Notification toast container (bottom-right) -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifToastContainer" style="z-index:9999;"></div>
 
+  <!-- Terms & Conditions modal (view mode for footer link; locked accept mode when re-acceptance required) -->
+  @{
+      var _showTcModal = Context.Items.ContainsKey("ShowTCModal");
+      if (_showTcModal) { ViewData["AcceptMode"] = true; ViewData["LockedMode"] = true; }
+  }
+  @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
+  @{ ViewData.Remove("AcceptMode"); ViewData.Remove("LockedMode"); }
+
+  @if (_showTcModal)
+  {
+      <script>
+          document.addEventListener('DOMContentLoaded', function () {
+              var el = document.getElementById('termsModal');
+              if (el) { new bootstrap.Modal(el).show(); }
+          });
+      </script>
+  }
+
 </body>
 </html>

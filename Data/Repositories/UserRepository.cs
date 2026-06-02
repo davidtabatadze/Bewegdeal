@@ -70,6 +70,13 @@ namespace Bewegdeal.Data.Repositories
                                        );
                     break;
 
+                case UserUpdateAreaEnum.TermsAcceptDate:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.TermsAndConditionsAcceptDate, update.TermsAndConditionsAcceptDate)
+                                       );
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid update area", nameof(area));
             }

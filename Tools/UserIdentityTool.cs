@@ -17,6 +17,7 @@ namespace Bewegdeal.Tools
                 new("Theme", user.Theme),
                 new("PictureUrl", pictureUrl ?? string.Empty),
                 new("AcquaintedHIW", user.AcquaintedHIW ? "true" : "false"),
+                new("TermsAcceptDate", user.TermsAndConditionsAcceptDate.ToString("o")),
             };
 
             return new ClaimsPrincipal(

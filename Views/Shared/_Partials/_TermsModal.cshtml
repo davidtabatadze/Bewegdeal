@@ -2,16 +2,21 @@
 @{
     var _termsContent = (await _termsRepo.Get()).TermsAndConditionsContent;
     var _acceptMode = ViewData["AcceptMode"] as bool? == true;
+    var _lockedMode = ViewData["LockedMode"] as bool? == true;
 }
 
 @if (!string.IsNullOrWhiteSpace(_termsContent))
 {
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true"
+         @(_lockedMode ? Html.Raw("data-bs-backdrop=\"static\" data-bs-keyboard=\"false\"") : Html.Raw(""))>
         <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Terms &amp; Conditions</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    @if (!_lockedMode)
+                    {
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    }
                 </div>
                 <div class="modal-body" id="termsModalBody">
                     @Html.Raw(_termsContent)
@@ -19,10 +24,25 @@
                 @if (_acceptMode)
                 {
                     <div class="modal-footer justify-content-center">
-                        <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
-                        <button type="button" class="btn btn-primary" id="termsAcceptBtn" disabled>
-                            I Accept
-                        </button>
+                        @if (_lockedMode)
+                        {
+                            <!-- Locked: form POST to persist acceptance -->
+                            <form method="post" action="/User/AcceptTerms" id="acceptTermsForm">
+                                @Html.AntiForgeryToken()
+                            </form>
+                            <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <button type="submit" form="acceptTermsForm" id="termsAcceptBtn" class="btn btn-primary" disabled>
+                                I Accept
+                            </button>
+                        }
+                        else
+                        {
+                            <!-- Registration: JS-handled, no POST -->
+                            <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <button type="button" id="termsAcceptBtn" class="btn btn-primary" disabled>
+                                I Accept
+                            </button>
+                        }
                     </div>
                 }
             </div>

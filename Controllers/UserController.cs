@@ -234,5 +234,19 @@ namespace Bewegdeal.Controllers
         }
 
         #endregion
+
+        #region Terms
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptTerms()
+        {
+            await UserService.SetTermsAcceptDate(GetClaim<long>(ClaimTypes.NameIdentifier));
+            await RefreshClaim("TermsAcceptDate", DateTime.Now);
+            return RedirectToAction("Index", "Home");
+        }
+
+        #endregion
     }
 }

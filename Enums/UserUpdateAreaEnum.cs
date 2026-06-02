@@ -3,6 +3,7 @@
     public enum UserUpdateAreaEnum
     {
         Status = 1,
-        Password
+        Password,
+        TermsAcceptDate
     }
 }
