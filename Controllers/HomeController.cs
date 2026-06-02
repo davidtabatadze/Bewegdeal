@@ -12,7 +12,7 @@ namespace Bewegdeal.Controllers
         {
             if (!HasClaim("AcquaintedHIW", true) && !User.IsInRole(UserRoleEnum.Administrator))
             {
-                return RedirectToAction(GetClaim<string>(ClaimTypes.Role), "HowItWorks");
+                return RedirectToAction("C" + GetClaim<string>(ClaimTypes.Role)!.Substring(1), "HowItWorks");
             }
 
             if (User.IsInRole(UserRoleEnum.Customer))

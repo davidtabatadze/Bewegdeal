@@ -48,4 +48,52 @@
             </div>
         </div>
     </div>
+
+    @if (_acceptMode)
+    {
+        <script>
+            (function () {
+                var modalEl   = document.getElementById('termsModal');
+                if (!modalEl) { return; }
+                var acceptBtn  = document.getElementById('termsAcceptBtn');
+                var body       = document.getElementById('termsModalBody');
+                var scrollHint = document.getElementById('termsScrollHint');
+
+                // Unlock immediately if content fits without scrolling
+                modalEl.addEventListener('shown.bs.modal', function () {
+                    if (body.scrollHeight <= body.clientHeight) {
+                        acceptBtn.disabled = false;
+                        scrollHint.style.display = 'none';
+                    }
+                });
+
+                // Unlock accept button when scrolled to the bottom
+                body.addEventListener('scroll', function () {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                        acceptBtn.disabled = false;
+                        scrollHint.style.display = 'none';
+                    }
+                });
+
+                @if (!_lockedMode)
+                {
+                    <text>
+                // Accept: check the checkbox and close (registration flow)
+                acceptBtn.addEventListener('click', function () {
+                    var cb = document.getElementById('agreeTerms');
+                    if (cb) { cb.checked = true; }
+                    bootstrap.Modal.getInstance(modalEl).hide();
+                });
+
+                // Dismiss without accepting: ensure checkbox stays unchecked
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    if (!acceptBtn.disabled) { return; }
+                    var cb = document.getElementById('agreeTerms');
+                    if (cb) { cb.checked = false; }
+                });
+                    </text>
+                }
+            })();
+        </script>
+    }
 }

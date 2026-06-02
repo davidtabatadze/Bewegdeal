@@ -126,10 +126,7 @@
   @if (_showTcModal)
   {
       <script>
-          document.addEventListener('DOMContentLoaded', function () {
-              var el = document.getElementById('termsModal');
-              if (el) { new bootstrap.Modal(el).show(); }
-          });
+          bootstrap.Modal.getOrCreateInstance(document.getElementById('termsModal')).show();
       </script>
   }
 

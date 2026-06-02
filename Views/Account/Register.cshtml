@@ -28,67 +28,41 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js"></script>
+    @{ ViewData["AcceptMode"] = true; }
+    @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
+    @{ ViewData.Remove("AcceptMode"); }
     <script>
         (function () {
-                var modalEl    = document.getElementById('termsModal');
-                if (!modalEl) { return; } // no T&C content configured yet
+            var modalEl = document.getElementById('termsModal');
+            if (!modalEl) { return; } // no T&C content configured yet
 
-                var checkbox   = document.getElementById('agreeTerms');
-                var modal      = new bootstrap.Modal(modalEl);
-                var acceptBtn  = document.getElementById('termsAcceptBtn');
-                var body       = document.getElementById('termsModalBody');
-                var scrollHint = document.getElementById('termsScrollHint');
+            var checkbox   = document.getElementById('agreeTerms');
+            var acceptBtn  = document.getElementById('termsAcceptBtn');
+            var body       = document.getElementById('termsModalBody');
+            var scrollHint = document.getElementById('termsScrollHint');
 
-                // Intercept clicks on the checkbox
-                checkbox.addEventListener('click', function (e) {
-                    if (this.checked) {
-                        // User is trying to check → prevent and open modal
-                        e.preventDefault();
-                        acceptBtn.disabled = true;
-                        scrollHint.style.display = '';
-                        body.scrollTop = 0;
-                        modal.show();
-                    }
-                    // User is unchecking → allow normally
-                });
-
-                // Also intercept clicks on the "Terms & Conditions" text link
-                document.getElementById('termsLink').addEventListener('click', function () {
+            // Intercept clicks on the checkbox
+            checkbox.addEventListener('click', function (e) {
+                if (this.checked) {
+                    // User is trying to check → prevent and open modal
+                    e.preventDefault();
                     acceptBtn.disabled = true;
                     scrollHint.style.display = '';
                     body.scrollTop = 0;
-                    modal.show();
-                });
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+                // User is unchecking → allow normally
+            });
 
-                // Unlock immediately if content fits without scrolling
-                modalEl.addEventListener('shown.bs.modal', function () {
-                    if (body.scrollHeight <= body.clientHeight) {
-                        acceptBtn.disabled = false;
-                        scrollHint.style.display = 'none';
-                    }
-                });
-
-                // Unlock accept button when scrolled to the bottom
-                body.addEventListener('scroll', function () {
-                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
-                        acceptBtn.disabled = false;
-                        scrollHint.style.display = 'none';
-                    }
-                });
-
-                // Accept: check the checkbox and close
-                acceptBtn.addEventListener('click', function () {
-                    checkbox.checked = true;
-                    modal.hide();
-                });
-
-                // Dismiss without accepting: ensure checkbox stays unchecked
-                modalEl.addEventListener('hidden.bs.modal', function () {
-                    if (!acceptBtn.disabled) { return; } // accepted path hides modal too, skip
-                    checkbox.checked = false;
-                });
-            })();
-        </script>
+            // Also intercept clicks on the "Terms & Conditions" text link
+            document.getElementById('termsLink').addEventListener('click', function () {
+                acceptBtn.disabled = true;
+                scrollHint.style.display = '';
+                body.scrollTop = 0;
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            });
+        })();
+    </script>
     <script>
         (function () {
             var stored = localStorage.getItem('templateCustomizer-front-page--Theme');
@@ -377,10 +351,6 @@
         </div>
     </div>
 </div>
-
-@{ ViewData["AcceptMode"] = true; }
-@await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
-@{ ViewData.Remove("AcceptMode"); }
 
 <script>
     window.Helpers.initCustomOptionCheck();

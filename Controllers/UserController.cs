@@ -243,7 +243,8 @@ namespace Bewegdeal.Controllers
         public async Task<IActionResult> AcceptTerms()
         {
             await UserService.SetTermsAcceptDate(GetClaim<long>(ClaimTypes.NameIdentifier));
-            await RefreshClaim("TermsAcceptDate", DateTime.Now);
+            await RefreshClaim("TermsAcceptDate", DateTime.Now.AddMinutes(5));
+            await RefreshClaim("TermsAccepted", "true");
             return RedirectToAction("Index", "Home");
         }
 
