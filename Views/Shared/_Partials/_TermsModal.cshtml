@@ -30,7 +30,7 @@
                             <form method="post" action="/User/AcceptTerms" id="acceptTermsForm">
                                 @Html.AntiForgeryToken()
                             </form>
-                            <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
                             <button type="submit" form="acceptTermsForm" id="termsAcceptBtn" class="btn btn-primary" disabled>
                                 I Accept
                             </button>
@@ -38,7 +38,7 @@
                         else
                         {
                             <!-- Registration: JS-handled, no POST -->
-                            <small class="text-muted me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
                             <button type="button" id="termsAcceptBtn" class="btn btn-primary" disabled>
                                 I Accept
                             </button>

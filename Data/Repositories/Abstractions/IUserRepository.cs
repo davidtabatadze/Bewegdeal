@@ -9,6 +9,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
     {
         Task Update(UserUpdateAreaEnum area, UserEntity update);
         Task<UserEntity?> Get(UserFilter filter, string[]? properties = null);
+        Task<UserEntity?> GetRegistered(string email, string mobile);
         Task<int> Count(UserFilter filter);
         Task<List<UserEntity>> Load(UserFilter filter);
     }

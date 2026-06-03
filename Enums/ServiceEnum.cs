@@ -6,5 +6,7 @@ namespace Bewegdeal.Enums
         public const string Removal = "removal";
         public const string Pickup = "pickup";
         public const string Transport = "transport";
+
+        public static readonly string[] All = [Moving, Removal, Pickup, Transport];
     }
 }

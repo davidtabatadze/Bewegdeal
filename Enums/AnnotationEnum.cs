@@ -39,7 +39,7 @@
             }
             public class Register
             {
-                public const string Exists = "An account with this email address already exists. You may sign in instead.";
+                public const string Exists = "An account with this email address or mobile number already exists. You may sign in instead.";
             }
             public class Email
             {

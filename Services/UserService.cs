@@ -56,6 +56,9 @@ namespace Bewegdeal.Services
         public async Task<UserEntity?> Get(string email, string[]? properties = null)
             => await UserRepository.Get(new UserFilter { Email = (email ?? "-").Trim() }, properties);
 
+        public async Task<UserEntity?> GetRegistered(string email, string mobile)
+            => await UserRepository.GetRegistered(email, mobile);
+
         public async Task<int> Count(UserFilter filter)
             => await UserRepository.Count(filter);
 

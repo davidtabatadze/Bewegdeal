@@ -82,6 +82,14 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
+        public async Task<UserEntity?> GetRegistered(string email, string mobile)
+            => Context.Users.Where(u =>
+                                u.Email.ToLower() == (email ?? "-").ToLower() ||
+                                u.Mobile.ToLower() == (mobile ?? "-").ToLower()
+                            )
+                            .Select(BuildSelect<UserEntity>([nameof(UserEntity.Id)]))
+                            .FirstOrDefault();
+
         public async Task<UserEntity?> Get(UserFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Users.AsQueryable(), filter).Select(BuildSelect<UserEntity>(properties)).FirstOrDefaultAsync();
 

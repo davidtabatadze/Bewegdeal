@@ -173,21 +173,11 @@ namespace Bewegdeal.Services
         public async Task<ResultModel> Register(RegisterViewModel model)
         {
             // validate email uniqueness
-            var existing = await UserService.Get(model.Email, [nameof(UserEntity.Id)]);
+            var existing = await UserService.GetRegistered(model.Email, model.Mobile);
             if (existing is not null)
             {
                 return ResultModel.Fail(AnnotationEnum.Account.Register.Exists);
             }
-
-            // setup interests
-            var interests = model.Role == UserRoleEnum.Customer ?
-                            [] :
-                            new string[] {
-                            model.ServiceMoving ?? "",
-                            model.ServiceJunk ?? "",
-                            model.ServiceStorePickup ?? "",
-                            model.ServiceVehicle ?? ""
-                            }.Where(i => !string.IsNullOrWhiteSpace(i));
 
             // ready terms of service
             long? termsFileId = null;
@@ -215,7 +205,7 @@ namespace Bewegdeal.Services
                 Address = model.Address,
                 Password = hash,
                 Salt = salt,
-                Interests = [.. interests],
+                Interests = model.Interests ?? [],
                 Status = UserStatusEnum.Unverified,
                 ServiceTermsFileId = termsFileId,
                 AcquaintedHIW = false,
