@@ -100,22 +100,30 @@ namespace Bewegdeal.Services
             return ResultModel.Ok(AnnotationEnum.Account.ResetPassword.Success);
         }
 
-        public async Task<ResultModel> VerifyEmail(string email, string otp)
+        public async Task<ResultModel> VerifyAccount(string email, string mobile, string emailOtp, string mobileOtp)
         {
-            // seek one time code
-            var otCodeKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
-            var otCode = cache.Get<string>(otCodeKey);
+            // email code
+            var emailCacheKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
+            var cachedEmailOtp = cache.Get<string>(emailCacheKey);
 
-            // no code? error
-            if (otCode is null)
+            // mobile code
+            var smsCacheKey = CacheKeyTool.Get(CacheKeyEnum.SmsVerification, mobile);
+            var cachedMobileOtp = cache.Get<string>(smsCacheKey);
+
+            // expired ...
+            if (cachedEmailOtp is null || cachedMobileOtp is null)
             {
                 return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.Expired);
             }
 
-            // wrong input? error
-            if (otCode != otp)
+            // invalid ...
+            if (cachedEmailOtp != emailOtp)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.Invalid);
+                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidEmail);
+            }
+            if (cachedMobileOtp != mobileOtp)
+            {
+                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidMobile);
             }
 
             // update user
@@ -134,7 +142,8 @@ namespace Bewegdeal.Services
             }
 
             // clear cache
-            cache.Remove(otCodeKey);
+            cache.Remove(emailCacheKey);
+            cache.Remove(smsCacheKey);
             return ResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
         }
 
@@ -147,7 +156,7 @@ namespace Bewegdeal.Services
             // cache the code for later verification
             cache.Set(
                 CacheKeyTool.Get(CacheKeyEnum.SmsVerification, mobile),
-                otEmail,
+                otSms,
                 TimeSpan.FromMinutes(
                     Convert.ToInt64(ConstantEnum.VerificationTimeout)
                 )

@@ -131,18 +131,20 @@ public class AccountController(AccountService AccountService, FileService FileSe
     #region Verify Email
 
     [HttpGet]
-    public IActionResult VerifyEmail(string email)
+    public IActionResult VerifyEmail(string email, string mobile)
     {
         ViewBag.Email = email;
+        ViewBag.Mobile = mobile;
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> VerifyEmail(string email, string otp)
+    public async Task<IActionResult> VerifyEmail(string email, string mobile, string emailOtp, string mobileOtp)
     {
         ViewBag.Email = email;
+        ViewBag.Mobile = mobile;
 
-        var result = await AccountService.VerifyEmail(email, otp);
+        var result = await AccountService.VerifyAccount(email, mobile, emailOtp, mobileOtp);
 
         if (!result.Success)
         {
@@ -155,11 +157,12 @@ public class AccountController(AccountService AccountService, FileService FileSe
     }
 
     [HttpPost]
-    public async Task<IActionResult> VerifyResend(string email)
+    public async Task<IActionResult> VerifyResend(string email, string mobile)
     {
         ViewBag.Email = email;
+        ViewBag.Mobile = mobile;
 
-        var result = await AccountService.VerifySend(email, "");
+        var result = await AccountService.VerifySend(email, mobile);
 
         if (!result.Success)
         {
@@ -201,7 +204,7 @@ public class AccountController(AccountService AccountService, FileService FileSe
             return View(model);
         }
 
-        return RedirectToAction(nameof(VerifyEmail), new { email = model.Email });
+        return RedirectToAction(nameof(VerifyEmail), new { email = model.Email, mobile = model.Mobile });
     }
 
     #endregion

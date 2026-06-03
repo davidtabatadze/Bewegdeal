@@ -32,10 +32,11 @@
             }
             public class VerifyEmail
             {
-                public const string Expired = "Verification code has expired. Please, request a new one.";
-                public const string Invalid = "Invalid verification code. Please, reenter or request a new one.";
-                public const string Success = "Your email has been verified. You may sign in now.";
-                public const string Resent = "A new verification code has been sent to your email.";
+                public const string Expired = "Verification codes has expired. Please, request a new one.";
+                public const string InvalidEmail = "Invalid email verification code. Please, reenter a correct one.";
+                public const string InvalidMobile = "Invalid mobile verification code. Please, reenter a correct one.";
+                public const string Success = "Your account has been verified. You may sign in now.";
+                public const string Resent = "New verification codes have been sent to your email and mobile.";
             }
             public class Register
             {
