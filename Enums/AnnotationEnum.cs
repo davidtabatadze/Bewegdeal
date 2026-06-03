@@ -46,6 +46,10 @@
                 public const string Verification = "We are sorry, we are unable to send you a verification email right now. Please, try again later or contact the site administration.";
                 public const string Reset = "We are sorry, we are unable to send you a password reset email right now. Please, try again later or contact the site administration.";
             }
+            public class Sms
+            {
+                public const string Verification = "We are sorry, we are unable to send you a verification sms right now. Please, try again later or contact the site administration.";
+            }
         }
         public class Request
         {

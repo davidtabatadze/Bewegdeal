@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService FileService, MailService MailService, IMemoryCache cache)
+    public class AccountService(UserService UserService, FileService FileService, BrevoService BrevoService, IMemoryCache cache)
     {
         public async Task<ResultObjectModel<UserEntity>> Login(string email, string password)
         {
@@ -45,7 +45,7 @@ namespace Bewegdeal.Services
                 );
 
                 // send email
-                var result = await MailService.Send(
+                var result = await BrevoService.SendEmail(
                     email,
                     EmailEnum.PasswordReset,
                     new Dictionary<string, object> {
@@ -138,31 +138,53 @@ namespace Bewegdeal.Services
             return ResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
         }
 
-        public async Task<ResultModel> VerifySend(string email)
+        public async Task<ResultModel> VerifySend(string email, string mobile)
         {
             // generate ot code
-            var otCode = Random.Shared.Next(100000, 1000000).ToString();
+            var otSms = Random.Shared.Next(100000, 1000000).ToString();
+            var otEmail = Random.Shared.Next(100000, 1000000).ToString();
 
             // cache the code for later verification
             cache.Set(
-                CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email),
-                otCode,
+                CacheKeyTool.Get(CacheKeyEnum.SmsVerification, mobile),
+                otEmail,
                 TimeSpan.FromMinutes(
-                    Convert.ToInt64(ConstantEnum.EmailVerificationTimeout)
+                    Convert.ToInt64(ConstantEnum.VerificationTimeout)
+                )
+            );
+            cache.Set(
+                CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email),
+                otEmail,
+                TimeSpan.FromMinutes(
+                    Convert.ToInt64(ConstantEnum.VerificationTimeout)
                 )
             );
 
-            // send email
-            var result = await MailService.Send(
-                email,
-                EmailEnum.VerifyAccount,
+            // send sms
+            var smsResult = await BrevoService.SendSms(
+                mobile,
                 new Dictionary<string, object> {
-                    { "otcode", otCode },
-                    { "timeout", ConstantEnum.EmailVerificationTimeout }
+                    { "otcode", otSms },
+                    { "timeout", ConstantEnum.VerificationTimeout }
                 }
             );
 
-            if (!result.Success)
+            if (!smsResult.Success)
+            {
+                return ResultModel.Fail(AnnotationEnum.Account.Sms.Verification);
+            }
+
+            // send email
+            var emailResult = await BrevoService.SendEmail(
+                email,
+                EmailEnum.VerifyAccount,
+                new Dictionary<string, object> {
+                    { "otcode", otEmail },
+                    { "timeout", ConstantEnum.VerificationTimeout }
+                }
+            );
+
+            if (!emailResult.Success)
             {
                 return ResultModel.Fail(AnnotationEnum.Account.Email.Verification);
             }
@@ -215,7 +237,7 @@ namespace Bewegdeal.Services
             });
 
             // send verification email
-            var verification = await VerifySend(user.Email);
+            var verification = await VerifySend(user.Email, user.Mobile);
             if (!verification.Success)
             {
                 return ResultModel.Fail(verification.Message);

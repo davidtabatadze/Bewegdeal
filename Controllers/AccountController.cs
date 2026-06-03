@@ -159,7 +159,7 @@ public class AccountController(AccountService AccountService, FileService FileSe
     {
         ViewBag.Email = email;
 
-        var result = await AccountService.VerifySend(email);
+        var result = await AccountService.VerifySend(email, "");
 
         if (!result.Success)
         {

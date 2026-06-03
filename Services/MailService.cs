@@ -4,9 +4,22 @@ using Bewegdeal.Tools;
 
 namespace Bewegdeal.Services
 {
-    public class MailService
+    public class BrevoService
     {
-        public async Task<ResultModel> Send(string email, EmailEnum type, Dictionary<string, object>? parameters = null)
+        public async Task<ResultModel> SendSms(string mobile, Dictionary<string, object>? parameters = null)
+        {
+            var content = "Hello,\nYour Bewegdeal verification code is: {{otcode}}\nThis code expires in {{timeout}} minutes.\nIf you did not register on Bewegdeal, please ignore this sms.";
+            foreach (var param in parameters ?? [])
+            {
+                content = content.Replace("{{" + param.Key + "}}", param.Value.ToString());
+            }
+
+            var result = await BrevoTool.SendSms(mobile, content);
+
+            return result.Value == BrevoStatusEnum.Sent.Value ? ResultModel.Ok() : ResultModel.Fail("");
+        }
+
+        public async Task<ResultModel> SendEmail(string email, EmailEnum type, Dictionary<string, object>? parameters = null)
         {
             var parts = type.Value.Split(" # ");
             var title = parts[0];
@@ -24,13 +37,13 @@ namespace Bewegdeal.Services
                 content = content.Replace("{{" + param.Key + "}}", param.Value.ToString());
             }
 
-            var result = await BrevoTool.Send(
+            var result = await BrevoTool.SendEmail(
                 email,
                 title,
                 content
             );
 
-            return result.Value == EmailStatusEnum.Sent.Value ? ResultModel.Ok() : ResultModel.Fail("");
+            return result.Value == BrevoStatusEnum.Sent.Value ? ResultModel.Ok() : ResultModel.Fail("");
         }
     }
 }
