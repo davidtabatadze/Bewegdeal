@@ -17,7 +17,7 @@ Dropzone.autoDiscover = false;
   const _existingFiles = (typeof existingFiles !== 'undefined') ? existingFiles : [];
 
   // ── Notyf ─────────────────────────────────────────────────────────────────
-  const notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
+  const notyf = new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } });
 
   // ── Dropzone preview template ─────────────────────────────────────────────
   const previewTemplate = `<div class="dz-preview dz-file-preview">

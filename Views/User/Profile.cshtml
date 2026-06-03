@@ -320,7 +320,7 @@
 
 @section PageScripts {
     <script>
-        var notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
+        var notyf = new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } });
 
         @if (TempData["PersonalError"] is string personalError) {
             <text>notyf.error(@Json.Serialize(personalError));</text>

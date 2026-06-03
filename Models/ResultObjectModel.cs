@@ -11,5 +11,7 @@
             new() { Success = true, Message = message };
         public static ResultObjectModel<T> Fail(string? message = null) =>
             new() { Success = false, Message = message };
+        public static ResultObjectModel<T> Fail(T result, string? message = null) =>
+            new() { Success = false, Object = result, Message = message };
     }
 }

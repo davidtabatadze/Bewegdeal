@@ -21,7 +21,7 @@ namespace Bewegdeal.Services
             {
                 UserStatusEnum.Blocked => ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Blocked),
                 UserStatusEnum.Pending => ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Pending),
-                UserStatusEnum.Unverified => ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Unverified),
+                UserStatusEnum.Unverified => ResultObjectModel<UserEntity>.Fail(user, AnnotationEnum.Account.Login.Unverified),
                 _ => ResultObjectModel<UserEntity>.Ok(user)
             };
         }

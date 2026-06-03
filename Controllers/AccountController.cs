@@ -31,7 +31,11 @@ public class AccountController(AccountService AccountService, FileService FileSe
 
         if (result.Message == AnnotationEnum.Account.Login.Unverified)
         {
-            return RedirectToAction(nameof(VerifyEmail), new { email });
+            return RedirectToAction(nameof(VerifyAccount), new
+            {
+                email = result.Object?.Email ?? "-",
+                mobile = result.Object?.Mobile ?? "-"
+            });
         }
         else if (result.Message is not null)
         {
@@ -128,10 +132,10 @@ public class AccountController(AccountService AccountService, FileService FileSe
 
     #endregion
 
-    #region Verify Email
+    #region Verify Account
 
     [HttpGet]
-    public IActionResult VerifyEmail(string email, string mobile)
+    public IActionResult VerifyAccount(string email, string mobile)
     {
         ViewBag.Email = email;
         ViewBag.Mobile = mobile;
@@ -139,7 +143,7 @@ public class AccountController(AccountService AccountService, FileService FileSe
     }
 
     [HttpPost]
-    public async Task<IActionResult> VerifyEmail(string email, string mobile, string emailOtp, string mobileOtp)
+    public async Task<IActionResult> VerifyAccount(string email, string mobile, string emailOtp, string mobileOtp)
     {
         ViewBag.Email = email;
         ViewBag.Mobile = mobile;
@@ -167,11 +171,11 @@ public class AccountController(AccountService AccountService, FileService FileSe
         if (!result.Success)
         {
             ViewBag.Error = result.Message;
-            return View("VerifyEmail");
+            return View("VerifyAccount");
         }
 
         ViewBag.Success = result.Message;
-        return View("VerifyEmail");
+        return View("VerifyAccount");
     }
 
     #endregion
@@ -204,7 +208,7 @@ public class AccountController(AccountService AccountService, FileService FileSe
             return View(model);
         }
 
-        return RedirectToAction(nameof(VerifyEmail), new { email = model.Email, mobile = model.Mobile });
+        return RedirectToAction(nameof(VerifyAccount), new { email = model.Email, mobile = model.Mobile });
     }
 
     #endregion

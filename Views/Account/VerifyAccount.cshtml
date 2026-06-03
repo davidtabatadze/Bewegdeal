@@ -26,13 +26,13 @@
     @if (ViewBag.Error is string error)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
     @if (ViewBag.Success is string success)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(success));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(success));
         </script>
     }
 }
@@ -57,7 +57,7 @@
                     </p>
                     <p class="mb-5 text-muted small">Please, enter recieved codes below.</p>
 
-                    <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyEmail">
+                    <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyAccount">
                         <input type="hidden" name="email" value="@ViewBag.Email" />
                         <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
 

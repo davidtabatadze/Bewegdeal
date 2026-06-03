@@ -74,7 +74,7 @@
     @if (ViewBag.Error is string error)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
 }
