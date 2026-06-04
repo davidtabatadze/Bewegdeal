@@ -5,7 +5,6 @@ using Bewegdeal.Models;
 using Bewegdeal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bewegdeal.Controllers
 {
@@ -42,7 +41,7 @@ namespace Bewegdeal.Controllers
                 return NotFound();
             }
 
-            if (HasClaim(ClaimTypes.NameIdentifier, user.Id))
+            if (HasClaim(IdentityFieldEnum.Id, user.Id))
             {
                 return BadRequest();
             }
@@ -235,6 +234,22 @@ namespace Bewegdeal.Controllers
 
         #endregion
 
+        #region How It Works
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AcceptHIW()
+        {
+            await UserService.Update(UserUpdateAreaEnum.AcceptHIW, new UserEntity
+            {
+                Id = GetClaim<long>(IdentityFieldEnum.Id)
+            });
+            await RefreshClaim(IdentityFieldEnum.AcquaintedHIW, true);
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        #endregion
+
         #region Terms
 
         [Authorize]
@@ -242,9 +257,13 @@ namespace Bewegdeal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AcceptTerms()
         {
-            await UserService.SetTermsAcceptDate(GetClaim<long>(ClaimTypes.NameIdentifier));
-            await RefreshClaim("TermsAcceptDate", DateTime.Now.AddMinutes(5));
-            await RefreshClaim("TermsAccepted", "true");
+            await UserService.Update(UserUpdateAreaEnum.AcceptTerms, new UserEntity
+            {
+                Id = GetClaim<long>(IdentityFieldEnum.Id),
+                TermsAndConditionsAcceptDate = DateTime.Now
+            });
+            await RefreshClaim(IdentityFieldEnum.TermsAcceptDate, DateTime.Now.AddMinutes(5));
+            await RefreshClaim(IdentityFieldEnum.TermsAccepted, "true");
             return RedirectToAction("Index", "Home");
         }
 

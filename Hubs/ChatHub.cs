@@ -123,7 +123,7 @@ namespace Bewegdeal.Hubs
         // ── Helpers ───────────────────────────────────────────────────────────────
 
         private long GetUserId() =>
-            long.TryParse(Context.User?.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
+            long.TryParse(Context.User?.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
 
         private static bool IsParticipant(ChatEntity chat, long userId) =>
             chat.CustomerId == userId || chat.CompanyId == userId;

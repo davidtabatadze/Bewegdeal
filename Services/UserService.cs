@@ -17,13 +17,6 @@ namespace Bewegdeal.Services
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
             => await UserRepository.Update(area, update);
 
-        public async Task SetTermsAcceptDate(long id)
-            => await Update(UserUpdateAreaEnum.TermsAcceptDate, new UserEntity
-            {
-                Id = id,
-                TermsAndConditionsAcceptDate = DateTime.Now
-            });
-
         //public async Task SetUserStatus(long id, string status)
         //{
         //    await UserRepository.SetUserStatus(id, status);

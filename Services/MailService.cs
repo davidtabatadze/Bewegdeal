@@ -8,7 +8,7 @@ namespace Bewegdeal.Services
     {
         public async Task<ResultModel> SendSms(string mobile, Dictionary<string, object>? parameters = null)
         {
-            var content = "Hello,\nYour Bewegdeal verification code is: {{otcode}}\nThis code expires in {{timeout}} minutes.\nIf you did not register on Bewegdeal, please ignore this sms.";
+            var content = "Hallo,\nIhr Bewegdeal-bestätigungscode lautet:: {{otcode}}\nDieser Code ist {{timeout}} Minuten gültig.\nFalls sie sich nicht bei Bewegdeal registriert haben, ignorieren sie diese SMS bitte.";
             foreach (var param in parameters ?? [])
             {
                 content = content.Replace("{{" + param.Key + "}}", param.Value.ToString());

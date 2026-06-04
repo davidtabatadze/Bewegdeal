@@ -70,10 +70,17 @@ namespace Bewegdeal.Data.Repositories
                                        );
                     break;
 
-                case UserUpdateAreaEnum.TermsAcceptDate:
+                case UserUpdateAreaEnum.AcceptTerms:
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
                                             u.SetProperty(p => p.TermsAndConditionsAcceptDate, update.TermsAndConditionsAcceptDate)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.AcceptHIW:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.AcquaintedHIW, true)
                                        );
                     break;
 

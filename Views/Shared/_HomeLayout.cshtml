@@ -1,134 +1,134 @@
 <!DOCTYPE html>
 <html lang="en"
       class="layout-menu-fixed layout-navbar-hidden"
-      data-skin="default" data-bs-theme="@(User.FindFirstValue("Theme") ?? "light")"
+      data-skin="default" data-bs-theme="@(User.FindFirstValue(IdentityFieldEnum.Theme) ?? "light")"
       data-assets-path="/" data-template="vertical-menu-template">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>@ViewData["Title"] - Bewegdeal</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>@ViewData["Title"] - Bewegdeal</title>
 
-  <!-- Keep localStorage in sync with the server-stored theme preference -->
-  <script>
-    (function () {
-      var serverTheme = '@(User.FindFirstValue("Theme") ?? "light")';
-      localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', serverTheme);
-      localStorage.setItem('templateCustomizer-front-page--Theme', serverTheme);
-    })();
-  </script>
+    <!-- Keep localStorage in sync with the server-stored theme preference -->
+    <script>
+            (function () {
+              var serverTheme = '@(User.FindFirstValue(IdentityFieldEnum.Theme) ?? "light")';
+              localStorage.setItem('templateCustomizer-vertical-menu-template--Theme', serverTheme);
+              localStorage.setItem('templateCustomizer-front-page--Theme', serverTheme);
+            })();
+    </script>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Core CSS -->
-  <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
-  <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
-  <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
-  <link rel="stylesheet" href="~/vendor/css/core.css" />
-  <link rel="stylesheet" href="~/css/demo.css" />
-  <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-  <link rel="stylesheet" href="~/css/site.css" />
-  <link rel="stylesheet" href="~/vendor/libs/animate-css/animate.css" />
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
+    <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
+    <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
+    <link rel="stylesheet" href="~/vendor/css/core.css" />
+    <link rel="stylesheet" href="~/css/demo.css" />
+    <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/vendor/libs/animate-css/animate.css" />
 
-  @RenderSection("VendorStyles", required: false)
-  @RenderSection("PageStyles", required: false)
+    @RenderSection("VendorStyles", required: false)
+    @RenderSection("PageStyles", required: false)
 
-  <!-- Template helpers & config (must be in <head>) -->
-  <script src="~/vendor/js/helpers.js"></script>
-  <script src="~/js/config.js"></script>
+    <!-- Template helpers & config (must be in <head>) -->
+    <script src="~/vendor/js/helpers.js"></script>
+    <script src="~/js/config.js"></script>
 </head>
 <body>
 
-  <div class="layout-wrapper layout-content-navbar">
-    <div class="layout-container">
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
 
-      <!-- Vertical Menu -->
-      @await Html.PartialAsync("Sections/Menu/_VerticalMenu")
-      <!-- / Vertical Menu -->
+            <!-- Vertical Menu -->
+            @await Html.PartialAsync("Sections/Menu/_VerticalMenu")
+            <!-- / Vertical Menu -->
+            <!-- Layout page -->
+            <div class="layout-page">
 
-      <!-- Layout page -->
-      <div class="layout-page">
-
-        @*<!-- Navbar -->
+                @*<!-- Navbar -->
         @await Html.PartialAsync("Sections/Navbar/_NavbarHome")
         <!-- / Navbar -->*@
 
-        <!-- Content wrapper -->
-        <div class="content-wrapper">
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
 
-          <!-- Content -->
-          <div class="container-xxl flex-grow-1 container-p-y">
-            @RenderBody()
-          </div>
-          <!-- / Content -->
+                    <!-- Content -->
+                    <div class="container-xxl flex-grow-1 container-p-y">
+                        @RenderBody()
+                    </div>
+                    <!-- / Content -->
+                    <!-- Footer -->
+                    @await Html.PartialAsync("Sections/Footer/_FooterHome")
+                    <!-- / Footer -->
 
-          <!-- Footer -->
-          @await Html.PartialAsync("Sections/Footer/_FooterHome")
-          <!-- / Footer -->
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- / Content wrapper -->
 
-          <div class="content-backdrop fade"></div>
+            </div>
+            <!-- / Layout page -->
+
         </div>
-        <!-- / Content wrapper -->
 
-      </div>
-      <!-- / Layout page -->
-
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+        <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+        <div class="drag-target"></div>
     </div>
 
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
-    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-    <div class="drag-target"></div>
-  </div>
+    <!-- Core Scripts -->
+    <script src="~/vendor/libs/jquery/jquery.js"></script>
+    <script src="~/vendor/libs/popper/popper.js"></script>
+    <script src="~/vendor/js/bootstrap.js"></script>
+    <script src="~/vendor/libs/node-waves/node-waves.js"></script>
+    <script src="~/vendor/libs/%40algolia/autocomplete-js.js"></script>
+    <script src="~/vendor/libs/pickr/pickr.js"></script>
+    <script src="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="~/vendor/libs/hammer/hammer.js"></script>
+    <script src="~/vendor/libs/i18n/i18n.js"></script>
+    <script src="~/vendor/js/menu.js"></script>
+    <script src="~/js/site.js"></script>
 
-  <!-- Core Scripts -->
-  <script src="~/vendor/libs/jquery/jquery.js"></script>
-  <script src="~/vendor/libs/popper/popper.js"></script>
-  <script src="~/vendor/js/bootstrap.js"></script>
-  <script src="~/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="~/vendor/libs/%40algolia/autocomplete-js.js"></script>
-  <script src="~/vendor/libs/pickr/pickr.js"></script>
-  <script src="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="~/vendor/libs/hammer/hammer.js"></script>
-  <script src="~/vendor/libs/i18n/i18n.js"></script>
-  <script src="~/vendor/js/menu.js"></script>
-  <script src="~/js/site.js"></script>
+    @RenderSection("VendorScripts", required: false)
 
-  @RenderSection("VendorScripts", required: false)
+    <script src="~/js/main.js"></script>
 
-  <script src="~/js/main.js"></script>
+    @RenderSection("PageScripts", required: false)
 
-  @RenderSection("PageScripts", required: false)
+    <!-- Global notifications -->
+    <script>
+        window.notificationConfig = { userId: '@User.FindFirstValue(IdentityFieldEnum.Id)' };
+    </script>
+    <script src="~/vendor/libs/signalr/signalr.min.js"></script>
+    <script src="~/js/notifications.js"></script>
 
-  <!-- Global notifications -->
-  <script>
-      window.notificationConfig = { userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)' };
-  </script>
-  <script src="~/vendor/libs/signalr/signalr.min.js"></script>
-  <script src="~/js/notifications.js"></script>
+    <!-- Notification toast container (bottom-right) -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifToastContainer" style="z-index:9999;"></div>
 
-  <!-- Notification toast container (bottom-right) -->
-  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifToastContainer" style="z-index:9999;"></div>
+    <!-- Terms & Conditions modal (view mode for footer link; locked accept mode when re-acceptance required) -->
+    @{
+        var _showTcModal = Context.Items.ContainsKey("ShowTCModal");
+        if (_showTcModal) { ViewData["AcceptMode"] = true; ViewData["LockedMode"] = true; }
+    }
+    @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
+    @{
+        ViewData.Remove("AcceptMode"); ViewData.Remove("LockedMode");
+    }
 
-  <!-- Terms & Conditions modal (view mode for footer link; locked accept mode when re-acceptance required) -->
-  @{
-      var _showTcModal = Context.Items.ContainsKey("ShowTCModal");
-      if (_showTcModal) { ViewData["AcceptMode"] = true; ViewData["LockedMode"] = true; }
-  }
-  @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
-  @{ ViewData.Remove("AcceptMode"); ViewData.Remove("LockedMode"); }
-
-  @if (_showTcModal)
-  {
-      <script>
-          bootstrap.Modal.getOrCreateInstance(document.getElementById('termsModal')).show();
-      </script>
-  }
+    @if (_showTcModal)
+    {
+        <script>
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('termsModal')).show();
+        </script>
+    }
 
 </body>
 </html>

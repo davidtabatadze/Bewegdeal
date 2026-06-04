@@ -4,6 +4,7 @@
     {
         Status = 1,
         Password,
-        TermsAcceptDate
+        AcceptTerms,
+        AcceptHIW
     }
 }

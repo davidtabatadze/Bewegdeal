@@ -2,6 +2,7 @@
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.Tools;
+using Bewegdeal.ViewModels;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
@@ -201,7 +202,7 @@ namespace Bewegdeal.Services
             return ResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Resent);
         }
 
-        public async Task<ResultModel> Register(RegisterViewModel model)
+        public async Task<ResultModel> Register(RegistrationViewModel model)
         {
             // validate email uniqueness
             var existing = await UserService.GetRegistered(model.Email, model.Mobile);

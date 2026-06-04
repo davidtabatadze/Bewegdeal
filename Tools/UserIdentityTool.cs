@@ -1,4 +1,5 @@
 using Bewegdeal.Data.Entities;
+using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 
@@ -14,11 +15,16 @@ namespace Bewegdeal.Tools
                 new(ClaimTypes.Role, user.Role),
                 new(ClaimTypes.Name, user.Name),
                 new(ClaimTypes.Email, user.Email),
-                new("Theme", user.Theme),
-                new("PictureUrl", pictureUrl ?? string.Empty),
-                new("AcquaintedHIW", user.AcquaintedHIW ? "true" : "false"),
-                new("TermsAcceptDate", user.TermsAndConditionsAcceptDate.ToString("o")),
-                new("TermsAccepted", "true")
+                // bewegdeal
+                new(IdentityFieldEnum.Id, user.Id.ToString()),
+                new(IdentityFieldEnum.Role, user.Role),
+                new(IdentityFieldEnum.Name, user.Name),
+                new(IdentityFieldEnum.Email, user.Email),
+                new(IdentityFieldEnum.Theme, user.Theme),
+                new(IdentityFieldEnum.PictureUrl, pictureUrl ?? string.Empty),
+                new(IdentityFieldEnum.AcquaintedHIW, user.AcquaintedHIW ? "true" : "false"),
+                new(IdentityFieldEnum.TermsAcceptDate, user.TermsAndConditionsAcceptDate.ToString("o")),
+                new(IdentityFieldEnum.TermsAccepted, "true")
             };
 
             return new ClaimsPrincipal(

@@ -1,9 +1,9 @@
 using Bewegdeal.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace Bewegdeal.Models
+namespace Bewegdeal.ViewModels
 {
-    public class RegisterViewModel : IValidatableObject
+    public class RegistrationViewModel : IValidatableObject
     {
         [Required]
         [MinLength(1)]

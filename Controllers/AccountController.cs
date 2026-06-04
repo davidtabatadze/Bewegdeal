@@ -1,7 +1,7 @@
 using Bewegdeal.Enums;
-using Bewegdeal.Models;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
+using Bewegdeal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -185,11 +185,11 @@ public class AccountController(AccountService AccountService, FileService FileSe
     [HttpGet]
     public IActionResult Register()
     {
-        return View(new RegisterViewModel());
+        return View(new RegistrationViewModel());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel model)
+    public async Task<IActionResult> Register(RegistrationViewModel model)
     {
         if (!ModelState.IsValid)
         {

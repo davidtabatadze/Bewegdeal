@@ -19,8 +19,8 @@ namespace Bewegdeal.Tools
             if (context.User.Identity?.IsAuthenticated == true)
             {
                 var status = UserStatusEnum.Active;
-                var forceTC = context.User.FindFirstValue("TermsAccepted") != "true";
-                var parse = long.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
+                var forceTC = context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted) != "true";
+                var parse = long.TryParse(context.User.FindFirstValue(IdentityFieldEnum.Id), out var userId);
 
                 if (parse)
                 {
@@ -30,9 +30,9 @@ namespace Bewegdeal.Tools
                         var settings = await settingService.Get();
                         var user = await userService.Get(userId, [nameof(UserEntity.Status)]);
 
-                        DateTime.TryParse(context.User.FindFirstValue("TermsAcceptDate"), out var termsAcceptDate);
+                        DateTime.TryParse(context.User.FindFirstValue(IdentityFieldEnum.TermsAcceptDate), out var termsAcceptDate);
                         if (
-                            context.User.FindFirstValue(ClaimTypes.Role) != UserRoleEnum.Administrator &&
+                            context.User.FindFirstValue(IdentityFieldEnum.Role) != UserRoleEnum.Administrator &&
                             termsAcceptDate < settings.TermsAndConditionsContentDate
                         )
                         {
@@ -54,15 +54,15 @@ namespace Bewegdeal.Tools
                     return;
                 }
 
-                if (!forceTC && context.User.FindFirstValue("TermsAccepted") != "true")
+                if (!forceTC && context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted) != "true")
                 {
                     await context.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(
                             new ClaimsIdentity(
                                 context.User.Claims
-                                    .Where(c => c.Type != "TermsAccepted")
-                                    .Append(new Claim("TermsAccepted", "true")),
+                                    .Where(c => c.Type != IdentityFieldEnum.TermsAccepted)
+                                    .Append(new Claim(IdentityFieldEnum.TermsAccepted, "true")),
                                 CookieAuthenticationDefaults.AuthenticationScheme
                             )
                         )

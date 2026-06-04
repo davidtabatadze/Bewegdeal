@@ -1,12 +1,12 @@
 @{
     string? currentPage = ViewContext.HttpContext.Request.Path;
 
-    var _menuName = User.FindFirstValue(ClaimTypes.Name) ?? "?";
+    var _menuName = User.FindFirstValue(IdentityFieldEnum.Name) ?? "?";
     var _menuInitials = string.Concat(
         _menuName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0]))
     );
     if (string.IsNullOrEmpty(_menuInitials)) { _menuInitials = "?"; }
-    var _menuPictureUrl = User.FindFirstValue("PictureUrl");
+    var _menuPictureUrl = User.FindFirstValue(IdentityFieldEnum.PictureUrl);
 }
 
 <!-- Menu -->
