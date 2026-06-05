@@ -1,9 +1,9 @@
 /* Custom styles goes here */
 
 :root {
-  --bs-primary: #0d9394;
-  --bs-primary-rgb: 13, 147, 148;
-  --bs-primary-text-emphasis: #053b3b;
-  --bs-primary-bg-subtle: #d1f0f0;
-  --bs-primary-border-subtle: #a3e1e1;
+  --bs-primary: #00cce0;
+  --bs-primary-rgb: 0, 204, 224;
+  --bs-primary-text-emphasis: #005259;
+  --bs-primary-bg-subtle: #ccf5f9;
+  --bs-primary-border-subtle: #99ebf3;
 }
