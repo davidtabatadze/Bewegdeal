@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace Bewegdeal.Controllers;
 
-public class AccountController(AccountService AccountService, FileService FileService) : XBaseController
+public class AccountController(AccountService AccountService) : XBaseController
 {
 
     #region Login
@@ -45,11 +45,9 @@ public class AccountController(AccountService AccountService, FileService FileSe
 
         var user = result.Object!;
 
-        var pictureUrl = await FileService.GetUrl(user.AvatarFileId);
-        var principal = UserIdentityTool.BuildPrincipal(user, pictureUrl);
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            principal,
+            UserIdentityTool.BuildPrincipal(user, AccountService.GetAvatar(user).Url),
             new AuthenticationProperties
             {
                 IsPersistent = rememberMe,

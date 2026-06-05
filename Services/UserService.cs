@@ -1,5 +1,4 @@
-﻿using Bewegdeal.Data.Base;
-using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
@@ -9,7 +8,7 @@ using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
-    public class UserService(IUserRepository UserRepository, FileService FileService)
+    public class UserService(IUserRepository UserRepository, FileService2 FileService)
     {
 
         #region Repository
@@ -39,26 +38,26 @@ namespace Bewegdeal.Services
 
         public async Task<ResultModel> UpdateProfile(long id, ProfileViewModel model)
         {
-            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ServiceTermsFileId)]);
+            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ServiceTerms)]);
             if (user is null || user.Role != model.Role)
             {
                 return ResultModel.Fail("");
             }
 
             // define service terms
-            var serviceTermsFileId = user.Role == UserRoleEnum.Company ? user.ServiceTermsFileId : null;
+            var userServiceTerms = user.Role == UserRoleEnum.Company ? user.ServiceTerms : null;
             if (user.Role == UserRoleEnum.Company)
             {
-                if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
+                if (model.DeleteServiceTerms)
                 {
-                    await FileService.Delete(user.ServiceTermsFileId.Value);
-                    serviceTermsFileId = null;
+                    await FileService.Delete(user.ServiceTerms);
+                    userServiceTerms = null;
                 }
                 if (model.ServiceTermsFile is not null)
                 {
                     var file = await FileService.Create(
                         model.ServiceTermsFile,
-                        model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
+                        model.DeleteServiceTerms ? null : user.ServiceTerms,
                         5,
                         [FileTypeEnum.PDF]
                     );
@@ -66,7 +65,7 @@ namespace Bewegdeal.Services
                     {
                         return ResultModel.Fail(file.Message);
                     }
-                    serviceTermsFileId = file.ObjectId;
+                    userServiceTerms = file.Result;
                 }
             }
 
@@ -77,7 +76,7 @@ namespace Bewegdeal.Services
                 Name = model.Name,
                 Address = model.Address,
                 Interests = model.Interests ?? [],
-                ServiceTermsFileId = serviceTermsFileId
+                ServiceTerms = userServiceTerms
             });
 
             return ResultModel.Ok();
@@ -85,25 +84,23 @@ namespace Bewegdeal.Services
 
         public async Task<ResultModel> UpdateAvatar(long id, IFormFile? avatar)
         {
-            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.AvatarFileId)]);
+            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Avatar)]);
             if (user is null)
             {
                 return ResultModel.Fail("");
             }
 
             // define file
-            var fileId = (long?)null;
-            var fileUrl = string.Empty;
-
+            string? userAvatar = null;
             if (avatar is null)
             {
-                await FileService.Delete(user.AvatarFileId);
+                await FileService.Delete(user.Avatar);
             }
             else
             {
                 var file = await FileService.Create(
                     avatar,
-                    user.AvatarFileId,
+                    user.Avatar,
                     3,
                     [FileTypeEnum.PNG, FileTypeEnum.JPEG]
                 );
@@ -111,17 +108,16 @@ namespace Bewegdeal.Services
                 {
                     return ResultModel.Fail(file.Message);
                 }
-                fileId = file.ObjectId;
-                fileUrl = await FileService.GetUrl(fileId);
+                userAvatar = file.Result;
             }
 
             await Update(UserUpdateAreaEnum.Avatar, new UserEntity
             {
                 Id = user.Id,
-                AvatarFileId = fileId
+                Avatar = userAvatar
             });
 
-            return ResultModel.Ok(fileUrl);
+            return ResultModel.Ok(FileService.GetUrl(userAvatar));
         }
 
         public async Task<ResultModel> UpdatePassword(long id, string? newPassword, string? confirmPassword)
@@ -158,49 +154,30 @@ namespace Bewegdeal.Services
                 return null;
             }
 
-            var serviceTermsFile = await FileService.Get(user.ServiceTermsFileId);
-            var serviceTermsFileUrl = await FileService.GetUrl(user.ServiceTermsFileId);
+            var serviceTermsFileUrl = FileService.GetUrl(user.ServiceTerms);
+            var serviceTermsFileName = FileService.GetName(user.ServiceTerms);
 
             return new UserProfileModel
             {
                 User = user,
                 ServiceTermsFileUrl = serviceTermsFileUrl,
-                ServiceTermsFileName = serviceTermsFile?.FileName,
-                Avatar = await GetAvatar(user)
+                ServiceTermsFileName = serviceTermsFileName,
+                Avatar = GetAvatar(user)
             };
         }
 
-        public async Task<UserAvatarModel> GetAvatar(long? id)
-            => await GetAvatar(await Get(
-                id ?? 0,
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.AvatarFileId)]
-            ));
-
-        public async Task<UserAvatarModel> GetAvatar(UserEntity? user)
-        {
-            var avatar = await FileService.Get(user?.AvatarFileId);
-            return GetAvatar(user, avatar);
-        }
-
-        public UserAvatarModel GetAvatar(UserEntity? user, FileEntity? file)
+        public UserAvatarModel GetAvatar(UserEntity? user)
         {
             var avatar = new UserAvatarModel();
 
             if (user is not null)
             {
-                if (!string.IsNullOrWhiteSpace(user.Name))
-                {
-                    avatar.Name = user.Name;
-                    avatar.Initials = string.Concat(
-                        user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                                 .Take(2).Select(p => char.ToUpper(p[0]))
-                    );
-                }
-            }
-
-            if (file is not null)
-            {
-                avatar.Url = FileService.GetUrl(file);
+                avatar.Url = FileService.GetUrl(user.Avatar);
+                avatar.Name = user.Name;
+                avatar.Initials = string.Concat(
+                    user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                .Take(2).Select(p => char.ToUpper(p[0]))
+                );
             }
 
             return avatar;
@@ -211,15 +188,7 @@ namespace Bewegdeal.Services
             var users = await Load(filter);
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
-            var avatarFiles = await FileService.Load(new BaseFilter
-            {
-                Ids = [.. users.Where(u => u.AvatarFileId.HasValue).Select(u => u.AvatarFileId!.Value)]
-            });
-            var avatars = users.Select(u =>
-            {
-                var file = avatarFiles.FirstOrDefault(f => f.Id == u.AvatarFileId);
-                return GetAvatar(u, file);
-            }).ToList();
+            var avatars = users.Select(u => GetAvatar(u)).ToList();
 
             return new GridResultViewModel<object>
             {

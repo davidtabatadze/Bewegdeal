@@ -62,7 +62,7 @@ Account pages live under `/Account`:
 - `/Account/Register`
 - `/Account/ForgotPassword`
 - `/Account/ResetPassword`
-- `/Account/VerifyEmail`
+- `/Account/VerifyAccount`
 
 ## Partials
 
@@ -96,11 +96,11 @@ Views/
 - `LandingController` — public landing page; checks `User.Identity!.IsAuthenticated` to redirect logged-in users
 - `HomeController` — `[Authorize]`; checks `AcquaintedHIW` claim and role, redirects to `HowItWorks` or `Dashboard`
 - `DashboardController` — `[Authorize]`; `Index()` dispatches via `User.IsInRole()` to Admin/Company views or Request/List
-- `HowItWorksController` — `[Authorize]`; `Customer()` `[Authorize(Roles=Customer)]`; `Company()` `[Authorize(Roles=Company)]`; `Acknowledge()` refreshes `AcquaintedHIW` claim
-- `UserController` — `[Authorize(Roles=Administrator)]` on List/LoadUsers/UpdateUserStatus; `[Authorize]` on Profile actions; `AcceptTerms([HttpPost])` updates T&C accept date + refreshes claim
-- `AccountController` — public; Login (issues cookie via `SignInAsync`), Logout (`SignOutAsync`), Register, ForgotPassword, ResetPassword, VerifyEmail, VerifyResend
+- `HowItWorksController` — `[Authorize]`; `Customer()` `[Authorize(Roles=Customer)]`; `Company()` `[Authorize(Roles=Company)]`
+- `UserController` — `[Authorize(Roles=Administrator)]` on List/LoadUsers/UpdateUserStatus; `[Authorize]` on all Profile actions; actions: `UpdateAvatar`, `UpdateTheme`, `UpdateProfile`, `UpdatePassword`, `AcceptHIW`, `AcceptTerms`
+- `AccountController` — public; Login (issues cookie via `SignInAsync`), Logout (`SignOutAsync`), Register, ForgotPassword, ResetPassword, VerifyAccount, VerifyResend
 - `SettingsController` — `[Authorize(Roles=Administrator)]`; Index, SaveTermAndConditionSettings (Quill HTML content), SaveRequestSettings
-- `FileController` — public; `GET /File/Download/{key}`
+- `FileController` — public; `GET /File/Download?key=`
 - `RequestController` — `[Authorize]`; Create, Edit, View, List; Create/Edit gate on `GetClaim<string>(Role) == Customer`
 - `ChatController` — `[Authorize]`; Visibility, Initiate, Conversation, Cancel
 
@@ -111,10 +111,12 @@ They share the same visual shell: `authentication-wrapper authentication-basic`,
 
 - `Login.cshtml` — email/password form; on success redirects to HowItWorks if `!AcquaintedHIW && Role != Administrator`, otherwise to Home
 - `Register.cshtml` — 3-step bs-stepper (max-width: 740px); steps: **Role → General → Account**
+  - Step 2 (General): **Customer** sees only Name + Phone; **Company** sees Name + Phone + UID (disabled) + Address
   - Step 3: `agreeTerms` checkbox intercepts clicks — opens `_TermsModal` in AcceptMode; user must scroll to bottom to unlock "I Accept"; accepting checks the checkbox; closing without accepting leaves it unchecked; if no T&C content configured, checkbox works normally
+  - Services/interests posted as `string[]? Interests` (checkbox `name="Interests"`)
 - `ForgotPassword.cshtml` — single email field; always shows success — never reveals whether email exists
 - `ResetPassword.cshtml` — token-validated password reset form; token passed via query string
-- `VerifyEmail.cshtml` — 6-digit OTP input, driven by pages-auth-two-steps.js
+- `VerifyAccount.cshtml` — two 6-digit OTP inputs (email code + mobile code); driven by `pages-auth-two-steps.js`; both codes sent to `POST /Account/VerifyAccount`; Resend sends to `POST /Account/VerifyResend`
 
 ## Settings Page
 
@@ -143,7 +145,7 @@ Navbar links (`_NavbarLanding.cshtml`): Home, Services (`#services`), How it wor
 
 Menu items are hardcoded in `_VerticalMenu.cshtml`. Active state determined by comparing `ViewContext.HttpContext.Request.Path`.
 
-**User badge** — reads `ClaimTypes.Name` for display name, computes initials from name, reads `"PictureUrl"` claim for avatar. Both `menuBadgeImg` / `menuBadgeInitials` elements always rendered, one hidden via `display:none`.
+**User badge** — reads `ClaimTypes.Name` for display name, computes initials from name, reads `"AvatarUrl"` claim for avatar. Both `menuBadgeImg` / `menuBadgeInitials` elements always rendered, one hidden via `display:none`.
 
 **Role visibility** — all `@if` blocks use `User.IsInRole(UserRoleEnum.*)` (no session reads).
 
@@ -196,7 +198,7 @@ protected bool HasClaim(string type, object value)
 protected async Task RefreshClaim(string type, object value)
 ```
 
-Common claim keys: `ClaimTypes.NameIdentifier` (user ID), `ClaimTypes.Role`, `ClaimTypes.Name`, `ClaimTypes.Email`, `"PictureUrl"`, `"AcquaintedHIW"`, `"TermsAcceptDate"`.
+Common claim keys: `ClaimTypes.NameIdentifier` (user ID), `ClaimTypes.Role`, `ClaimTypes.Name`, `ClaimTypes.Email`, `"AvatarUrl"`, `"AcquaintedHIW"`, `"TermsAcceptDate"`, `"TermsAccepted"` (internal cache-bypass flag).
 
 ### Project Structure
 
@@ -205,11 +207,11 @@ Controllers/
 ├── XBaseController.cs           # Base: GetClaim<T>, HasClaim, RefreshClaim
 ├── LandingController.cs
 ├── HomeController.cs            # [Authorize]; HIW + role check → redirect
-├── HowItWorksController.cs      # [Authorize]; Customer/Company [Authorize(Roles=...)]; Acknowledge()
+├── HowItWorksController.cs      # [Authorize]; Customer/Company [Authorize(Roles=...)]
 ├── DashboardController.cs       # [Authorize]; Index() dispatches via User.IsInRole()
-├── AccountController.cs         # public; Login/Logout/Register/ForgotPassword/ResetPassword/Verify*
+├── AccountController.cs         # public; Login/Logout/Register/ForgotPassword/ResetPassword/VerifyAccount/VerifyResend
 ├── UserController.cs            # [Authorize(Roles=Admin)] on List/LoadUsers/UpdateUserStatus;
-│                                #   [Authorize] on Profile/*; AcceptTerms [HttpPost]
+│                                #   [Authorize] on UpdateAvatar/UpdateTheme/UpdateProfile/UpdatePassword/AcceptHIW/AcceptTerms
 ├── SettingsController.cs        # [Authorize(Roles=Admin)]; Index, SaveTermAndConditionSettings, SaveRequestSettings
 ├── RequestController.cs         # [Authorize]; Create, Edit, View, List
 ├── ChatController.cs            # [Authorize]; Visibility, Initiate, Conversation, Cancel
@@ -254,7 +256,7 @@ Data/
 Enums/
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
-├── UserUpdateAreaEnum.cs        # Status, Password, TermsAcceptDate
+├── UserUpdateAreaEnum.cs        # Status, Password, Theme, Profile, Avatar, AcceptHIW, AcceptTerms
 ├── ChatStatusEnum.cs            # "active", "cancelled", "resolved"
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
 ├── FileTypeEnum.cs              # MIME type constants: PDF, PNG, JPEG, MP4, MOV
@@ -262,41 +264,53 @@ Enums/
 ├── SortDirectionEnum.cs         # "asc", "desc"
 ├── ReferenceTypeEnum.cs         # "user-role", "user-status"
 ├── EmailStatusEnum.cs           # "sent", "failed"
+├── SmsStatusEnum.cs             # "sent", "failed"
 ├── RequestStatusEnum.cs         # "pending", "negotiation", "resolved", "cancelled"
 ├── RequestFileTypeEnum.cs       # "image", "video"
-├── ConstantEnum.cs              # UserCacheTimeout=60, ResetPasswordTimeout=5, EmailVerificationTimeout=5
+├── ConstantEnum.cs              # UserCacheTimeout=60, ResetPasswordTimeout=10, VerificationTimeout=10
 └── AnnotationEnum.cs            # Nested string classes for user-facing messages
 Models/
 ├── GridResultViewModel.cs       # Server-side DataTables response envelope
 ├── RequestViewModel.cs          # Create + Edit request form model
-└── ChatHistoryModel.cs          # Model for _ChatHistory.cshtml partial
+├── ChatHistoryViewModel.cs      # Model for _ChatHistory.cshtml partial
+├── UserProfileModel.cs          # Profile page model: UserEntity User, Avatar, ServiceTermsFileName/Url
+└── UserAvatarModel.cs           # Url, Initials, Name
+ViewModels/
+├── RegisterViewModel.cs         # Registration form; string[]? Interests (replaces per-service bools)
+└── ProfileViewModel.cs          # Profile update form; Role (hidden), Name, Address, Interests, ServiceTermsFile, DeleteServiceTerms
 Services/
 ├── FileService.cs               # Scoped — validate, upload, persist; GetUrl(fileId)
 ├── SettingService.cs            # Scoped — Get() only; wraps ISettingsRepository
-└── UserService.cs               # Scoped — CRUD + GetValidUser + GetAvatar + SetTermsAcceptDate
+└── UserService.cs               # Scoped — CRUD + GetAvatar + GetProfile + UpdateProfile + UpdateAvatar + LoadGrid
 Storage/                         # Git-ignored; local file storage root
 Tools/
 ├── PasswordTool.cs              # Static; HashPassword() → (hash, salt); Verify()
-├── BrevoTool.cs                 # Static; Configure(IConfiguration); Send() → EmailStatus
+├── BrevoTool.cs                 # Static; Configure(IConfiguration); SendEmail() → EmailStatusEnum; SendSms() → SmsStatusEnum
+│                                #   Config keys: Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName, Brevo:SmsFrom
 ├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
-├── FileStorageTool.cs           # Singleton local-filesystem impl
-├── UserIdentityTool.cs          # Static; BuildPrincipal(UserEntity, pictureUrl?) → ClaimsPrincipal
+├── FileStorageTool.cs           # Singleton local-filesystem impl; GetUrl returns /File/Download?key=
+├── UserIdentityTool.cs          # Static; BuildPrincipal(UserEntity, avatarUrl?) → ClaimsPrincipal
 │                                #   Claims: NameIdentifier, Role, Name, Email, Theme,
-│                                #           PictureUrl, AcquaintedHIW, TermsAcceptDate
-├── UserRefreshTool.cs           # Middleware; runs after UseAuthentication; on per-user cache miss:
-│                                #   fetches user status + settings; sets HttpContext.Items["ShowTCModal"]
-│                                #   if TermsAcceptDate < TermsAndConditionsContentDate (non-admin only);
-│                                #   signs out blocked/missing users; cache TTL = UserCacheTimeout (60 min)
+│                                #           AvatarUrl, AcquaintedHIW, TermsAcceptDate
+├── UserRefreshTool.cs           # Middleware; runs after UseAuthentication; uses "TermsAccepted" cookie claim
+│                                #   as cache bypass flag; on cache miss: fetches user status + settings;
+│                                #   sets HttpContext.Items["ShowTCModal"] if TermsAcceptDate < ContentDate
+│                                #   (non-admin only); signs out blocked/missing users; TTL = UserCacheTimeout
 └── CacheKeyTool.cs              # Static helper for building IMemoryCache keys
 Views/
 ├── Dashboard/
 │   ├── Admin.cshtml
 │   └── Company.cshtml           # Period filter + 6 stat cards; Quill stars via Raty
 ├── HowItWorks/
-│   ├── Customer.cshtml          # Sticky header with Acknowledge button when !AcquaintedHIW
+│   ├── Customer.cshtml          # Sticky header with AcceptHIW button when !AcquaintedHIW; POST /User/AcceptHIW
 │   └── Company.cshtml
 ├── Settings/
 │   └── Index.cshtml             # T&C: full Quill editor; Request: number inputs
+├── User/
+│   ├── List.cshtml              # DataTable with real user avatars (URL or initials from server)
+│   └── Profile.cshtml           # Picture/Theme/Personal/Password cards; uses ViewBag.Profile (UserProfileModel)
+│                                #   Company: Name+Mobile(disabled)+UID(disabled)+Address+Interests+ServiceTerms
+│                                #   Customer: Name+Mobile(disabled) only
 └── Request/
     ├── Form.cshtml              # Create + Edit (isEdit = ViewBag.Request is not null)
     ├── View.cshtml              # Swiper gallery; floating chat tab; requester avatar
@@ -310,6 +324,9 @@ Views/Shared/_Partials/
 └── _ChatHistory.cshtml          # Chat panel partial; @model ChatHistoryModel
 wwwroot/js/
 ├── app-company-dashboard.js
+├── app-user-list.js             # User DataTable; shows real avatars (img or initials from full['avatar'])
+├── pages-auth-two-steps.js      # Two independent OTP wrappers (#emailOtpWrapper / #mobileOtpWrapper)
+├── pages-auth-multisteps.js     # Register stepper; Step 2 fields toggled by role; Interests via name="Interests"
 ├── request-form.js
 ├── app-request-list.js
 └── chat.js
@@ -332,7 +349,7 @@ wwwroot/js/
 | Address | string? | max 512 |
 | Interests | string[] | comma-separated, max 128; values from `ServiceEnum` |
 | ServiceTermsFileId | long? | FK to Files — company terms of service PDF |
-| ProfilePictureFileId | long? | FK to Files — profile picture |
+| AvatarFileId | long? | FK to Files — profile picture |
 | Theme | string | "light" or "dark"; default "light" |
 | AcquaintedHIW | bool | whether user has seen the How It Works page |
 | CreateDate | DateTime | UTC |
@@ -369,8 +386,8 @@ Filters are criteria bags — only non-null/non-empty fields are applied. Always
 
 **UserIdentityTool** (static):
 ```csharp
-// Call at login; pictureUrl is resolved via FileService.GetUrl() before calling
-ClaimsPrincipal principal = UserIdentityTool.BuildPrincipal(user, pictureUrl);
+// Call at login; avatarUrl is resolved via FileService.GetUrl() before calling
+ClaimsPrincipal principal = UserIdentityTool.BuildPrincipal(user, avatarUrl);
 ```
 
 **UserRefreshTool** (middleware — registered after `UseAuthentication`):
@@ -395,7 +412,10 @@ SettingsEntity settings = await settingService.Get();
 
 **UserService** (scoped):
 ```csharp
-await userService.SetTermsAcceptDate(userId); // sets TermsAndConditionsAcceptDate = DateTime.Now
+UserAvatarModel avatar = await userService.GetAvatar(user);      // from entity (no extra DB hit)
+UserAvatarModel avatar = await userService.GetAvatar(userId);    // fetches entity first
+UserAvatarModel avatar = userService.GetAvatar(user, fileEntity); // fully synchronous overload
+UserProfileModel? profile = await userService.GetProfile(userId);
 ```
 
 ### Infrastructure (Program.cs)
@@ -429,7 +449,7 @@ Users (7 rows, all Status=Active):
 - If `TermsAcceptDate < TermsAndConditionsContentDate` (and role ≠ Administrator): sets `HttpContext.Items["ShowTCModal"] = true`
 - `_HomeLayout` renders `_TermsModal` in locked mode (`backdrop=static`, no close button) and auto-opens it via JS
 - User cannot dismiss — must click "I Accept"
-- `POST /User/AcceptTerms` → `userService.SetTermsAcceptDate(id)` → `RefreshClaim("TermsAcceptDate", DateTime.Now)` → redirect to Home
+- `POST /User/AcceptTerms` → `UserUpdateAreaEnum.AcceptTerms` → `RefreshClaim("TermsAcceptDate", ...)` + `RefreshClaim("TermsAccepted", true)` → redirect to Home
 
 ### Registration T&C flow
 - `agreeTerms` checkbox click intercept: opens `_TermsModal` in AcceptMode (with close button)
@@ -439,8 +459,10 @@ Users (7 rows, all Status=Active):
 - If no T&C content configured: checkbox works normally, no modal
 
 ### _TermsModal.cshtml usage
+The partial owns all scroll-unlock JS when `AcceptMode=true` — no page needs to duplicate it.
+
 ```razor
-// Accept mode with close button (Register.cshtml)
+// Accept mode with close button (Register.cshtml — rendered inside @section PageScripts, after Bootstrap)
 @{ ViewData["AcceptMode"] = true; }
 @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
 @{ ViewData.Remove("AcceptMode"); }
@@ -448,9 +470,12 @@ Users (7 rows, all Status=Active):
 // Locked mode — no close, auto-opened (_HomeLayout when ShowTCModal)
 @{ ViewData["AcceptMode"] = true; ViewData["LockedMode"] = true; }
 @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
+// _HomeLayout then: bootstrap.Modal.getOrCreateInstance(...).show();
 
 // View-only mode (footer link) — _HomeLayout renders it without any ViewData
 ```
+
+**Important:** in `_BlankLayout`, `@RenderBody()` runs **before** Bootstrap loads. The partial's `<script>` references `bootstrap`, so it must only be rendered inside `@section PageScripts` (which renders after Bootstrap) — never inline in the body.
 
 ---
 
@@ -461,7 +486,7 @@ First-time onboarding for Customer/Company roles. Administrators are exempt.
 ### Flow
 1. After login: if `!AcquaintedHIW claim && Role != Administrator` → redirect to `HowItWorks/Customer` or `HowItWorks/Company`
 2. User reads the page; sticky header shows "I understand" button only when `ViewBag.ShowBar = !HasClaim("AcquaintedHIW", true)`
-3. `POST /HowItWorks/Acknowledge` → `RefreshClaim("AcquaintedHIW", true)` → redirect to Dashboard (DB write via `SetAcquaintedHIW` is stubbed pending implementation)
+3. `POST /User/AcceptHIW` → DB write via `UserUpdateAreaEnum.AcceptHIW` → `RefreshClaim("AcquaintedHIW", true)` → redirect to Dashboard
 
 ---
 
@@ -509,7 +534,7 @@ Never use image paths or data URLs for Raty stars — causes `getAttribute` cras
 All tables use `serverSide: true`. Key conventions:
 - Page action: `List()` — loads ViewBag stats, returns view
 - Data action: `[HttpGet] LoadXxx(...)` — returns `GridResultViewModel<object>`
-- Mutation action: `[HttpPost] UpdateXxxStatus(long id)` — self-protection check first
+- Mutation action: `[HttpPost] UpdateXxxStatus(long id, string status)` — posts current status alongside id; self-protection + stale-state check first
 - Each table has its own JS file in `wwwroot/js/`
 - Loading indicator: Notiflix `Block.pulse('.card-datatable')` — never use `processing: true`
 - `scrollX: true`, `responsive: false` — Responsive extension conflicts with scrollX

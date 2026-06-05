@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
           return (
             '<div class="d-flex justify-content-start align-items-center user-name">' +
               '<div class="avatar-wrapper">' +
-                '<div class="avatar avatar-sm me-4">' + avatarInner + '</div>' +
+                '<div class="avatar avatar-m me-4">' + avatarInner + '</div>' +
               '</div>' +
               '<div class="d-flex flex-column">' +
                 '<span class="text-heading fw-medium text-truncate">' + name + '</span>' +
@@ -135,9 +135,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const map = interestMap[key];
             if (!map) { return ''; }
             return (
-              '<li class="avatar avatar-xs pull-up" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
+              '<li class="avatar avatar-m pull-up" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
                 '<div class="avatar-initial rounded-circle ' + map.color + '">' +
-                  '<i class="icon-base ri ' + map.icon + ' icon-xs"></i>' +
+                  '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                 '</div>' +
               '</li>'
             );

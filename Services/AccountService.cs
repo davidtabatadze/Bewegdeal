@@ -7,11 +7,24 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService FileService, BrevoService BrevoService, IMemoryCache cache)
+    public class AccountService(UserService UserService, FileService2 FileService, BrevoService BrevoService, IMemoryCache cache)
     {
         public async Task<ResultObjectModel<UserEntity>> Login(string email, string password)
         {
-            var user = await UserService.Get(email);
+            var user = await UserService.Get(email, [
+                nameof(UserEntity.Id),
+                nameof(UserEntity.Role),
+                nameof(UserEntity.Name),
+                nameof(UserEntity.Email),
+                nameof(UserEntity.Mobile),
+                nameof(UserEntity.Status),
+                nameof(UserEntity.Password),
+                nameof(UserEntity.Salt),
+                nameof(UserEntity.Theme),
+                nameof(UserEntity.Avatar),
+                nameof(UserEntity.AcquaintedHIW),
+                nameof(UserEntity.TermsAndConditionsAcceptDate),
+            ]);
 
             if (user is null || !PasswordTool.Verify(password, user.Password, user.Salt))
             {
@@ -212,7 +225,7 @@ namespace Bewegdeal.Services
             }
 
             // ready terms of service
-            long? termsFileId = null;
+            string? userServiceTerms = null;
             if (model.Role == UserRoleEnum.Company && model.TermsFile is not null)
             {
                 var file = await FileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
@@ -220,7 +233,7 @@ namespace Bewegdeal.Services
                 {
                     return ResultModel.Fail(file.Message);
                 }
-                termsFileId = file.ObjectId;
+                userServiceTerms = file.Result;
             }
 
             // ready password
@@ -239,7 +252,7 @@ namespace Bewegdeal.Services
                 Salt = salt,
                 Interests = model.Interests ?? [],
                 Status = UserStatusEnum.Unverified,
-                ServiceTermsFileId = termsFileId,
+                ServiceTerms = userServiceTerms,
                 AcquaintedHIW = false,
                 Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light,
                 CreateDate = DateTime.Now,
@@ -255,5 +268,7 @@ namespace Bewegdeal.Services
 
             return ResultModel.Ok();
         }
+
+        public UserAvatarModel GetAvatar(UserEntity? user) => UserService.GetAvatar(user);
     }
 }

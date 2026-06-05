@@ -15,8 +15,8 @@ namespace Bewegdeal.Data.Entities
         public string? Number { get; set; } = string.Empty;
         public string? Address { get; set; } = string.Empty;
         public string[] Interests { get; set; } = [];
-        public long? ServiceTermsFileId { get; set; }
-        public long? AvatarFileId { get; set; }
+        public string? ServiceTerms { get; set; }
+        public string? Avatar { get; set; }
         public string Theme { get; set; } = "light";
         public bool AcquaintedHIW { get; set; }
         public DateTime CreateDate { get; set; }

@@ -7,7 +7,7 @@ namespace Bewegdeal.Tools
 {
     public static class UserIdentityTool
     {
-        public static ClaimsPrincipal BuildPrincipal(UserEntity user, string? pictureUrl = null)
+        public static ClaimsPrincipal BuildPrincipal(UserEntity user, string? avatarUrl = null)
         {
             var claims = new List<Claim>
             {
@@ -21,7 +21,7 @@ namespace Bewegdeal.Tools
                 new(IdentityFieldEnum.Name, user.Name),
                 new(IdentityFieldEnum.Email, user.Email),
                 new(IdentityFieldEnum.Theme, user.Theme),
-                new(IdentityFieldEnum.AvatarUrl, pictureUrl ?? string.Empty),
+                new(IdentityFieldEnum.AvatarUrl, avatarUrl ?? string.Empty),
                 new(IdentityFieldEnum.AcquaintedHIW, user.AcquaintedHIW ? "true" : "false"),
                 new(IdentityFieldEnum.TermsAcceptDate, user.TermsAndConditionsAcceptDate.ToString("o")),
                 new(IdentityFieldEnum.TermsAccepted, "true")

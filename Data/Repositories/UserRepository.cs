@@ -95,7 +95,7 @@ namespace Bewegdeal.Data.Repositories
                 case UserUpdateAreaEnum.Avatar:
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
-                                            u.SetProperty(p => p.AvatarFileId, update.AvatarFileId)
+                                            u.SetProperty(p => p.Avatar, update.Avatar)
                                        );
                     break;
 
@@ -105,7 +105,7 @@ namespace Bewegdeal.Data.Repositories
                                             .SetProperty(p => p.Name, update.Name)
                                             .SetProperty(p => p.Address, update.Address)
                                             .SetProperty(p => p.Interests, update.Interests)
-                                            .SetProperty(p => p.ServiceTermsFileId, update.ServiceTermsFileId)
+                                            .SetProperty(p => p.ServiceTerms, update.ServiceTerms)
                                        );
                     break;
 

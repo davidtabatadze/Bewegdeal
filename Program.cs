@@ -80,7 +80,7 @@ namespace Bewegdeal
             // ── Services ──────────────────────────────────────────────────────────
             // Scoped because FileService wraps IFileRepository (also scoped).
             builder.Services.AddScoped<BrevoService>();
-            builder.Services.AddScoped<FileService>();
+            builder.Services.AddScoped<FileService2>();
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
