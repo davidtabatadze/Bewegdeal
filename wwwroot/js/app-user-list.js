@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
     columns: [
       { data: 'status'     },   // 0 — status (sortable)
       { data: 'role'       },   // 1 — role
-      { data: 'name'       },   // 2 — user cell
+      { data: 'avatar'     },   // 2 — user cell
       { data: 'mobile'     },   // 3 — contact
       { data: 'createDate' },   // 4 — date (sortable)
       { data: 'interests'  },   // 5 — interests
@@ -74,18 +74,18 @@ document.addEventListener('DOMContentLoaded', function () {
         orderable: false,
         responsivePriority: 4,
         render: function (data, type, full) {
-          const name = full['name'];
-          const email = full['email'];
+          const name     = full['name'];
+          const email    = full['email'];
+          const avatar   = full['avatar'] || {};
 
-          const initials = ((name.match(/\b\w/g) || []).map(c => c.toUpperCase()));
-          const badge = ((initials.shift() || '') + (initials.pop() || '')).toUpperCase();
-
-          const avatar = '<span class="avatar-initial rounded-circle bg-label-primary">' + badge + '</span>';
+          const avatarInner = avatar.url
+            ? '<img src="' + avatar.url + '" alt="' + name + '" class="rounded-circle" style="width:100%;height:100%;object-fit:cover;" />'
+            : '<span class="avatar-initial rounded-circle bg-label-primary">' + (avatar.initials || '') + '</span>';
 
           return (
             '<div class="d-flex justify-content-start align-items-center user-name">' +
               '<div class="avatar-wrapper">' +
-                '<div class="avatar avatar-sm me-4">' + avatar + '</div>' +
+                '<div class="avatar avatar-sm me-4">' + avatarInner + '</div>' +
               '</div>' +
               '<div class="d-flex flex-column">' +
                 '<span class="text-heading fw-medium text-truncate">' + name + '</span>' +

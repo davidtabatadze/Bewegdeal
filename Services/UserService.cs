@@ -1,4 +1,5 @@
-﻿using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Base;
+using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
@@ -17,32 +18,6 @@ namespace Bewegdeal.Services
 
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
             => await UserRepository.Update(area, update);
-
-        //public async Task SetUserStatus(long id, string status)
-        //{
-        //    await UserRepository.SetUserStatus(id, status);
-        //}
-        //public async Task SetAcquaintedHIW(long id)
-        //{
-        //    await UserRepository.SetAcquaintedHIW(id);
-        //}
-        //public async Task UpdatePassword(long id, string hash, string salt)
-        //{
-        //    await UserRepository.UpdatePassword(id, hash, salt);
-        //}
-        //public async Task UpdatePicture(long id, long? fileId)
-        //{
-        //    await UserRepository.UpdatePicture(id, fileId);
-        //}
-        //public async Task UpdateTheme(long id, string theme)
-        //{
-        //    await UserRepository.UpdateTheme(id, theme);
-        //}
-        //public async Task UpdatePersonal(UserEntity user)
-        //{
-        //    await UserRepository.UpdatePersonal(user);
-        //}
-
 
         public async Task<UserEntity?> Get(long id, string[]? properties = null)
             => await UserRepository.Get<UserEntity>(id, properties);
@@ -176,6 +151,12 @@ namespace Bewegdeal.Services
 
         public async Task<UserAvatarModel> GetAvatar(UserEntity? user)
         {
+            var avatar = await FileService.Get(user?.AvatarFileId);
+            return GetAvatar(user, avatar);
+        }
+
+        public UserAvatarModel GetAvatar(UserEntity? user, FileEntity? file)
+        {
             var avatar = new UserAvatarModel();
 
             if (user is not null)
@@ -188,7 +169,11 @@ namespace Bewegdeal.Services
                                  .Take(2).Select(p => char.ToUpper(p[0]))
                     );
                 }
-                avatar.Url = await FileService.GetUrl(user.AvatarFileId);
+            }
+
+            if (file is not null)
+            {
+                avatar.Url = FileService.GetUrl(file);
             }
 
             return avatar;
@@ -199,13 +184,22 @@ namespace Bewegdeal.Services
             var users = await Load(filter);
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
+            var avatarFiles = await FileService.Load(new BaseFilter
+            {
+                Ids = [.. users.Where(u => u.AvatarFileId.HasValue).Select(u => u.AvatarFileId!.Value)]
+            });
+            var avatars = users.Select(u =>
+            {
+                var file = avatarFiles.FirstOrDefault(f => f.Id == u.AvatarFileId);
+                return GetAvatar(u, file);
+            }).ToList();
 
             return new GridResultViewModel<object>
             {
                 Draw = draw,
                 RecordsTotal = total,
                 RecordsFiltered = filtered,
-                Data = users.Select(u => new
+                Data = users.Select((u, i) => new
                 {
                     id = u.Id,
                     name = u.Name,
@@ -214,6 +208,7 @@ namespace Bewegdeal.Services
                     address = u.Address,
                     role = u.Role,
                     status = u.Status,
+                    avatar = avatars[i],
                     interests = u.Interests,
                     createDate = u.CreateDate.ToString("yyyy-MM-dd HH:mm")
                 })
