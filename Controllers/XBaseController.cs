@@ -1,3 +1,4 @@
+using Bewegdeal.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Bewegdeal.Controllers
     public class XBaseController : Controller
     {
         public string BaseUrl => $"{Request.Scheme}://{Request.Host}";
+        public long UserId => GetClaim<long>(IdentityFieldEnum.Id);
 
         protected T? GetClaim<T>(string type)
         {

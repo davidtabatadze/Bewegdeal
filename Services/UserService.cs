@@ -3,10 +3,12 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
+using Bewegdeal.ViewModels;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bewegdeal.Services
 {
-    public class UserService(IUserRepository UserRepository, FileService fileService)
+    public class UserService(IUserRepository UserRepository, FileService FileService)
     {
 
         #region Repository
@@ -60,20 +62,81 @@ namespace Bewegdeal.Services
 
         #endregion
 
-        public async Task<UserAvatarViewModel> GetAvatar(long? userId)
+        public async Task<ResultModel> UpdateProfile(long id, ProfileViewModel model)
+        {
+            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ServiceTermsFileId)]);
+            if (user is null || user.Role != model.Role)
+            {
+                return ResultModel.Fail("");
+            }
+
+            // define service terms
+            var serviceTermsFileId = user.Role == UserRoleEnum.Company ? user.ServiceTermsFileId : null;
+            if (user.Role == UserRoleEnum.Company)
+            {
+                if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
+                {
+                    await FileService.Delete(user.ServiceTermsFileId.Value);
+                    serviceTermsFileId = null;
+                }
+                if (model.ServiceTermsFile is not null)
+                {
+                    var file = await FileService.Create(
+                        model.ServiceTermsFile,
+                        model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
+                        5,
+                        [FileTypeEnum.PDF]
+                    );
+                    if (file.Message is not null)
+                    {
+                        return ResultModel.Fail(file.Message);
+                    }
+                    serviceTermsFileId = file.ObjectId;
+                }
+            }
+
+            // save
+            await Update(UserUpdateAreaEnum.Profile, new UserEntity
+            {
+                Id = user.Id,
+                Name = model.Name,
+                Address = model.Address,
+                Interests = model.Interests ?? [],
+                ServiceTermsFileId = serviceTermsFileId
+            });
+
+            return ResultModel.Ok();
+        }
+
+        public async Task<UserProfileModel?> GetProfile(long id)
+        {
+            var user = (await Get(id)) ?? new UserEntity { };
+            if (user.Id == 0)
+            {
+                return null;
+            }
+
+            var serviceTermsFile = await FileService.Get(user.ServiceTermsFileId);
+            var serviceTermsFileUrl = await FileService.GetUrl(user.ServiceTermsFileId);
+
+            return new UserProfileModel
+            {
+                User = user,
+                ServiceTermsFileUrl = serviceTermsFileUrl,
+                ServiceTermsFileName = serviceTermsFile?.FileName,
+                Avatar = await GetAvatar(user)
+            };
+        }
+
+        public async Task<UserAvatarModel> GetAvatar(long? id)
             => await GetAvatar(await Get(
-                userId ?? 0,
+                id ?? 0,
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.ProfilePictureFileId)]
             ));
 
-        public async Task<UserAvatarViewModel> GetAvatar(UserEntity? user)
+        public async Task<UserAvatarModel> GetAvatar(UserEntity? user)
         {
-            var avatar = new UserAvatarViewModel
-            {
-                Initials = "??",
-                Name = "Undefined",
-                Url = null
-            };
+            var avatar = new UserAvatarModel();
 
             if (user is not null)
             {
@@ -85,7 +148,7 @@ namespace Bewegdeal.Services
                                  .Take(2).Select(p => char.ToUpper(p[0]))
                     );
                 }
-                avatar.Url = await fileService.GetUrl(user.ProfilePictureFileId);
+                avatar.Url = await FileService.GetUrl(user.ProfilePictureFileId);
             }
 
             return avatar;

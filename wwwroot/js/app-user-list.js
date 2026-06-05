@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch('/User/UpdateUserStatus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body:   'id=' + encodeURIComponent(userId)
+        body:   'id=' + encodeURIComponent(userId) + '&status=' + encodeURIComponent(currentStatus)
       }).then(function (res) {
         if (res.ok) {
           res.json().then(function (body) {

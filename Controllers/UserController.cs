@@ -1,8 +1,8 @@
-using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
-using Bewegdeal.Models;
 using Bewegdeal.Services;
+using Bewegdeal.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,16 +32,11 @@ namespace Bewegdeal.Controllers
 
         [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpPost]
-        public async Task<IActionResult> UpdateUserStatus(long id)
+        public async Task<IActionResult> UpdateUserStatus(long id, string status)
         {
             var user = await UserService.Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Status)]);
 
-            if (user is null)
-            {
-                return NotFound();
-            }
-
-            if (HasClaim(IdentityFieldEnum.Id, user.Id))
+            if (user is null || UserId == user.Id || user.Status != status)
             {
                 return BadRequest();
             }
@@ -70,19 +65,14 @@ namespace Bewegdeal.Controllers
         [Authorize]
         public async Task<IActionResult> Profile()
         {
-            //var user = await userService.GetValidUser(UserId);
-            //if (user is null)
-            //{
-            //    return RedirectToAction("Index", "Home");
-            //}
+            var result = await UserService.GetProfile(UserId);
 
-            //ViewBag.User = user;
-            //ViewBag.Avatar = await userService.GetAvatar(user);
+            if (result is null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
-            //var serviceTermsFile = await fileService.Get(user.ServiceTermsFileId);
-            //ViewBag.ServiceTermsFile = serviceTermsFile;
-            //ViewBag.ServiceTermsUrl = fileService.GetUrl(serviceTermsFile);
-
+            ViewBag.Profile = result;
             return View();
         }
 
@@ -144,61 +134,36 @@ namespace Bewegdeal.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SavePersonal(SavePersonalViewModel model)
+        public async Task<IActionResult> UpdateProfile(ProfileViewModel model)
         {
-            //var user = await userService.GetValidUser(UserId);
-            //if (user is null)
-            //{
-            //    return RedirectToAction("Index", "Home");
-            //}
+            if (!ModelState.IsValid)
+            {
+                TempData["ProfileError"] = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault();
+            }
+            else
+            {
+                var result = await UserService.UpdateProfile(UserId, model);
 
-            //if (string.IsNullOrWhiteSpace(model?.Name) || string.IsNullOrWhiteSpace(model?.Mobile))
-            //{
-            //    TempData["PersonalError"] = "Name and phone number are required.";
-            //    return RedirectToAction(nameof(Profile));
-            //}
+                if (result.Success)
+                {
+                    await RefreshClaim(IdentityFieldEnum.Name, model?.Name ?? "?");
+                }
+                else
+                {
+                    if (result.Message is null)
+                    {
 
-            //// define service terms
-            //var serviceTermsFileId = user.Role == UserRoleEnum.Company ? user.ServiceTermsFileId : null;
-            //if (user.Role == UserRoleEnum.Company)
-            //{
-            //    if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
-            //    {
-            //        await fileService.Delete(user.ServiceTermsFileId.Value);
-            //        serviceTermsFileId = null;
-            //    }
-            //    if (model.ServiceTermsFile is not null)
-            //    {
-            //        var file = await fileService.Create(
-            //            model.ServiceTermsFile,
-            //            model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
-            //            5,
-            //            [FileTypeEnum.PDF]
-            //        );
-            //        if (file.Message is not null)
-            //        {
-            //            TempData["PersonalError"] = file.Message;
-            //            return RedirectToAction(nameof(Profile));
-            //        }
-            //        serviceTermsFileId = file.ObjectId;
-            //    }
-            //}
-
-            //var number = user.Role == UserRoleEnum.Company ? user.Number : model.Number;
-            //var interests = user.Role == UserRoleEnum.Company ? model?.Interests ?? [] : [];
-
-            //await userService.UpdatePersonal(new UserEntity
-            //{
-            //    Id = user.Id,
-            //    Number = number,
-            //    Interests = interests,
-            //    Name = model?.Name?.Trim() ?? "",
-            //    Mobile = model?.Mobile?.Trim() ?? "",
-            //    Address = model?.Address?.Trim(),
-            //    ServiceTermsFileId = serviceTermsFileId
-            //});
-
-            //HttpContext.Session.SetString(ConstantEnum.SessionUserName, model?.Name?.Trim() ?? "-");
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        TempData["ProfileError"] = result.Message;
+                    }
+                }
+            }
 
             return RedirectToAction(nameof(Profile));
         }
@@ -234,7 +199,7 @@ namespace Bewegdeal.Controllers
 
         #endregion
 
-        #region How It Works
+        #region HIW
 
         [Authorize]
         [HttpPost]
@@ -242,7 +207,7 @@ namespace Bewegdeal.Controllers
         {
             await UserService.Update(UserUpdateAreaEnum.AcceptHIW, new UserEntity
             {
-                Id = GetClaim<long>(IdentityFieldEnum.Id)
+                Id = UserId
             });
             await RefreshClaim(IdentityFieldEnum.AcquaintedHIW, true);
             return RedirectToAction("Index", "Dashboard");
@@ -259,11 +224,10 @@ namespace Bewegdeal.Controllers
         {
             await UserService.Update(UserUpdateAreaEnum.AcceptTerms, new UserEntity
             {
-                Id = GetClaim<long>(IdentityFieldEnum.Id),
-                TermsAndConditionsAcceptDate = DateTime.Now
+                Id = UserId
             });
             await RefreshClaim(IdentityFieldEnum.TermsAcceptDate, DateTime.Now.AddMinutes(5));
-            await RefreshClaim(IdentityFieldEnum.TermsAccepted, "true");
+            await RefreshClaim(IdentityFieldEnum.TermsAccepted, true);
             return RedirectToAction("Index", "Home");
         }
 

@@ -1,9 +1,9 @@
-using Bewegdeal.Enums;
+﻿using Bewegdeal.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Bewegdeal.ViewModels
 {
-    public class RegistrationViewModel : IValidatableObject
+    public class ProfileViewModel : IValidatableObject
     {
         [Required]
         [MinLength(1)]
@@ -15,44 +15,19 @@ namespace Bewegdeal.ViewModels
         [MaxLength(32)]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
-        [MinLength(1)]
-        [MaxLength(16)]
-        public string Mobile { get; set; } = string.Empty;
-
-        [MaxLength(16)]
-        public string? Number { get; set; }
-
         [MaxLength(256)]
         public string? Address { get; set; }
 
-        [Required]
-        [MinLength(1)]
-        [MaxLength(32)]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        [MinLength(6)]
-        [MaxLength(16)]
-        public string Password { get; set; } = string.Empty;
-
-        public string Theme { get; set; } = UserThemeEnum.Light;
-
-        public IFormFile? TermsFile { get; set; }
-
         public string[]? Interests { get; set; }
+
+        public IFormFile? ServiceTermsFile { get; set; }
+
+        public bool DeleteServiceTerms { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (Role == UserRoleEnum.Company)
             {
-                if (string.IsNullOrWhiteSpace(Number))
-                {
-                    yield return new ValidationResult(
-                        "UID is required for companies.",
-                        [nameof(Number)]
-                    );
-                }
                 if (string.IsNullOrWhiteSpace(Address))
                 {
                     yield return new ValidationResult(
@@ -78,7 +53,6 @@ namespace Bewegdeal.ViewModels
             }
             else
             {
-                Number = null;
                 Address = null;
                 Interests = [];
             }

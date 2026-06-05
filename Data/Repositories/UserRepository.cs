@@ -15,13 +15,13 @@ namespace Bewegdeal.Data.Repositories
         {
             var rows = new[]
             {
-                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Company },
-                new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Mobile = "-", Password = "asdASD123", Role = UserRoleEnum.Company },
+                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Password = "asdASD123", Role = UserRoleEnum.Company },
+                new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Password = "asdASD123", Role = UserRoleEnum.Company },
             };
 
             foreach (var row in rows)
@@ -40,7 +40,8 @@ namespace Bewegdeal.Data.Repositories
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
-                    Mobile = row.Mobile,
+                    Number = "-",
+                    Mobile = "-",
                     Address = row.Address,
                     Password = hash,
                     Salt = salt,
@@ -73,7 +74,7 @@ namespace Bewegdeal.Data.Repositories
                 case UserUpdateAreaEnum.AcceptTerms:
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
-                                            u.SetProperty(p => p.TermsAndConditionsAcceptDate, update.TermsAndConditionsAcceptDate)
+                                            u.SetProperty(p => p.TermsAndConditionsAcceptDate, DateTime.Now)
                                        );
                     break;
 
@@ -81,6 +82,16 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
                                             u.SetProperty(p => p.AcquaintedHIW, true)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Profile:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u => u
+                                            .SetProperty(p => p.Name, update.Name)
+                                            .SetProperty(p => p.Address, update.Address)
+                                            .SetProperty(p => p.Interests, update.Interests)
+                                            .SetProperty(p => p.ServiceTermsFileId, update.ServiceTermsFileId)
                                        );
                     break;
 

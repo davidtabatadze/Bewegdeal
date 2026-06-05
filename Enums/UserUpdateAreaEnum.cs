@@ -5,6 +5,7 @@
         Status = 1,
         Password,
         AcceptTerms,
-        AcceptHIW
+        AcceptHIW,
+        Profile
     }
 }
