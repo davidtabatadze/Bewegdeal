@@ -1,1 +1,9 @@
 /* Custom styles goes here */
+
+:root {
+  --bs-primary: #0d9394;
+  --bs-primary-rgb: 13, 147, 148;
+  --bs-primary-text-emphasis: #053b3b;
+  --bs-primary-bg-subtle: #d1f0f0;
+  --bs-primary-border-subtle: #a3e1e1;
+}
