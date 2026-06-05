@@ -9,7 +9,7 @@ namespace Bewegdeal.Services
 {
     public class AccountService(UserService UserService, FileService2 FileService, BrevoService BrevoService, IMemoryCache cache)
     {
-        public async Task<ResultObjectModel<UserEntity>> Login(string email, string password)
+        public async Task<GenericResultModel<UserEntity>> Login(string email, string password)
         {
             var user = await UserService.Get(email, [
                 nameof(UserEntity.Id),
@@ -28,19 +28,19 @@ namespace Bewegdeal.Services
 
             if (user is null || !PasswordTool.Verify(password, user.Password, user.Salt))
             {
-                return ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Credentials);
+                return GenericResultModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Credentials);
             }
 
             return user.Status switch
             {
-                UserStatusEnum.Blocked => ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Blocked),
-                UserStatusEnum.Pending => ResultObjectModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Pending),
-                UserStatusEnum.Unverified => ResultObjectModel<UserEntity>.Fail(user, AnnotationEnum.Account.Login.Unverified),
-                _ => ResultObjectModel<UserEntity>.Ok(user)
+                UserStatusEnum.Blocked => GenericResultModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Blocked),
+                UserStatusEnum.Pending => GenericResultModel<UserEntity>.Fail(AnnotationEnum.Account.Login.Pending),
+                UserStatusEnum.Unverified => GenericResultModel<UserEntity>.Fail(user, AnnotationEnum.Account.Login.Unverified),
+                _ => GenericResultModel<UserEntity>.Ok(user)
             };
         }
 
-        public async Task<ResultModel> ForgotPassword(string email, string token, string resetLink)
+        public async Task<GenericResultModel> ForgotPassword(string email, string token, string resetLink)
         {
             var user = await UserService.Get(email, [nameof(UserEntity.Email), nameof(UserEntity.Name)]);
 
@@ -71,14 +71,14 @@ namespace Bewegdeal.Services
 
                 if (!result.Success)
                 {
-                    return ResultModel.Fail(AnnotationEnum.Account.Email.Reset);
+                    return GenericResultModel.Fail(AnnotationEnum.Account.Email.Reset);
                 }
             }
 
-            return ResultModel.Ok(AnnotationEnum.Account.ForgotPassword.Success);
+            return GenericResultModel.Ok(AnnotationEnum.Account.ForgotPassword.Success);
         }
 
-        public async Task<ResultModel> ResetPassword(string token, string password)
+        public async Task<GenericResultModel> ResetPassword(string token, string password)
         {
             // load cache
             var tokenKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token ?? "-");
@@ -96,7 +96,7 @@ namespace Bewegdeal.Services
             // validate
             if (user is null || lastToken != token)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.ResetPassword.Expired);
+                return GenericResultModel.Fail(AnnotationEnum.Account.ResetPassword.Expired);
             }
 
             // update password
@@ -111,10 +111,10 @@ namespace Bewegdeal.Services
                 }
             );
 
-            return ResultModel.Ok(AnnotationEnum.Account.ResetPassword.Success);
+            return GenericResultModel.Ok(AnnotationEnum.Account.ResetPassword.Success);
         }
 
-        public async Task<ResultModel> VerifyAccount(string email, string mobile, string emailOtp, string mobileOtp)
+        public async Task<GenericResultModel> VerifyAccount(string email, string mobile, string emailOtp, string mobileOtp)
         {
             // email code
             var emailCacheKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
@@ -127,17 +127,17 @@ namespace Bewegdeal.Services
             // expired ...
             if (cachedEmailOtp is null || cachedMobileOtp is null)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.Expired);
+                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.Expired);
             }
 
             // invalid ...
             if (cachedEmailOtp != emailOtp)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidEmail);
+                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidEmail);
             }
             if (cachedMobileOtp != mobileOtp)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidMobile);
+                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidMobile);
             }
 
             // update user
@@ -158,10 +158,10 @@ namespace Bewegdeal.Services
             // clear cache
             cache.Remove(emailCacheKey);
             cache.Remove(smsCacheKey);
-            return ResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
+            return GenericResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
         }
 
-        public async Task<ResultModel> VerifySend(string email, string mobile)
+        public async Task<GenericResultModel> VerifySend(string email, string mobile)
         {
             // generate ot code
             var otSms = Random.Shared.Next(100000, 1000000).ToString();
@@ -194,7 +194,7 @@ namespace Bewegdeal.Services
 
             if (!smsResult.Success)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.Sms.Verification);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Sms.Verification);
             }
 
             // send email
@@ -209,19 +209,19 @@ namespace Bewegdeal.Services
 
             if (!emailResult.Success)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.Email.Verification);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Email.Verification);
             }
 
-            return ResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Resent);
+            return GenericResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Resent);
         }
 
-        public async Task<ResultModel> Register(RegistrationViewModel model)
+        public async Task<GenericResultModel> Register(RegistrationViewModel model)
         {
             // validate email uniqueness
             var existing = await UserService.GetRegistered(model.Email, model.Mobile);
             if (existing is not null)
             {
-                return ResultModel.Fail(AnnotationEnum.Account.Register.Exists);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Register.Exists);
             }
 
             // ready terms of service
@@ -231,7 +231,7 @@ namespace Bewegdeal.Services
                 var file = await FileService.Create(model.TermsFile, null, 5, [FileTypeEnum.PDF]);
                 if (file.Message is not null)
                 {
-                    return ResultModel.Fail(file.Message);
+                    return GenericResultModel.Fail(file.Message);
                 }
                 userServiceTerms = file.Result;
             }
@@ -263,10 +263,10 @@ namespace Bewegdeal.Services
             var verification = await VerifySend(user.Email, user.Mobile);
             if (!verification.Success)
             {
-                return ResultModel.Fail(verification.Message);
+                return GenericResultModel.Fail(verification.Message);
             }
 
-            return ResultModel.Ok();
+            return GenericResultModel.Ok();
         }
 
         public UserAvatarModel GetAvatar(UserEntity? user) => UserService.GetAvatar(user);

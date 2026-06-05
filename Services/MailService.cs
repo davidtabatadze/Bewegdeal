@@ -6,7 +6,7 @@ namespace Bewegdeal.Services
 {
     public class BrevoService
     {
-        public async Task<ResultModel> SendSms(string mobile, Dictionary<string, object>? parameters = null)
+        public async Task<GenericResultModel> SendSms(string mobile, Dictionary<string, object>? parameters = null)
         {
             var content = "Hallo,\nIhr Bewegdeal-bestätigungscode lautet:: {{otcode}}\nDieser Code ist {{timeout}} Minuten gültig.\nFalls sie sich nicht bei Bewegdeal registriert haben, ignorieren sie diese SMS bitte.";
             foreach (var param in parameters ?? [])
@@ -16,10 +16,10 @@ namespace Bewegdeal.Services
 
             var result = await BrevoTool.SendSms(mobile, content);
 
-            return result.Value == BrevoStatusEnum.Sent.Value ? ResultModel.Ok() : ResultModel.Fail("");
+            return result.Value == BrevoStatusEnum.Sent.Value ? GenericResultModel.Ok() : GenericResultModel.Fail("");
         }
 
-        public async Task<ResultModel> SendEmail(string email, EmailEnum type, Dictionary<string, object>? parameters = null)
+        public async Task<GenericResultModel> SendEmail(string email, EmailEnum type, Dictionary<string, object>? parameters = null)
         {
             var parts = type.Value.Split(" # ");
             var title = parts[0];
@@ -28,7 +28,7 @@ namespace Bewegdeal.Services
             var path = Path.Combine(AppContext.BaseDirectory, "MailTemplates", template);
             if (!File.Exists(path))
             {
-                return ResultModel.Fail($"The email template file not found: {path}");
+                return GenericResultModel.Fail($"The email template file not found: {path}");
             }
 
             var content = await File.ReadAllTextAsync(path);
@@ -43,7 +43,7 @@ namespace Bewegdeal.Services
                 content
             );
 
-            return result.Value == BrevoStatusEnum.Sent.Value ? ResultModel.Ok() : ResultModel.Fail("");
+            return result.Value == BrevoStatusEnum.Sent.Value ? GenericResultModel.Ok() : GenericResultModel.Fail("");
         }
     }
 }

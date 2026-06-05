@@ -1,6 +1,6 @@
 namespace Bewegdeal.Models
 {
-    public class GridResultViewModel<T>
+    public class GridResultModel<T>
     {
         public int Draw { get; init; }
         public int RecordsTotal { get; init; }

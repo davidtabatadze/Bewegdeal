@@ -33,8 +33,8 @@ public class AccountController(AccountService AccountService) : XBaseController
         {
             return RedirectToAction(nameof(VerifyAccount), new
             {
-                email = result.Object?.Email ?? "-",
-                mobile = result.Object?.Mobile ?? "-"
+                email = result.Result?.Email ?? "-",
+                mobile = result.Result?.Mobile ?? "-"
             });
         }
         else if (result.Message is not null)
@@ -43,7 +43,7 @@ public class AccountController(AccountService AccountService) : XBaseController
             return View();
         }
 
-        var user = result.Object!;
+        var user = result.Result!;
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,

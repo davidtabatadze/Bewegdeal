@@ -36,12 +36,12 @@ namespace Bewegdeal.Services
 
         #endregion
 
-        public async Task<ResultModel> UpdateProfile(long id, ProfileViewModel model)
+        public async Task<GenericResultModel> UpdateProfile(long id, ProfileViewModel model)
         {
             var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ServiceTerms)]);
             if (user is null || user.Role != model.Role)
             {
-                return ResultModel.Fail("");
+                return GenericResultModel.Fail("");
             }
 
             // define service terms
@@ -63,7 +63,7 @@ namespace Bewegdeal.Services
                     );
                     if (file.Message is not null)
                     {
-                        return ResultModel.Fail(file.Message);
+                        return GenericResultModel.Fail(file.Message);
                     }
                     userServiceTerms = file.Result;
                 }
@@ -79,15 +79,15 @@ namespace Bewegdeal.Services
                 ServiceTerms = userServiceTerms
             });
 
-            return ResultModel.Ok();
+            return GenericResultModel.Ok();
         }
 
-        public async Task<ResultModel> UpdateAvatar(long id, IFormFile? avatar)
+        public async Task<GenericResultModel> UpdateAvatar(long id, IFormFile? avatar)
         {
             var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Avatar)]);
             if (user is null)
             {
-                return ResultModel.Fail("");
+                return GenericResultModel.Fail("");
             }
 
             // define file
@@ -106,7 +106,7 @@ namespace Bewegdeal.Services
                 );
                 if (file.Message is not null)
                 {
-                    return ResultModel.Fail(file.Message);
+                    return GenericResultModel.Fail(file.Message);
                 }
                 userAvatar = file.Result;
             }
@@ -117,18 +117,18 @@ namespace Bewegdeal.Services
                 Avatar = userAvatar
             });
 
-            return ResultModel.Ok(FileService.GetUrl(userAvatar));
+            return GenericResultModel.Ok(FileService.GetUrl(userAvatar));
         }
 
-        public async Task<ResultModel> UpdatePassword(long id, string? newPassword, string? confirmPassword)
+        public async Task<GenericResultModel> UpdatePassword(long id, string? newPassword, string? confirmPassword)
         {
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                return ResultModel.Fail("All password fields are required.");
+                return GenericResultModel.Fail("All password fields are required.");
             }
             if (newPassword != confirmPassword)
             {
-                return ResultModel.Fail("New passwords do not match.");
+                return GenericResultModel.Fail("New passwords do not match.");
             }
 
             // update password
@@ -143,7 +143,7 @@ namespace Bewegdeal.Services
                 }
             );
 
-            return ResultModel.Ok();
+            return GenericResultModel.Ok();
         }
 
         public async Task<UserProfileModel?> GetProfile(long id)
@@ -183,14 +183,14 @@ namespace Bewegdeal.Services
             return avatar;
         }
 
-        public async Task<GridResultViewModel<object>> LoadGrid(UserFilter filter, int draw)
+        public async Task<GridResultModel<object>> LoadGrid(UserFilter filter, int draw)
         {
             var users = await Load(filter);
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
             var avatars = users.Select(u => GetAvatar(u)).ToList();
 
-            return new GridResultViewModel<object>
+            return new GridResultModel<object>
             {
                 Draw = draw,
                 RecordsTotal = total,
