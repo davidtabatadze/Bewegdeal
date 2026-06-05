@@ -5,7 +5,7 @@ namespace Bewegdeal.Services
 {
     public class FileService2(IFileStorageTool StorageTool)
     {
-        public async Task<GenericResultModel<string>> Create(IFormFile file, string? replaceFile, short? maxSize, string[] allowedTypes)
+        public async Task<GenericResultModel<string>> Create(IFormFile file, string? replaceToken, short? maxSize, string[] allowedTypes)
         {
             var fileName = file.FileName;
             var fileLength = file.Length;
@@ -39,36 +39,36 @@ namespace Bewegdeal.Services
             using var stream = file.OpenReadStream();
             var key = await StorageTool.Create(stream, fileName, fileContentType);
 
-            // kvp
-            var kvp = ComposeKVP(key, fileName);
+            // token
+            var token = ComposeToken(key, fileName);
 
             // delete old
-            await Delete(replaceFile);
+            await Delete(replaceToken);
 
             // all good
-            return GenericResultModel<string>.Ok(kvp);
+            return GenericResultModel<string>.Ok(token);
         }
 
-        public async Task Delete(string? kvp)
+        public async Task Delete(string? token)
         {
-            if (kvp is not null)
+            if (token is not null)
             {
-                await StorageTool.Delete(DecomposeKVP(kvp));
+                await StorageTool.Delete(DecomposeToken(token));
             }
         }
 
-        //public List<string> GetUrls(List<string?> kvps, string? baseUrl = null)
-        //    => [.. (kvps ?? []).Select(i => GetUrl(i, baseUrl)).Where(i => i is not null)];
+        //public List<string> GetUrls(List<string?> tokens, string? baseUrl = null)
+        //    => [.. (tokens ?? []).Select(i => GetUrl(i, baseUrl)).Where(i => i is not null)];
 
-        public string? GetUrl(string? kvp, string? baseUrl = null)
-            => kvp is not null ? $"{baseUrl ?? ""}{StorageTool.GetUrl(DecomposeKVP(kvp))}" : null;
+        public string? GetUrl(string? token, string? baseUrl = null)
+            => token is not null ? $"{baseUrl ?? ""}{StorageTool.GetUrl(DecomposeToken(token))}" : null;
 
-        public string? GetName(string? kvp)
-            => kvp is not null ? Uri.UnescapeDataString(kvp.Replace(DecomposeKVP(kvp) + "=", "")) : null;
+        public string? GetName(string? token)
+            => token is not null ? Uri.UnescapeDataString(token.Replace(DecomposeToken(token) + "=", "")) : null;
 
-        private static string ComposeKVP(string key, string name)
+        private static string ComposeToken(string key, string name)
             => key + "=" + Uri.EscapeDataString(name);
-        private static string DecomposeKVP(string? kvp)
-            => kvp is null ? "-" : Uri.UnescapeDataString(kvp.Split('=')[0]);
+        private static string DecomposeToken(string? token)
+            => token is null ? "-" : Uri.UnescapeDataString(token.Split('=')[0]);
     }
 }
