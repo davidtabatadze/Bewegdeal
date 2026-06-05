@@ -4,6 +4,7 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
+using Bewegdeal.Tools;
 using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
@@ -121,6 +122,32 @@ namespace Bewegdeal.Services
             });
 
             return ResultModel.Ok(fileUrl);
+        }
+
+        public async Task<ResultModel> UpdatePassword(long id, string? newPassword, string? confirmPassword)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                return ResultModel.Fail("All password fields are required.");
+            }
+            if (newPassword != confirmPassword)
+            {
+                return ResultModel.Fail("New passwords do not match.");
+            }
+
+            // update password
+            var (hash, salt) = PasswordTool.HashPassword(newPassword);
+            await Update(
+                UserUpdateAreaEnum.Password,
+                new UserEntity
+                {
+                    Id = id,
+                    Salt = salt,
+                    Password = hash
+                }
+            );
+
+            return ResultModel.Ok();
         }
 
         public async Task<UserProfileModel?> GetProfile(long id)

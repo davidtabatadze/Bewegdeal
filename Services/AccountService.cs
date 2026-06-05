@@ -86,7 +86,7 @@ namespace Bewegdeal.Services
                 return ResultModel.Fail(AnnotationEnum.Account.ResetPassword.Expired);
             }
 
-            // update password and clear token
+            // update password
             var (hash, salt) = PasswordTool.HashPassword(password);
             await UserService.Update(
                 UserUpdateAreaEnum.Password,

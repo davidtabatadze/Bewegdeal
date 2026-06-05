@@ -3,6 +3,8 @@ using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
 using Bewegdeal.Services;
 using Bewegdeal.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -143,30 +145,17 @@ namespace Bewegdeal.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(string? newPassword, string? confirmPassword)
+        public async Task<IActionResult> UpdatePassword(string? newPassword, string? confirmPassword)
         {
-            //var user = await userService.GetValidUser(UserId);
-            //if (user is null)
-            //{
-            //    return RedirectToAction("Index", "Home");
-            //}
+            var result = await UserService.UpdatePassword(UserId, newPassword, confirmPassword);
 
-            //if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
-            //{
-            //    TempData["PasswordError"] = "All password fields are required.";
-            //    return RedirectToAction(nameof(Profile));
-            //}
+            if (!result.Success)
+            {
+                TempData["PasswordError"] = result.Message;
+                return RedirectToAction(nameof(Profile));
+            }
 
-            //if (newPassword != confirmPassword)
-            //{
-            //    TempData["PasswordError"] = "New passwords do not match.";
-            //    return RedirectToAction(nameof(Profile));
-            //}
-
-            //var (hash, salt) = PasswordTool.HashPassword(newPassword);
-            //await userService.UpdatePassword(user.Id, hash, salt);
-
-            //HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
 
