@@ -6,7 +6,7 @@
         _menuName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0]))
     );
     if (string.IsNullOrEmpty(_menuInitials)) { _menuInitials = "?"; }
-    var _menuPictureUrl = User.FindFirstValue(IdentityFieldEnum.PictureUrl);
+    var _menuPictureUrl = User.FindFirstValue(IdentityFieldEnum.AvatarUrl);
 }
 
 <!-- Menu -->

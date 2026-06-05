@@ -7,7 +7,7 @@
         public const string Name = "bewegdeal-name";
         public const string Email = "bewegdeal-email";
         public const string Theme = "bewegdeal-theme";
-        public const string PictureUrl = "bewegdeal-picture-url";
+        public const string AvatarUrl = "bewegdeal-avatar-url";
         public const string AcquaintedHIW = "bewegdeal-acquainted-hiw";
         public const string TermsAccepted = "bewegdeal-terms-accepted";
         public const string TermsAcceptDate = "bewegdeal-terms-accept-date";

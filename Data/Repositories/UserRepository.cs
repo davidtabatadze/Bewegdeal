@@ -1,4 +1,4 @@
-using Bewegdeal.Data.Base;
+﻿using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
@@ -82,6 +82,20 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
                                             u.SetProperty(p => p.AcquaintedHIW, true)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Theme:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Theme, update.Theme)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Avatar:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.AvatarFileId, update.AvatarFileId)
                                        );
                     break;
 

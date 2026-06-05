@@ -1,4 +1,4 @@
-using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -51,7 +51,7 @@ namespace Bewegdeal.Data
                               statement.StartsWith("CREATE UNIQUE INDEX");
 
                 // UNIQUE must be replaced before INDEX to avoid partial match.
-                // MySQL does not support IF NOT EXISTS for indexes — handled via try-catch below instead.
+                // MySQL does not support IF NOT EXISTS for indexes â€” handled via try-catch below instead.
                 var sql = statement.Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ");
 
                 if (!isMySql)
@@ -115,7 +115,7 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
                 e.Property(u => u.ServiceTermsFileId).IsRequired(false);
-                e.Property(u => u.ProfilePictureFileId).IsRequired(false);
+                e.Property(u => u.AvatarFileId).IsRequired(false);
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");
                 e.Property(u => u.AcquaintedHIW).IsRequired().HasDefaultValue(false);
                 e.Property(u => u.CreateDate).IsRequired();

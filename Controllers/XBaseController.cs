@@ -31,14 +31,14 @@ namespace Bewegdeal.Controllers
         protected bool HasClaim(string type, object value)
             => User.FindFirstValue(type) == value.ToString();
 
-        protected async Task RefreshClaim(string type, object value)
+        protected async Task RefreshClaim(string type, object? value)
             => await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(
                     new ClaimsIdentity(
                         User.Claims
                             .Where(c => c.Type != type)
-                            .Append(new Claim(type, value.ToString()!)),
+                            .Append(new Claim(type, value is null ? string.Empty : value.ToString()!)),
                         CookieAuthenticationDefaults.AuthenticationScheme
                     )
                 )

@@ -78,56 +78,29 @@ namespace Bewegdeal.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SavePicture(IFormFile? picture)
+        public async Task<IActionResult> UpdateAvatar(IFormFile? avatar)
         {
-            //var user = await userService.GetValidUser(UserId);
-            //if (user is null)
-            //{
-            //    return Unauthorized();
-            //}
+            var result = await UserService.UpdateAvatar(UserId, avatar);
 
-            //if (picture is null)
-            //{
-            //    if (user.ProfilePictureFileId.HasValue)
-            //    {
-            //        await fileService.Delete(user.ProfilePictureFileId.Value);
-            //        await userService.UpdatePicture(user.Id, null);
-            //    }
-            //    HttpContext.Session.Remove(ConstantEnum.SessionUserPictureId);
-            //    return Ok();
-            //}
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Message });
+            }
 
-            //var file = await fileService.Create(
-            //    picture,
-            //    user.ProfilePictureFileId,
-            //    3,
-            //    [FileTypeEnum.PNG, FileTypeEnum.JPEG]
-            //);
-
-            //if (file.Message is not null)
-            //{
-            //    return BadRequest(new { file.Message });
-            //}
-
-            //await userService.UpdatePicture(user.Id, file.ObjectId);
-
-            //HttpContext.Session.SetString(ConstantEnum.SessionUserPictureId, (file.ObjectId ?? 0).ToString());
-
+            await RefreshClaim(IdentityFieldEnum.AvatarUrl, result.Message);
             return Ok();
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SaveTheme(string theme)
+        public async Task<IActionResult> UpdateTheme(string theme)
         {
-            //if (long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId))
-            //{
-            //    await userService.UpdateTheme(
-            //        userId,
-            //        theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
-            //    );
-            //    HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, theme);
-            //}
+            await UserService.Update(UserUpdateAreaEnum.Theme, new UserEntity
+            {
+                Id = UserId,
+                Theme = theme
+            });
+            await RefreshClaim(IdentityFieldEnum.Theme, true);
 
             return Ok();
         }

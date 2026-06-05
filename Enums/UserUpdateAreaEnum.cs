@@ -3,9 +3,11 @@
     public enum UserUpdateAreaEnum
     {
         Status = 1,
+        Theme,
         Password,
         AcceptTerms,
         AcceptHIW,
-        Profile
+        Profile,
+        Avatar
     }
 }

@@ -50,22 +50,22 @@ namespace Bewegdeal.Services
             });
 
             // delete old
-            if (replaceId.HasValue)
-            {
-                await Delete(replaceId.Value);
-            }
+            await Delete(replaceId);
 
             // all good
             return ResultModel.Ok(entity.Id);
         }
 
-        public async Task Delete(long id)
+        public async Task Delete(long? id)
         {
-            var record = await Get(id, [nameof(FileEntity.Key)]);
-            if (record is not null)
+            if (id is not null)
             {
-                await FileRepository.Delete<FileEntity>(id);
-                await StorageTool.Delete(record.Key);
+                var record = await Get(id, [nameof(FileEntity.Key)]);
+                if (record is not null)
+                {
+                    await FileRepository.Delete<FileEntity>(id.Value);
+                    await StorageTool.Delete(record.Key);
+                }
             }
         }
 

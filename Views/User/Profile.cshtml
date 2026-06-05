@@ -29,7 +29,7 @@
 
     <!-- 1. Picture -->
     <div class="col-12 col-sm-6">
-        <form id="pictureForm" asp-controller="User" asp-action="SavePicture" method="post" enctype="multipart/form-data">
+        <form id="pictureForm" asp-controller="User" asp-action="UpdateAvatar" method="post" enctype="multipart/form-data">
             <div class="card h-100">
 
                 <div class="card-header">
@@ -52,7 +52,7 @@
                             <label for="pictureInput" class="btn btn-outline-primary">
                                 <i class="icon-base ri ri-upload-2-line me-1_5"></i>Choose File
                             </label>
-                            <input type="file" id="pictureInput" name="picture" class="d-none" accept=".png,.jpg,.jpeg" />
+                            <input type="file" id="pictureInput" name="avatar" class="d-none" accept=".png,.jpg,.jpeg" />
                             <button type="button" id="pictureRemoveBtn" class="btn btn-outline-danger@(hasPicture ? "" : " d-none")">
                                 <i class="icon-base ri ri-delete-bin-line me-1_5"></i>Remove
                             </button>
@@ -68,7 +68,7 @@
 
     <!-- 2. Theme -->
     <div class="col-12 col-sm-6">
-        <form id="themeForm" asp-controller="User" asp-action="SaveTheme" method="post" class="h-100">
+        <form id="themeForm" asp-controller="User" asp-action="UpdateTheme" method="post" class="h-100">
             <div class="card h-100">
 
                 <div class="card-header">
@@ -369,7 +369,7 @@
         // upload
         var fd = new FormData();
         fd.append('__RequestVerificationToken', token);
-        fd.append('picture', file);
+        fd.append('avatar', file);
         fetch(form.action, { method: 'POST', body: fd })
         .then(function (res) {
         if (!res.ok) {
@@ -391,7 +391,7 @@
         clearBadgePicture();
         var fd = new FormData();
         fd.append('__RequestVerificationToken', token);
-        fetch('@Url.Action("SavePicture", "User")', { method: 'POST', body: fd })
+        fetch('@Url.Action("UpdateAvatar", "User")', { method: 'POST', body: fd })
         .catch(function () { notyf.error('Something went wrong. Please try again.'); });
         });
         }

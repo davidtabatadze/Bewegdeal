@@ -4,7 +4,6 @@ using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.ViewModels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bewegdeal.Services
 {
@@ -108,6 +107,47 @@ namespace Bewegdeal.Services
             return ResultModel.Ok();
         }
 
+        public async Task<ResultModel> UpdateAvatar(long id, IFormFile? avatar)
+        {
+            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.AvatarFileId)]);
+            if (user is null)
+            {
+                return ResultModel.Fail("");
+            }
+
+            // define file
+            var fileId = (long?)null;
+            var fileUrl = string.Empty;
+
+            if (avatar is null)
+            {
+                await FileService.Delete(user.AvatarFileId);
+            }
+            else
+            {
+                var file = await FileService.Create(
+                    avatar,
+                    user.AvatarFileId,
+                    3,
+                    [FileTypeEnum.PNG, FileTypeEnum.JPEG]
+                );
+                if (file.Message is not null)
+                {
+                    return ResultModel.Fail(file.Message);
+                }
+                fileId = file.ObjectId;
+                fileUrl = await FileService.GetUrl(fileId);
+            }
+
+            await Update(UserUpdateAreaEnum.Avatar, new UserEntity
+            {
+                Id = user.Id,
+                AvatarFileId = fileId
+            });
+
+            return ResultModel.Ok(fileUrl);
+        }
+
         public async Task<UserProfileModel?> GetProfile(long id)
         {
             var user = (await Get(id)) ?? new UserEntity { };
@@ -131,7 +171,7 @@ namespace Bewegdeal.Services
         public async Task<UserAvatarModel> GetAvatar(long? id)
             => await GetAvatar(await Get(
                 id ?? 0,
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.ProfilePictureFileId)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.AvatarFileId)]
             ));
 
         public async Task<UserAvatarModel> GetAvatar(UserEntity? user)
@@ -148,7 +188,7 @@ namespace Bewegdeal.Services
                                  .Take(2).Select(p => char.ToUpper(p[0]))
                     );
                 }
-                avatar.Url = await FileService.GetUrl(user.ProfilePictureFileId);
+                avatar.Url = await FileService.GetUrl(user.AvatarFileId);
             }
 
             return avatar;

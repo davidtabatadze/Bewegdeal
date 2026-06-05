@@ -1,4 +1,4 @@
-using Bewegdeal.Enums;
+﻿using Bewegdeal.Enums;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Bewegdeal.ViewModels;
@@ -45,7 +45,7 @@ public class AccountController(AccountService AccountService, FileService FileSe
 
         var user = result.Object!;
 
-        var pictureUrl = await FileService.GetUrl(user.ProfilePictureFileId);
+        var pictureUrl = await FileService.GetUrl(user.AvatarFileId);
         var principal = UserIdentityTool.BuildPrincipal(user, pictureUrl);
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
