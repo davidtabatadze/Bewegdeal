@@ -42,6 +42,9 @@ namespace Bewegdeal.Data.Repositories
         public async Task<T?> Get<T>(long id, string[]? properties = null) where T : class, IEntity
             => await Context.Set<T>().Where(i => i.Id == id).Select(BuildSelect<T>(properties)).FirstOrDefaultAsync();
 
+        public async Task<List<T>> Load<T>(IEnumerable<long> ids, string[]? properties = null) where T : class, IEntity
+            => await Context.Set<T>().Where(i => ids.Contains(i.Id)).Select(BuildSelect<T>(properties)).ToListAsync();
+
         public Expression<Func<T, T>> BuildSelect<T>(string[]? properties) where T : class, IEntity
         {
             if (properties is null || properties.Length == 0)

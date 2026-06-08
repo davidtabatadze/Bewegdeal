@@ -106,6 +106,10 @@ namespace Bewegdeal.Services
                 requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
                 true
             );
+            var requesters = await UserService.Load(
+                requests.Count == 0 ? [0] : [.. requests.Select(r => r.RequesterId)],
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
+            );
 
             return new GridResultModel<object>
             {
@@ -125,7 +129,8 @@ namespace Bewegdeal.Services
                     asap = r.ASAP,
                     date = r.Date?.ToString("MMM d, yyyy"),
                     time = r.Time?.ToString("HH:mm"),
-                    imageUrl = FileService.GetUrl(files.FirstOrDefault(f => f.RequestId == r.Id)?.File, baseUrl)
+                    imageUrl = FileService.GetUrl(files.FirstOrDefault(f => f.RequestId == r.Id)?.File, baseUrl),
+                    requester = UserService.GetAvatar(requesters.FirstOrDefault(u => u.Id == r.RequesterId))
                 })
             };
         }

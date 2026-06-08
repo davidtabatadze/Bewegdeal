@@ -1,4 +1,5 @@
-﻿using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Base;
+using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
@@ -33,6 +34,9 @@ namespace Bewegdeal.Services
 
         public async Task<List<UserEntity>> Load(UserFilter filter)
             => await UserRepository.Load(filter);
+
+        public async Task<List<UserEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
+            => await UserRepository.Load<UserEntity>(ids, properties);
 
         #endregion
 
