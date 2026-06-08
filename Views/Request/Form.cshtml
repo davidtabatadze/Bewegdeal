@@ -1,11 +1,14 @@
 @using Bewegdeal.Data.Entities
 @using Bewegdeal.Enums
+@using Bewegdeal.Models
 @{
     Layout = "_HomeLayout";
-    var settings = (SettingsEntity)ViewBag.Settings;
-    var req      = ViewBag.Request as RequestEntity;
+    var vm       = (RequestModel)ViewBag.Request;
+    var settings = vm.Settings!;
+    var req      = vm.Data;
     var isEdit   = req is not null;
     ViewData["Title"] = isEdit ? "Edit Request" : "New Request";
+    var existingFilesList = isEdit ? vm.Files : [];
 }
 
 @section VendorStyles {
@@ -32,7 +35,16 @@
         const videoMaxCount  = @settings.RequestVideoMaxCount;
         const videoMaxSize   = @settings.RequestVideoMaxSize;
         @if (isEdit) {
-            <text>const existingFiles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Files));</text>
+            <text>const existingFiles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                existingFilesList.Select(f => new {
+                    fileId   = f.Id,
+                    fileName = f.Name,
+                    size     = f.Size,
+                    type     = f.Type,
+                    isMain   = f.IsMain,
+                    url      = f.Url
+                })
+            ));</text>
         }
     </script>
     <script src="~/js/request-form.js"></script>
@@ -66,7 +78,7 @@
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-truck-line text-success"></i>
                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Moving</span>
-                                                <small>Household or office relocation</small>
+                                                @* <small>Household or office relocation</small> *@
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Moving" id="serviceMoving" checked="@(isEdit && req!.Service == ServiceEnum.Moving ? "checked" : null)" />
                                         </label>
@@ -78,7 +90,7 @@
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-recycle-line text-danger"></i>
                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Removal</span>
-                                                <small>Junk and waste removal</small>
+                                                @* <small>Junk and waste removal</small> *@
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Removal" id="serviceRemoval" checked="@(isEdit && req!.Service == ServiceEnum.Removal ? "checked" : null)" />
                                         </label>
@@ -90,7 +102,7 @@
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-shopping-bag-4-line text-warning"></i>
                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Pickup</span>
-                                                <small>Store or warehouse pickup</small>
+                                                @* <small>Store or warehouse pickup</small> *@
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Pickup" id="servicePickup" checked="@(isEdit && req!.Service == ServiceEnum.Pickup ? "checked" : null)" />
                                         </label>
@@ -102,7 +114,7 @@
                                             <span class="custom-option-body">
                                                 <i class="icon-base ri ri-car-line text-info"></i>
                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Transport</span>
-                                                <small>Vehicle or cargo transport</small>
+                                                @* <small>Vehicle or cargo transport</small> *@
                                             </span>
                                             <input name="service" class="form-check-input" type="radio" value="@ServiceEnum.Transport" id="serviceTransport" checked="@(isEdit && req!.Service == ServiceEnum.Transport ? "checked" : null)" />
                                         </label>

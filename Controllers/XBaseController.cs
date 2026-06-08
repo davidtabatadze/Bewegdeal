@@ -29,7 +29,7 @@ namespace Bewegdeal.Controllers
         }
 
         protected bool HasClaim(string type, object value)
-            => User.FindFirstValue(type) == value.ToString();
+            => User.FindFirstValue(type)!.ToLower() == value.ToString()!.ToLower();
 
         protected async Task RefreshClaim(string type, object? value)
             => await HttpContext.SignInAsync(

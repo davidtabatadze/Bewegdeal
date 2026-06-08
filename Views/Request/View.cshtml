@@ -1,10 +1,10 @@
-﻿@using Bewegdeal.Data.Entities
-@using Bewegdeal.Enums
+﻿@using Bewegdeal.Enums
+@using Bewegdeal.Models
 @{
     Layout = "_HomeLayout";
-    var req = (RequestEntity)ViewBag.Request;
-    var files = ((IEnumerable<dynamic>)ViewBag.Files).ToList();
-    var allMedia = files;
+    var vm = (RequestModel)ViewBag.Request;
+    var req = vm.Data!;
+    var allMedia = vm.Files;
 
     ViewData["Title"] = req.Title;
 
@@ -104,17 +104,17 @@
                 </div>
                 <div class="d-flex align-items-center gap-1">
                     <div class="content-right">
-                        <span class="text-dark mb-0 h5">@ViewBag.RequesterName</span>
+                        <span class="text-dark mb-0 h5">@vm.Requester?.Name</span>
                     </div>
                     <div class="avatar avatar-md">
-                        @if (ViewBag.RequesterPictureUrl is not null)
+                        @if (vm.Requester?.Url is not null)
                         {
-                            <img src="@ViewBag.RequesterPictureUrl" alt="@ViewBag.RequesterName" class="rounded-circle" style="object-fit:cover;width:100%;height:100%;" />
+                            <img src="@vm.Requester.Url" alt="@vm.Requester.Name" class="rounded-circle" style="object-fit:cover;width:100%;height:100%;" />
                         }
                         else
                         {
                             <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
-                                  style="display:flex;align-items:center;justify-content:center;">@ViewBag.RequesterInitials</span>
+                                  style="display:flex;align-items:center;justify-content:center;">@vm.Requester?.Initials</span>
                         }
                     </div>
                 </div>
@@ -146,18 +146,18 @@
                     <div class="swiper-wrapper">
                         @foreach (var f in allMedia)
                         {
-                            if (f.type == RequestFileTypeEnum.Image)
+                            if (f.Type == RequestFileTypeEnum.Image)
                             {
                                 <div class="swiper-slide" style="position:relative; overflow:hidden;">
-                                    <div style="position:absolute; inset:0; background-image:url('@f.url'); background-size:cover; background-position:center; filter:blur(18px); transform:scale(1.1); opacity:0.75;"></div>
-                                    <img src="@f.url" alt="@f.fileName" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;" />
+                                    <div style="position:absolute; inset:0; background-image:url('@f.Url'); background-size:cover; background-position:center; filter:blur(18px); transform:scale(1.1); opacity:0.75;"></div>
+                                    <img src="@f.Url" alt="@f.Name" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;" />
                                 </div>
                             }
                             else
                             {
                                 <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#000;">
                                     <video controls style="max-height:100%; max-width:100%; object-fit:contain;">
-                                        <source src="@f.url" />
+                                        <source src="@f.Url" />
                                     </video>
                                 </div>
                             }
@@ -173,9 +173,9 @@
                         <div class="swiper-wrapper">
                             @foreach (var f in allMedia)
                             {
-                                if (f.type == RequestFileTypeEnum.Image)
+                                if (f.Type == RequestFileTypeEnum.Image)
                                 {
-                                    <div class="swiper-slide" style="background-image:url(@f.url)"></div>
+                                    <div class="swiper-slide" style="background-image:url(@f.Url)"></div>
                                 }
                                 else
                                 {

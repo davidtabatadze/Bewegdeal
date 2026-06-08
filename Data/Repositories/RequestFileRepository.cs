@@ -13,26 +13,9 @@ namespace Bewegdeal.Data.Repositories
             await Context.RequestFiles
                          .Where(i => i.RequestId == requestId)
                          .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsMain, false));
-
-            var main = await Context.RequestFiles
-                                    .Where(i =>
-                                        i.Type == RequestFileTypeEnum.Image &&
-                                        i.Id == id
-                                    )
-                                    .FirstOrDefaultAsync();
-            main ??= await Context.RequestFiles
-                                  .Where(i =>
-                                      i.Type == RequestFileTypeEnum.Image &&
-                                      i.RequestId == requestId
-                                  )
-                                  .OrderBy(i => i.Id)
-                                  .FirstOrDefaultAsync();
-
-            if (main is not null)
-            {
-                main.IsMain = true;
-                await Context.SaveChangesAsync();
-            }
+            await Context.RequestFiles
+                         .Where(i => i.RequestId == requestId && i.Id == id)
+                         .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsMain, true));
         }
 
         public async Task<List<RequestFileEntity>> Load(long? requestId, List<long>? requestIds = null, bool? isMain = null)

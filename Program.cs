@@ -84,6 +84,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<RequestService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.

@@ -49,8 +49,10 @@ public class RequestController(RequestService RequestService) : XBaseController
     [Authorize(Roles = UserRoleEnum.Customer)]
     public async Task<IActionResult> Create(RequestViewModel model)
     {
-        // validate 
+        // validate
         await RequestService.PrepareValidation(model);
+        ModelState.Clear();
+        TryValidateModel(model);
         if (!ModelState.IsValid)
         {
             return Json(new
@@ -104,8 +106,10 @@ public class RequestController(RequestService RequestService) : XBaseController
     [Authorize(Roles = UserRoleEnum.Customer)]
     public async Task<IActionResult> Edit(RequestViewModel model)
     {
-        // validate 
+        // validate
         await RequestService.PrepareValidation(model);
+        ModelState.Clear();
+        TryValidateModel(model);
         if (!ModelState.IsValid)
         {
             return Json(new
@@ -150,6 +154,8 @@ public class RequestController(RequestService RequestService) : XBaseController
         {
             return RedirectToAction("Index", "Dashboard");
         }
+
+        ViewBag.Request = result.Result;
         return View("View");
     }
 

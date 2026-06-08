@@ -1,13 +1,13 @@
 ﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories;
+using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
-    public class RequestService(RequestRepository RequestRepository, RequestFileRepository RequestFileRepository, UserService UserService, FileService2 FileService, SettingService SettingService)
+    public class RequestService(IRequestRepository RequestRepository, IRequestFileRepository RequestFileRepository, UserService UserService, FileService2 FileService, SettingService SettingService)
     {
 
         public async Task<GenericResultModel<RequestEntity>> Create(long userId, RequestViewModel model)
@@ -247,10 +247,6 @@ namespace Bewegdeal.Services
                     Size = model.Images[i].Length,
                     IsMain = i == model.MainImageIndex
                 });
-                //if (i == request.MainImageIndex)
-                //{
-                //    request.KeepMainFileId = file.ObjectId ?? 0;
-                //}
             }
 
             // add new videos ...
@@ -279,7 +275,12 @@ namespace Bewegdeal.Services
             await RequestFileRepository.Create(fileEntities);
 
             // set main file
-            await RequestFileRepository.SetMain(model.Id, model.KeepMainFileId);
+            await RequestFileRepository.SetMain(
+                model.Id,
+                model.KeepMainFileId > 0 ? model.KeepMainFileId :
+                model.MainImageIndex < fileEntities.Count ? fileEntities[model.MainImageIndex].Id :
+                0
+            );
 
             // ...
             return GenericResultModel.Ok();
