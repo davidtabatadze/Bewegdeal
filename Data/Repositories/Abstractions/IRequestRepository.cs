@@ -6,7 +6,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
 {
     public interface IRequestRepository : IRepository
     {
-        Task<RequestEntity?> Get(string number);
+        Task<RequestEntity?> Get(RequestFilter filter, string[]? properties = null);
         Task<int> Count(RequestFilter filter);
         Task<List<RequestEntity>> Load(RequestFilter filter);
     }

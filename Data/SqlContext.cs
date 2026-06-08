@@ -236,11 +236,13 @@ namespace Bewegdeal.Data
                 e.Property(f => f.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(f => f.RequestId);
+                e.HasIndex(f => f.IsMain);
 
-                e.Property(f => f.RequestId).IsRequired();
-                e.Property(f => f.FileId).IsRequired();
+                e.Property(f => f.Size).IsRequired();
                 e.Property(f => f.IsMain).IsRequired();
+                e.Property(f => f.RequestId).IsRequired();
                 e.Property(f => f.Type).IsRequired().HasMaxLength(8);
+                e.Property(f => f.File).IsRequired().HasMaxLength(256);
             });
         }
 

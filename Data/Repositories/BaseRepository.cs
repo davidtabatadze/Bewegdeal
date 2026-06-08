@@ -17,6 +17,12 @@ namespace Bewegdeal.Data.Repositories
             return entity;
         }
 
+        public async Task Create<T>(IEnumerable<T> entities) where T : class, IEntity
+        {
+            await Context.Set<T>().AddRangeAsync(entities);
+            await Context.SaveChangesAsync();
+        }
+
         public async Task Update<T>(T entity) where T : class, IEntity
         {
             Context.Set<T>().Update(entity);
@@ -25,6 +31,13 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task Delete<T>(long id) where T : class, IEntity
             => await Context.Set<T>().Where(f => f.Id == id).ExecuteDeleteAsync();
+
+        public async Task Delete<T>(List<long> ids) where T : class, IEntity
+        {
+            await Context.RequestFiles
+                         .Where(i => ids.Contains(i.Id))
+                         .ExecuteDeleteAsync();
+        }
 
         public async Task<T?> Get<T>(long id, string[]? properties = null) where T : class, IEntity
             => await Context.Set<T>().Where(i => i.Id == id).Select(BuildSelect<T>(properties)).FirstOrDefaultAsync();

@@ -8,15 +8,7 @@ namespace Bewegdeal.Data.Repositories
     public class RequestFileRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IRequestFileRepository
     {
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task Create(List<RequestFileEntity> files)
-        {
-            Context.RequestFiles.AddRange(files);
-            await Context.SaveChangesAsync();
-        }
-
-        public async Task SetMainImage(long requestId, long fileId)
+        public async Task SetMain(long requestId, long id)
         {
             await Context.RequestFiles
                          .Where(i => i.RequestId == requestId)
@@ -25,8 +17,7 @@ namespace Bewegdeal.Data.Repositories
             var main = await Context.RequestFiles
                                     .Where(i =>
                                         i.Type == RequestFileTypeEnum.Image &&
-                                        i.RequestId == requestId &&
-                                        i.FileId == fileId
+                                        i.Id == id
                                     )
                                     .FirstOrDefaultAsync();
             main ??= await Context.RequestFiles
@@ -44,29 +35,26 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        // ── Read ─────────────────────────────────────────────────────────────────
-
-        public async Task<List<RequestFileEntity>> Load(long requestId)
+        public async Task<List<RequestFileEntity>> Load(long? requestId, List<long>? requestIds = null, bool? isMain = null)
         {
-            return await Context.RequestFiles
-                                .Where(i => i.RequestId == requestId)
-                                .ToListAsync();
-        }
+            var query = Context.RequestFiles.AsQueryable();
 
-        public async Task<List<RequestFileEntity>> LoadMainImages(List<long> requestIds)
-        {
-            return await Context.RequestFiles
-                                .Where(f => requestIds.Contains(f.RequestId) && f.IsMain)
-                                .ToListAsync();
-        }
+            if (requestId is not null)
+            {
+                query = query.Where(i => i.RequestId == requestId);
+            }
 
-        // ── Delete ───────────────────────────────────────────────────────────────
+            if (requestIds is not null)
+            {
+                query = query.Where(i => requestIds.Contains(i.RequestId));
+            }
 
-        public async Task Delete(List<long> ids)
-        {
-            await Context.RequestFiles
-                         .Where(i => ids.Contains(i.Id))
-                         .ExecuteDeleteAsync();
+            if (isMain is not null)
+            {
+                query = query.Where(i => i.IsMain == isMain);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

@@ -1,98 +1,36 @@
-using Bewegdeal.Data.Base;
-using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
-using Bewegdeal.Models;
 using Bewegdeal.Services;
+using Bewegdeal.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
-[RequireLogin]
-public class RequestController(
-    ISettingsRepository settingsRepository,
-    IRequestRepository requestRepository,
-    IRequestFileRepository requestFileRepository,
-    FileService fileService,
-    UserService userService) : XBaseController
+[Authorize]
+public class RequestController(RequestService RequestService) : XBaseController
 {
     #region List
 
     [HttpGet]
     public async Task<IActionResult> List()
     {
-        var user = await userService.GetValidUser(UserId);
-        var viewerId = user?.Id ?? 0;
-        var viewerRole = user?.Role ?? "-";
+        var data = await RequestService.LoadGrid(UserId);
 
-        ViewBag.ViewerRole = viewerRole;
-        ViewBag.ViewerInterests = user?.Interests ?? [];
-
-        if (viewerRole == UserRoleEnum.Customer)
-        {
-            ViewBag.CustomerHasRequests = await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole }) > 0;
-        }
-        else
-        {
-            ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, ViewerInterests = user?.Interests ?? [] });
-            ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
-            ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
-            ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
-        }
+        ViewBag.ViewerRole = data.Result!.viewerRole;
+        ViewBag.ViewerInterests = data.Result!.viewerInterests;
+        ViewBag.CustomerHasRequests = data.Result!.customerHasRequests;
+        ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, ViewerInterests = user?.Interests ?? [] });
+        ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
+        ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
+        ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
         return View();
     }
 
     [HttpGet]
     public async Task<IActionResult> LoadRequests([FromQuery] RequestFilter filter, [FromQuery] int draw = 1)
     {
-        var user = await userService.GetValidUser(UserId);
-        filter.ViewerId = user?.Id ?? 0;
-        filter.ViewerRole = user?.Role ?? "-";
-        filter.ViewerInterests = user?.Interests ?? [];
-
-        var requests = await requestRepository.Load(filter);
-        var filtered = await requestRepository.Count(filter);
-        var total = await requestRepository.Count(new RequestFilter
-        {
-            ViewerId = user?.Id ?? 0,
-            ViewerRole = user?.Role ?? "-",
-            ViewerInterests = user?.Interests ?? []
-        });
-
-        var files = await requestFileRepository.LoadMainImages(
-            requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
-        );
-        var images = await fileService.Load(new BaseFilter
-        {
-            Ids = files.Count == 0 ? [0] : [.. files.Select(f => f.FileId)]
-        });
-
-        var data = requests.Select(r =>
-        {
-            var image = images.FirstOrDefault(i =>
-                i.Id == files.FirstOrDefault(f => f.RequestId == r.Id)?.FileId
-            );
-
-            return (object)new
-            {
-                id = r.Id,
-                number = r.Number,
-                status = r.Status,
-                service = r.Service,
-                title = r.Title,
-                createDate = r.CreateDate.ToString("MMM d, yyyy"),
-                cost = r.Cost,
-                currency = r.Currency,
-                asap = r.ASAP,
-                date = r.Date?.ToString("MMM d, yyyy"),
-                time = r.Time?.ToString("HH:mm"),
-                imageUrl = fileService.GetUrl(image, BaseUrl)
-            };
-        });
-
-        return Json(new GridResultViewModel<object> { });//new GridResultViewModel<object>(draw, total, filtered, data));
+        return Json(await RequestService.LoadGrid(filter, draw, UserId, BaseUrl));
     }
 
     #endregion
@@ -100,67 +38,38 @@ public class RequestController(
     #region Create
 
     [HttpGet]
+    [Authorize(Roles = UserRoleEnum.Customer)]
     public async Task<IActionResult> Create()
     {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
-        if (user is null)
-        {
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        ViewBag.Settings = await settingsRepository.Get();
+        ViewBag.Request = await RequestService.Get();
         return View("Form");
     }
 
     [HttpPost]
+    [Authorize(Roles = UserRoleEnum.Customer)]
     public async Task<IActionResult> Create(RequestViewModel model)
     {
-        // validate user
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
-        if (user is null)
-        {
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        // validate requirement
-        var requirement = ValidateRequirement(model);
-        if (requirement is not null)
+        // validate 
+        await RequestService.PrepareValidation(model);
+        if (!ModelState.IsValid)
         {
             return Json(new
             {
                 success = false,
-                error = requirement
-            });
-        }
-
-        // validate settings
-        var settings = await settingsRepository.Get();
-
-        // validate media
-        var media = ValidateMedia(model, settings, []);
-        if (media is not null)
-        {
-            return Json(new
-            {
-                success = false,
-                error = media
+                error = ModelState.Values.SelectMany(v => v.Errors)
+                                         .Select(e => e.ErrorMessage)
+                                         .FirstOrDefault()
             });
         }
 
         // create request
-        var request = await requestRepository.Create(
-            BuildRequest(null, model, user.Id)
-        );
-
-        // upload media
-        model.Id = request.Id;
-        var upload = await UploadMedia(model, settings, []);
-        if (upload is not null)
+        var request = await RequestService.Create(UserId, model);
+        if (!request.Success)
         {
             return Json(new
             {
                 success = false,
-                error = upload
+                error = request.Message
             });
         }
 
@@ -168,7 +77,62 @@ public class RequestController(
         return Json(new
         {
             success = true,
-            redirect = Url.Action("View", "Request", new { number = request.Number })
+            redirect = Url.Action("View", "Request", new { number = request.Result?.Number ?? "-" })
+        });
+    }
+
+    #endregion
+
+    #region Edit
+
+    [HttpGet]
+    [Authorize(Roles = UserRoleEnum.Customer)]
+    public async Task<IActionResult> Edit(long id)
+    {
+        var result = await RequestService.Get(id, UserId);
+
+        if (!result.Success || result.Result is null)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        ViewBag.Request = result.Result;
+        return View("Form");
+    }
+
+    [HttpPost]
+    [Authorize(Roles = UserRoleEnum.Customer)]
+    public async Task<IActionResult> Edit(RequestViewModel model)
+    {
+        // validate 
+        await RequestService.PrepareValidation(model);
+        if (!ModelState.IsValid)
+        {
+            return Json(new
+            {
+                success = false,
+                error = ModelState.Values.SelectMany(v => v.Errors)
+                                         .Select(e => e.ErrorMessage)
+                                         .FirstOrDefault()
+            });
+        }
+
+        // update request
+        var request = await RequestService.Update(UserId, model);
+        if (!request.Success)
+        {
+            return Json(new
+            {
+                success = false,
+                error = request.Message
+            });
+        }
+
+        // all good
+        return Json(new
+        {
+            success = true,
+            redirect = Url.Action("View", "Request", new { number = request.Result?.Number ?? "-" })
         });
     }
 
@@ -180,292 +144,14 @@ public class RequestController(
     [ActionName("View")]
     public async Task<IActionResult> ViewRequest(string number)
     {
-        var request = await requestRepository.Get(number);
-        if (request is null)
+        var result = await RequestService.Get(number, UserId);
+
+        if (!result.Success || result.Result is null)
         {
             return RedirectToAction("Index", "Dashboard");
         }
-
-        var requestFiles = await requestFileRepository.Load(request.Id);
-        var files = await fileService.Load(new BaseFilter
-        {
-            Ids = [.. requestFiles.Select(rf => rf.FileId)]
-        });
-
-        var requester = await userService.Get(request.RequesterId);
-        var requesterAvatar = await userService.GetAvatar(requester);
-
-        ViewBag.Request = request;
-        ViewBag.RequesterName = requesterAvatar.Name;
-        ViewBag.RequesterPictureUrl = requesterAvatar.Url;
-        ViewBag.RequesterInitials = requesterAvatar.Initials;
-        ViewBag.Files = files.Select(f => new
-        {
-            url = fileService.GetUrl(f, BaseUrl),
-            fileName = f.FileName,
-            isMain = requestFiles.First(rf => rf.FileId == f.Id).IsMain,
-            type = requestFiles.First(rf => rf.FileId == f.Id).Type
-        }).OrderBy(f => f.type).ThenByDescending(f => f.isMain);
         return View("View");
     }
 
     #endregion
-
-    #region Edit
-
-    [HttpGet]
-    public async Task<IActionResult> Edit(long id)
-    {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
-        var request = await ValidateRequest(id, user?.Id ?? 0);
-
-        if (user is null || request is null)
-        {
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        var settings = await settingsRepository.Get();
-        var requestFiles = await requestFileRepository.Load(id);
-        var files = await fileService.Load(new BaseFilter
-        {
-            Ids = requestFiles.Select(rf => rf.FileId).ToList()
-        });
-
-        ViewBag.Settings = settings;
-        ViewBag.Request = request;
-        ViewBag.Files = files.Select(i => new
-        {
-            fileId = i.Id,
-            url = fileService.GetUrl(i, BaseUrl),
-            fileName = i.FileName,
-            size = i.Size,
-            isMain = requestFiles.First(rf => rf.FileId == i.Id).IsMain,
-            type = requestFiles.First(rf => rf.FileId == i.Id).Type
-        });
-        return View("Form");
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Edit(RequestViewModel model)
-    {
-        var user = await userService.GetValidUser(UserId, roles: [UserRoleEnum.Customer]);
-        var request = await ValidateRequest(model.Id, user?.Id ?? 0);
-
-        if (user is null || request is null)
-        {
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        // validate requirement
-        var requirement = ValidateRequirement(model);
-        if (requirement is not null)
-        {
-            return Json(new
-            {
-                success = false,
-                error = requirement
-            });
-        }
-
-        // ...
-        var settings = await settingsRepository.Get();
-        var existingFiles = await requestFileRepository.Load(model.Id);
-
-        // validate media
-        var media = ValidateMedia(model, settings, existingFiles);
-        if (media is not null)
-        {
-            return Json(new
-            {
-                success = false,
-                error = media
-            });
-        }
-
-        // update request fields
-        await requestRepository.Update(BuildRequest(request, model, user.Id));
-
-        // upload media
-        var upload = await UploadMedia(model, settings, existingFiles);
-        if (upload is not null)
-        {
-            return Json(new
-            {
-                success = false,
-                error = upload
-            });
-        }
-
-        // all good
-        return Json(new
-        {
-            success = true,
-            redirect = Url.Action("View", "Request", new { number = request.Number })
-        });
-    }
-
-    #endregion
-
-    private async Task<string?> UploadMedia(RequestViewModel request, SettingsEntity settings, List<RequestFileEntity> existingFiles)
-    {
-        request.Images ??= [];
-        request.Videos ??= [];
-        request.KeepFileIds ??= [];
-        var fileEntities = new List<RequestFileEntity>();
-
-        // seek existing files to be deleted
-        var deletions = existingFiles.Where(i => !request.KeepFileIds.Contains(i.FileId)).ToList();
-
-        // delete request files not being kept and their storage
-        await requestFileRepository.Delete([.. deletions.Select(i => i.Id)]);
-        foreach (var file in deletions)
-        {
-            await fileService.Delete(file.FileId);
-        }
-
-        // add new images ...
-        for (var i = 0; i < request.Images.Length; i++)
-        {
-            var file = await fileService.Create(
-                request.Images[i],
-                null,
-                settings.RequestImageMaxSize,
-                [FileTypeEnum.PNG, FileTypeEnum.JPEG]
-            );
-            if (file.Message is not null)
-            {
-                return file.Message;
-            }
-            fileEntities.Add(new RequestFileEntity
-            {
-                RequestId = request.Id,
-                FileId = file.ObjectId ?? 0,
-                Type = RequestFileTypeEnum.Image
-            });
-            if (i == request.MainImageIndex)
-            {
-                request.KeepMainFileId = file.ObjectId ?? 0;
-            }
-        }
-
-        // add new videos ...
-        foreach (var vid in request.Videos)
-        {
-            var file = await fileService.Create(
-                vid,
-                null,
-                settings.RequestVideoMaxSize,
-                [FileTypeEnum.MP4, FileTypeEnum.MOV]
-            );
-            if (file.Message is not null)
-            {
-                return file.Message;
-            }
-            fileEntities.Add(new RequestFileEntity
-            {
-                RequestId = request.Id,
-                FileId = file.ObjectId ?? 0,
-                Type = RequestFileTypeEnum.Video
-            });
-        }
-
-        // save new request files
-        await requestFileRepository.Create(fileEntities);
-
-        // set main file
-        await requestFileRepository.SetMainImage(request.Id, request.KeepMainFileId);
-
-        // ...
-        return null;
-    }
-
-    private async Task<RequestEntity?> ValidateRequest(long id, long userId)
-    {
-        var request = await requestRepository.Get<RequestEntity>(id);
-
-        if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
-        {
-            return null;
-        }
-
-        return request;
-    }
-
-    private static RequestEntity BuildRequest(RequestEntity? entity, RequestViewModel request, long userId)
-    {
-        entity ??= new RequestEntity
-        {
-            Number = Guid.NewGuid().ToString("N"),
-            CreateDate = DateTime.UtcNow,
-            Status = RequestStatusEnum.Pending,
-            RequesterId = userId
-        };
-
-        entity.Service = request.Service;
-        entity.Title = request.Title.Trim();
-        entity.Description = request.Description?.Trim() ?? "";
-        entity.PickupAddress = request.PickupAddress.Trim();
-        entity.DeliveryAddress = request.DeliveryAddress?.Trim() ?? "";
-        entity.Cost = request.Cost;
-        entity.Currency = "EUR";
-        entity.ASAP = request.IsASAP;
-        entity.Date = !request.IsASAP ? DateOnly.Parse(request.Date!) : null;
-        entity.Time = !request.IsASAP ? TimeOnly.Parse(request.Time!) : null;
-
-        return entity;
-    }
-
-    private static string? ValidateRequirement(RequestViewModel model)
-    {
-        var field =
-            !new[] {
-                ServiceEnum.Moving,
-                ServiceEnum.Removal,
-                ServiceEnum.Pickup,
-                ServiceEnum.Transport
-            }.Contains(model.Service) ? AnnotationEnum.Request.Requirement.ServiceType :
-            string.IsNullOrWhiteSpace(model.Title) ? AnnotationEnum.Request.Requirement.Title :
-            string.IsNullOrWhiteSpace(model.PickupAddress) ? AnnotationEnum.Request.Requirement.PickupAddress :
-            (model.Service != ServiceEnum.Removal && string.IsNullOrWhiteSpace(model.DeliveryAddress)) ? AnnotationEnum.Request.Requirement.DeliveryAddress :
-            (model.Cost < 1 || model.Cost > 10000) ? AnnotationEnum.Request.Requirement.Cost :
-            (!model.IsASAP && !DateOnly.TryParse(model.Date, out _)) ? AnnotationEnum.Request.Requirement.Date :
-            (!model.IsASAP && !TimeOnly.TryParse(model.Time, out _)) ? AnnotationEnum.Request.Requirement.Time :
-            null;
-
-        return field is null ? null : string.Format(AnnotationEnum.Request.Requirement.Error, field);
-    }
-
-    private static string? ValidateMedia(RequestViewModel request, SettingsEntity settings, List<RequestFileEntity> existingFiles)
-    {
-        request.Images ??= [];
-        request.Videos ??= [];
-        request.KeepFileIds ??= [];
-
-        var totalImages = request.Images.Length +
-                          existingFiles.Count(i =>
-                            i.Type == RequestFileTypeEnum.Image &&
-                            request.KeepFileIds.Contains(i.FileId)
-                          );
-        var totalVideos = request.Videos.Length +
-                          existingFiles.Count(i =>
-                            i.Type == RequestFileTypeEnum.Video &&
-                            request.KeepFileIds.Contains(i.FileId)
-                          );
-
-        if (totalImages == 0)
-        {
-            return AnnotationEnum.Request.Media.ImageMinCount;
-        }
-        if (totalImages > settings.RequestImageMaxCount)
-        {
-            return string.Format(AnnotationEnum.Request.Media.ImageMaxCount, settings.RequestImageMaxCount);
-        }
-        if (totalVideos > settings.RequestVideoMaxCount)
-        {
-            return string.Format(AnnotationEnum.Request.Media.VideoMaxCount, settings.RequestVideoMaxCount);
-        }
-
-        return null;
-    }
-
 }

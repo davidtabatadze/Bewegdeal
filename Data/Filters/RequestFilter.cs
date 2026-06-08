@@ -4,6 +4,7 @@ namespace Bewegdeal.Data.Filters
 {
     public class RequestFilter : BaseFilter
     {
+        public string? Number { get; set; }
         public string? Search { get; set; }
         public string? Status { get; set; }
         public string? Service { get; set; }

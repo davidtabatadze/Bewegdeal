@@ -9,48 +9,25 @@ namespace Bewegdeal.Data.Repositories
     public class RequestRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IRequestRepository
     {
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-
-
-
-
-
-        public async Task<RequestEntity?> Get(string number) =>
-            await Context.Requests.FirstOrDefaultAsync(r => r.Number == number);
-
-        public async Task<int> Count(RequestFilter filter) =>
-            await ApplyFilters(Context.Requests.AsQueryable(), filter).CountAsync();
+        public async Task<RequestEntity?> Get(RequestFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Requests.AsQueryable(), filter).Select(BuildSelect<RequestEntity>(properties)).FirstOrDefaultAsync();
 
         public async Task<List<RequestEntity>> Load(RequestFilter filter)
-        {
-            var query = ApplyFilters(Context.Requests.AsQueryable(), filter);
+            => await ApplyFilters(Context.Requests.AsQueryable(), filter).ToListAsync();
 
-            if (!string.IsNullOrWhiteSpace(filter.SortDirection) && !string.IsNullOrWhiteSpace(filter.SortField))
-            {
-                var desc = filter.SortDirection == SortDirectionEnum.Desc;
-                query = filter.SortField switch
-                {
-                    SortFieldEnum.Status => desc ? query.OrderByDescending(r => r.Status) : query.OrderBy(r => r.Status),
-                    SortFieldEnum.Service => desc ? query.OrderByDescending(r => r.Service) : query.OrderBy(r => r.Service),
-                    SortFieldEnum.CreateDate => desc ? query.OrderByDescending(r => r.CreateDate) : query.OrderBy(r => r.CreateDate),
-                    _ => desc ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id)
-                };
-            }
+        public async Task<int> Count(RequestFilter filter)
+            => await ApplyFilters(Context.Requests.AsQueryable(), filter).CountAsync();
 
-            if (filter.Start.HasValue && filter.Length.HasValue)
-            {
-                query = query.Skip(filter.Start.Value).Take(filter.Length.Value);
-            }
-
-            return await query.ToListAsync();
-        }
-
-        private static IQueryable<RequestEntity> ApplyFilters(IQueryable<RequestEntity> query, RequestFilter filter)
+        private IQueryable<RequestEntity> ApplyFilters(IQueryable<RequestEntity> query, RequestFilter filter)
         {
             if (filter.Id.HasValue)
             {
                 query = query.Where(r => r.Id == filter.Id.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Number))
+            {
+                query = query.Where(r => r.Number == filter.Number);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Status))
@@ -132,11 +109,11 @@ namespace Bewegdeal.Data.Repositories
                 }
             }
 
+            query = ApplySorting(query, filter);
+            query = ApplyPaging(query, filter);
+
             return query;
         }
-
-        // ── Delete ───────────────────────────────────────────────────────────────
-        // ***
 
     }
 }
