@@ -54,7 +54,8 @@ Dropzone.autoDiscover = false;
       acceptedFiles:    '.png,.jpg,.jpeg,.mp4,.mov',
       previewTemplate:  previewTemplate,
       dictInvalidFileType: 'Only PNG, JPG, MP4 and MOV files are accepted.',
-      dictFileTooBig:   'File is too large.'
+      dictFileTooBig:   'File is too large.',
+      dictRemoveFile:   '<i class="icon-base ri ri-delete-bin-line text-danger me-1 icon-14px"></i>Remove file'
     });
 
     mediaDropzone.on('addedfile', function (file) {

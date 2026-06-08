@@ -54,13 +54,6 @@
     <div class="col-12">
         <div class="card">
 
-            <div class="card-header sticky-element d-flex justify-content-center align-items-center">
-                <div class="action-btns">
-                    <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
-                    <button id="btnSubmitRequest" type="button" class="btn btn-primary">@(isEdit ? "Save Changes" : "Place Request")</button>
-                </div>
-            </div>
-
             <div class="card-body pt-5">
                 <form id="requestForm" asp-controller="Request" asp-action="@(isEdit ? "Edit" : "Create")" method="post">
                     @if (isEdit) {
@@ -234,6 +227,13 @@
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <div class="card-footer sticky-element d-flex justify-content-center align-items-center" style="bottom: 0;">
+                <div class="action-btns">
+                    <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
+                    <button id="btnSubmitRequest" type="button" class="btn btn-primary">@(isEdit ? "Save Changes" : "Place Request")</button>
+                </div>
             </div>
 
         </div>
