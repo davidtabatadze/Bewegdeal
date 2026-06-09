@@ -15,7 +15,7 @@ namespace Bewegdeal.ViewModels
 
         [Required]
         [MinLength(1)]
-        [MaxLength(128)]
+        [MaxLength(64)]
         public string Title { get; set; } = string.Empty;
 
         [MaxLength(2048)]

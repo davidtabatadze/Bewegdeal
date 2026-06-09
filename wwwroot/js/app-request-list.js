@@ -133,6 +133,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Request cell — thumbnail + title + service label
                 targets: 0,
                 orderable: false,
+                createdCell: function (td) {
+                    td.style.minWidth = '300px';
+                },
                 render: function (data, type, full) {
                     const title = full['title'];
                     const service = full['service'];
@@ -140,15 +143,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     const serviceObj = serviceMap[service] || { label: service };
 
                     const img = imageUrl
-                        ? '<img src="' + imageUrl + '" class="rounded pull-up" style="width:64px;height:64px;object-fit:cover;flex-shrink:0;">'
+                        ? '<img src="' + imageUrl + '" class="rounded pull-up view-request-btn" style="width:64px;height:64px;object-fit:cover;flex-shrink:0;cursor:pointer;" data-number="' + full['number'] + '">'
                         : '<div class="rounded bg-label-secondary d-flex align-items-center justify-content-center" style="width:40px;height:40px;flex-shrink:0;"><i class="icon-base ri ri-image-line"></i></div>';
 
                     return (
                         '<div class="d-flex align-items-center gap-3">' +
                         img +
                         '<div class="d-flex flex-column">' +
-                        '<span class="view-request-btn text-heading fw-medium text-truncate" style="max-width:200px;cursor:pointer;" data-number="' + full['number'] + '">' + title + '</span>' +
-                        '<small class="' + (serviceObj.color || 'text-muted') + '">' + serviceObj.label + '</small>' +
+                        '<span class="view-request-btn text-heading fw-medium text-strong" style="cursor:pointer;" data-number="' + full['number'] + '">' + title + '</span>' +
+                        '<small class="text-muted mt-2">#' + full['id'] + '</small>' +
                         '</div>' +
                         '</div>'
                     );
@@ -162,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const map = serviceMap2[full['service']];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
-                        '<li class="avatar avatar-m pull-up" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
                         '<div class="avatar-initial rounded-circle ' + map.color + '">' +
                         '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                         '</div>' +
@@ -175,7 +178,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Create date
                 targets: 3,
                 width: '120px',
-                minWidth: '220px',
+                createdCell: function (td) {
+                    td.style.minWidth = '135px';
+                },
                 render: function (data, type, full) {
                     return full['createDate'];
                 }
@@ -184,6 +189,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Details — cost + timing
                 targets: 4,
                 orderable: false,
+                createdCell: function (td) {
+                    td.style.minWidth = '200px';
+                },
                 render: function (data, type, full) {
                     const cost = full['cost'];
                     const currency = full['currency'];
@@ -207,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return (
                         '<div class="d-flex justify-content-start align-items-center user-name">' +
                         '<div class="avatar-wrapper">' +
-                        '<div class="avatar avatar-m me-2 pull-up" data-bs-toggle="tooltip" data-bs-placement="top" title="' + avatar.name + '">' + avatarInner + '</div>' +
+                        '<div class="avatar avatar-m me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="' + avatar.name + '">' + avatarInner + '</div>' +
                         '</div>' +
                         '<div class="d-flex flex-column">' +
                         '<span class="fw-medium">' + currency + ' ' + parseFloat(cost).toFixed(2) + '</span>' +

@@ -149,6 +149,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Date
                 targets: 4,
                 width: '130px',
+                createdCell: function (td) {
+                    td.style.minWidth = '135px';
+                },
                 render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
             },
             {
