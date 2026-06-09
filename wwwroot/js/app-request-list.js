@@ -33,10 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Column index → sort field sent to the server (only sortable columns listed)
     const columnToField = {
-        0: 'id',
         1: 'status',
-        3: 'service',
-        4: 'createDate'
+        2: 'service',
+        3: 'createDate'
     };
 
     if (!dt_table) { return; }
@@ -73,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
             url: '/Request/LoadRequests',
             data: function (d) {
                 const order = d.order && d.order[0];
-                d.sortField = columnToField[order ? order.column : 4] || 'createDate';
+                d.sortField = columnToField[order ? order.column : 3] || 'createDate';
                 d.sortDirection = order ? order.dir : 'desc';
 
                 delete d.order;
@@ -99,28 +98,28 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         columns: [
-            { data: 'id' },   // 0 — number / view button
+            // { data: 'id' },   // 0 — number / view button
             { data: 'status' },   // 1 — status badge
             { data: 'title' },   // 2 — request cell (image + title + service)
             { data: 'service' },   // 3 — service icon
-            { data: 'createDate' },   // 4 — date
+            { data: 'createDate', width: '120px' },   // 4 — date
             { data: 'cost' },   // 5 — details
         ],
         columnDefs: [
-            {
-                // Number — view button
-                targets: 0,
-                width: '60px',
-                render: function (data, type, full) {
-                    return (
-                        '<button type="button" class="btn btn-text-secondary view-request-btn"' +
-                        ' data-number="' + full['number'] + '">' +
-                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
-                        '#' + full['id'] +
-                        '</button>'
-                    );
-                }
-            },
+            // {
+            //     // Number — view button
+            //     targets: 0,
+            //     width: '60px',
+            //     render: function (data, type, full) {
+            //         return (
+            //             '<button type="button" class="btn btn-text-secondary view-request-btn"' +
+            //             ' data-number="' + full['number'] + '">' +
+            //             '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
+            //             '#' + full['id'] +
+            //             '</button>'
+            //         );
+            //     }
+            // },
             {
                 // Status icon with tooltip
                 targets: 1,
@@ -132,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Request cell — thumbnail + title + service label
-                targets: 2,
+                targets: 0,
                 orderable: false,
                 render: function (data, type, full) {
                     const title = full['title'];
@@ -141,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const serviceObj = serviceMap[service] || { label: service };
 
                     const img = imageUrl
-                        ? '<img src="' + imageUrl + '" alt="" class="rounded" style="width:64px;height:64px;object-fit:cover;flex-shrink:0;">'
+                        ? '<img src="' + imageUrl + '" class="rounded pull-up" style="width:64px;height:64px;object-fit:cover;flex-shrink:0;">'
                         : '<div class="rounded bg-label-secondary d-flex align-items-center justify-content-center" style="width:40px;height:40px;flex-shrink:0;"><i class="icon-base ri ri-image-line"></i></div>';
 
                     return (
@@ -157,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Service icon with tooltip
-                targets: 3,
+                targets: 2,
                 width: '60px',
                 render: function (data, type, full) {
                     const map = serviceMap2[full['service']];
@@ -174,15 +173,16 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Create date
-                targets: 4,
+                targets: 3,
                 width: '120px',
+                minWidth: '220px',
                 render: function (data, type, full) {
                     return full['createDate'];
                 }
             },
             {
                 // Details — cost + timing
-                targets: 5,
+                targets: 4,
                 orderable: false,
                 render: function (data, type, full) {
                     const cost = full['cost'];
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         ],
         pageLength: 10,
-        order: [[4, 'desc']],
+        order: [[3, 'desc']],
         drawCallback: function () {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                 if (!bootstrap.Tooltip.getInstance(el)) {
