@@ -240,6 +240,35 @@ Dropzone.autoDiscover = false;
     });
   }
 
+  // ── Bootstrap-select (selectpicker) init ──────────────────────────────────
+  if (typeof $ !== 'undefined' && typeof $.fn.selectpicker !== 'undefined') {
+    $('#vehicleType, #vehicleCondition').selectpicker();
+    if (typeof handleBootstrapSelectEvents === 'function') {
+      handleBootstrapSelectEvents();
+    }
+  }
+
+  // ── Additional Details visibility ─────────────────────────────────────────
+  const noDetailsMsg        = document.getElementById('noDetailsMsg');
+  const transportFields     = document.getElementById('transportFields');
+  const elevatorParkingFields = document.getElementById('elevatorParkingFields');
+
+  function updateAdditionalDetails(service) {
+    if (!service) {
+      noDetailsMsg.classList.remove('d-none');
+      transportFields.classList.add('d-none');
+      elevatorParkingFields.classList.add('d-none');
+    } else if (service === 'transport') {
+      noDetailsMsg.classList.add('d-none');
+      transportFields.classList.remove('d-none');
+      elevatorParkingFields.classList.add('d-none');
+    } else {
+      noDetailsMsg.classList.add('d-none');
+      transportFields.classList.add('d-none');
+      elevatorParkingFields.classList.remove('d-none');
+    }
+  }
+
   const destAddressWrapper = document.getElementById('deliveryAddress')?.closest('.col-12');
 
   function toggleDestinationAddress(service) {
@@ -260,12 +289,16 @@ Dropzone.autoDiscover = false;
     radio.addEventListener('change', function () {
       document.getElementById('serviceError').classList.add('d-none');
       toggleDestinationAddress(this.value);
+      updateAdditionalDetails(this.value);
+      document.getElementById('vehicleTypeError').classList.add('d-none');
+      document.getElementById('vehicleConditionError').classList.add('d-none');
     });
   });
 
-  // Apply on page load (Edit mode may have Removal pre-selected)
-  const initialService = document.querySelector('input[name="service"]:checked')?.value;
+  // Apply on page load (Edit mode may have a service pre-selected)
+  const initialService = document.querySelector('input[name="service"]:checked')?.value ?? null;
   if (initialService) { toggleDestinationAddress(initialService); }
+  updateAdditionalDetails(initialService);
 
   // ── Form submission ───────────────────────────────────────────────────────
   const form      = document.getElementById('requestForm');
@@ -286,6 +319,8 @@ Dropzone.autoDiscover = false;
         el.classList.remove('is-invalid');
       });
       document.getElementById('serviceError').classList.add('d-none');
+      document.getElementById('vehicleTypeError').classList.add('d-none');
+      document.getElementById('vehicleConditionError').classList.add('d-none');
       const mediaErrorEl = document.getElementById('mediaError');
       mediaErrorEl.textContent = '';
       mediaErrorEl.classList.add('d-none');
@@ -366,6 +401,19 @@ Dropzone.autoDiscover = false;
               break;
             }
           }
+        }
+      }
+
+      if (selectedService === 'transport') {
+        const vType = document.getElementById('vehicleType').value;
+        if (!vType) {
+          document.getElementById('vehicleTypeError').classList.remove('d-none');
+          hasErrors = true;
+        }
+        const vCond = document.getElementById('vehicleCondition').value;
+        if (!vCond) {
+          document.getElementById('vehicleConditionError').classList.remove('d-none');
+          hasErrors = true;
         }
       }
 

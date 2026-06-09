@@ -19,13 +19,12 @@ namespace Bewegdeal.Hubs
         /// </summary>
         public async Task JoinNotifications()
         {
-            var userId = GetUserId();
-            if (userId == 0) { return; }
+            if (UserId == 0) { return; }
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, "user-" + userId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, "user-" + UserId);
 
             // Catchup: fire one notification per chat with unread messages
-            var unread = await chatRepository.LoadUnreadForUser(userId);
+            var unread = await chatRepository.LoadUnreadForUser(UserId);
             foreach (var summary in unread)
             {
                 await Clients.Caller.SendAsync("NewMessageNotification", new
@@ -42,16 +41,15 @@ namespace Bewegdeal.Hubs
         /// </summary>
         public async Task JoinChat(string chatKey)
         {
-            var userId = GetUserId();
-            if (userId == 0) { return; }
+            if (UserId == 0) { return; }
 
             var chat = await chatRepository.Get(chatKey);
-            if (chat is null || !IsParticipant(chat, userId)) { return; }
+            if (chat is null || !IsParticipant(chat, UserId)) { return; }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(chatKey));
 
             // mark incoming messages as read on join, then notify the sender
-            await chatRepository.MarkRead(chat.Id, userId);
+            await chatRepository.MarkRead(chat.Id, UserId);
             await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
         }
 
@@ -60,14 +58,13 @@ namespace Bewegdeal.Hubs
         /// </summary>
         public async Task SendMessage(string chatKey, string content)
         {
-            var userId = GetUserId();
-            if (userId == 0) { return; }
+            if (UserId == 0) { return; }
 
             content = (content ?? "").Trim();
             if (string.IsNullOrWhiteSpace(content) || content.Length > 2048) { return; }
 
             var chat = await chatRepository.Get(chatKey);
-            if (chat is null || !IsParticipant(chat, userId) || chat.Status != ChatStatusEnum.Active)
+            if (chat is null || !IsParticipant(chat, UserId) || chat.Status != ChatStatusEnum.Active)
             {
                 return;
             }
@@ -75,7 +72,7 @@ namespace Bewegdeal.Hubs
             var message = await chatRepository.CreateMessage(new ChatMessageEntity
             {
                 ChatId = chat.Id,
-                SenderId = userId,
+                SenderId = UserId,
                 Content = content,
                 SentDate = DateTime.UtcNow,
                 IsRead = false
@@ -91,8 +88,8 @@ namespace Bewegdeal.Hubs
             });
 
             // notify the recipient's personal group (for other-page toast / browser notification)
-            var recipientId = userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            var sender = await userService.Get(userId);
+            var recipientId = UserId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
+            var sender = await userService.Get(UserId);
             var request = await requestRepository.Get<RequestEntity>(chat.RequestId);
             var preview = content.Length > 80 ? content[..80] + "…" : content;
 
@@ -110,24 +107,25 @@ namespace Bewegdeal.Hubs
         /// </summary>
         public async Task MarkRead(string chatKey)
         {
-            var userId = GetUserId();
-            if (userId == 0) { return; }
+            if (UserId == 0) { return; }
 
             var chat = await chatRepository.Get(chatKey);
-            if (chat is null || !IsParticipant(chat, userId)) { return; }
+            if (chat is null || !IsParticipant(chat, UserId)) { return; }
 
-            await chatRepository.MarkRead(chat.Id, userId);
+            await chatRepository.MarkRead(chat.Id, UserId);
             await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 
-        private long GetUserId() =>
+        private static string GroupName(string chatKey) => "chat-" + chatKey;
+
+        private long UserId =>
             long.TryParse(Context.User?.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
 
         private static bool IsParticipant(ChatEntity chat, long userId) =>
             chat.CustomerId == userId || chat.CompanyId == userId;
 
-        private static string GroupName(string chatKey) => "chat-" + chatKey;
+        
     }
 }

@@ -192,6 +192,10 @@ namespace Bewegdeal.Data
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
                     );
                 e.Property(r => r.AgreementId).IsRequired(false);
+                e.Property(r => r.VehicleType).IsRequired(false).HasMaxLength(16);
+                e.Property(r => r.VehicleCondition).IsRequired(false).HasMaxLength(16);
+                e.Property(r => r.PresentElevator).IsRequired().HasDefaultValue(false);
+                e.Property(r => r.PresentParking).IsRequired().HasDefaultValue(false);
             });
         }
 

@@ -312,6 +312,21 @@ namespace Bewegdeal.Services
             entity.Date = !request.IsASAP ? DateOnly.Parse(request.Date!) : null;
             entity.Time = !request.IsASAP ? TimeOnly.Parse(request.Time!) : null;
 
+            if (request.Service == ServiceEnum.Transport)
+            {
+                entity.VehicleType = request.VehicleType?.Trim();
+                entity.VehicleCondition = request.VehicleCondition?.Trim();
+                entity.PresentElevator = false;
+                entity.PresentParking = false;
+            }
+            else
+            {
+                entity.VehicleType = null;
+                entity.VehicleCondition = null;
+                entity.PresentElevator = request.PresentElevator;
+                entity.PresentParking = request.PresentParking;
+            }
+
             return entity;
         }
     }

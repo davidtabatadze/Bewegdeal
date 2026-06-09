@@ -40,6 +40,10 @@ namespace Bewegdeal.ViewModels
         public int MainImageIndex { get; set; }
         public long[] KeepFileIds { get; set; } = [];
         public long KeepMainFileId { get; set; }
+        public string? VehicleType { get; set; }
+        public string? VehicleCondition { get; set; }
+        public bool PresentElevator { get; set; }
+        public bool PresentParking { get; set; }
 
         #region Validation Externals
         public short ImageMaxSize { get; set; }
@@ -81,6 +85,8 @@ namespace Bewegdeal.ViewModels
                 (Cost < 1 || Cost > 10000) ? AnnotationEnum.Request.Requirement.Cost :
                 (!IsASAP && !DateOnly.TryParse(Date, out _)) ? AnnotationEnum.Request.Requirement.Date :
                 (!IsASAP && !TimeOnly.TryParse(Time, out _)) ? AnnotationEnum.Request.Requirement.Time :
+                (Service == ServiceEnum.Transport && string.IsNullOrWhiteSpace(VehicleType)) ? AnnotationEnum.Request.Requirement.VehicleType :
+                (Service == ServiceEnum.Transport && string.IsNullOrWhiteSpace(VehicleCondition)) ? AnnotationEnum.Request.Requirement.VehicleCondition :
                 null;
 
             if (field is not null)

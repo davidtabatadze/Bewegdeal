@@ -63,6 +63,8 @@
                 public const string Cost = "Cost (1 to 10,000)";
                 public const string Date = "Date";
                 public const string Time = "Time";
+                public const string VehicleType = "Vehicle Type";
+                public const string VehicleCondition = "Vehicle Condition";
                 public const string Error = "{0} field is required.";
             }
             public class Media
