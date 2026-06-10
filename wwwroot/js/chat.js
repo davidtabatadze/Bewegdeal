@@ -62,7 +62,7 @@
 
         Swal.fire({
             title: 'End negotiation?',
-            text: 'Sure you want to cancel negotiation?',
+            text: 'Sure you want to cancel the negotiation?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, end it',

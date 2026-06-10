@@ -1,5 +1,5 @@
 @using Bewegdeal.Enums
-@model Bewegdeal.Models.ChatHistoryViewModel
+@model Bewegdeal.Models.ChatHistoryModel
 
 <style>
     .chat-bubble-tail {
@@ -118,7 +118,7 @@ else
                                         <div class="chat-message-text p-2">
                                             <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
                                             <span class="chat-bubble-meta">
-                                                <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-success" : "")"></i>
+                                                <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-warning" : "")"></i>
                                                 <small>@msg.SentDate.ToString("HH:mm")</small>
                                             </span>
                                         </div>

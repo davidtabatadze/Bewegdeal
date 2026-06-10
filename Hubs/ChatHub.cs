@@ -1,5 +1,4 @@
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Bewegdeal.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -7,69 +6,57 @@ using System.Security.Claims;
 
 namespace Bewegdeal.Hubs
 {
-    public class ChatHub(
-        IChatRepository chatRepository,
-        UserService userService,
-        IRequestRepository requestRepository) : Hub
+    public class ChatHub(ChatService ChatService) : Hub
     {
-        /// <summary>
-        /// Joins the caller's personal notification group so they receive new-message alerts on any page.
-        /// Also replays one notification per active chat that has unread messages, so alerts are not
-        /// missed when the user was offline when the messages arrived.
-        /// </summary>
+
         public async Task JoinNotifications()
         {
-            if (UserId == 0) { return; }
+            return;
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, "user-" + UserId);
+            //if (UserId == 0) { return; }
 
-            // Catchup: fire one notification per chat with unread messages
-            var unread = await chatRepository.LoadUnreadForUser(UserId);
-            foreach (var summary in unread)
-            {
-                await Clients.Caller.SendAsync("NewMessageNotification", new
-                {
-                    senderName = summary.SenderName,
-                    preview = summary.Preview,
-                    requestNumber = summary.RequestNumber
-                });
-            }
+            //await Groups.AddToGroupAsync(Context.ConnectionId, "user-" + UserId);
+
+            //// Catchup: fire one notification per chat with unread messages
+            //var unread = await chatRepository.LoadUnreadForUser(UserId);
+            //foreach (var summary in unread)
+            //{
+            //    await Clients.Caller.SendAsync("NewMessageNotification", new
+            //    {
+            //        senderName = summary.SenderName,
+            //        preview = summary.Preview,
+            //        requestNumber = summary.RequestNumber
+            //    });
+            //}
         }
 
-        /// <summary>
-        /// Joins the SignalR group for a specific chat, after verifying the caller is a participant.
-        /// </summary>
         public async Task JoinChat(string chatKey)
         {
-            if (UserId == 0) { return; }
-
-            var chat = await chatRepository.Get(chatKey);
-            if (chat is null || !IsParticipant(chat, UserId)) { return; }
+            var chat = await ChatService.Get(chatKey);
+            if (chat is null || !IsParticipant(chat, UserId))
+            {
+                return;
+            }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(chatKey));
-
-            // mark incoming messages as read on join, then notify the sender
-            await chatRepository.MarkRead(chat.Id, UserId);
-            await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
+            await MarkRead(chatKey, chat);
         }
 
-        /// <summary>
-        /// Saves the message to the database and broadcasts it to all group members.
-        /// </summary>
         public async Task SendMessage(string chatKey, string content)
         {
-            if (UserId == 0) { return; }
-
             content = (content ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(content) || content.Length > 2048) { return; }
+            if (string.IsNullOrWhiteSpace(content) || content.Length > 2048) // why?
+            {
+                return;
+            }
 
-            var chat = await chatRepository.Get(chatKey);
+            var chat = await ChatService.Get(chatKey);
             if (chat is null || !IsParticipant(chat, UserId) || chat.Status != ChatStatusEnum.Active)
             {
                 return;
             }
 
-            var message = await chatRepository.CreateMessage(new ChatMessageEntity
+            var message = await ChatService.AddMessage(new ChatMessageEntity
             {
                 ChatId = chat.Id,
                 SenderId = UserId,
@@ -88,44 +75,42 @@ namespace Bewegdeal.Hubs
             });
 
             // notify the recipient's personal group (for other-page toast / browser notification)
-            var recipientId = UserId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            var sender = await userService.Get(UserId);
-            var request = await requestRepository.Get<RequestEntity>(chat.RequestId);
-            var preview = content.Length > 80 ? content[..80] + "…" : content;
+            //var recipientId = UserId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
+            //var sender = await userService.Get(UserId);
+            //var request = await requestRepository.Get<RequestEntity>(chat.RequestId);
+            //var preview = content.Length > 80 ? content[..80] + "…" : content;
 
-            await Clients.Group("user-" + recipientId).SendAsync("NewMessageNotification", new
-            {
-                senderName = sender?.Name ?? "Someone",
-                preview = preview,
-                requestNumber = request?.Number ?? ""
-            });
+            //await Clients.Group("user-" + recipientId).SendAsync("NewMessageNotification", new
+            //{
+            //    senderName = sender?.Name ?? "Someone",
+            //    preview = preview,
+            //    requestNumber = request?.Number ?? ""
+            //});
         }
 
-        /// <summary>
-        /// Marks all messages from the other party as read and notifies them.
-        /// Called by the receiver when a new message arrives while they are already in the chat.
-        /// </summary>
-        public async Task MarkRead(string chatKey)
+        public async Task MarkRead(string chatKey, ChatEntity? chat = null)
         {
-            if (UserId == 0) { return; }
+            chat ??= await ChatService.Get(chatKey);
+            if (chat is null || !IsParticipant(chat, UserId))
+            {
+                return;
+            }
 
-            var chat = await chatRepository.Get(chatKey);
-            if (chat is null || !IsParticipant(chat, UserId)) { return; }
-
-            await chatRepository.MarkRead(chat.Id, UserId);
+            await ChatService.ReadMessages(chat.Id, UserId);
             await Clients.OthersInGroup(GroupName(chatKey)).SendAsync("MessagesRead");
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────────
+        public async Task LeaveChat(string chatKey)
+        {
+            //var chat = await ChatService.Get(chatKey);
+            //if (chat is null || !IsParticipant(chat, UserId)) { return; }
+            //await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(chatKey));
+            await Clients.Group(GroupName(chatKey)).SendAsync("ChatCancelled");
+        }
 
-        private static string GroupName(string chatKey) => "chat-" + chatKey;
+        private static string GroupName(string chatKey) => "bewegdeal-chat-" + chatKey;
+        private long UserId => long.TryParse(Context.User?.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
+        private static bool IsParticipant(ChatEntity chat, long userId) => chat.CustomerId == userId || chat.CompanyId == userId;
 
-        private long UserId =>
-            long.TryParse(Context.User?.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
-
-        private static bool IsParticipant(ChatEntity chat, long userId) =>
-            chat.CustomerId == userId || chat.CompanyId == userId;
-
-        
     }
 }

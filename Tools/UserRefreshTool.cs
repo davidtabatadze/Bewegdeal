@@ -47,7 +47,7 @@ namespace Bewegdeal.Tools
                     }
                 }
 
-                if (!parse || status != UserStatusEnum.Active)
+                if (!parse || userId == 0 || status != UserStatusEnum.Active)
                 {
                     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     context.Response.Redirect("/Account/Login");

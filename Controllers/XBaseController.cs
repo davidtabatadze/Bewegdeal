@@ -10,6 +10,7 @@ namespace Bewegdeal.Controllers
     {
         public string BaseUrl => $"{Request.Scheme}://{Request.Host}";
         public long UserId => GetClaim<long>(IdentityFieldEnum.Id);
+        public string UserRole => GetClaim<string>(IdentityFieldEnum.Role) ?? "undefined";
 
         protected T? GetClaim<T>(string type)
         {

@@ -2,7 +2,7 @@ using Bewegdeal.Data.Entities;
 
 namespace Bewegdeal.Models
 {
-    public class ChatHistoryViewModel
+    public class ChatHistoryModel
     {
         public string Mode { get; set; } = string.Empty;
         public string ChatKey { get; set; } = string.Empty;

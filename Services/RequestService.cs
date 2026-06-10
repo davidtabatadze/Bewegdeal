@@ -41,7 +41,7 @@ namespace Bewegdeal.Services
             }
 
             // do update
-            await RequestRepository.Update(BuildRequest(request, model, userId));
+            await Update(RequestUpdateAreaEnum.Full, BuildRequest(request, model, userId));
 
             // upload media
             var upload = await UploadMedia(model, requestFiles);
@@ -53,14 +53,23 @@ namespace Bewegdeal.Services
             return GenericResultModel<RequestEntity>.Ok(request);
         }
 
+        public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
+            => await RequestRepository.Update(area, update);
+
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.Get() };
 
+        public async Task<RequestEntity?> Get(long id, string[]? properties = null)
+            => await Get(new RequestFilter { Id = id }, properties);
+
+        public async Task<RequestEntity?> Get(string number, string[]? properties = null)
+            => await Get(new RequestFilter { Number = number ?? "-" }, properties);
+
         public async Task<GenericResultModel<RequestModel>> Get(long id, long userId)
-            => await Get(userId, await RequestRepository.Get(new RequestFilter { Id = id }), true);
+            => await Get(userId, await Get(id), true);
 
         public async Task<GenericResultModel<RequestModel>> Get(string number, long userId)
-            => await Get(userId, await RequestRepository.Get(new RequestFilter { Number = number ?? "-" }), false);
+            => await Get(userId, await Get(number), false);
 
         public async Task<GenericResultModel<dynamic>> LoadGrid(long userId)
         {
@@ -158,6 +167,9 @@ namespace Bewegdeal.Services
             );
             return GenericResultModel<RequestViewModel>.Ok(model, null);
         }
+
+        private async Task<RequestEntity?> Get(RequestFilter filter, string[]? properties = null)
+            => await RequestRepository.Get(filter, properties);
 
         private async Task<GenericResultModel<RequestModel>> Get(long userId, RequestEntity? request, bool edit)
         {

@@ -9,6 +9,36 @@ namespace Bewegdeal.Data.Repositories
     public class RequestRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IRequestRepository
     {
 
+        public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
+        {
+            switch (area)
+            {
+
+                case RequestUpdateAreaEnum.Full:
+                    await Update(update);
+                    break;
+
+                case RequestUpdateAreaEnum.ChatActivate:
+                    await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Pending)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, RequestStatusEnum.Negotiation)
+                                               .SetProperty(p => p.ExecutorId, update.ExecutorId)
+                                          );
+                    break;
+
+                case RequestUpdateAreaEnum.ChatDeactivate:
+                    await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Negotiation)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, RequestStatusEnum.Pending)
+                                               .SetProperty(p => p.ExecutorId, (long?)null)
+                                          );
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid update area", nameof(area));
+            }
+        }
+
         public async Task<RequestEntity?> Get(RequestFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Requests.AsQueryable(), filter).Select(BuildSelect<RequestEntity>(properties)).FirstOrDefaultAsync();
 

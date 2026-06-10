@@ -2,6 +2,7 @@ using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Hubs;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -84,7 +85,10 @@ namespace Bewegdeal
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<ChatHub>();
+            builder.Services.AddScoped<ChatService>();
             builder.Services.AddScoped<RequestService>();
+            builder.Services.AddScoped<RequestChatService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
@@ -121,7 +125,7 @@ namespace Bewegdeal
             // ── Routes ────────────────────────────────────────────────────────────
             // Default route lands on the public landing page, not the admin dashboard.
             app.MapStaticAssets();
-            app.MapHub<Bewegdeal.Hubs.ChatHub>("/hubs/chat");
+            app.MapHub<ChatHub>("/hubs/chat");
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Landing}/{action=Index}/{id?}")
