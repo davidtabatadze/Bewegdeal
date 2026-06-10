@@ -85,8 +85,8 @@ namespace Bewegdeal
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
-            builder.Services.AddScoped<ChatHub>();
             builder.Services.AddScoped<ChatService>();
+            builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<RequestChatService>();
 

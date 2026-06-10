@@ -1,11 +1,10 @@
 ﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Enums;
-using Bewegdeal.Hubs;
 using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class RequestChatService(RequestService RequestService, ChatService ChatService, ChatHub ChatHub)
+    public class RequestChatService(RequestService RequestService, ChatService ChatService, ChatHubService ChatHubService)
     {
 
         public async Task<string> GetMode(string requestNumber, long userId, string userRole)
@@ -90,15 +89,15 @@ namespace Bewegdeal.Services
 
         public async Task Cancel(string requestNumber, long userId)
         {
-            var request = await RequestService.Get(requestNumber, []);
+            var request = await RequestService.Get(requestNumber, [nameof(RequestEntity.Id)]);
             var chat = await ChatService.GetActive(null, request?.Id ?? 0);
 
             if (request is not null && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {
-                await ChatHub.SendMessage(chat.Key, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.", userId);
+                await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
-                await ChatHub.LeaveChat(chat.Key);
+                await ChatHubService.Leave(chat.Key);
             }
         }
 
