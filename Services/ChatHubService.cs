@@ -1,11 +1,11 @@
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Enums;
-using Bewegdeal.Hubs;
+using Bewegdeal.Tools;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Bewegdeal.Services
 {
-    public class ChatHubService(ChatService ChatService, IHubContext<ChatHub> HubContext)
+    public class ChatHubService(ChatService ChatService, IHubContext<ChatTool> HubContext)
     {
 
         public async Task Join(long userId, string chatKey, string connectionId)
@@ -16,12 +16,12 @@ namespace Bewegdeal.Services
                 return;
             }
 
-            await HubContext.Groups.AddToGroupAsync(connectionId, ChatHub.GroupName(chatKey));
+            await HubContext.Groups.AddToGroupAsync(connectionId, ChatTool.GroupName(chatKey));
             await MarkRead(userId, chatKey, connectionId, chat);
         }
 
         public async Task Leave(string chatKey)
-            => await HubContext.Clients.Group(ChatHub.GroupName(chatKey)).SendAsync("ChatCancelled");
+            => await HubContext.Clients.Group(ChatTool.GroupName(chatKey)).SendAsync("ChatCancelled");
         //var chat = await ChatService.Get(chatKey);
         //if (chat is null || !IsParticipant(chat, UserId)) { return; }
         //await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(chatKey));
@@ -51,7 +51,7 @@ namespace Bewegdeal.Services
                 IsRead = false
             });
 
-            await HubContext.Clients.Group(ChatHub.GroupName(chat.Key)).SendAsync("ReceiveMessage", new
+            await HubContext.Clients.Group(ChatTool.GroupName(chat.Key)).SendAsync("ReceiveMessage", new
             {
                 id = message.Id,
                 senderId = message.SenderId,
@@ -84,7 +84,7 @@ namespace Bewegdeal.Services
 
             await ChatService.ReadMessages(chat.Id, userId);
             await HubContext.Clients
-                            .GroupExcept(ChatHub.GroupName(chatKey), connectionId)
+                            .GroupExcept(ChatTool.GroupName(chatKey), connectionId)
                             .SendAsync("MessagesRead");
         }
 

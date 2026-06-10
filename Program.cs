@@ -2,7 +2,6 @@ using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Data.Repositories.Abstractions;
-using Bewegdeal.Hubs;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -125,7 +124,7 @@ namespace Bewegdeal
             // ── Routes ────────────────────────────────────────────────────────────
             // Default route lands on the public landing page, not the admin dashboard.
             app.MapStaticAssets();
-            app.MapHub<ChatHub>("/hubs/chat");
+            app.MapHub<ChatTool>("/hubs/chat");
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Landing}/{action=Index}/{id?}")

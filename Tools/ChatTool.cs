@@ -3,21 +3,21 @@ using Bewegdeal.Services;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
-namespace Bewegdeal.Hubs
+namespace Bewegdeal.Tools
 {
-    public class ChatHub(ChatHubService ChatHubService) : Hub
+    public class ChatTool(ChatHubService ChatHubService) : Hub
     {
 
-        public async Task JoinChat(string chatKey)
+        public async Task Join(string chatKey)
             => await ChatHubService.Join(UserId, chatKey, Context.ConnectionId);
 
-        public async Task SendMessage(string chatKey, string content)
+        public async Task Send(string chatKey, string content)
             => await ChatHubService.Send(UserId, chatKey, content);
 
         public async Task MarkRead(string chatKey)
             => await ChatHubService.MarkRead(UserId, chatKey, Context.ConnectionId);
 
-        public async Task JoinNotifications()
+        public async Task Notify()
             => await ChatHubService.Notify();
 
         public static string GroupName(string chatKey) => "bewegdeal-chat-" + chatKey;

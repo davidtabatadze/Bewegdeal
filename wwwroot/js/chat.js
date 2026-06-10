@@ -161,7 +161,7 @@
             if (waitingForEcho) { Block.pulse('.chat-history-footer'); }
         }, 1000);
 
-        connection.invoke('SendMessage', chatKey, content)
+        connection.invoke('Send', chatKey, content)
             .catch(function (err) {
                 clearTimeout(echoTimer);
                 Block.remove('.chat-history-footer');
@@ -205,7 +205,7 @@
         });
 
         connection.start()
-            .then(function () { return connection.invoke('JoinChat', key); })
+            .then(function () { return connection.invoke('Join', key); })
             .catch(function (e) { console.error('SignalR error:', e); });
 
         scrollToBottom();
