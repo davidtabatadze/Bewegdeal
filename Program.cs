@@ -84,6 +84,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<FraudWordService>();
             builder.Services.AddScoped<ChatService>();
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<RequestService>();
@@ -106,6 +107,7 @@ namespace Bewegdeal
 
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
+                await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IFraudWordRepository>()).Seed();
             }
 
             // ── Middleware pipeline ───────────────────────────────────────────────

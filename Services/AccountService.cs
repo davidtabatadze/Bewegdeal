@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService2 FileService, BrevoService BrevoService, IMemoryCache cache)
+    public class AccountService(UserService UserService, FileService2 FileService, BrevoService BrevoService, IMemoryCache Cache)
     {
         public async Task<GenericResultModel<UserEntity>> Login(string email, string password)
         {
@@ -47,12 +47,12 @@ namespace Bewegdeal.Services
             if (user is not null)
             {
                 // cache 
-                cache.Set(
+                Cache.Set(
                     CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token),
                     email,
                     TimeSpan.FromMinutes(ConstantEnum.ResetPasswordTimeout)
                 );
-                cache.Set(
+                Cache.Set(
                     CacheKeyTool.Get(CacheKeyEnum.PasswordReset, email),
                     token,
                     TimeSpan.FromMinutes(ConstantEnum.ResetPasswordTimeout)
@@ -82,13 +82,13 @@ namespace Bewegdeal.Services
         {
             // load cache
             var tokenKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, token ?? "-");
-            var email = cache.Get<string>(tokenKey) ?? "-";
+            var email = Cache.Get<string>(tokenKey) ?? "-";
             var emailKey = CacheKeyTool.Get(CacheKeyEnum.PasswordReset, email);
-            var lastToken = cache.Get<string>(emailKey) ?? "-";
+            var lastToken = Cache.Get<string>(emailKey) ?? "-";
 
             // clear cache
-            cache.Remove(tokenKey);
-            cache.Remove(emailKey);
+            Cache.Remove(tokenKey);
+            Cache.Remove(emailKey);
 
             // load user
             var user = await UserService.Get(email, [nameof(UserEntity.Id)]);
@@ -118,11 +118,11 @@ namespace Bewegdeal.Services
         {
             // email code
             var emailCacheKey = CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email);
-            var cachedEmailOtp = cache.Get<string>(emailCacheKey);
+            var cachedEmailOtp = Cache.Get<string>(emailCacheKey);
 
             // mobile code
             var smsCacheKey = CacheKeyTool.Get(CacheKeyEnum.SmsVerification, mobile);
-            var cachedMobileOtp = cache.Get<string>(smsCacheKey);
+            var cachedMobileOtp = Cache.Get<string>(smsCacheKey);
 
             // expired ...
             if (cachedEmailOtp is null || cachedMobileOtp is null)
@@ -156,8 +156,8 @@ namespace Bewegdeal.Services
             }
 
             // clear cache
-            cache.Remove(emailCacheKey);
-            cache.Remove(smsCacheKey);
+            Cache.Remove(emailCacheKey);
+            Cache.Remove(smsCacheKey);
             return GenericResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
         }
 
@@ -168,14 +168,14 @@ namespace Bewegdeal.Services
             var otEmail = Random.Shared.Next(100000, 1000000).ToString();
 
             // cache the code for later verification
-            cache.Set(
+            Cache.Set(
                 CacheKeyTool.Get(CacheKeyEnum.SmsVerification, mobile),
                 otSms,
                 TimeSpan.FromMinutes(
                     Convert.ToInt64(ConstantEnum.VerificationTimeout)
                 )
             );
-            cache.Set(
+            Cache.Set(
                 CacheKeyTool.Get(CacheKeyEnum.EmailVerification, email),
                 otEmail,
                 TimeSpan.FromMinutes(

@@ -258,14 +258,7 @@ namespace Bewegdeal.Data
 
                 e.HasKey(w => w.Id);
                 e.Property(w => w.Id).ValueGeneratedOnAdd();
-
-                e.HasIndex(w => w.Status);
-
                 e.Property(w => w.Word).IsRequired().HasMaxLength(128);
-                e.Property(w => w.Description).IsRequired().HasMaxLength(512);
-                e.Property(w => w.Status).IsRequired().HasMaxLength(16);
-                e.Property(w => w.CreatedAt).IsRequired();
-                e.Property(w => w.CreatedByName).IsRequired().HasMaxLength(64);
             });
         }
 

@@ -1,104 +1,34 @@
-using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
 using Bewegdeal.Models;
 using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireAdmin]
-    public class FraudWordController(IFraudWordRepository fraudWordRepo, UserService userService) : Controller
+    [Authorize(Roles = UserRoleEnum.Administrator)]
+    public class FraudWordController(FraudWordService FraudWordService) : XBaseController
     {
-        private readonly IFraudWordRepository _fraudWordRepo = fraudWordRepo;
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> LoadWords([FromQuery] FraudWordFilter filter, [FromQuery] int draw = 1)
-        {
-            var total = await _fraudWordRepo.Count(new FraudWordFilter());
-            var filtered = await _fraudWordRepo.Count(filter);
-            var rows = await _fraudWordRepo.Load(filter);
-
-            var data = rows.Select(w => new
-            {
-                id = w.Id,
-                word = w.Word,
-                description = w.Description,
-                status = w.Status,
-                createdAt = w.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                createdByName = w.CreatedByName
-            });
-
-            return Json(new GridResultViewModel<object> { }); //new GridResultViewModel<object>(draw, total, filtered, data.Cast<object>()));
+            return View(await FraudWordService.Load());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(string word, string description)
+        public async Task<IActionResult> Create(string word)
         {
-            if (string.IsNullOrWhiteSpace(word))
-            {
-                TempData["Error"] = "Fraud word is required.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId);
-            var user = await userService.Get(userId);
-
-            await _fraudWordRepo.Create(new FraudWordEntity
-            {
-                Word = word.Trim(),
-                Description = description?.Trim() ?? string.Empty,
-                Status = FraudWordStatusEnum.Active,
-                CreatedAt = DateTime.UtcNow,
-                CreatedByName = user?.Name ?? "Unknown"
-            });
-
-            TempData["Success"] = "Fraud word added successfully.";
-            return RedirectToAction(nameof(Index));
+            await FraudWordService.Create(word);
+            return Json(GenericResultModel.Ok());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(long id, string word, string description)
+        public async Task<IActionResult> Delete(string word)
         {
-            if (string.IsNullOrWhiteSpace(word))
-            {
-                return BadRequest("Word is required.");
-            }
-
-            await _fraudWordRepo.Update(id, word.Trim(), description?.Trim() ?? string.Empty);
-            return Ok();
+            await FraudWordService.Delete(word);
+            return Json(GenericResultModel.Ok());
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ToggleStatus(long id)
-        {
-            var entry = await _fraudWordRepo.Get(new FraudWordFilter { Id = id });
-            if (entry == null)
-            {
-                return NotFound();
-            }
-
-            var next = entry.Status == FraudWordStatusEnum.Active
-                ? FraudWordStatusEnum.Disabled
-                : FraudWordStatusEnum.Active;
-
-            await _fraudWordRepo.SetStatus(id, next);
-            return Json(new { status = next });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(long id)
-        {
-            // await _fraudWordRepo.Delete(id);
-            return Ok();
-        }
     }
 }

@@ -26,7 +26,7 @@ namespace Bewegdeal.Data.Repositories
 
             foreach (var row in rows)
             {
-                if (await Get(new UserFilter { Id = row.Id }) != null)
+                if (await Get<UserEntity>(row.Id) != null)
                 {
                     continue;
                 }

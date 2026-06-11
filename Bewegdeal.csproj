@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\FraudWordController.cs" />
     <Compile Remove="Services\FileService.cs" />
   </ItemGroup>
 
