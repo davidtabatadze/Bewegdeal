@@ -146,12 +146,17 @@
         if (!input.classList.contains('message-input')) { return; }
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
+        if (input.value.length > 1024) {
+            input.style.setProperty('border', '1px solid var(--bs-danger)', 'important');
+        } else {
+            input.style.removeProperty('border');
+        }
     });
 
     function sendMessage(form) {
         var input   = form.querySelector('.message-input');
         var content = (input ? input.value : '').trim();
-        if (!content || !connection) { return; }
+        if (!content || content.length > 1024 || !connection) { return; }
 
         input.value = '';
         input.style.height = 'auto';

@@ -32,7 +32,7 @@ namespace Bewegdeal.Services
         public async Task Send(long userId, ChatEntity? chat, string content)
         {
             content = (content ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(content) || content.Length > 2048) // why?
+            if (string.IsNullOrWhiteSpace(content) || content.Length > 1024)
             {
                 return;
             }

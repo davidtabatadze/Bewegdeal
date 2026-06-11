@@ -300,7 +300,7 @@ namespace Bewegdeal.Data
 
                 e.Property(m => m.ChatId).IsRequired();
                 e.Property(m => m.SenderId).IsRequired();
-                e.Property(m => m.Content).IsRequired().HasMaxLength(2048);
+                e.Property(m => m.Content).IsRequired().HasMaxLength(1024);
                 e.Property(m => m.SentDate).IsRequired();
                 e.Property(m => m.IsRead).IsRequired().HasDefaultValue(false);
             });
