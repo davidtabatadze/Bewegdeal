@@ -300,7 +300,7 @@
                   '<div class="chat-message-wrapper flex-grow-1">' +
                     '<div class="chat-message-text p-2">' +
                       '<p class="mb-0" style="white-space:pre-wrap;">' + esc(content) + '<span class="chat-bubble-tail"></span></p>' +
-                      '<span class="chat-bubble-meta text-body-secondary">' +
+                      '<span class="chat-bubble-meta">' +
                         '<small>' + esc(time) + '</small>' +
                       '</span>' +
                     '</div>' +

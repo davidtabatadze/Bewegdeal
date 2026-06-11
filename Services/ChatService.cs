@@ -70,6 +70,7 @@ namespace Bewegdeal.Services
                     return (object)new
                     {
                         id = c.Id,
+                        key = c.Key,
                         requestId = c.RequestId,
                         requestNumber = request?.Number ?? "-",
                         status = c.Status,
@@ -81,6 +82,38 @@ namespace Bewegdeal.Services
                         createDate = c.CreateDate.ToString("MMM d, yyyy"),
                     };
                 })
+            };
+        }
+
+        public async Task<ChatHistoryModel?> GetAdminConversation(string key)
+        {
+            var chat = await Get(key, [
+                nameof(ChatEntity.Id), nameof(ChatEntity.Key),
+                nameof(ChatEntity.CustomerId), nameof(ChatEntity.CompanyId)
+            ]);
+            if (chat is null) { return null; }
+
+            var messages = await LoadMessages(chat.Id);
+            var users = await UserService.Load(
+                [chat.CustomerId, chat.CompanyId],
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
+            );
+            var customer = users.FirstOrDefault(u => u.Id == chat.CustomerId);
+            var company = users.FirstOrDefault(u => u.Id == chat.CompanyId);
+            var customerAvatar = UserService.GetAvatar(customer);
+            var companyAvatar = UserService.GetAvatar(company);
+
+            return new ChatHistoryModel
+            {
+                Mode = ChatModeEnum.Ongoing,
+                ChatKey = chat.Key,
+                ViewerId = chat.CustomerId,
+                ViewerInitials = customerAvatar.Initials,
+                ViewerPictureUrl = customerAvatar.Url,
+                OtherPartyName = companyAvatar.Name,
+                OtherPartyInitials = companyAvatar.Initials,
+                OtherPartyPictureUrl = companyAvatar.Url,
+                Messages = messages
             };
         }
     }

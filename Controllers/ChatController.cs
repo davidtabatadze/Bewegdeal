@@ -24,6 +24,18 @@ namespace Bewegdeal.Controllers
         }
 
         [Authorize(Roles = UserRoleEnum.Administrator)]
+        [HttpGet]
+        public async Task<IActionResult> Conversation(string key)
+        {
+            var conversation = await ChatService.GetAdminConversation(key);
+            if (conversation is null)
+            {
+                return Content("");
+            }
+            return PartialView("~/Views/Chat/Conversation.cshtml", conversation);
+        }
+
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpPost]
         public async Task<IActionResult> UpdateChatFraud(long id, string fraud)
         {
