@@ -1,7 +1,7 @@
 /**
  * Request Chat
- * Phase 1 (page load)   — GET /Chat/Visibility    → show/hide the button
- * Phase 2 (canvas open) — GET /Chat/Conversation  → server-rendered HTML, connect SignalR
+ * Phase 1 (page load)   — GET /RequestChat/Visibility    → show/hide the button
+ * Phase 2 (canvas open) — GET /RequestChat/Conversation  → server-rendered HTML, connect SignalR
  */
 'use strict';
 
@@ -27,7 +27,7 @@
 
     // ── Phase 1: visibility check (fast) ─────────────────────────────────────
 
-    fetch('/Chat/Visibility?requestNumber=' + encodeURIComponent(requestNumber))
+    fetch('/RequestChat/Visibility?requestNumber=' + encodeURIComponent(requestNumber))
         .then(function (r) { return r.json(); })
         .then(function (data) {
             mode = data.mode || ChatMode.None;
@@ -76,7 +76,7 @@
             if (!result.isConfirmed) { return; }
 
             Block.pulse('#chatCard');
-            fetch('/Chat/Cancel', {
+            fetch('/RequestChat/Cancel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'requestNumber=' + encodeURIComponent(requestNumber)
@@ -100,7 +100,7 @@
         btn.innerHTML =
             '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Starting…';
 
-        fetch('/Chat/Initiate', {
+        fetch('/RequestChat/Initiate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'requestNumber=' + encodeURIComponent(requestNumber)
@@ -225,7 +225,7 @@
 
     function loadConversation() {
         Block.pulse('#chatCard');
-        fetch('/Chat/Conversation?requestNumber=' + encodeURIComponent(requestNumber))
+        fetch('/RequestChat/Conversation?requestNumber=' + encodeURIComponent(requestNumber))
             .then(function (r) { return r.text(); })
             .then(function (html) {
                 Block.remove('#chatCard');

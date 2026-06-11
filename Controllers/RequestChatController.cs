@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers;
 
 [Authorize]
-public class ChatController(RequestChatService RequestChatService) : XBaseController
+public class RequestChatController(RequestChatService RequestChatService) : XBaseController
 {
 
     [HttpGet]
