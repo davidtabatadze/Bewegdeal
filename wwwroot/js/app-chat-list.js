@@ -9,16 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status → icon HTML (tooltip style, like Role column in user list)
     const statusBadgeObj = {
-        ongoing:   '<i class="icon-base ri ri-wechat-line       icon-22px text-info    me-2"></i>',
-        agreed:    '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success me-2"></i>',
+        ongoing: '<i class="icon-base ri ri-wechat-line       icon-22px text-info    me-2"></i>',
+        agreed: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success me-2"></i>',
         cancelled: '<i class="icon-base ri ri-hand              icon-22px text-danger  me-2"></i>'
     };
 
     // Fraud → badge color (like Status column in user list)
     const fraudObj = {
-        safe:     { title: 'Safe',     class: 'bg-label-success' },
-        dubious:  { title: 'Dubious',  class: 'bg-label-warning' },
-        resolved: { title: 'Resolved', class: 'bg-label-info'    }
+        safe: { title: 'Safe', class: 'btn-text-success' },
+        dubious: { title: 'Dubious', class: 'btn-text-warning' },
+        resolved: { title: 'Resolved', class: 'btn-text-info' }
     };
 
     // Column index → sort field name
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
             url: '/Chat/LoadChats',
             data: function (d) {
                 const order = d.order && d.order[0];
-                d.sortField     = columnToField[order ? order.column : 6] || 'createDate';
+                d.sortField = columnToField[order ? order.column : 6] || 'createDate';
                 d.sortDirection = order ? order.dir : 'desc';
 
                 delete d.order;
@@ -43,18 +43,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 d.search = document.getElementById('chatsSearch').value;
                 d.status = document.getElementById('filterStatus').value;
-                d.fraud  = document.getElementById('filterFraud').value;
+                d.fraud = document.getElementById('filterFraud').value;
 
                 return d;
             }
         },
         columns: [
-            { data: 'requestId'  },  // 0 — request id (sortable)
-            { data: 'id'         },  // 1 — chat id (sortable)
-            { data: 'status'     },  // 2 — status (sortable)
-            { data: 'fraud'      },  // 3 — fraud (sortable)
-            { data: 'customer'   },  // 4 — customer (not sortable)
-            { data: 'company'    },  // 5 — company (not sortable)
+            { data: 'requestId' },  // 0 — request id (sortable)
+            { data: 'id' },  // 1 — chat id (sortable)
+            { data: 'status' },  // 2 — status (sortable)
+            { data: 'fraud' },  // 3 — fraud (sortable)
+            { data: 'customer' },  // 4 — customer (not sortable)
+            { data: 'company' },  // 5 — company (not sortable)
             { data: 'createDate' },  // 6 — date (sortable, default desc)
         ],
         columnDefs: [
@@ -76,19 +76,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '70px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const icon   = statusBadgeObj[status] || '';
-                    const label  = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
+                    const icon = statusBadgeObj[status] || '';
+                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
                     return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
                 }
             },
             {
                 // Fraud — colored badge
                 targets: 3,
-                width: '110px',
+                width: '120px',
                 render: function (data, type, full) {
                     const fraud = full['fraud'];
-                    const obj   = fraudObj[fraud] || { title: fraud, class: 'bg-label-secondary' };
-                    return '<span class="badge ' + obj.class + '">' + obj.title + '</span>';
+                    const obj = fraudObj[fraud] || { title: fraud, class: 'btn-text-secondary' };
+                    const id = full['id'];
+
+                    if (fraud != 'dubious') {
+                        return (
+                            '<button type="button" class="btn ' + obj.class + '" style="pointer-events:none">' +
+                            obj.title +
+                            '</button>'
+                        );
+                    }
+
+                    return (
+                        '<button type="button" class="btn ' + obj.class + ' status-toggle-btn"' +
+                        ' data-chat-id="' + id + '"' +
+                        ' data-current-fraud="' + fraud + '">' +
+                        '<span class="icon-base ri ri-exchange-line icon-16px me-1_5"></span>' +
+                        obj.title +
+                        '</button>'
+                    );
                 }
             },
             {
@@ -136,10 +153,10 @@ document.addEventListener('DOMContentLoaded', function () {
         language: {
             search: '',
             paginate: {
-                next:     '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
+                next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
-                first:    '<i class="icon-base ri ri-skip-back-mini-line    scaleX-n1-rtl icon-22px"></i>',
-                last:     '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
+                first: '<i class="icon-base ri ri-skip-back-mini-line    scaleX-n1-rtl icon-22px"></i>',
+                last: '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
             }
         },
         responsive: false
@@ -149,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Block.pulse('.card-datatable');
 
     dt_chat.on('preXhr.dt', function () { Block.pulse('.card-datatable'); });
-    dt_chat.on('xhr.dt',    function () { Block.remove('.card-datatable'); });
+    dt_chat.on('xhr.dt', function () { Block.remove('.card-datatable'); });
 
     // Filters
     let searchTimeout;
@@ -169,20 +186,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Layout tweaks (same as template)
     setTimeout(function () {
         [
-            { selector: '.dt-buttons .btn',        classToRemove: 'btn-secondary' },
+            { selector: '.dt-buttons .btn', classToRemove: 'btn-secondary' },
             { selector: '.dt-length .form-select', classToAdd: 'ms-0' },
-            { selector: '.dt-length',              classToAdd: 'mb-md-4 mb-0' },
-            { selector: '.dt-layout-end',          classToRemove: 'justify-content-between', classToAdd: 'd-flex gap-md-4 justify-content-md-between justify-content-center gap-md-2 flex-wrap mt-0' },
-            { selector: '.dt-layout-start',        classToAdd: 'mt-md-0 mt-5' },
+            { selector: '.dt-length', classToAdd: 'mb-md-4 mb-0' },
+            { selector: '.dt-layout-end', classToRemove: 'justify-content-between', classToAdd: 'd-flex gap-md-4 justify-content-md-between justify-content-center gap-md-2 flex-wrap mt-0' },
+            { selector: '.dt-layout-start', classToAdd: 'mt-md-0 mt-5' },
             { selector: '.dt-layout-start .dt-buttons', classToAdd: 'd-md-flex d-block gap-4 justify-content-center' },
-            { selector: '.dt-layout-end .dt-buttons',   classToAdd: 'd-md-flex d-block gap-4 mb-md-0 mb-5 justify-content-center' },
-            { selector: '.dt-layout-table',        classToRemove: 'row mt-2' },
-            { selector: '.dt-layout-full',         classToRemove: 'col-md col-12' },
-            { selector: '.dt-layout-full .table',  classToAdd: 'table-responsive' }
+            { selector: '.dt-layout-end .dt-buttons', classToAdd: 'd-md-flex d-block gap-4 mb-md-0 mb-5 justify-content-center' },
+            { selector: '.dt-layout-table', classToRemove: 'row mt-2' },
+            { selector: '.dt-layout-full', classToRemove: 'col-md col-12' },
+            { selector: '.dt-layout-full .table', classToAdd: 'table-responsive' }
         ].forEach(function ({ selector, classToRemove, classToAdd }) {
             document.querySelectorAll(selector).forEach(function (el) {
                 if (classToRemove) { classToRemove.split(' ').forEach(function (c) { el.classList.remove(c); }); }
-                if (classToAdd)    { classToAdd.split(' ').forEach(function (c) { el.classList.add(c); }); }
+                if (classToAdd) { classToAdd.split(' ').forEach(function (c) { el.classList.add(c); }); }
             });
         });
     }, 100);

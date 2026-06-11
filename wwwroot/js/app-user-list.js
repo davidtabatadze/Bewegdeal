@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     if (status === 'unverified') {
                         return (
-                            '<button type="button" class="btn ' + obj.class + '" disabled style="pointer-events:none">' +
+                            '<button type="button" class="btn ' + obj.class + '" style="pointer-events:none">' +
                             obj.title +
                             '</button>'
                         );
