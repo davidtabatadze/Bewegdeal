@@ -42,13 +42,16 @@ namespace Bewegdeal.Services
                 return;
             }
 
+            var isFraud = await FraudWordService.IsFraud(content);
+
             var message = await ChatService.AddMessage(new ChatMessageEntity
             {
                 ChatId = chat.Id,
                 SenderId = userId,
                 Content = content,
                 SentDate = DateTime.UtcNow,
-                IsRead = false
+                IsRead = false,
+                IsFraud = isFraud
             });
 
             await HubContext.Clients.Group(ChatTool.GroupName(chat.Key)).SendAsync("ReceiveMessage", new
@@ -60,12 +63,9 @@ namespace Bewegdeal.Services
                 sentDay = message.SentDate.ToString("yyyy-MM-dd")
             });
 
-            if (chat.Fraud == ChatFraudEnum.Safe)
+            if (isFraud && chat.Fraud == ChatFraudEnum.Safe)
             {
-                if (await FraudWordService.IsFraud(content))
-                {
-                    await ChatService.Update(ChatUpdateAreaEnum.Fraud, new() { Id = chat.Id, Fraud = ChatFraudEnum.Dubious });
-                }
+                await ChatService.Update(ChatUpdateAreaEnum.Fraud, new() { Id = chat.Id, Fraud = ChatFraudEnum.Dubious });
             }
 
             // notify the recipient's personal group (for other-page toast / browser notification)

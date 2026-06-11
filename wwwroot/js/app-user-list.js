@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return (
                         '<div class="d-flex justify-content-start align-items-center user-name">' +
                         '<div class="avatar-wrapper">' +
-                        '<div class="avatar avatar-m me-2 pull-up">' + avatarInner + '</div>' +
+                        '<div class="avatar avatar-m me-2">' + avatarInner + '</div>' +
                         '</div>' +
                         '<div class="d-flex flex-column">' +
                         '<span class="text-heading fw-medium text-truncate">' + name + '</span>' +

@@ -10,5 +10,6 @@ namespace Bewegdeal.Data.Entities
         public string Content { get; set; } = string.Empty;
         public DateTime SentDate { get; set; }
         public bool IsRead { get; set; }
+        public bool IsFraud { get; set; }
     }
 }

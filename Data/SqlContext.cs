@@ -303,6 +303,7 @@ namespace Bewegdeal.Data
                 e.Property(m => m.Content).IsRequired().HasMaxLength(1024);
                 e.Property(m => m.SentDate).IsRequired();
                 e.Property(m => m.IsRead).IsRequired().HasDefaultValue(false);
+                e.Property(m => m.IsFraud).IsRequired().HasDefaultValue(false);
             });
         }
 
