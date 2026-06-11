@@ -62,6 +62,9 @@ namespace Bewegdeal.Services
         public async Task<RequestEntity?> Get(long id, string[]? properties = null)
             => await Get(new RequestFilter { Id = id }, properties);
 
+        public async Task<List<RequestEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
+            => await RequestRepository.Load<RequestEntity>(ids, properties);
+
         public async Task<RequestEntity?> Get(string number, string[]? properties = null)
             => await Get(new RequestFilter { Number = number ?? "-" }, properties);
 
@@ -316,7 +319,7 @@ namespace Bewegdeal.Services
             entity.Service = request.Service;
             entity.Title = request.Title.Trim();
             entity.Description = request.Description?.Trim() ?? "";
-            entity.PickupAddress = request.PickupAddress.Trim();
+            entity.PickupAddress = request.PickupAddress?.Trim() ?? "";
             entity.DeliveryAddress = request.DeliveryAddress?.Trim() ?? "";
             entity.Cost = request.Cost;
             entity.Currency = "EUR";

@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 2,
                 orderable: false,
                 render: function (data, type, full) {
-                    return renderUserCell(full['company']);
+                    return renderUserCell(full['company'], full['companyEmail']);
                 }
             },
             {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 3,
                 orderable: false,
                 render: function (data, type, full) {
-                    return renderUserCell(full['customer']);
+                    return renderUserCell(full['customer'], full['customerEmail']);
                 }
             },
             {
@@ -124,11 +124,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 5,
                 width: '110px',
                 render: function (data, type, full) {
+                    const number = full['requestNumber'];
                     return (
-                        '<button type="button" class="btn btn-text-primary" style="max-width:100px">' +
+                        '<a href="/Request/View?number=' + encodeURIComponent(number) + '"' +
+                        ' class="btn btn-text-primary" style="max-width:100px">' +
                         '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
                         '#' + data +
-                        '</button>'
+                        '</a>'
                     );
                 }
             },
@@ -273,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    function renderUserCell(avatar) {
+    function renderUserCell(avatar, email) {
         if (!avatar) { return '—'; }
         const avatarInner = avatar.url
             ? '<img src="' + avatar.url + '" class="rounded-circle" style="width:100%;height:100%;object-fit:cover;" />'
@@ -285,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '</div>' +
             '<div class="d-flex flex-column">' +
             '<span class="text-heading fw-medium text-truncate">' + (avatar.name || '—') + '</span>' +
+            (email ? '<small class="text-muted">' + email + '</small>' : '') +
             '</div>' +
             '</div>'
         );

@@ -6,7 +6,7 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class ChatService(IChatRepository ChatRepository, UserService UserService)
+    public class ChatService(IChatRepository ChatRepository, UserService UserService, RequestService RequestService)
     {
         public async Task<ChatEntity> Create(ChatEntity chat)
             => await ChatRepository.Create(chat);
@@ -40,12 +40,22 @@ namespace Bewegdeal.Services
             var filtered = await Count(filter);
             var total = await Count(new ChatFilter());
 
-            var allUserIds = chats.Select(c => c.CustomerId)
-                                  .Concat(chats.Select(c => c.CompanyId))
-                                  .Concat([0])
-                                  .Distinct();
-            var users = await UserService.Load(allUserIds, [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
+            var users = await UserService.Load(
+                chats.Select(c => c.CustomerId)
+                     .Concat(chats.Select(c => c.CompanyId))
+                     .Concat([0])
+                     .Distinct(),
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Email), nameof(UserEntity.Avatar)]
+            );
             var userMap = users.ToDictionary(u => u.Id);
+
+            var requests = await RequestService.Load(
+                chats.Select(c => c.RequestId)
+                     .Concat([0])
+                     .Distinct(),
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Number)]
+            );
+            var requestMap = requests.ToDictionary(r => r.Id);
 
             return new GridResultModel<object>
             {
@@ -56,14 +66,18 @@ namespace Bewegdeal.Services
                 {
                     userMap.TryGetValue(c.CustomerId, out var customer);
                     userMap.TryGetValue(c.CompanyId, out var company);
+                    requestMap.TryGetValue(c.RequestId, out var request);
                     return (object)new
                     {
                         id = c.Id,
                         requestId = c.RequestId,
+                        requestNumber = request?.Number ?? "-",
                         status = c.Status,
                         fraud = c.Fraud,
                         customer = UserService.GetAvatar(customer),
+                        customerEmail = customer?.Email ?? "-",
                         company = UserService.GetAvatar(company),
+                        companyEmail = company?.Email ?? "-",
                         createDate = c.CreateDate.ToString("MMM d, yyyy"),
                     };
                 })
