@@ -21,6 +21,13 @@ namespace Bewegdeal.Data.Repositories
                                        );
                     break;
 
+                case ChatUpdateAreaEnum.Fraud:
+                    await Context.Chats.Where(c => c.Id == update.Id)
+                                       .ExecuteUpdateAsync(c =>
+                                            c.SetProperty(p => p.Fraud, update.Fraud)
+                                       );
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid update area", nameof(area));
             }

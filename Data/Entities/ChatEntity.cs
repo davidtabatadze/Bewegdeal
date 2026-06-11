@@ -9,6 +9,7 @@ namespace Bewegdeal.Data.Entities
         public long RequestId { get; set; }
         public long CustomerId { get; set; }
         public long CompanyId { get; set; }
+        public string Fraud { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime CreateDate { get; set; }
     }

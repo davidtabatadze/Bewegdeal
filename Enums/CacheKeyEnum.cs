@@ -6,5 +6,6 @@
         public const string SmsVerification = "SmsVerification";
         public const string PasswordReset = "PasswordReset";
         public const string FraudeWords = "FraudeWords";
+        public const string FraudeWordsCompiled = "FraudeWordsCompiled";
     }
 }

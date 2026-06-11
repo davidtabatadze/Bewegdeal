@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Bewegdeal.Services
 {
-    public class ChatHubService(ChatService ChatService, IHubContext<ChatTool> HubContext)
+    public class ChatHubService(ChatService ChatService, FraudWordService FraudWordService, IHubContext<ChatTool> HubContext)
     {
 
         public async Task Join(long userId, string chatKey, string connectionId)
@@ -59,6 +59,14 @@ namespace Bewegdeal.Services
                 sentDate = message.SentDate.ToString("HH:mm"),
                 sentDay = message.SentDate.ToString("yyyy-MM-dd")
             });
+
+            if (chat.Fraud == ChatFraudEnum.Safe)
+            {
+                if (await FraudWordService.IsFraud(content))
+                {
+                    await ChatService.Update(ChatUpdateAreaEnum.Fraud, new() { Id = chat.Id, Fraud = ChatFraudEnum.Dubious });
+                }
+            }
 
             // notify the recipient's personal group (for other-page toast / browser notification)
             //var recipientId = UserId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;

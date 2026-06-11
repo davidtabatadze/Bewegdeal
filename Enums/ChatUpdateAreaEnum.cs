@@ -2,6 +2,7 @@
 {
     public enum ChatUpdateAreaEnum
     {
-        Status = 1
+        Status = 1,
+        Fraud
     }
 }

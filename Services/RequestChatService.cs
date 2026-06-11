@@ -38,6 +38,7 @@ namespace Bewegdeal.Services
                 RequestId = request.Id,
                 CustomerId = request.RequesterId,
                 CompanyId = userId,
+                Fraud = ChatFraudEnum.Safe,
                 Status = ChatStatusEnum.Active,
                 CreateDate = DateTime.UtcNow
             });
