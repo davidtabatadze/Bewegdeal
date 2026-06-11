@@ -49,19 +49,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         columns: [
-            { data: 'fraud'      },  // 0 — fraud (sortable)
-            { data: 'status'     },  // 1 — status (sortable)
-            { data: 'company'    },  // 2 — company (not sortable)
-            { data: 'customer'   },  // 3 — customer (not sortable)
+            { data: 'fraud' },  // 0 — fraud (sortable)
+            { data: 'status' },  // 1 — status (sortable)
+            { data: 'company' },  // 2 — company (not sortable)
+            { data: 'customer' },  // 3 — customer (not sortable)
             { data: 'createDate' },  // 4 — date (sortable, default desc)
-            { data: 'requestId'  },  // 5 — request id (sortable)
-            { data: 'id'         },  // 6 — chat id (sortable)
+            { data: 'requestId' },  // 5 — request id (sortable)
+            { data: 'id' },  // 6 — chat id (sortable)
         ],
         columnDefs: [
             {
                 // Fraud — button
                 targets: 0,
-                width: '120px',
+                width: '110px',
                 render: function (data, type, full) {
                     const fraud = full['fraud'];
                     const obj = fraudObj[fraud] || { title: fraud, class: 'btn-text-secondary' };
@@ -120,16 +120,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
             },
             {
-                // Request ID
+                // Request
                 targets: 5,
                 width: '110px',
-                render: (data) => '<span class="fw-medium">#' + data + '</span>'
+                render: function (data, type, full) {
+                    return (
+                        '<button type="button" class="btn btn-text-primary" style="max-width:100px">' +
+                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
+                        '#' + data +
+                        '</button>'
+                    );
+                }
             },
             {
-                // Chat ID
+                // Chat
                 targets: 6,
-                width: '90px',
-                render: (data) => '<span class="fw-medium">#' + data + '</span>'
+                width: '110px',
+                render: function (data, type, full) {
+                    return (
+                        '<button type="button" class="btn btn-text-primary" style="max-width:100px">' +
+                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
+                        '#' + data +
+                        '</button>'
+                    );
+                }
             }
         ],
         pageLength: 10,
@@ -214,10 +228,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const btn = e.target.closest('.fraud-toggle-btn');
         if (!btn) { return; }
 
-        const chatId      = btn.dataset.chatId;
+        const chatId = btn.dataset.chatId;
         const currentFraud = btn.dataset.currentFraud;
         const confirmHtml = confirmTextMap[currentFraud];
-        const dtRow       = dt_chat.row(btn.closest('tr'));
+        const dtRow = dt_chat.row(btn.closest('tr'));
 
         Swal.fire({
             title: 'Confirm Action',
