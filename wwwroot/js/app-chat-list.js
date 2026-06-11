@@ -126,11 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 render: function (data, type, full) {
                     const number = full['requestNumber'];
                     return (
-                        '<a href="/Request/View?number=' + encodeURIComponent(number) + '"' +
-                        ' class="btn btn-text-primary" style="max-width:100px">' +
+                        '<button type="button" class="btn btn-text-primary" style="max-width:100px"' +
+                        ' onclick="window.location.href=\'/Request/View?number=' + encodeURIComponent(number) + '\'">' +
                         '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
                         '#' + data +
-                        '</a>'
+                        '</button>'
                     );
                 }
             },
@@ -140,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '110px',
                 render: function (data, type, full) {
                     return (
-                        '<button type="button" class="btn btn-text-primary" style="max-width:100px">' +
+                        '<button type="button" class="btn btn-text-primary chat-view-btn" style="max-width:100px"' +
+                        ' data-chat-key="' + full['key'] + '">' +
                         '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
                         '#' + data +
                         '</button>'
@@ -273,6 +274,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+    });
+
+    // Chat view — open offcanvas with conversation history
+    dt_chat_table.addEventListener('click', function (e) {
+        const btn = e.target.closest('.chat-view-btn');
+        if (!btn) { return; }
+
+        const key = btn.dataset.chatKey;
+        const offcanvasEl = document.getElementById('adminChatOffcanvas');
+        const body = document.getElementById('adminChatOffcanvasBody');
+
+        body.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>';
+        bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).show();
+
+        fetch('/Chat/Conversation?key=' + encodeURIComponent(key))
+            .then(function (res) { return res.text(); })
+            .then(function (html) { body.innerHTML = html; });
     });
 
     function renderUserCell(avatar, email) {

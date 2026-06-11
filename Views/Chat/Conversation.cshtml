@@ -119,7 +119,7 @@ else
                                 @if (isMine)
                                 {
                                     <div class="chat-message-wrapper flex-grow-1">
-                                        <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")">
+                                        <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")@(isAdminView && msg.IsFraud ? "border-left:3px solid var(--bs-danger);" : "")">
                                             <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@(isAdminView ? "width:45px;" : "")"></span></p>
                                             <span class="chat-bubble-meta">
                                                 @if (!isAdminView)
@@ -163,7 +163,7 @@ else
                                         </div>
                                     </div>
                                     <div class="chat-message-wrapper flex-grow-1">
-                                        <div class="chat-message-text p-2">
+                                        <div class="chat-message-text p-2" style="@(isAdminView && msg.IsFraud ? "border-right:3px solid var(--bs-danger);" : "")">
                                             <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
                                             <span class="chat-bubble-meta">
                                                 <small>@msg.SentDate.ToString("HH:mm")</small>
