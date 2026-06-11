@@ -112,14 +112,6 @@
                 </a>
             </li>
 
-            <!-- Fraud Dictionary -->
-            <li class='menu-item@(currentPage == "/FraudWord/Index" || currentPage == "/FraudWord" ? " active" : "")'>
-                <a asp-controller="FraudWord" asp-action="Index" class="menu-link">
-                    <i class="menu-icon icon-base ri ri-spam-2-line"></i>
-                    <div data-i18n="Fraud Dictionary">Fraud Dictionary</div>
-                </a>
-            </li>
-
             <!-- Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>
                 <a asp-controller="Request" asp-action="List" class="menu-link">
@@ -133,6 +125,14 @@
                 <a asp-controller="Settings" asp-action="Index" class="menu-link">
                     <i class="menu-icon icon-base ri ri-settings-4-line"></i>
                     <div data-i18n="Settings">Settings</div>
+                </a>
+            </li>
+
+            <!-- Fraud Words -->
+            <li class='menu-item@(currentPage == "/FraudWord/Index" || currentPage == "/FraudWord" ? " active" : "")'>
+                <a asp-controller="FraudWord" asp-action="Index" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-spam-2-line"></i>
+                    <div data-i18n="Fraud Words">Fraud Words</div>
                 </a>
             </li>
         }

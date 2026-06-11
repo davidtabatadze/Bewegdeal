@@ -2,20 +2,6 @@
 
 (function () {
 
-    Swal.fire({
-        title: 'Fraud Words',
-        icon: 'warning',
-        html:
-            '<ul class="text-start ps-4 mb-0">' +
-                '<li>These words are used to monitor and flag chat messages.</li>' +
-                '<li>Be careful what you add or remove.</li>' +
-                '<li>Changes may impact the chat flow.</li>' +
-            '</ul>',
-        confirmButtonText: 'I understand',
-        customClass: { confirmButton: 'btn btn-danger' },
-        buttonsStyling: false
-    });
-
     var input = document.getElementById('fraudWordsInput');
     if (!input) { return; }
 

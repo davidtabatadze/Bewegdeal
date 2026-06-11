@@ -1,16 +1,14 @@
 @model List<string>
 @{
     Layout = "_HomeLayout";
-    ViewData["Title"] = "Fraud Dictionary";
+    ViewData["Title"] = "Fraud Words";
 }
 
 @section VendorStyles {
-    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
     <link rel="stylesheet" href="~/vendor/libs/tagify/tagify.css" />
 }
 
 @section VendorScripts {
-    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="~/vendor/libs/tagify/tagify.js"></script>
 }
 
@@ -18,15 +16,67 @@
     <script src="~/js/app-fraud-word.js"></script>
 }
 
-<div class="card">
-    <h5 class="card-header">Fraud Dictionary</h5>
-    <div class="card-body">
-        <div class="form-floating form-floating-outline">
-            <input id="fraudWordsInput"
-                   class="form-control"
-                   name="fraudWords"
-                   value="@string.Join(", ", Model)" />
-            <label for="fraudWordsInput">Fraud Words</label>
+<div class="d-flex flex-column gap-6" style="min-height: calc(100dvh - 8rem)">
+
+    <div class="alert alert-danger mb-0" role="alert">
+        <div class="d-flex align-items-center mb-2">
+            <i class="icon-base ri ri-error-warning-line me-2 icon-20px"></i>
+            <strong>Handle with care</strong>
+        </div>
+        <ul class="mb-0">
+            <li>These words are used to detect fraud in chat messages.</li>
+            <li>Be careful what you add or remove — changes take effect immediately.</li>
+            <li>Incorrect entries may block legitimate messages or miss actual fraud.</li>
+        </ul>
+    </div>
+
+    <div class="card mb-0">
+        <div class="card-body">
+            <p class="mb-3">Use <code>*</code> as a wildcard to control how a word is matched against chat messages:</p>
+            <div class="row g-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">word</code>
+                        <div class="text-body-secondary small mb-2">Exact match</div>
+                        <div class="small">e.g. <code>scam</code> — only flags the word "scam" by itself</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">word*</code>
+                        <div class="text-body-secondary small mb-2">Starts with</div>
+                        <div class="small">e.g. <code>pay*</code> — flags "paypal", "payment", "payday"</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">*word</code>
+                        <div class="text-body-secondary small mb-2">Ends with</div>
+                        <div class="small">e.g. <code>*fraud</code> — flags "bankfraud", "wirefraud"</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">*word*</code>
+                        <div class="text-body-secondary small mb-2">Contains</div>
+                        <div class="small">e.g. <code>*cash*</code> — flags "send cash now", "cashapp"</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="card flex-grow-1 mb-0">
+        <h5 class="card-header">Dictionary</h5>
+        <div class="card-body">
+            <div class="form-floating form-floating-outline">
+                <input id="fraudWordsInput"
+                       class="form-control"
+                       name="fraudWords"
+                       value="@string.Join(", ", Model)" />
+                <label for="fraudWordsInput">Words</label>
+            </div>
+        </div>
+    </div>
+
 </div>
