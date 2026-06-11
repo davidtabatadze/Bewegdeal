@@ -12,6 +12,8 @@ namespace Bewegdeal.Services
             => await ChatRepository.Create(chat);
         public async Task Update(ChatUpdateAreaEnum area, ChatEntity update)
             => await ChatRepository.Update(area, update);
+        public async Task<ChatEntity?> Get(long id, string[]? properties = null)
+            => await Get(new ChatFilter { Id = id }, properties);
         public async Task<ChatEntity?> Get(string key, string[]? properties = null)
             => await Get(new ChatFilter { Key = key }, properties);
         public async Task<ChatEntity?> GetOngoing(string? key = null, long? requestId = null)
@@ -19,6 +21,8 @@ namespace Bewegdeal.Services
                         new ChatFilter { Key = key, RequestId = requestId, Status = ChatStatusEnum.Ongoing },
                         [nameof(ChatEntity.Id), nameof(ChatEntity.Key), nameof(ChatEntity.CompanyId), nameof(ChatEntity.CustomerId)]
                      );
+        private async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
+            => await ChatRepository.Get(filter, properties);
         public async Task ReadMessages(long chatId, long viewerId)
             => await ChatRepository.ReadMessages(chatId, viewerId);
         public async Task<ChatMessageEntity> AddMessage(ChatMessageEntity message)
@@ -29,8 +33,6 @@ namespace Bewegdeal.Services
             => await ChatRepository.Load(filter);
         public async Task<int> Count(ChatFilter filter)
             => await ChatRepository.Count(filter);
-        private async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
-            => await ChatRepository.Get(filter, properties);
 
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {

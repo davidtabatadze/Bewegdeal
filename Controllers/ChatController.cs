@@ -1,4 +1,5 @@
-﻿using Bewegdeal.Data.Filters;
+﻿using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
 using Bewegdeal.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +21,26 @@ namespace Bewegdeal.Controllers
         public async Task<IActionResult> LoadChats([FromQuery] ChatFilter filter, [FromQuery] int draw = 1)
         {
             return Json(await ChatService.LoadGrid(filter, draw));
+        }
+
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        [HttpPost]
+        public async Task<IActionResult> UpdateChatFraud(long id, string fraud)
+        {
+            var chat = await ChatService.Get(id, [nameof(ChatEntity.Id), nameof(ChatEntity.Fraud)]);
+
+            if (chat is null || chat.Fraud != fraud)
+            {
+                return BadRequest();
+            }
+
+            await ChatService.Update(ChatUpdateAreaEnum.Fraud, new ChatEntity
+            {
+                Id = chat.Id,
+                Fraud = ChatFraudEnum.Resolved
+            });
+
+            return Json(new { fraud = ChatFraudEnum.Resolved });
         }
     }
 }

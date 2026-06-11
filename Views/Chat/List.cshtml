@@ -5,6 +5,7 @@
 }
 
 @section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
     <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
@@ -13,6 +14,7 @@
 }
 
 @section VendorScripts {
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
@@ -60,13 +62,13 @@
         <table class="datatables-chats table">
             <thead>
                 <tr>
+                    <th>Fraud</th>
+                    <th>Status</th>
+                    <th>Company</th>
+                    <th>Customer</th>
+                    <th>Date</th>
                     <th>Request</th>
                     <th>Chat</th>
-                    <th>Status</th>
-                    <th>Fraud</th>
-                    <th>Customer</th>
-                    <th>Company</th>
-                    <th>Date</th>
                 </tr>
             </thead>
         </table>

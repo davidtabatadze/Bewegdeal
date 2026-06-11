@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Column index → sort field name
-    // 0: requestId, 1: id, 2: status, 3: fraud, 4: customer (n/a), 5: company (n/a), 6: createDate
-    const columnToField = { 0: 'requestId', 1: 'id', 2: 'status', 3: 'fraud', 6: 'createDate' };
+    // 0: fraud, 1: status, 2: company (n/a), 3: customer (n/a), 4: createDate, 5: requestId, 6: id
+    const columnToField = { 0: 'fraud', 1: 'status', 4: 'createDate', 5: 'requestId', 6: 'id' };
 
     if (!dt_chat_table) { return; }
 
@@ -49,48 +49,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         columns: [
-            { data: 'requestId' },  // 0 — request id (sortable)
-            { data: 'id' },  // 1 — chat id (sortable)
-            { data: 'status' },  // 2 — status (sortable)
-            { data: 'fraud' },  // 3 — fraud (sortable)
-            { data: 'customer' },  // 4 — customer (not sortable)
-            { data: 'company' },  // 5 — company (not sortable)
-            { data: 'createDate' },  // 6 — date (sortable, default desc)
+            { data: 'fraud'      },  // 0 — fraud (sortable)
+            { data: 'status'     },  // 1 — status (sortable)
+            { data: 'company'    },  // 2 — company (not sortable)
+            { data: 'customer'   },  // 3 — customer (not sortable)
+            { data: 'createDate' },  // 4 — date (sortable, default desc)
+            { data: 'requestId'  },  // 5 — request id (sortable)
+            { data: 'id'         },  // 6 — chat id (sortable)
         ],
         columnDefs: [
             {
-                // Request ID
+                // Fraud — button
                 targets: 0,
-                width: '110px',
-                render: (data) => '<span class="fw-medium">#' + data + '</span>'
-            },
-            {
-                // Chat ID
-                targets: 1,
-                width: '90px',
-                render: (data) => '<span class="fw-medium">#' + data + '</span>'
-            },
-            {
-                // Status — icon + tooltip (like Role column)
-                targets: 2,
-                width: '70px',
-                render: function (data, type, full) {
-                    const status = full['status'];
-                    const icon = statusBadgeObj[status] || '';
-                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
-                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
-                }
-            },
-            {
-                // Fraud — colored badge
-                targets: 3,
                 width: '120px',
                 render: function (data, type, full) {
                     const fraud = full['fraud'];
                     const obj = fraudObj[fraud] || { title: fraud, class: 'btn-text-secondary' };
                     const id = full['id'];
 
-                    if (fraud != 'dubious') {
+                    if (fraud !== 'dubious') {
                         return (
                             '<button type="button" class="btn ' + obj.class + '" style="pointer-events:none">' +
                             obj.title +
@@ -99,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     return (
-                        '<button type="button" class="btn ' + obj.class + ' status-toggle-btn"' +
+                        '<button type="button" class="btn ' + obj.class + ' fraud-toggle-btn"' +
                         ' data-chat-id="' + id + '"' +
                         ' data-current-fraud="' + fraud + '">' +
                         '<span class="icon-base ri ri-exchange-line icon-16px me-1_5"></span>' +
@@ -109,31 +86,54 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
-                // Customer — avatar + name (like User column)
-                targets: 4,
-                orderable: false,
+                // Status — icon + tooltip (like Role column)
+                targets: 1,
+                width: '70px',
                 render: function (data, type, full) {
-                    return renderUserCell(full['customer']);
+                    const status = full['status'];
+                    const icon = statusBadgeObj[status] || '';
+                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
+                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
                 }
             },
             {
                 // Company — avatar + name (like User column)
-                targets: 5,
+                targets: 2,
                 orderable: false,
                 render: function (data, type, full) {
                     return renderUserCell(full['company']);
                 }
             },
             {
+                // Customer — avatar + name (like User column)
+                targets: 3,
+                orderable: false,
+                render: function (data, type, full) {
+                    return renderUserCell(full['customer']);
+                }
+            },
+            {
                 // Date
-                targets: 6,
+                targets: 4,
                 width: '135px',
                 createdCell: function (td) { td.style.minWidth = '135px'; },
                 render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
+            },
+            {
+                // Request ID
+                targets: 5,
+                width: '110px',
+                render: (data) => '<span class="fw-medium">#' + data + '</span>'
+            },
+            {
+                // Chat ID
+                targets: 6,
+                width: '90px',
+                render: (data) => '<span class="fw-medium">#' + data + '</span>'
             }
         ],
         pageLength: 10,
-        order: [[6, 'desc']],
+        order: [[4, 'desc']],
         drawCallback: function () {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                 if (!bootstrap.Tooltip.getInstance(el)) {
@@ -203,6 +203,61 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }, 100);
+
+    // Status change — delegated click on the table wrapper
+    const confirmTextMap = {
+        dubious: 'Sure you want to change fraud to <span class="text-info fw-medium">Resolved</span>?'
+    };
+
+    // Fraud toggle — delegated click on the table wrapper
+    dt_chat_table.addEventListener('click', function (e) {
+        const btn = e.target.closest('.fraud-toggle-btn');
+        if (!btn) { return; }
+
+        const chatId      = btn.dataset.chatId;
+        const currentFraud = btn.dataset.currentFraud;
+        const confirmHtml = confirmTextMap[currentFraud];
+        const dtRow       = dt_chat.row(btn.closest('tr'));
+
+        Swal.fire({
+            title: 'Confirm Action',
+            html: confirmHtml,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, resolve it',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            fetch('/Chat/UpdateChatFraud', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + encodeURIComponent(chatId) + '&fraud=' + encodeURIComponent(currentFraud)
+            }).then(function (res) {
+                if (res.ok) {
+                    res.json().then(function (body) {
+                        const rowData = dtRow.data();
+                        rowData.fraud = body.fraud;
+                        dtRow.data(rowData).draw(false);
+                    });
+                    Swal.fire({
+                        title: 'Done!',
+                        text: 'Chat fraud status has been resolved.',
+                        icon: 'success',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false
+                    });
+                } else {
+                    Swal.fire({ title: 'Error', text: 'Failed to update fraud status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                }
+            });
+        });
+    });
 
     function renderUserCell(avatar) {
         if (!avatar) { return '—'; }
