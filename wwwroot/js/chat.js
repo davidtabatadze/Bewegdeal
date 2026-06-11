@@ -141,6 +141,11 @@
         }
     });
 
+    body.addEventListener('paste', function (e) {
+        if (!e.target.classList.contains('message-input')) { return; }
+        e.preventDefault();
+    });
+
     body.addEventListener('input', function (e) {
         var input = e.target;
         if (!input.classList.contains('message-input')) { return; }
