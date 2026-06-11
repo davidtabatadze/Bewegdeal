@@ -36,6 +36,12 @@ namespace Bewegdeal.Data.Repositories
         public async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Chats.AsQueryable(), filter).Select(BuildSelect<ChatEntity>(properties)).FirstOrDefaultAsync();
 
+        public async Task<List<ChatEntity>> Load(ChatFilter filter)
+            => await ApplyFilters(Context.Chats.AsQueryable(), filter).ToListAsync();
+
+        public async Task<int> Count(ChatFilter filter)
+            => await ApplyFilters(Context.Chats.AsQueryable(), filter).CountAsync();
+
         public async Task<ChatMessageEntity> AddMessage(ChatMessageEntity message)
             => await Create(message);
 
@@ -74,9 +80,18 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.Status == filter.Status);
             }
 
+            if (!string.IsNullOrWhiteSpace(filter.Fraud))
+            {
+                query = query.Where(r => r.Fraud == filter.Fraud);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                query = query.Where(r => r.Id == 0);
+            }
+
             query = ApplySorting(query, filter);
             query = ApplyPaging(query, filter);
-
             return query;
         }
 

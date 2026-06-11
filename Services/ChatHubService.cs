@@ -37,7 +37,7 @@ namespace Bewegdeal.Services
                 return;
             }
 
-            if (chat is null || !IsParticipant(chat, userId) || chat.Status != ChatStatusEnum.Active)
+            if (chat is null || !IsParticipant(chat, userId) || chat.Status != ChatStatusEnum.Ongoing)
             {
                 return;
             }

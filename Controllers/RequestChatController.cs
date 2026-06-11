@@ -34,7 +34,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
         {
             return Content("");
         }
-        return PartialView("Conversation", conversation);
+        return PartialView("~/Views/Chat/Conversation.cshtml", conversation);
     }
 
     [HttpPost]

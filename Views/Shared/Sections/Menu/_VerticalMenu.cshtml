@@ -112,6 +112,14 @@
                 </a>
             </li>
 
+            <!-- Chats -->
+            <li class='menu-item@(currentPage == "/Chat/List" ? " active" : "")'>
+                <a asp-controller="Chat" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-wechat-line"></i>
+                    <div data-i18n="Chats">Chats</div>
+                </a>
+            </li>
+
             <!-- Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>
                 <a asp-controller="Request" asp-action="List" class="menu-link">

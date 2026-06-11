@@ -10,7 +10,7 @@ namespace Bewegdeal.Services
         public async Task<string> GetMode(string requestNumber, long userId, string userRole)
         {
             var request = await RequestService.Get(requestNumber, [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]);
-            var chat = await ChatService.GetActive(null, request?.Id ?? 0);
+            var chat = await ChatService.GetOngoing(null, request?.Id ?? 0);
 
             return
                 userRole == UserRoleEnum.Company &&
@@ -19,7 +19,7 @@ namespace Bewegdeal.Services
 
                 request?.Status == RequestStatusEnum.Negotiation &&
                 (chat?.CompanyId == userId || chat?.CustomerId == userId)
-                    ? ChatModeEnum.Active :
+                    ? ChatModeEnum.Ongoing :
 
                     ChatModeEnum.None;
         }
@@ -39,7 +39,7 @@ namespace Bewegdeal.Services
                 CustomerId = request.RequesterId,
                 CompanyId = userId,
                 Fraud = ChatFraudEnum.Safe,
-                Status = ChatStatusEnum.Active,
+                Status = ChatStatusEnum.Ongoing,
                 CreateDate = DateTime.UtcNow
             });
 
@@ -60,7 +60,7 @@ namespace Bewegdeal.Services
         public async Task<ChatHistoryModel?> Conversation(string requestNumber, long userId)
         {
             var request = await RequestService.Get(requestNumber, [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]);
-            var chat = await ChatService.GetActive(null, request?.Id ?? 0);
+            var chat = await ChatService.GetOngoing(null, request?.Id ?? 0);
 
             if (request is null)
             {
@@ -76,7 +76,7 @@ namespace Bewegdeal.Services
 
             return new ChatHistoryModel
             {
-                Mode = request.Status == RequestStatusEnum.Pending ? ChatModeEnum.Initiate : ChatModeEnum.Active,
+                Mode = request.Status == RequestStatusEnum.Pending ? ChatModeEnum.Initiate : ChatModeEnum.Ongoing,
                 ChatKey = chat?.Key ?? "",
                 ViewerId = userId,
                 ViewerInitials = "I J",
@@ -91,7 +91,7 @@ namespace Bewegdeal.Services
         public async Task Cancel(string requestNumber, long userId)
         {
             var request = await RequestService.Get(requestNumber, [nameof(RequestEntity.Id)]);
-            var chat = await ChatService.GetActive(null, request?.Id ?? 0);
+            var chat = await ChatService.GetOngoing(null, request?.Id ?? 0);
 
             if (request is not null && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {

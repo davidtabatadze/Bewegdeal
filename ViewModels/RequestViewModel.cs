@@ -22,10 +22,10 @@ namespace Bewegdeal.ViewModels
         public string? Description { get; set; }
 
         [MaxLength(512)]
-        public string PickupAddress { get; set; } = string.Empty;
+        public string? PickupAddress { get; set; }
 
         [MaxLength(512)]
-        public string DeliveryAddress { get; set; } = string.Empty;
+        public string? DeliveryAddress { get; set; }
 
         [Required]
         public decimal Cost { get; set; }
@@ -122,8 +122,8 @@ namespace Bewegdeal.ViewModels
 
             Title = Title.Trim();
             Description = Description?.Trim();
-            PickupAddress = PickupAddress.Trim();
-            DeliveryAddress = DeliveryAddress.Trim();
+            PickupAddress = PickupAddress?.Trim();
+            DeliveryAddress = DeliveryAddress?.Trim();
         }
     }
 }

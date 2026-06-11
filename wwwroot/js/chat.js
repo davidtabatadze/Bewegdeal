@@ -7,7 +7,7 @@
 
 (function () {
     var cfg      = window.chatConfig || {};
-    var ChatMode = window.ChatMode   || { None: 'none', Initiate: 'initiate', Active: 'active' };
+    var ChatMode = window.ChatMode   || { None: 'none', Initiate: 'initiate', Ongoing: 'ongoing' };
     var requestNumber = cfg.requestNumber || '';
     if (!requestNumber) { return; }
 
@@ -41,7 +41,7 @@
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
         window.chatOpen = true;
         if (contextLoaded) {
-            if (mode === ChatMode.Active && chatKey) { connectSignalR(chatKey); }
+            if (mode === ChatMode.Ongoing && chatKey) { connectSignalR(chatKey); }
             return;
         }
         loadConversation();
@@ -239,7 +239,7 @@
                 chatKey  = conv.dataset.chatKey || '';
                 viewerId = parseInt(conv.dataset.viewerId || '0', 10);
 
-                if (mode === ChatMode.Active) {
+                if (mode === ChatMode.Ongoing) {
                     var historyBody = body.querySelector('.chat-history-body');
                     if (historyBody) { new PerfectScrollbar(historyBody); }
                     var separators = body.querySelectorAll('.chat-date-separator[data-date]');
