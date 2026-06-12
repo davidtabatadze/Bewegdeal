@@ -55,6 +55,13 @@
         }
     });
 
+    // ── Proposal flow ─────────────────────────────────────────────────────────
+
+    body.addEventListener('click', function (e) {
+        if (!e.target.closest('#chatProposalBtn')) { return; }
+        if (window.ChatProposal) { window.ChatProposal.open(requestNumber); }
+    });
+
     // ── Cancel flow ──────────────────────────────────────────────────────────
 
     body.addEventListener('click', function (e) {
@@ -231,6 +238,10 @@
                 Block.remove('#chatCard');
                 body.innerHTML = html;
                 contextLoaded  = true;
+
+                body.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+                    new bootstrap.Tooltip(el);
+                });
 
                 var conv = document.getElementById('chatConversation');
                 if (!conv) { return; }

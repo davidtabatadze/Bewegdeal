@@ -69,6 +69,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
             builder.Services.AddScoped<IRequestRepository, RequestRepository>();
             builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
+            builder.Services.AddScoped<IRequestProposalRepository, RequestProposalRepository>();
             builder.Services.AddScoped<IFraudWordRepository, FraudWordRepository>();
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
 

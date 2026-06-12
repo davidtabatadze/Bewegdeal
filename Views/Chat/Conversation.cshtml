@@ -89,7 +89,7 @@ else
                         </div>
                     </div>
                 </div> *@
-                <div class="alert alert-danger m-2" role="alert">
+                <div class="alert alert-danger alert-dismissible m-2" role="alert">
                     <div class="d-flex align-items-center mb-2">
                         <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                         <strong>Handle with care</strong>
@@ -198,11 +198,13 @@ else
                         <div class="message-actions d-flex align-items-center">
                             @if (User.IsInRole(UserRoleEnum.Company))
                             {
-                                <span id="chatAgreementBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer">
+                                <span id="chatProposalBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer"
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
                                     <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
                                 </span>
                             }
-                            <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer">
+                            <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Chat">
                                 <i class="icon-base ri ri-hand icon-md text-danger"></i>
                             </span>
                             <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">

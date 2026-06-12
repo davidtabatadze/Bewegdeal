@@ -47,7 +47,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
 
     [HttpPost]
     [Authorize(Roles = UserRoleEnum.Company)]
-    public async Task<IActionResult> Propose(string requestNumber, RequestProposalViewModel model)
+    public async Task<IActionResult> Propose(RequestProposalViewModel model)
     {
         if (!ModelState.IsValid)
         {

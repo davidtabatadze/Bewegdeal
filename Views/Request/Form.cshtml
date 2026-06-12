@@ -272,18 +272,24 @@
                                 <div id="scheduled-fields" class="@(isEdit && !req!.ASAP ? "" : "d-none")">
                                     <div class="row g-6">
                                         <div class="col-auto" style="width: 200px;">
-                                            <div class="form-floating form-floating-outline">
-                                                <input type="text" id="proposedDate" name="date" class="form-control" placeholder="" value="@(isEdit ? req!.Date?.ToString("yyyy-MM-dd") : "")" />
-                                                <label for="proposedDate">Date</label>
-                                                <div class="invalid-feedback">Please select a date.</div>
+                                            <div class="input-group input-group-merge">
+                                                <div class="form-floating form-floating-outline flex-grow-1">
+                                                    <input type="text" id="proposedDate" name="date" class="form-control" placeholder="" value="@(isEdit ? req!.Date?.ToString("MMMM d, yyyy") : "")" />
+                                                    <label for="proposedDate">Date</label>
+                                                </div>
+                                                <span class="input-group-text"><i class="icon-base ri ri-calendar-line"></i></span>
                                             </div>
+                                            <div class="invalid-feedback">Please select a date.</div>
                                         </div>
                                         <div class="col-auto" style="width: 200px;">
-                                            <div class="form-floating form-floating-outline">
-                                                <input type="text" id="proposedTime" name="time" class="form-control" placeholder="" value="@(isEdit ? req!.Time?.ToString("HH:mm") : "")" />
-                                                <label for="proposedTime">Time</label>
-                                                <div class="invalid-feedback">Please select a time.</div>
+                                            <div class="input-group input-group-merge">
+                                                <div class="form-floating form-floating-outline flex-grow-1">
+                                                    <input type="text" id="proposedTime" name="time" class="form-control" placeholder="" value="@(isEdit ? req!.Time?.ToString("HH:mm") : "")" />
+                                                    <label for="proposedTime">Time</label>
+                                                </div>
+                                                <span class="input-group-text"><i class="icon-base ri ri-time-line"></i></span>
                                             </div>
+                                            <div class="invalid-feedback">Please select a time.</div>
                                         </div>
                                     </div>
                                 </div>

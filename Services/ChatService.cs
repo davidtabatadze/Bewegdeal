@@ -17,10 +17,7 @@ namespace Bewegdeal.Services
         public async Task<ChatEntity?> Get(string key, string[]? properties = null)
             => await Get(new ChatFilter { Key = key }, properties);
         public async Task<ChatEntity?> GetOngoing(string? key = null, long? requestId = null)
-            => await Get(
-                        new ChatFilter { Key = key, RequestId = requestId, Status = ChatStatusEnum.Ongoing },
-                        [nameof(ChatEntity.Id), nameof(ChatEntity.Key), nameof(ChatEntity.CompanyId), nameof(ChatEntity.CustomerId)]
-                     );
+            => await Get(new ChatFilter { Key = key, RequestId = requestId, Status = ChatStatusEnum.Ongoing });
         private async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
             => await ChatRepository.Get(filter, properties);
         public async Task ReadMessages(long chatId, long viewerId)

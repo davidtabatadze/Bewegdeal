@@ -46,6 +46,9 @@
     <link rel="stylesheet" href="~/vendor/css/pages/app-chat.css" />
     <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
     <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
+    <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="~/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+
 }
 
 @section PageScripts {
@@ -55,6 +58,8 @@
     <script src="~/vendor/libs/swiper/swiper.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="~/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
     <script src="~/js/request-view.js"></script>
     <script>
         window.chatConfig = { requestNumber: '@req.Number' };
@@ -257,6 +262,8 @@
         </div>
     </div>
 }
+
+@await Html.PartialAsync("~/Views/Request/_ProposalModal.cshtml")
 
 <!-- Floating chat tab — hidden until chat.js confirms mode != 'none' -->
 <div id="chatFloatingBtn" style="position:fixed;right:1.5rem;bottom:3rem;z-index:1040;display:none;">

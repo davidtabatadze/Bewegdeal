@@ -185,12 +185,10 @@ Dropzone.autoDiscover = false;
   const dateInput = document.getElementById('proposedDate');
   if (dateInput && typeof flatpickr !== 'undefined') {
     datePicker = flatpickr(dateInput, {
-      dateFormat: 'Y-m-d',
-      altInput:   true,
-      altFormat:  'F j, Y',
+      dateFormat: 'F j, Y',
       minDate:    'today',
-      onChange:   function (selectedDates, dateStr, instance) {
-        instance.altInput?.classList.remove('is-invalid');
+      onChange:   function () {
+        dateInput.classList.remove('is-invalid');
       }
     });
   }
@@ -420,7 +418,7 @@ Dropzone.autoDiscover = false;
       const isASAP = document.querySelector('input[name="isASAP"]:checked')?.value === 'true';
       if (!isASAP) {
         if (!dateInput || !dateInput.value) {
-          (datePicker?.altInput ?? dateInput)?.classList.add('is-invalid');
+          dateInput?.classList.add('is-invalid');
           hasErrors = true;
         }
         if (!timeInput || !timeInput.value) {
