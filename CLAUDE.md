@@ -92,7 +92,7 @@ Views/
 
 ## Controllers
 
-- `XBaseController` — base controller; provides `GetClaim<T>`, `HasClaim`, `RefreshClaim` claim helpers; all app controllers inherit from it
+- `XBaseController` — base controller; provides `UserId` (long), `UserRole` (string), `GetClaim<T>`, `HasClaim`, `RefreshClaim`; all app controllers inherit from it
 - `LandingController` — public landing page; checks `User.Identity!.IsAuthenticated` to redirect logged-in users
 - `HomeController` — `[Authorize]`; checks `AcquaintedHIW` claim and role, redirects to `HowItWorks` or `Dashboard`
 - `DashboardController` — `[Authorize]`; `Index()` dispatches via `User.IsInRole()` to Admin/Company views or Request/List
@@ -102,7 +102,9 @@ Views/
 - `SettingsController` — `[Authorize(Roles=Administrator)]`; Index, SaveTermAndConditionSettings (Quill HTML content), SaveRequestSettings
 - `FileController` — public; `GET /File/Download?key=`
 - `RequestController` — `[Authorize]`; Create, Edit, View, List; Create/Edit gate on `GetClaim<string>(Role) == Customer`
-- `ChatController` — `[Authorize]`; Visibility, Initiate, Conversation, Cancel
+- `ChatController` — `[Authorize(Roles=Administrator)]`; List, LoadChats, Conversation (by key), UpdateChatFraud
+- `RequestChatController` — `[Authorize]`; Visibility, Conversation (by requestNumber), Cancel; Initiate `[Authorize(Roles=Company)]`
+- `FraudWordController` — `[Authorize(Roles=Administrator)]`; Index, Create, Delete
 
 ## Account Views
 
@@ -145,7 +147,7 @@ Navbar links (`_NavbarLanding.cshtml`): Home, Services (`#services`), How it wor
 
 Menu items are hardcoded in `_VerticalMenu.cshtml`. Active state determined by comparing `ViewContext.HttpContext.Request.Path`.
 
-**User badge** — reads `ClaimTypes.Name` for display name, computes initials from name, reads `"AvatarUrl"` claim for avatar. Both `menuBadgeImg` / `menuBadgeInitials` elements always rendered, one hidden via `display:none`.
+**User badge** — reads `IdentityFieldEnum.Name` claim for display name, computes initials from name, reads `IdentityFieldEnum.AvatarUrl` claim for avatar. Both `menuBadgeImg` / `menuBadgeInitials` elements always rendered, one hidden via `display:none`.
 
 **Role visibility** — all `@if` blocks use `User.IsInRole(UserRoleEnum.*)` (no session reads).
 
@@ -188,23 +190,35 @@ All controllers use standard ASP.NET Core attributes — no custom filter attrib
 All app controllers inherit from `XBaseController` (which itself inherits `Controller`). It provides:
 
 ```csharp
+public long   UserId   => GetClaim<long>(IdentityFieldEnum.Id);
+public string UserRole => GetClaim<string>(IdentityFieldEnum.Role) ?? "undefined";
+
 // Read a claim value, converted to T; returns default if missing or unparseable
 protected T? GetClaim<T>(string type)
 
-// Check if a claim equals a given value (uses value.ToString())
+// Check if a claim equals a given value (case-insensitive via .ToLower())
 protected bool HasClaim(string type, object value)
 
 // Re-issue the auth cookie with one claim updated; used after DB writes that affect user state
-protected async Task RefreshClaim(string type, object value)
+protected async Task RefreshClaim(string type, object? value)
 ```
 
-Common claim keys: `ClaimTypes.NameIdentifier` (user ID), `ClaimTypes.Role`, `ClaimTypes.Name`, `ClaimTypes.Email`, `"AvatarUrl"`, `"AcquaintedHIW"`, `"TermsAcceptDate"`, `"TermsAccepted"` (internal cache-bypass flag).
+Claim keys live in `IdentityFieldEnum` — always use these constants, never hard-coded strings:
+- `IdentityFieldEnum.Id` → `"bewegdeal-id"` (long, user PK)
+- `IdentityFieldEnum.Role` → `"bewegdeal-role"`
+- `IdentityFieldEnum.Name` → `"bewegdeal-name"`
+- `IdentityFieldEnum.Email` → `"bewegdeal-email"`
+- `IdentityFieldEnum.Theme` → `"bewegdeal-theme"`
+- `IdentityFieldEnum.AvatarUrl` → `"bewegdeal-avatar-url"`
+- `IdentityFieldEnum.AcquaintedHIW` → `"bewegdeal-acquainted-hiw"`
+- `IdentityFieldEnum.TermsAccepted` → `"bewegdeal-terms-accepted"` (internal cache-bypass flag)
+- `IdentityFieldEnum.TermsAcceptDate` → `"bewegdeal-terms-accept-date"`
 
 ### Project Structure
 
 ```
 Controllers/
-├── XBaseController.cs           # Base: GetClaim<T>, HasClaim, RefreshClaim
+├── XBaseController.cs           # Base: UserId, UserRole, GetClaim<T>, HasClaim, RefreshClaim
 ├── LandingController.cs
 ├── HomeController.cs            # [Authorize]; HIW + role check → redirect
 ├── HowItWorksController.cs      # [Authorize]; Customer/Company [Authorize(Roles=...)]
@@ -214,89 +228,115 @@ Controllers/
 │                                #   [Authorize] on UpdateAvatar/UpdateTheme/UpdateProfile/UpdatePassword/AcceptHIW/AcceptTerms
 ├── SettingsController.cs        # [Authorize(Roles=Admin)]; Index, SaveTermAndConditionSettings, SaveRequestSettings
 ├── RequestController.cs         # [Authorize]; Create, Edit, View, List
-├── ChatController.cs            # [Authorize]; Visibility, Initiate, Conversation, Cancel
+├── RequestChatController.cs     # [Authorize]; Visibility, Conversation, Cancel; Initiate [Authorize(Roles=Company)]
+├── ChatController.cs            # [Authorize(Roles=Admin)]; List, LoadChats, Conversation (by key), UpdateChatFraud
+├── FraudWordController.cs       # [Authorize(Roles=Admin)]; Index, Create, Delete
 └── FileController.cs            # public; Download
-Hubs/
-└── ChatHub.cs                   # SignalR hub; reads userId from Context.User claims;
-                                 #   JoinNotifications, JoinChat, SendMessage, MarkRead
 Data/
 ├── Base/
 │   ├── IEntity.cs               # Marker interface
 │   ├── IRepository.cs           # Marker interface
 │   ├── IRepositorySeedable.cs   # Adds Task Seed()
-│   └── BaseFilter.cs            # Id<T>, Ids<List<T>>, SortField, SortDirection, Start, Length
+│   ├── BaseFilter.cs            # Id<T>, Ids<List<T>>, SortField, SortDirection, Start, Length
+│   └── BaseRepository.cs        # Shared EF Core query helpers
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
 │   ├── FileEntity.cs            # Files table (metadata only)
 │   ├── SettingsEntity.cs        # Settings table (single row, Id = 1)
-│   ├── ReferenceEntity.cs       # References table
 │   ├── RequestEntity.cs         # Requests table
-│   └── RequestFileEntity.cs     # RequestFiles table
+│   ├── RequestFileEntity.cs     # RequestFiles table
+│   ├── RequestAgreementEntity.cs
+│   ├── ChatEntity.cs            # Chats table: Key, RequestId, CustomerId, CompanyId, Fraud, Status
+│   ├── ChatMessageEntity.cs     # ChatMessages table: ChatId, SenderId, Content, SentDate, IsRead, IsFraud
+│   └── FraudWordEntity.cs       # FraudWords table: Word
 ├── Filters/
 │   ├── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
 │   ├── FileFilter.cs            # Extends BaseFilter<long?>, adds Key
-│   └── RequestFilter.cs         # Extends BaseFilter<long?>, adds Search, Status, Service, Viewer*
+│   ├── RequestFilter.cs         # Extends BaseFilter<long?>, adds Search, Status, Service, Viewer*
+│   └── ChatFilter.cs
 ├── Repositories/
 │   ├── Abstractions/
 │   │   ├── IUserRepository.cs
-│   │   ├── IReferenceRepository.cs
 │   │   ├── IFileRepository.cs
 │   │   ├── ISettingsRepository.cs
 │   │   ├── IRequestRepository.cs
 │   │   ├── IRequestFileRepository.cs
-│   │   └── IChatRepository.cs
+│   │   ├── IChatRepository.cs
+│   │   └── IFraudWordRepository.cs
 │   ├── UserRepository.cs        # EF Core + IRepositorySeedable; Update() switches on UserUpdateAreaEnum
-│   ├── ReferenceRepository.cs   # EF Core + IRepositorySeedable
 │   ├── FileRepository.cs        # EF Core
 │   ├── SettingsRepository.cs    # EF Core + IRepositorySeedable
 │   ├── RequestRepository.cs     # EF Core; private ApplyFilters
 │   ├── RequestFileRepository.cs # EF Core
-│   └── ChatRepository.cs        # EF Core; ChatEntity + ChatMessageEntity
+│   ├── ChatRepository.cs        # EF Core; ChatEntity + ChatMessageEntity
+│   └── FraudWordRepository.cs   # EF Core
 └── SqlContext.cs                # DbContext; DateOnly↔DateTime and TimeOnly↔TimeSpan converters
 Enums/
+├── IdentityFieldEnum.cs         # bewegdeal-* claim key constants
 ├── UserRoleEnum.cs              # "administrator", "customer", "company"
 ├── UserStatusEnum.cs            # "active", "pending", "blocked", "unverified"
 ├── UserUpdateAreaEnum.cs        # Status, Password, Theme, Profile, Avatar, AcceptHIW, AcceptTerms
-├── ChatStatusEnum.cs            # "active", "cancelled", "resolved"
+├── UserThemeEnum.cs             # "light", "dark"
+├── ChatStatusEnum.cs            # "agreed", "ongoing", "cancelled"
+├── ChatModeEnum.cs              # "none", "initiate", "ongoing"
+├── ChatFraudEnum.cs             # "safe", "dubious", "resolved"
+├── ChatUpdateAreaEnum.cs        # C# enum: Status=1, Fraud
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
 ├── FileTypeEnum.cs              # MIME type constants: PDF, PNG, JPEG, MP4, MOV
 ├── SortFieldEnum.cs             # "status"
 ├── SortDirectionEnum.cs         # "asc", "desc"
-├── ReferenceTypeEnum.cs         # "user-role", "user-status"
-├── EmailStatusEnum.cs           # "sent", "failed"
-├── SmsStatusEnum.cs             # "sent", "failed"
 ├── RequestStatusEnum.cs         # "pending", "negotiation", "resolved", "cancelled"
 ├── RequestFileTypeEnum.cs       # "image", "video"
+├── RequestUpdateAreaEnum.cs     # C# enum: Full=1, ChatActivate, ChatDeactivate
+├── RequestAgreementStatusEnum.cs
+├── RequestViewerFocusEnum.cs
+├── VehicleTypeEnum.cs
+├── VehicleConditionEnum.cs
+├── FraudWordStatusEnum.cs
+├── EmailEnum.cs
+├── BrevoStatusEnum.cs
 ├── ConstantEnum.cs              # UserCacheTimeout=60, ResetPasswordTimeout=10, VerificationTimeout=10
+├── CacheKeyEnum.cs              # IMemoryCache key constants: EmailVerification, SmsVerification,
+│                                #   PasswordReset, FraudeWords, FraudeWordsCompiled
 └── AnnotationEnum.cs            # Nested string classes for user-facing messages
 Models/
-├── GridResultViewModel.cs       # Server-side DataTables response envelope
-├── RequestViewModel.cs          # Create + Edit request form model
-├── ChatHistoryViewModel.cs      # Model for _ChatHistory.cshtml partial
+├── GenericResultModel.cs        # GenericResultModel (bool Success, string? Message) +
+│                                #   GenericResultModel<T> (adds T? Result); static Ok/Fail factories
+├── GridResultModel.cs           # Server-side DataTables response envelope
+├── RequestModel.cs              # Create + Edit request form model
+├── RequestFileModel.cs
+├── ChatHistoryModel.cs          # @model for Conversation.cshtml: Mode, ChatKey, viewer/other party info, Messages
+├── ChatUnreadSummary.cs
 ├── UserProfileModel.cs          # Profile page model: UserEntity User, Avatar, ServiceTermsFileName/Url
 └── UserAvatarModel.cs           # Url, Initials, Name
-ViewModels/
-├── RegisterViewModel.cs         # Registration form; string[]? Interests (replaces per-service bools)
-└── ProfileViewModel.cs          # Profile update form; Role (hidden), Name, Address, Interests, ServiceTermsFile, DeleteServiceTerms
 Services/
 ├── FileService.cs               # Scoped — validate, upload, persist; GetUrl(fileId)
+├── FileService2.cs
 ├── SettingService.cs            # Scoped — Get() only; wraps ISettingsRepository
-└── UserService.cs               # Scoped — CRUD + GetAvatar + GetProfile + UpdateProfile + UpdateAvatar + LoadGrid
+├── UserService.cs               # Scoped — CRUD + GetAvatar + GetProfile + UpdateProfile + UpdateAvatar + LoadGrid
+├── AccountService.cs
+├── BrevoService.cs
+├── RequestService.cs
+├── ChatService.cs               # Scoped — chat CRUD, AddMessage, ReadMessages, LoadGrid, GetAdminConversation
+├── RequestChatService.cs        # Scoped — GetMode, Initiate, Conversation, Cancel (user-facing chat flow)
+├── ChatHubService.cs            # Scoped — Join, Send, MarkRead, Notify; called by ChatTool hub
+└── FraudWordService.cs          # Scoped — IsFraud() with * wildcard pattern matching; cached
 Storage/                         # Git-ignored; local file storage root
 Tools/
 ├── PasswordTool.cs              # Static; HashPassword() → (hash, salt); Verify()
-├── BrevoTool.cs                 # Static; Configure(IConfiguration); SendEmail() → EmailStatusEnum; SendSms() → SmsStatusEnum
-│                                #   Config keys: Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName, Brevo:SmsFrom
+├── BrevoTool.cs                 # Static; Configure(IConfiguration); SendEmail/SendSms
 ├── IFileStorageTool.cs          # Create(stream, fileName, mimeType) → key; Delete(key); GetUrl(key)
 ├── FileStorageTool.cs           # Singleton local-filesystem impl; GetUrl returns /File/Download?key=
 ├── UserIdentityTool.cs          # Static; BuildPrincipal(UserEntity, avatarUrl?) → ClaimsPrincipal
-│                                #   Claims: NameIdentifier, Role, Name, Email, Theme,
-│                                #           AvatarUrl, AcquaintedHIW, TermsAcceptDate
-├── UserRefreshTool.cs           # Middleware; runs after UseAuthentication; uses "TermsAccepted" cookie claim
-│                                #   as cache bypass flag; on cache miss: fetches user status + settings;
+│                                #   Claims use IdentityFieldEnum keys
+├── UserRefreshTool.cs           # Middleware; runs after UseAuthentication;
+│                                #   on cache miss: fetches user status + settings;
 │                                #   sets HttpContext.Items["ShowTCModal"] if TermsAcceptDate < ContentDate
 │                                #   (non-admin only); signs out blocked/missing users; TTL = UserCacheTimeout
-└── CacheKeyTool.cs              # Static helper for building IMemoryCache keys
+└── ChatTool.cs                  # SignalR Hub (in Tools/, not Hubs/); delegates to ChatHubService
+                                 #   Methods: Join(chatKey), Send(chatKey, content), MarkRead(chatKey), Notify()
+                                 #   Group name: "bewegdeal-chat-{chatKey}" via ChatTool.GroupName()
+                                 #   Reads UserId via IdentityFieldEnum.Id claim
 Views/
 ├── Dashboard/
 │   ├── Admin.cshtml
@@ -311,17 +351,23 @@ Views/
 │   └── Profile.cshtml           # Picture/Theme/Personal/Password cards; uses ViewBag.Profile (UserProfileModel)
 │                                #   Company: Name+Mobile(disabled)+UID(disabled)+Address+Interests+ServiceTerms
 │                                #   Customer: Name+Mobile(disabled) only
-└── Request/
-    ├── Form.cshtml              # Create + Edit (isEdit = ViewBag.Request is not null)
-    ├── View.cshtml              # Swiper gallery; floating chat tab; requester avatar
-    └── List.cshtml              # DataTable; empty state for customers
+├── Request/
+│   ├── Form.cshtml              # Create + Edit (isEdit = ViewBag.Request is not null)
+│   ├── View.cshtml              # Swiper gallery; floating chat offcanvas; requester avatar
+│   └── List.cshtml              # DataTable; empty state for customers
+├── Chat/
+│   ├── List.cshtml              # Admin chat list DataTable
+│   └── Conversation.cshtml      # Partial; @model ChatHistoryModel; mode-aware (initiate vs ongoing);
+│                                #   admin view: read-only, fraud border highlights;
+│                                #   non-admin view: danger alert + message input + cancel btn
+└── FraudWord/
+    └── Index.cshtml             # Admin fraud word management
 Views/Shared/_Partials/
 ├── _Macros.cshtml               # Materio SVG logo
-├── _TermsModal.cshtml           # Fullscreen Bootstrap modal; injects ISettingsRepository;
-│                                #   ViewData["AcceptMode"]=true → accept footer with scroll-unlock;
-│                                #   ViewData["LockedMode"]=true → no close button, backdrop=static;
-│                                #   renders nothing if TermsAndConditionsContent is empty
-└── _ChatHistory.cshtml          # Chat panel partial; @model ChatHistoryModel
+└── _TermsModal.cshtml           # Fullscreen Bootstrap modal; injects ISettingsRepository;
+                                 #   ViewData["AcceptMode"]=true → accept footer with scroll-unlock;
+                                 #   ViewData["LockedMode"]=true → no close button, backdrop=static;
+                                 #   renders nothing if TermsAndConditionsContent is empty
 wwwroot/js/
 ├── app-company-dashboard.js
 ├── app-user-list.js             # User DataTable; shows real avatars (img or initials from full['avatar'])
@@ -329,7 +375,7 @@ wwwroot/js/
 ├── pages-auth-multisteps.js     # Register stepper; Step 2 fields toggled by role; Interests via name="Interests"
 ├── request-form.js
 ├── app-request-list.js
-└── chat.js
+└── chat.js                      # Request-page chat: Phase 1 visibility, Phase 2 conversation, SignalR
 ```
 
 ### Entities
@@ -376,7 +422,32 @@ wwwroot/js/
 | RequestVideoMaxCount | short | SMALLINT |
 | RequestVideoMaxSize | short | SMALLINT, in MB |
 
-**ReferenceEntity**, **RequestEntity**, **RequestFileEntity**, **ChatEntity**, **ChatMessageEntity** — unchanged.
+**ChatEntity** (`Chats` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK |
+| Key | string | unique GUID key |
+| RequestId | long | FK to Requests |
+| CustomerId | long | FK to Users |
+| CompanyId | long | FK to Users |
+| Fraud | string | `ChatFraudEnum` value |
+| Status | string | `ChatStatusEnum` value |
+| CreateDate | DateTime | UTC |
+
+**ChatMessageEntity** (`ChatMessages` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK |
+| ChatId | long | FK to Chats |
+| SenderId | long | FK to Users |
+| Content | string | max 1024 |
+| SentDate | DateTime | UTC |
+| IsRead | bool | |
+| IsFraud | bool | flagged by FraudWordService |
+
+**FraudWordEntity** (`FraudWords` table): `Id` (long PK), `Word` (string) — supports `*` prefix/suffix wildcards.
+
+**RequestEntity**, **RequestFileEntity**, **RequestAgreementEntity** — see source.
 
 ### Filters
 
@@ -391,9 +462,19 @@ ClaimsPrincipal principal = UserIdentityTool.BuildPrincipal(user, avatarUrl);
 ```
 
 **UserRefreshTool** (middleware — registered after `UseAuthentication`):
-- Per-user cache key: `CacheKeyTool.Get("bewegdeal_user", userId)` — TTL 60 min
 - On cache miss: fetches user + settings; kicks blocked users; sets `HttpContext.Items["ShowTCModal"] = true` for non-admin when `TermsAcceptDate < TermsAndConditionsContentDate`
+- Cache keys via `CacheKeyEnum` constants (not `CacheKeyTool`)
 - `_HomeLayout` reads `Context.Items["ShowTCModal"]` to render locked T&C modal
+
+**ChatTool** (SignalR Hub — lives in `Tools/`, mapped at `/hubs/chat`):
+- Delegates all logic to `ChatHubService`
+- Group name format: `ChatTool.GroupName(chatKey)` → `"bewegdeal-chat-{chatKey}"`
+- `UserId` read from `IdentityFieldEnum.Id` claim on `Context.User`
+
+**FraudWordService**:
+- `IsFraud(content)` — checks message against cached compiled patterns
+- Pattern matching: `*word*` = contains, `*word` = ends with, `word*` = starts with, `word` = exact token match
+- Cache invalidated on Create/Delete
 
 **PasswordTool**, **BrevoTool**, **IFileStorageTool / FileStorageTool** — unchanged.
 
@@ -449,7 +530,7 @@ Users (7 rows, all Status=Active):
 - If `TermsAcceptDate < TermsAndConditionsContentDate` (and role ≠ Administrator): sets `HttpContext.Items["ShowTCModal"] = true`
 - `_HomeLayout` renders `_TermsModal` in locked mode (`backdrop=static`, no close button) and auto-opens it via JS
 - User cannot dismiss — must click "I Accept"
-- `POST /User/AcceptTerms` → `UserUpdateAreaEnum.AcceptTerms` → `RefreshClaim("TermsAcceptDate", ...)` + `RefreshClaim("TermsAccepted", true)` → redirect to Home
+- `POST /User/AcceptTerms` → `UserUpdateAreaEnum.AcceptTerms` → `RefreshClaim(IdentityFieldEnum.TermsAcceptDate, ...)` + `RefreshClaim(IdentityFieldEnum.TermsAccepted, true)` → redirect to Home
 
 ### Registration T&C flow
 - `agreeTerms` checkbox click intercept: opens `_TermsModal` in AcceptMode (with close button)
@@ -485,15 +566,15 @@ First-time onboarding for Customer/Company roles. Administrators are exempt.
 
 ### Flow
 1. After login: if `!AcquaintedHIW claim && Role != Administrator` → redirect to `HowItWorks/Customer` or `HowItWorks/Company`
-2. User reads the page; sticky header shows "I understand" button only when `ViewBag.ShowBar = !HasClaim("AcquaintedHIW", true)`
-3. `POST /User/AcceptHIW` → DB write via `UserUpdateAreaEnum.AcceptHIW` → `RefreshClaim("AcquaintedHIW", true)` → redirect to Dashboard
+2. User reads the page; sticky header shows "I understand" button only when `ViewBag.ShowBar = !HasClaim(IdentityFieldEnum.AcquaintedHIW, true)`
+3. `POST /User/AcceptHIW` → DB write via `UserUpdateAreaEnum.AcceptHIW` → `RefreshClaim(IdentityFieldEnum.AcquaintedHIW, true)` → redirect to Dashboard
 
 ---
 
 ## Request Feature
 
 ### Access guard
-`RequestController` is `[Authorize]`. Create/Edit additionally gate on `GetClaim<string>(ClaimTypes.Role) == UserRoleEnum.Customer`.
+`RequestController` is `[Authorize]`. Create/Edit additionally gate on `GetClaim<string>(IdentityFieldEnum.Role) == UserRoleEnum.Customer`.
 
 ### Role-based list visibility
 `List` and `LoadRequests` use `ViewerRole`, `ViewerId`, `ViewerInterests`, `ViewerFocus` on `RequestFilter`. Repository `ApplyFilters` branches on role:
@@ -533,7 +614,7 @@ Never use image paths or data URLs for Raty stars — causes `getAttribute` cras
 
 All tables use `serverSide: true`. Key conventions:
 - Page action: `List()` — loads ViewBag stats, returns view
-- Data action: `[HttpGet] LoadXxx(...)` — returns `GridResultViewModel<object>`
+- Data action: `[HttpGet] LoadXxx(...)` — returns `GridResultModel<object>`
 - Mutation action: `[HttpPost] UpdateXxxStatus(long id, string status)` — posts current status alongside id; self-protection + stale-state check first
 - Each table has its own JS file in `wwwroot/js/`
 - Loading indicator: Notiflix `Block.pulse('.card-datatable')` — never use `processing: true`
@@ -545,13 +626,26 @@ All tables use `serverSide: true`. Key conventions:
 
 ### Business rules
 - One active chat per request; Company initiates only
-- `ChatHub` reads userId from `Context.User` claims (not session)
-- Group name: `"chat-{chatKey}"`
+- Messages checked for fraud via `FraudWordService.IsFraud()` on send; flagged messages set `IsFraud=true` and escalate chat `Fraud` field to `ChatFraudEnum.Dubious`
+- Admin can mark fraud as resolved via `POST /Chat/UpdateChatFraud`
+- `ChatTool` (SignalR hub in `Tools/`) reads userId from `IdentityFieldEnum.Id` claim
 
-### Two-phase loading
-- Phase 1 `GET /Chat/Visibility?requestNumber=` — minimal check, returns `{ mode: "none"|"initiate"|"active" }`
-- Phase 2 `GET /Chat/Conversation?requestNumber=` — full data, returns partial view
+### Two-phase loading (request page)
+- Phase 1 `GET /RequestChat/Visibility?requestNumber=` — returns `{ mode: "none"|"initiate"|"ongoing" }`
+- Phase 2 `GET /RequestChat/Conversation?requestNumber=` — full data, returns `Conversation.cshtml` partial
+- Admin view via `GET /Chat/Conversation?key=` — read-only partial with fraud indicators
 
-### SignalR
-- `JoinNotifications`, `JoinChat(chatKey)`, `SendMessage(chatKey, content)`, `MarkRead(chatKey)`
+### Admin chat list
+- `GET /Chat/List` — DataTable view (admin only)
+- `GET /Chat/LoadChats` — server-side DataTable data
+
+### SignalR (`ChatTool` hub at `/hubs/chat`)
+- `Join(chatKey)`, `Send(chatKey, content)`, `MarkRead(chatKey)`, `Notify()`
+- Client events: `ReceiveMessage`, `ChatCancelled`, `MessagesRead`
+- Group name: `"bewegdeal-chat-{chatKey}"`
 - Client lib: `wwwroot/vendor/libs/signalr/signalr.min.js`
+
+### Fraud Word Management
+- Admin manages fraud words at `GET /FraudWord/Index`
+- `POST /FraudWord/Create` / `POST /FraudWord/Delete`
+- Patterns cached in `IMemoryCache` under `CacheKeyEnum.FraudeWords` / `CacheKeyEnum.FraudeWordsCompiled`
