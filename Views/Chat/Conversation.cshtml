@@ -196,9 +196,12 @@ else
                                   rows="1"
                                   style="resize:none;overflow:hidden;max-height:120px;"></textarea>
                         <div class="message-actions d-flex align-items-center">
-                            <span class="btn btn-text-success btn-icon rounded-pill cursor-pointer">
-                                <i class="icon-base ri ri-shake-hands-line icon-md text-success"></i>
-                            </span>
+                            @if (User.IsInRole(UserRoleEnum.Company))
+                            {
+                                <span id="chatAgreementBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer">
+                                    <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
+                                </span>
+                            }
                             <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer">
                                 <i class="icon-base ri ri-hand icon-md text-danger"></i>
                             </span>

@@ -1,6 +1,6 @@
 namespace Bewegdeal.Enums
 {
-    public class RequestAgreementStatusEnum
+    public class RequestProposalStatusEnum
     {
         public const string Pending = "pending";
         public const string Accepted = "accepted";

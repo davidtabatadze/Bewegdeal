@@ -16,7 +16,7 @@ namespace Bewegdeal.Data
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
-        public DbSet<RequestAgreementEntity> RequestAgreements => Set<RequestAgreementEntity>();
+        public DbSet<RequestProposalEntity> RequestProposals => Set<RequestProposalEntity>();
         public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
         public DbSet<ChatEntity> Chats => Set<ChatEntity>();
         public DbSet<ChatMessageEntity> ChatMessages => Set<ChatMessageEntity>();
@@ -84,7 +84,7 @@ namespace Bewegdeal.Data
             ConfigureSettings(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
-            ConfigureRequestAgreements(modelBuilder);
+            ConfigureRequestProposals(modelBuilder);
             ConfigureFraudWords(modelBuilder);
             ConfigureChats(modelBuilder);
             ConfigureChatMessages(modelBuilder);
@@ -199,30 +199,34 @@ namespace Bewegdeal.Data
             });
         }
 
-        private void ConfigureRequestAgreements(ModelBuilder modelBuilder)
+        private void ConfigureRequestProposals(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<RequestAgreementEntity>(e =>
+            modelBuilder.Entity<RequestProposalEntity>(e =>
             {
-                e.ToTable(_prefix + "RequestAgreements");
+                e.ToTable(_prefix + "RequestProposals");
 
                 e.HasKey(a => a.Id);
                 e.Property(a => a.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(a => a.Status);
+                e.HasIndex(a => a.RequestId);
+                e.HasIndex(a => a.CompanyId);
 
+                e.Property(a => a.RequestId).IsRequired();
+                e.Property(a => a.CompanyId).IsRequired();
                 e.Property(a => a.CreateDate).IsRequired();
                 e.Property(a => a.Cost).IsRequired().HasPrecision(18, 2);
                 e.Property(a => a.Currency).IsRequired().HasMaxLength(4);
-                e.Property(a => a.ServiceTermsFileId).IsRequired(false);
+                e.Property(a => a.ServiceTerms).HasMaxLength(256).IsRequired(false);
                 e.Property(a => a.Status).IsRequired().HasMaxLength(16);
                 e.Property(a => a.ReactionDate).IsRequired(false);
                 e.Property(a => a.ReactionReason).IsRequired(false).HasMaxLength(1024);
-                e.Property(a => a.Date).IsRequired(false)
+                e.Property(a => a.Date).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
                         v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null
                     );
-                e.Property(a => a.Time).IsRequired(false)
+                e.Property(a => a.Time).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null

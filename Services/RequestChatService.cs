@@ -1,6 +1,7 @@
 ﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
+using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
@@ -99,6 +100,40 @@ namespace Bewegdeal.Services
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
                 await ChatHubService.Leave(chat.Key);
+            }
+        }
+
+        public async Task Propose(long userId, RequestProposalViewModel model)
+        {
+            var request = await RequestService.Get(model.RequestNumber ?? "-", [nameof(RequestEntity.Id)]);
+            var chat = await ChatService.GetOngoing(null, request?.Id ?? 0);
+
+            model.RequestId = request?.Id ?? 0;
+            var proposal = await RequestService.CreateProposal(userId, model);
+
+            if (proposal is not null && chat?.CompanyId == userId)
+            {
+                await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id);
+            }
+        }
+
+        public async Task ProposalReact(long userId, long proposalId, bool accepted, string? reason = null)
+        {
+            var proposal = await RequestService.GetProposal(proposalId);
+            var chat = await ChatService.GetOngoing(null, proposal?.RequestId ?? 0);
+
+            if (proposal?.Status == RequestProposalStatusEnum.Pending)
+            {
+                await RequestService.UpdateProposal(proposalId, accepted, reason);
+                if (accepted)
+                {
+                    await ChatHubService.Send(userId, chat, "Deal, i accept");
+                }
+                else
+                {
+                    await ChatHubService.Send(userId, chat, "I have to reject");
+                    await ChatHubService.Send(userId, chat, reason ?? "");
+                }
             }
         }
 
