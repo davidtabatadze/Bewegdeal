@@ -285,12 +285,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const offcanvasEl = document.getElementById('adminChatOffcanvas');
         const body = document.getElementById('adminChatOffcanvasBody');
 
-        body.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>';
+        body.innerHTML = '';
         bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).show();
+        Block.pulse('#adminChatOffcanvasBody');
 
         fetch('/Chat/Conversation?key=' + encodeURIComponent(key))
             .then(function (res) { return res.text(); })
-            .then(function (html) { body.innerHTML = html; });
+            .then(function (html) {
+                Block.remove('#adminChatOffcanvasBody');
+                body.innerHTML = html;
+            })
+            .catch(function () { Block.remove('#adminChatOffcanvasBody'); });
     });
 
     function renderUserCell(avatar, email) {
