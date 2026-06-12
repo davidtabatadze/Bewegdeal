@@ -1,11 +1,11 @@
-/**
+﻿/**
  * App User View - Security
  */
 
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function (e) {
-  const formChangePass = document.querySelector('#formChangePassword'),
+  const formChangePass = document.querySelector('#formUpdatePassword'),
     phoneMask = document.querySelector('.phone-number-mask');
 
   // Form validation for Change password

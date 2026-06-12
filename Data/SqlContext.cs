@@ -1,4 +1,4 @@
-using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -13,12 +13,13 @@ namespace Bewegdeal.Data
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<FileEntity> Files => Set<FileEntity>();
-        public DbSet<ReferenceEntity> References => Set<ReferenceEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
-        public DbSet<RequestAgreementEntity> RequestAgreements => Set<RequestAgreementEntity>();
+        public DbSet<RequestProposalEntity> RequestProposals => Set<RequestProposalEntity>();
         public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
+        public DbSet<ChatEntity> Chats => Set<ChatEntity>();
+        public DbSet<ChatMessageEntity> ChatMessages => Set<ChatMessageEntity>();
 
         #endregion
 
@@ -50,7 +51,7 @@ namespace Bewegdeal.Data
                               statement.StartsWith("CREATE UNIQUE INDEX");
 
                 // UNIQUE must be replaced before INDEX to avoid partial match.
-                // MySQL does not support IF NOT EXISTS for indexes — handled via try-catch below instead.
+                // MySQL does not support IF NOT EXISTS for indexes â€” handled via try-catch below instead.
                 var sql = statement.Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ");
 
                 if (!isMySql)
@@ -81,11 +82,12 @@ namespace Bewegdeal.Data
             ConfigureUsers(modelBuilder);
             ConfigureFiles(modelBuilder);
             ConfigureSettings(modelBuilder);
-            ConfigureReferences(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
-            ConfigureRequestAgreements(modelBuilder);
+            ConfigureRequestProposals(modelBuilder);
             ConfigureFraudWords(modelBuilder);
+            ConfigureChats(modelBuilder);
+            ConfigureChatMessages(modelBuilder);
         }
 
         private void ConfigureUsers(ModelBuilder modelBuilder)
@@ -112,10 +114,12 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
-                e.Property(u => u.ServiceTermsFileId).IsRequired(false);
-                e.Property(u => u.ProfilePictureFileId).IsRequired(false);
+                e.Property(u => u.ServiceTerms).HasMaxLength(256).IsRequired(false);
+                e.Property(u => u.Avatar).HasMaxLength(256).IsRequired(false);
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");
                 e.Property(u => u.AcquaintedHIW).IsRequired().HasDefaultValue(false);
+                e.Property(u => u.CreateDate).IsRequired();
+                e.Property(u => u.TermsAndConditionsAcceptDate).IsRequired();
                 e.Property(u => u.Interests)
                     .HasMaxLength(128)
                     .HasConversion(
@@ -148,22 +152,6 @@ namespace Bewegdeal.Data
             });
         }
 
-        private void ConfigureReferences(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ReferenceEntity>(e =>
-            {
-                e.ToTable(_prefix + "References");
-
-                e.HasKey(r => r.Id);
-                e.HasIndex(r => r.Id).IsUnique();
-                e.HasIndex(r => r.Type);
-                e.Property(r => r.Id).ValueGeneratedNever().HasMaxLength(16);
-
-                e.Property(r => r.Type).IsRequired().HasMaxLength(16);
-                e.Property(r => r.Name).IsRequired().HasMaxLength(16);
-            });
-        }
-
         private void ConfigureRequests(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<RequestEntity>(e =>
@@ -184,7 +172,7 @@ namespace Bewegdeal.Data
                 e.Property(r => r.CreateDate).IsRequired();
                 e.Property(r => r.Status).IsRequired().HasMaxLength(16);
                 e.Property(r => r.Service).IsRequired().HasMaxLength(16);
-                e.Property(r => r.Title).IsRequired().HasMaxLength(128);
+                e.Property(r => r.Title).IsRequired().HasMaxLength(64);
                 e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
                 e.Property(r => r.PickupAddress).IsRequired().HasMaxLength(512);
                 e.Property(r => r.DeliveryAddress).IsRequired().HasMaxLength(512);
@@ -204,33 +192,43 @@ namespace Bewegdeal.Data
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
                     );
                 e.Property(r => r.AgreementId).IsRequired(false);
+                e.Property(r => r.VehicleType).IsRequired(false).HasMaxLength(16);
+                e.Property(r => r.VehicleCondition).IsRequired(false).HasMaxLength(16);
+                e.Property(r => r.PresentElevator).IsRequired().HasDefaultValue(false);
+                e.Property(r => r.PresentParking).IsRequired().HasDefaultValue(false);
             });
         }
 
-        private void ConfigureRequestAgreements(ModelBuilder modelBuilder)
+        private void ConfigureRequestProposals(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<RequestAgreementEntity>(e =>
+            modelBuilder.Entity<RequestProposalEntity>(e =>
             {
-                e.ToTable(_prefix + "RequestAgreements");
+                e.ToTable(_prefix + "RequestProposals");
 
-                e.HasKey(a => a.Id);
-                e.Property(a => a.Id).ValueGeneratedOnAdd();
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Id).ValueGeneratedOnAdd();
 
-                e.HasIndex(a => a.Status);
+                e.HasIndex(p => p.Status);
+                e.HasIndex(p => p.ChatId);
+                e.HasIndex(p => p.RequestId);
+                e.HasIndex(p => p.CompanyId);
 
-                e.Property(a => a.CreateDate).IsRequired();
-                e.Property(a => a.Cost).IsRequired().HasPrecision(18, 2);
-                e.Property(a => a.Currency).IsRequired().HasMaxLength(4);
-                e.Property(a => a.ServiceTermsFileId).IsRequired(false);
-                e.Property(a => a.Status).IsRequired().HasMaxLength(16);
-                e.Property(a => a.ReactionDate).IsRequired(false);
-                e.Property(a => a.ReactionReason).IsRequired(false).HasMaxLength(1024);
-                e.Property(a => a.Date).IsRequired(false)
+                e.Property(p => p.ChatId).IsRequired(false);
+                e.Property(p => p.RequestId).IsRequired();
+                e.Property(p => p.CompanyId).IsRequired();
+                e.Property(p => p.CreateDate).IsRequired();
+                e.Property(p => p.Cost).IsRequired().HasPrecision(18, 2);
+                e.Property(p => p.Currency).IsRequired().HasMaxLength(4);
+                e.Property(p => p.ServiceTerms).HasMaxLength(256).IsRequired(false);
+                e.Property(p => p.Status).IsRequired().HasMaxLength(16);
+                e.Property(p => p.ReactionDate).IsRequired(false);
+                e.Property(p => p.ReactionReason).IsRequired(false).HasMaxLength(1024);
+                e.Property(p => p.Date).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
                         v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null
                     );
-                e.Property(a => a.Time).IsRequired(false)
+                e.Property(p => p.Time).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
@@ -248,11 +246,13 @@ namespace Bewegdeal.Data
                 e.Property(f => f.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(f => f.RequestId);
+                e.HasIndex(f => f.IsMain);
 
-                e.Property(f => f.RequestId).IsRequired();
-                e.Property(f => f.FileId).IsRequired();
+                e.Property(f => f.Size).IsRequired();
                 e.Property(f => f.IsMain).IsRequired();
+                e.Property(f => f.RequestId).IsRequired();
                 e.Property(f => f.Type).IsRequired().HasMaxLength(8);
+                e.Property(f => f.File).IsRequired().HasMaxLength(256);
             });
         }
 
@@ -264,14 +264,52 @@ namespace Bewegdeal.Data
 
                 e.HasKey(w => w.Id);
                 e.Property(w => w.Id).ValueGeneratedOnAdd();
-
-                e.HasIndex(w => w.Status);
-
                 e.Property(w => w.Word).IsRequired().HasMaxLength(128);
-                e.Property(w => w.Description).IsRequired().HasMaxLength(512);
-                e.Property(w => w.Status).IsRequired().HasMaxLength(16);
-                e.Property(w => w.CreatedAt).IsRequired();
-                e.Property(w => w.CreatedByName).IsRequired().HasMaxLength(64);
+            });
+        }
+
+        private void ConfigureChats(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChatEntity>(e =>
+            {
+                e.ToTable(_prefix + "Chats");
+
+                e.HasKey(c => c.Id);
+                e.Property(c => c.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(c => c.Key).IsUnique();
+                e.HasIndex(c => c.RequestId);
+                e.HasIndex(c => c.Fraud);
+                e.HasIndex(c => c.Status);
+
+                e.Property(c => c.Key).IsRequired().HasMaxLength(32);
+                e.Property(c => c.RequestId).IsRequired();
+                e.Property(c => c.CustomerId).IsRequired();
+                e.Property(c => c.CompanyId).IsRequired();
+                e.Property(c => c.Fraud).IsRequired().HasMaxLength(16);
+                e.Property(c => c.Status).IsRequired().HasMaxLength(16);
+                e.Property(c => c.CreateDate).IsRequired();
+            });
+        }
+
+        private void ConfigureChatMessages(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChatMessageEntity>(e =>
+            {
+                e.ToTable(_prefix + "ChatMessages");
+
+                e.HasKey(m => m.Id);
+                e.Property(m => m.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(m => m.ChatId);
+                e.HasIndex(m => m.SenderId);
+
+                e.Property(m => m.ChatId).IsRequired();
+                e.Property(m => m.SenderId).IsRequired();
+                e.Property(m => m.Content).IsRequired().HasMaxLength(1024);
+                e.Property(m => m.SentDate).IsRequired();
+                e.Property(m => m.IsRead).IsRequired().HasDefaultValue(false);
+                e.Property(m => m.IsFraud).IsRequired().HasDefaultValue(false);
             });
         }
 
@@ -284,7 +322,8 @@ namespace Bewegdeal.Data
                 e.HasKey(s => s.Id);
                 e.Property(s => s.Id).ValueGeneratedNever();
 
-                e.Property(s => s.TermsAndConditionsFileId).IsRequired();
+                e.Property(s => s.TermsAndConditionsContent).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDate).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();

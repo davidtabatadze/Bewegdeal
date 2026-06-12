@@ -1,0 +1,92 @@
+@using Bewegdeal.Enums
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Chats";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
+    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
+    <link rel="stylesheet" href="~/vendor/css/pages/app-chat.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-chat-list.js"></script>
+}
+
+<!-- Chats Table -->
+<div class="card">
+    <div class="card-header border-bottom">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                    <input type="text" id="chatsSearch" class="form-control" placeholder="Search chats..." />
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Statuses</option>
+                            <option data-divider="true"></option>
+                            <option value="@ChatStatusEnum.Ongoing">Ongoing</option>
+                            <option value="@ChatStatusEnum.Agreed">Agreed</option>
+                            <option value="@ChatStatusEnum.Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select id="filterFraud" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Fraud States</option>
+                            <option data-divider="true"></option>
+                            <option value="@ChatFraudEnum.Safe">Safe</option>
+                            <option value="@ChatFraudEnum.Dubious">Dubious</option>
+                            <option value="@ChatFraudEnum.Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-datatable">
+        <table class="datatables-chats table">
+            <thead>
+                <tr>
+                    <th>Fraud</th>
+                    <th>Status</th>
+                    <th>Company</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Request</th>
+                    <th>Chat</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- Admin chat offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="adminChatOffcanvas" aria-labelledby="adminChatOffcanvasLabel" style="--bs-offcanvas-width:450px;--bs-offcanvas-bg:#f7f6fa;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title d-flex align-items-center text-primary gap-2" id="adminChatOffcanvasLabel">
+            <i class="icon-base ri ri-wechat-line icon-22px"></i> Chat
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0" style="overflow:hidden;">
+        <div class="app-chat card overflow-hidden h-100 m-0 rounded-0 border-0 shadow-none">
+            <div class="row g-0 h-100" id="adminChatOffcanvasBody"></div>
+        </div>
+    </div>
+</div>

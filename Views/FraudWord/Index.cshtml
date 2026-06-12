@@ -1,129 +1,82 @@
-@using Bewegdeal.Enums
+@model List<string>
 @{
     Layout = "_HomeLayout";
-    ViewData["Title"] = "Fraud Dictionary";
+    ViewData["Title"] = "Fraud Words";
 }
 
 @section VendorStyles {
-    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
-    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
-    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
-    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
+    <link rel="stylesheet" href="~/vendor/libs/tagify/tagify.css" />
 }
 
 @section VendorScripts {
-    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
-    <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+    <script src="~/vendor/libs/tagify/tagify.js"></script>
 }
 
 @section PageScripts {
     <script src="~/js/app-fraud-word.js"></script>
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible mb-6" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible mb-6" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<div class="d-flex flex-column gap-6" style="min-height: calc(100dvh - 8rem)">
 
-<!-- Add Fraud Word -->
-<div class="card mb-6">
-    <div class="card-header border-bottom">
-        <h5 class="card-title mb-0">Add Fraud Word</h5>
+    <div class="alert alert-danger mb-0" role="alert">
+        <div class="d-flex align-items-center mb-2">
+            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+            <strong>Handle with care</strong>
+        </div>
+        <ul class="mb-0">
+            <li>These words are used to detect fraud in chat messages.</li>
+            <li>Be careful what you add or remove — changes take effect immediately.</li>
+            <li>Incorrect entries may block legitimate messages or miss actual fraud.</li>
+        </ul>
     </div>
-    <div class="card-body pt-5">
-        <form method="post" asp-controller="FraudWord" asp-action="Add">
-            <div class="row g-4 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label" for="fraudWord">Fraud Word <span class="text-danger">*</span></label>
-                    <input type="text" id="fraudWord" name="word" class="form-control" placeholder="e.g. scam, fraud, fake..." maxlength="128" required />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="fraudDescription">Reason / Description</label>
-                    <input type="text" id="fraudDescription" name="description" class="form-control" placeholder="Why this word was flagged..." maxlength="512" />
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="icon-base ri ri-add-line me-1"></i> Add Word
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
-<!-- Fraud Dictionary Table -->
-<div class="card">
-    <div class="card-header border-bottom">
-        <div class="row g-3 align-items-center">
-            <div class="col-12 col-md-7">
-                <div class="input-group input-group-merge">
-                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
-                    <input type="text" id="fraudSearch" class="form-control" placeholder="Search words..." />
+    <div class="card mb-0">
+        <div class="card-body">
+            <p class="mb-3">Use <code>*</code> as a wildcard to control how a word is matched against chat messages:</p>
+            <div class="row g-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">word</code>
+                        <div class="text-body-secondary small mb-2">Exact match</div>
+                        <div class="small">e.g. <code>scam</code> — only flags the word "scam" by itself</div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-3">
-                <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
-                    <option value="">All Statuses</option>
-                    <option data-divider="true"></option>
-                    <option value="@FraudWordStatusEnum.Active">Active</option>
-                    <option value="@FraudWordStatusEnum.Disabled">Disabled</option>
-                </select>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">word*</code>
+                        <div class="text-body-secondary small mb-2">Starts with</div>
+                        <div class="small">e.g. <code>pay*</code> — flags "paypal", "payment", "payday"</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">*word</code>
+                        <div class="text-body-secondary small mb-2">Ends with</div>
+                        <div class="small">e.g. <code>*fraud</code> — flags "bankfraud", "wirefraud"</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="p-3 border rounded h-100">
+                        <code class="d-block mb-1 fs-5">*word*</code>
+                        <div class="text-body-secondary small mb-2">Contains</div>
+                        <div class="small">e.g. <code>*cash*</code> — flags "send cash now", "cashapp"</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="card-datatable">
-        <table class="datatables-fraud-words table">
-            <thead>
-                <tr>
-                    <th>Fraud Word</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Creation Date</th>
-                    <th>Added By</th>
-                    <th class="text-center">Actions</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-</div>
 
-<!-- Edit Modal -->
-<div class="modal fade" id="editFraudWordModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Fraud Word</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editWordId" />
-                <div class="mb-4">
-                    <label class="form-label" for="editWord">Fraud Word <span class="text-danger">*</span></label>
-                    <input type="text" id="editWord" class="form-control" maxlength="128" />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label" for="editDescription">Reason / Description</label>
-                    <input type="text" id="editDescription" class="form-control" maxlength="512" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveEditBtn">Save Changes</button>
+    <div class="card flex-grow-1 mb-0">
+        <h5 class="card-header">Dictionary</h5>
+        <div class="card-body">
+            <div class="form-floating form-floating-outline">
+                <input id="fraudWordsInput"
+                       class="form-control"
+                       name="fraudWords"
+                       value="@string.Join(", ", Model)" />
+                <label for="fraudWordsInput">Words</label>
             </div>
         </div>
     </div>
+
 </div>

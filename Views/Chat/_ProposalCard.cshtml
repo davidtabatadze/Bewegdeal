@@ -1,0 +1,44 @@
+@using Bewegdeal.Enums
+@model Bewegdeal.Data.Entities.RequestProposalEntity
+
+@{
+    var borderClass = Model.Status switch
+    {
+        RequestProposalStatusEnum.Accepted => "border-success",
+        RequestProposalStatusEnum.Rejected => "border-danger",
+        _ => "border-warning"
+    };
+}
+
+<div class="border @borderClass rounded p-3" style="min-width:220px;max-width:320px;">
+    <div class="d-flex align-items-center mb-2 gap-2">
+        <i class="icon-base ri ri-shake-hands-line text-warning icon-22px"></i>
+        <span class="fw-semibold">Proposal</span>
+    </div>
+    <div class="d-flex align-items-center gap-2 mb-1 text-body">
+        <i class="icon-base ri ri-money-euro-circle-line icon-18px text-muted"></i>
+        <span>@Model.Cost.ToString("N2") @Model.Currency</span>
+    </div>
+    @if (Model.Date.HasValue)
+    {
+        <div class="d-flex align-items-center gap-2 mb-1 text-body">
+            <i class="icon-base ri ri-calendar-line icon-18px text-muted"></i>
+            <span>@Model.Date.Value.ToString("dd MMM yyyy")@(Model.Time.HasValue ? " · " + Model.Time.Value.ToString("HH:mm") : "")</span>
+        </div>
+    }
+    @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer))
+    {
+        <div class="d-flex gap-2 mt-3">
+            <button type="button"
+                    class="btn btn-sm btn-success proposal-accept-btn"
+                    data-proposal-id="@Model.Id">
+                Accept
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-danger proposal-reject-btn"
+                    data-proposal-id="@Model.Id">
+                Reject
+            </button>
+        </div>
+    }
+</div>

@@ -19,6 +19,7 @@
                 public const string Credentials = "Invalid email or password.";
                 public const string Blocked = "Your account has been blocked. Please, contact support.";
                 public const string Pending = "Your account is pending approval. Please, wait for confirmation.";
+                public const string Unverified = "Your email address is not verified. Please, verify your email to log in.";
             }
             public class ForgotPassword
             {
@@ -31,19 +32,24 @@
             }
             public class VerifyEmail
             {
-                public const string Expired = "Verification code has expired. Please, request a new one.";
-                public const string Invalid = "Invalid verification code. Please, reenter or request a new one.";
-                public const string Success = "Your email has been verified. You may sign in now.";
-                public const string Resent = "A new verification code has been sent to your email.";
+                public const string Expired = "Verification codes has expired. Please, request a new one.";
+                public const string InvalidEmail = "Invalid email verification code. Please, reenter a correct one.";
+                public const string InvalidMobile = "Invalid mobile verification code. Please, reenter a correct one.";
+                public const string Success = "Your account has been verified. You may sign in now.";
+                public const string Resent = "New verification codes have been sent to your email and mobile.";
             }
             public class Register
             {
-                public const string Exists = "An account with this email address already exists. You may sign in instead.";
+                public const string Exists = "An account with this email address or mobile number already exists. You may sign in instead.";
             }
             public class Email
             {
                 public const string Verification = "We are sorry, we are unable to send you a verification email right now. Please, try again later or contact the site administration.";
                 public const string Reset = "We are sorry, we are unable to send you a password reset email right now. Please, try again later or contact the site administration.";
+            }
+            public class Sms
+            {
+                public const string Verification = "We are sorry, we are unable to send you a verification sms right now. Please, try again later or contact the site administration.";
             }
         }
         public class Request
@@ -57,6 +63,8 @@
                 public const string Cost = "Cost (1 to 10,000)";
                 public const string Date = "Date";
                 public const string Time = "Time";
+                public const string VehicleType = "Vehicle Type";
+                public const string VehicleCondition = "Vehicle Condition";
                 public const string Error = "{0} field is required.";
             }
             public class Media

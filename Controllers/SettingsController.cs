@@ -1,16 +1,12 @@
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
-using Bewegdeal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
-[RequireAdmin]
-public class SettingsController(
-    ISettingsRepository settingsRepository,
-    IFileRepository fileRepository,
-    FileService fileService) : Controller
+[Authorize(Roles = UserRoleEnum.Administrator)]
+public class SettingsController(ISettingsRepository settingsRepository) : XBaseController
 {
 
     #region Index
@@ -18,11 +14,7 @@ public class SettingsController(
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var settings = await settingsRepository.Get();
-
-        ViewBag.TermsFile = await fileRepository.Get(settings.TermsAndConditionsFileId);
-
-        return View(settings);
+        return View(await settingsRepository.Get());
     }
 
     #endregion
@@ -30,24 +22,11 @@ public class SettingsController(
     #region Save Term And Condition Settings
 
     [HttpPost]
-    public async Task<IActionResult> SaveTermAndConditionSettings(IFormFile? termsFile)
+    public async Task<IActionResult> SaveTermAndConditionSettings(string? termsContent)
     {
-        if (termsFile is null)
-        {
-            TempData["TermsError"] = "Please select a PDF file to upload.";
-            return RedirectToAction(nameof(Index));
-        }
-
         var settings = await settingsRepository.Get();
-
-        var (id, error) = await fileService.Create(termsFile, settings.TermsAndConditionsFileId, null, [FileTypeEnum.PDF]);
-        if (error is not null || id is null)
-        {
-            TempData["TermsError"] = error;
-            return RedirectToAction(nameof(Index));
-        }
-
-        settings.TermsAndConditionsFileId = id.Value;
+        settings.TermsAndConditionsContent = termsContent ?? string.Empty;
+        settings.TermsAndConditionsContentDate = DateTime.Now;
         await settingsRepository.Update(settings);
 
         TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";

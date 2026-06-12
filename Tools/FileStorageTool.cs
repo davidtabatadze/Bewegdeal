@@ -46,6 +46,6 @@ namespace Bewegdeal.Tools
             return Task.CompletedTask;
         }
 
-        public string GetUrl(string key) => $"/File/Download/{key}";
+        public string GetUrl(string key) => $"/File/Download?key={Uri.EscapeDataString(key)}";
     }
 }

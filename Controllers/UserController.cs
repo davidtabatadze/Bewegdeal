@@ -1,75 +1,46 @@
-using Bewegdeal.Data.Entities;
+﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
-using Bewegdeal.Models;
 using Bewegdeal.Services;
-using Bewegdeal.Tools;
+using Bewegdeal.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    public class UserController(
-        IUserRepository userRepository,
-        IFileRepository fileRepository,
-        FileService fileService
-    ) : XBaseController(userRepository)
+    public class UserController(UserService UserService) : XBaseController
     {
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly IFileRepository _fileRepository = fileRepository;
-        private readonly FileService _fileService = fileService;
 
         #region List
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         public async Task<IActionResult> List()
         {
-            var users = await _userRepository.Load(new UserFilter() { Id = 0 });
-            ViewBag.TotalCount = users.Count;
-            ViewBag.CustomerCount = users.Count(u => u.Role == UserRoleEnum.Customer);
-            ViewBag.CompanyCount = users.Count(u => u.Role == UserRoleEnum.Company);
-            ViewBag.PendingCount = users.Count(u => u.Status == UserStatusEnum.Pending);
+            ViewBag.TotalCount = 0;
+            ViewBag.CustomerCount = 0;
+            ViewBag.CompanyCount = 0;
+            ViewBag.PendingCount = 0;
             return View();
         }
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpGet]
         public async Task<IActionResult> LoadUsers([FromQuery] UserFilter filter, [FromQuery] int draw = 1)
         {
-            var users = await _userRepository.Load(filter);
-            var filtered = await _userRepository.Count(filter);
-            var total = await _userRepository.Count(new UserFilter());
-
-            var data = users.Select(u => new
-            {
-                id = u.Id,
-                name = u.Name,
-                email = u.Email,
-                mobile = u.Mobile,
-                address = u.Address,
-                role = u.Role,
-                status = u.Status,
-                interests = u.Interests
-            });
-
-            return Json(new GridResultViewModel<object>(draw, total, filtered, data));
+            return Json(await UserService.LoadGrid(filter, draw));
         }
 
-        [RequireAdmin]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpPost]
-        public async Task<IActionResult> UpdateUserStatus(long id)
+        public async Task<IActionResult> UpdateUserStatus(long id, string status)
         {
-            if (id.ToString() == HttpContext.Session.GetString(ConstantEnum.SessionUserId))
+            var user = await UserService.Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Status)]);
+
+            if (user is null || UserId == user.Id || user.Status != status)
             {
                 return BadRequest();
-            }
-
-            var user = await _userRepository.Get(new UserFilter { Id = id });
-
-            if (user is null)
-            {
-                return NotFound();
             }
 
             var newStatus = user.Status switch
@@ -80,7 +51,12 @@ namespace Bewegdeal.Controllers
                 _ => user.Status
             };
 
-            await _userRepository.SetUserStatus(id, newStatus);
+            await UserService.Update(UserUpdateAreaEnum.Status, new UserEntity
+            {
+                Id = user.Id,
+                Status = newStatus
+            });
+
             return Json(new { status = newStatus });
         }
 
@@ -88,187 +64,133 @@ namespace Bewegdeal.Controllers
 
         #region Profile
 
-        [RequireLogin]
+        [Authorize]
         public async Task<IActionResult> Profile()
         {
-            var user = await GetUser();
-            if (user is null)
+            var result = await UserService.GetProfile(UserId);
+
+            if (result is null)
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            FileEntity? picture = null;
-            if (user.ProfilePictureFileId.HasValue)
-            {
-                picture = await _fileRepository.Get(user.ProfilePictureFileId.Value);
-            }
-
-            FileEntity? serviceTermsFile = null;
-            if (user.Role == UserRoleEnum.Company && user.ServiceTermsFileId.HasValue)
-            {
-                serviceTermsFile = await _fileRepository.Get(user.ServiceTermsFileId.Value);
-            }
-
-            ViewBag.User = user;
-            ViewBag.PictureUrl = picture is not null
-                ? Url.Action("Download", "File", new { key = picture.Key })
-                : null;
-            ViewBag.ServiceTermsFile = serviceTermsFile;
-            ViewBag.ServiceTermsUrl = serviceTermsFile is not null
-                ? Url.Action("Download", "File", new { key = serviceTermsFile.Key })
-                : null;
-
+            ViewBag.Profile = result;
             return View();
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SavePicture(IFormFile? picture)
+        public async Task<IActionResult> UpdateAvatar(IFormFile? avatar)
         {
-            var user = await GetUser();
-            if (user is null)
+            var result = await UserService.UpdateAvatar(UserId, avatar);
+
+            if (!result.Success)
             {
-                return Unauthorized();
+                return BadRequest(new { result.Message });
             }
 
-            if (picture is null)
-            {
-                if (user.ProfilePictureFileId.HasValue)
-                {
-                    await _fileService.Delete(user.ProfilePictureFileId.Value);
-                    await _userRepository.UpdatePicture(user.Id, null);
-                }
-                HttpContext.Session.Remove(ConstantEnum.SessionUserPictureKey);
-                return Ok();
-            }
-
-            var (id, error) = await _fileService.Create(
-                picture,
-                user.ProfilePictureFileId,
-                3,
-                [FileTypeEnum.PNG, FileTypeEnum.JPEG]
-            );
-
-            if (error is not null)
-            {
-                return BadRequest(new { error });
-            }
-
-            await _userRepository.UpdatePicture(user.Id, id);
-
-            var file = await _fileRepository.Get(id!.Value);
-            if (file is not null)
-            {
-                HttpContext.Session.SetString(ConstantEnum.SessionUserPictureKey, file.Key);
-            }
-
+            await RefreshClaim(IdentityFieldEnum.AvatarUrl, result.Message);
             return Ok();
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SaveTheme(string theme)
+        public async Task<IActionResult> UpdateTheme(string theme)
         {
-            if (long.TryParse(HttpContext.Session.GetString(ConstantEnum.SessionUserId), out var userId))
+            await UserService.Update(UserUpdateAreaEnum.Theme, new UserEntity
             {
-                await _userRepository.UpdateTheme(
-                    userId,
-                    theme == UserThemeEnum.Light || theme == UserThemeEnum.Dark ? theme : UserThemeEnum.Light
-                );
-                HttpContext.Session.SetString(ConstantEnum.SessionUserTheme, theme);
-            }
-
-            return Ok();
-        }
-
-        [RequireLogin]
-        [HttpPost]
-        public async Task<IActionResult> SavePersonal(SavePersonalViewModel model)
-        {
-            var user = await GetUser();
-            if (user is null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            if (string.IsNullOrWhiteSpace(model?.Name) || string.IsNullOrWhiteSpace(model?.Mobile))
-            {
-                TempData["PersonalError"] = "Name and phone number are required.";
-                return RedirectToAction(nameof(Profile));
-            }
-
-            // define service terms
-            var serviceTermsFileId = user.Role == UserRoleEnum.Company ? user.ServiceTermsFileId : null;
-            if (user.Role == UserRoleEnum.Company)
-            {
-                if (model.DeleteServiceTerms && user.ServiceTermsFileId.HasValue)
-                {
-                    await _fileService.Delete(user.ServiceTermsFileId.Value);
-                    serviceTermsFileId = null;
-                }
-                if (model.ServiceTermsFile is not null)
-                {
-                    var file = await _fileService.Create(
-                        model.ServiceTermsFile,
-                        model.DeleteServiceTerms ? null : user.ServiceTermsFileId,
-                        5,
-                        [FileTypeEnum.PDF]
-                    );
-                    if (file.Error is not null)
-                    {
-                        TempData["PersonalError"] = file.Error;
-                        return RedirectToAction(nameof(Profile));
-                    }
-                    serviceTermsFileId = file.Id;
-                }
-            }
-
-            var number = user.Role == UserRoleEnum.Company ? user.Number : model.Number;
-            var interests = user.Role == UserRoleEnum.Company ? model?.Interests ?? [] : [];
-
-            await _userRepository.UpdatePersonal(new UserEntity
-            {
-                Id = user.Id,
-                Number = number,
-                Interests = interests,
-                Name = model?.Name?.Trim() ?? "",
-                Mobile = model?.Mobile?.Trim() ?? "",
-                Address = model?.Address?.Trim(),
-                ServiceTermsFileId = serviceTermsFileId
+                Id = UserId,
+                Theme = theme
             });
+            await RefreshClaim(IdentityFieldEnum.Theme, theme);
 
-            HttpContext.Session.SetString(ConstantEnum.SessionUserName, model?.Name?.Trim() ?? "-");
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(ProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ProfileError"] = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault();
+            }
+            else
+            {
+                var result = await UserService.UpdateProfile(UserId, model);
+
+                if (result.Success)
+                {
+                    await RefreshClaim(IdentityFieldEnum.Name, model?.Name ?? "?");
+                }
+                else
+                {
+                    if (result.Message is null)
+                    {
+
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        TempData["ProfileError"] = result.Message;
+                    }
+                }
+            }
 
             return RedirectToAction(nameof(Profile));
         }
 
-        [RequireLogin]
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(string? newPassword, string? confirmPassword)
+        public async Task<IActionResult> UpdatePassword(string? newPassword, string? confirmPassword)
         {
-            var user = await GetUser();
-            if (user is null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            var result = await UserService.UpdatePassword(UserId, newPassword, confirmPassword);
 
-            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            if (!result.Success)
             {
-                TempData["PasswordError"] = "All password fields are required.";
+                TempData["PasswordError"] = result.Message;
                 return RedirectToAction(nameof(Profile));
             }
 
-            if (newPassword != confirmPassword)
-            {
-                TempData["PasswordError"] = "New passwords do not match.";
-                return RedirectToAction(nameof(Profile));
-            }
-
-            var (hash, salt) = PasswordTool.HashPassword(newPassword);
-            await _userRepository.UpdatePassword(user.Id, hash, salt);
-
-            HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
+        }
+
+        #endregion
+
+        #region HIW
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AcceptHIW()
+        {
+            await UserService.Update(UserUpdateAreaEnum.AcceptHIW, new UserEntity
+            {
+                Id = UserId
+            });
+            await RefreshClaim(IdentityFieldEnum.AcquaintedHIW, true);
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        #endregion
+
+        #region Terms
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptTerms()
+        {
+            await UserService.Update(UserUpdateAreaEnum.AcceptTerms, new UserEntity
+            {
+                Id = UserId
+            });
+            await RefreshClaim(IdentityFieldEnum.TermsAcceptDate, DateTime.Now.AddMinutes(5).ToString("o"));
+            await RefreshClaim(IdentityFieldEnum.TermsAccepted, true);
+            return RedirectToAction("Index", "Home");
         }
 
         #endregion

@@ -1,0 +1,110 @@
+@{
+    Layout = "_BlankLayout";
+    ViewData["Title"] = "Two-Step Verification";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/@("@form-validation")/form-validation.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/cleave-zen/cleave-zen.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/popular.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/bootstrap5.js"></script>
+    <script src="~/vendor/libs/@("@form-validation")/auto-focus.js"></script>
+    <script src="~/vendor/libs/notyf/notyf.js"></script>
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/vendor/css/pages/page-auth.css" />
+}
+
+@section PageScripts {
+    <script src="~/js/pages-auth.js"></script>
+    <script src="~/js/pages-auth-two-steps.js"></script>
+    @if (ViewBag.Error is string error)
+    {
+        <script>
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+        </script>
+    }
+    @if (ViewBag.Success is string success)
+    {
+        <script>
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(success));
+        </script>
+    }
+}
+
+<div class="position-relative">
+    <div class="authentication-wrapper authentication-basic">
+        <div class="authentication-inner py-6 mx-4">
+            <div class="card p-sm-7 p-2">
+                <!-- Logo -->
+                <div class="app-brand justify-content-center mt-5">
+                    <a href="/" class="app-brand-link gap-3">
+                        <span class="app-brand-logo demo">@await Html.PartialAsync("../_Partials/_Macros")</span>
+                        <span class="app-brand-text demo text-heading fw-semibold">Bewegdeal</span>
+                    </a>
+                </div>
+                <!-- /Logo -->
+
+                <div class="card-body mt-1">
+                    <h4 class="mb-1">Two Step Verification 💬</h4>
+                    <p class="text-start mb-1">
+                        We have sent verification codes to your devices.
+                    </p>
+                    <p class="mb-5 text-muted small">Please, enter recieved codes below.</p>
+
+                    <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyAccount">
+                        <input type="hidden" name="email" value="@ViewBag.Email" />
+                        <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
+
+                        <p class="mb-1 small fw-medium">Email code</p>
+                        <div class="mb-4 form-control-validation">
+                            <div id="emailOtpWrapper" class="auth-input-wrapper d-flex align-items-center justify-content-between">
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" autofocus />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                            </div>
+                            <input type="hidden" name="emailOtp" />
+                        </div>
+
+                        <p class="mb-1 small fw-medium">Mobile code</p>
+                        <div class="mb-5 form-control-validation">
+                            <div id="mobileOtpWrapper" class="auth-input-wrapper d-flex align-items-center justify-content-between">
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                                <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
+                            </div>
+                            <input type="hidden" name="mobileOtp" />
+                        </div>
+
+                        <button class="btn btn-primary d-grid w-100 mb-5">Verify my account</button>
+                    </form>
+
+                    <form id="resendForm" method="post" asp-controller="Account" asp-action="VerifyResend">
+                        <input type="hidden" name="email" value="@ViewBag.Email" />
+                        <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
+                    </form>
+
+                    <div class="text-center">
+                        Didn't get the codes?
+                        <a href="javascript:void(0);" onclick="document.getElementById('resendForm').submit()"> Resend </a>
+                    </div>
+                </div>
+            </div>
+
+            <img src="~/img/illustrations/bewegdeal-truck.png" alt="auth-tree" class="authentication-image-object-left d-none d-lg-block" />
+            <img src="~/img/illustrations/auth-basic-mask-light.png" class="authentication-image d-none d-lg-block scaleX-n1-rtl" height="172" alt="triangle-bg" data-app-light-img="illustrations/auth-basic-mask-light.png" data-app-dark-img="illustrations/auth-basic-mask-dark.png" />
+            <img src="~/img/illustrations/bewegdeal-delivery.png" alt="auth-tree" class="authentication-image-object-right d-none d-lg-block" />
+        </div>
+    </div>
+</div>

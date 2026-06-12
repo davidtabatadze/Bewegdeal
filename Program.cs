@@ -2,9 +2,9 @@ using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Data.Repositories.Abstractions;
-using Bewegdeal.Middleware;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal
@@ -18,18 +18,24 @@ namespace Bewegdeal
             // ── MVC ──────────────────────────────────────────────────────────────
             builder.Services.AddControllersWithViews();
 
-            // ── Session ───────────────────────────────────────────────────────────
-            // HttpOnly + SameAsRequest keeps the cookie secure without forcing HTTPS in dev.
-            // 8-hour idle timeout matches a typical working day.
+            // ── SignalR ───────────────────────────────────────────────────────────
+            builder.Services.AddSignalR();
+
+            // ── Authentication ────────────────────────────────────────────────────
+            // Cookie auth is the primary scheme for in-scope controllers ([Authorize]).
+            // AccessDeniedPath mirrors the old RequireAdminAttribute redirect target.
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(o =>
+                {
+                    o.LoginPath = "/Account/Login";
+                    o.AccessDeniedPath = "/Home/Index";
+                    o.ExpireTimeSpan = TimeSpan.FromHours(8);
+                    o.SlidingExpiration = true;
+                });
+
+            // ── Cache ─────────────────────────────────────────────────────────────
+            // Used by StatusRefreshMiddleware to throttle per-user DB status checks.
             builder.Services.AddMemoryCache();
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-                options.IdleTimeout = TimeSpan.FromHours(8);
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-            });
 
             // ── Database ──────────────────────────────────────────────────────────
             // Provider and connection strings are read from Database section in appsettings.json.
@@ -59,12 +65,13 @@ namespace Bewegdeal
             // ── Repositories ──────────────────────────────────────────────────────
             // Scoped per request — each request gets its own DbContext and repository instance.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IReferenceRepository, ReferenceRepository>();
             builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
             builder.Services.AddScoped<IRequestRepository, RequestRepository>();
             builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
+            builder.Services.AddScoped<IRequestProposalRepository, RequestProposalRepository>();
             builder.Services.AddScoped<IFraudWordRepository, FraudWordRepository>();
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
             // ── Storage ───────────────────────────────────────────────────────────
             // Files are stored on the local file system.
@@ -73,7 +80,16 @@ namespace Bewegdeal
 
             // ── Services ──────────────────────────────────────────────────────────
             // Scoped because FileService wraps IFileRepository (also scoped).
-            builder.Services.AddScoped<FileService>();
+            builder.Services.AddScoped<BrevoService>();
+            builder.Services.AddScoped<FileService2>();
+            builder.Services.AddScoped<SettingService>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<FraudWordService>();
+            builder.Services.AddScoped<ChatService>();
+            builder.Services.AddScoped<ChatHubService>();
+            builder.Services.AddScoped<RequestService>();
+            builder.Services.AddScoped<RequestChatService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
@@ -90,9 +106,9 @@ namespace Bewegdeal
                 var context = scope.ServiceProvider.GetRequiredService<SqlContext>();
                 await context.EnsureTablesAsync();
 
-                await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IReferenceRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
+                await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IFraudWordRepository>()).Seed();
             }
 
             // ── Middleware pipeline ───────────────────────────────────────────────
@@ -104,13 +120,14 @@ namespace Bewegdeal
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseSession();
-            app.UseMiddleware<RememberMeMiddleware>();
+            app.UseAuthentication();
+            app.UseMiddleware<UserRefreshTool>();
             app.UseAuthorization();
 
             // ── Routes ────────────────────────────────────────────────────────────
             // Default route lands on the public landing page, not the admin dashboard.
             app.MapStaticAssets();
+            app.MapHub<ChatTool>("/hubs/chat");
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Landing}/{action=Index}/{id?}")

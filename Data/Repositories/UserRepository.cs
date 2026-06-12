@@ -1,4 +1,4 @@
-using Bewegdeal.Data.Base;
+﻿using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
@@ -8,25 +8,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class UserRepository(SqlContext context) : IUserRepository, IRepositorySeedable
+    public class UserRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IUserRepository, IRepositorySeedable
     {
 
         public async Task Seed()
         {
             var rows = new[]
             {
-                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Mobile = "+4369910433340", Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Mobile = "+995599438038",  Password = "asdASD123", Role = UserRoleEnum.Company },
-                new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Mobile = "+995555944072",  Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Mobile = "+995555944072",  Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Mobile = "+995555944072",  Password = "asdASD123", Role = UserRoleEnum.Company },
+                new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Password = "asdASD123", Role = UserRoleEnum.Company },
+                new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Password = "asdASD123", Role = UserRoleEnum.Company },
             };
 
             foreach (var row in rows)
             {
-                if (await Get(new UserFilter { Id = row.Id }) != null)
+                if (await Get<UserEntity>(row.Id) != null)
                 {
                     continue;
                 }
@@ -40,125 +40,107 @@ namespace Bewegdeal.Data.Repositories
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
-                    Mobile = row.Mobile,
+                    Number = "-",
+                    Mobile = "-",
                     Address = row.Address,
                     Password = hash,
-                    Salt = salt
+                    Salt = salt,
+                    CreateDate = DateTime.Now,
+                    TermsAndConditionsAcceptDate = DateTime.Now
                 });
             }
         }
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity> Create(UserEntity user)
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
         {
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task SetUserStatus(long id, string status)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Status, status));
-        }
-
-        public async Task SetAcquaintedHIW(long id)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.AcquaintedHIW, true));
-        }
-
-        public async Task UpdatePassword(long id, string hash, string salt)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Password, hash)
-                    .SetProperty(u => u.Salt, salt)
-                );
-        }
-
-        public async Task UpdatePicture(long id, long? fileId)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.ProfilePictureFileId, fileId));
-        }
-
-        public async Task UpdateTheme(long id, string theme)
-        {
-            await context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(u => u.Theme, theme));
-        }
-
-        public async Task UpdatePersonal(UserEntity user)
-        {
-            await context.Users
-                .Where(u => u.Id == user.Id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.Name, user.Name)
-                    .SetProperty(u => u.Number, user.Number)
-                    .SetProperty(u => u.Mobile, user.Mobile)
-                    .SetProperty(u => u.Address, user.Address)
-                    .SetProperty(u => u.Interests, user.Interests)
-                    .SetProperty(u => u.ServiceTermsFileId, user.ServiceTermsFileId)
-                );
-        }
-
-        // ── Read ─────────────────────────────────────────────────────────────────
-
-        public async Task<UserEntity?> Get(UserFilter filter)
-        {
-            var query = context.Users.AsQueryable();
-
-            if (filter.Id.HasValue)
+            switch (area)
             {
-                query = query.Where(u => u.Id == filter.Id.Value);
-            }
 
-            if (!string.IsNullOrWhiteSpace(filter.Email))
-            {
-                query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
-            }
+                case UserUpdateAreaEnum.Status:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Status, update.Status)
+                                       );
+                    break;
 
-            return await query.FirstOrDefaultAsync();
+                case UserUpdateAreaEnum.Password:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u => u
+                                           .SetProperty(p => p.Password, update.Password)
+                                           .SetProperty(p => p.Salt, update.Salt)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.AcceptTerms:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.TermsAndConditionsAcceptDate, DateTime.Now)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.AcceptHIW:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.AcquaintedHIW, true)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Theme:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Theme, update.Theme)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Avatar:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Avatar, update.Avatar)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Profile:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u => u
+                                            .SetProperty(p => p.Name, update.Name)
+                                            .SetProperty(p => p.Address, update.Address)
+                                            .SetProperty(p => p.Interests, update.Interests)
+                                            .SetProperty(p => p.ServiceTerms, update.ServiceTerms)
+                                       );
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid update area", nameof(area));
+            }
         }
 
-        public async Task<int> Count(UserFilter filter) =>
-            await ApplyFilters(context.Users.AsQueryable(), filter).CountAsync();
+        public async Task<UserEntity?> GetRegistered(string email, string mobile)
+            => Context.Users.Where(u =>
+                                u.Email.ToLower() == (email ?? "-").ToLower() ||
+                                u.Mobile.ToLower() == (mobile ?? "-").ToLower()
+                            )
+                            .Select(BuildSelect<UserEntity>([nameof(UserEntity.Id)]))
+                            .FirstOrDefault();
+
+        public async Task<UserEntity?> Get(UserFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).Select(BuildSelect<UserEntity>(properties)).FirstOrDefaultAsync();
 
         public async Task<List<UserEntity>> Load(UserFilter filter)
-        {
-            var query = ApplyFilters(context.Users.AsQueryable(), filter);
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).ToListAsync();
 
-            if (!string.IsNullOrWhiteSpace(filter.SortDirection) && !string.IsNullOrWhiteSpace(filter.SortField))
-            {
-                var desc = filter.SortDirection == SortDirectionEnum.Desc;
-                query = filter.SortField switch
-                {
-                    SortFieldEnum.Status => desc ? query.OrderByDescending(u => u.Status) : query.OrderBy(u => u.Status),
-                    _ => desc ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id)
-                };
-            }
+        public async Task<int> Count(UserFilter filter)
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).CountAsync();
 
-            if (filter.Start.HasValue && filter.Length.HasValue)
-            {
-                query = query.Skip(filter.Start.Value);
-                query = query.Take(filter.Length.Value);
-            }
-
-            return await query.ToListAsync();
-        }
-
-        private static IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
+        private IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
         {
             if (filter.Id.HasValue)
             {
                 query = query.Where(u => u.Id == filter.Id.Value);
+            }
+
+            if (filter.Ids != null && filter.Ids.Count != 0)
+            {
+                query = query.Where(u => filter.Ids.Contains(u.Id));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Email))
@@ -187,10 +169,12 @@ namespace Bewegdeal.Data.Repositories
                 );
             }
 
+            query = ApplySorting(query, filter);
+            query = ApplyPaging(query, filter);
+
+
             return query;
         }
 
-        // ── Delete ───────────────────────────────────────────────────────────────
-        // ***
     }
 }

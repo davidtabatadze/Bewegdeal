@@ -1,4 +1,4 @@
-@model Bewegdeal.Models.RegisterViewModel
+@model Bewegdeal.ViewModels.RegistrationViewModel
 @{
     Layout = "_BlankLayout";
     ViewData["Title"] = "Register";
@@ -28,6 +28,41 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js"></script>
+    @{ ViewData["AcceptMode"] = true; }
+    @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
+    @{ ViewData.Remove("AcceptMode"); }
+    <script>
+        (function () {
+            var modalEl = document.getElementById('termsModal');
+            if (!modalEl) { return; } // no T&C content configured yet
+
+            var checkbox   = document.getElementById('agreeTerms');
+            var acceptBtn  = document.getElementById('termsAcceptBtn');
+            var body       = document.getElementById('termsModalBody');
+            var scrollHint = document.getElementById('termsScrollHint');
+
+            // Intercept clicks on the checkbox
+            checkbox.addEventListener('click', function (e) {
+                if (this.checked) {
+                    // User is trying to check → prevent and open modal
+                    e.preventDefault();
+                    acceptBtn.disabled = true;
+                    scrollHint.style.display = '';
+                    body.scrollTop = 0;
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+                // User is unchecking → allow normally
+            });
+
+            // Also intercept clicks on the "Terms & Conditions" text link
+            document.getElementById('termsLink').addEventListener('click', function () {
+                acceptBtn.disabled = true;
+                scrollHint.style.display = '';
+                body.scrollTop = 0;
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            });
+        })();
+    </script>
     <script>
         (function () {
             var stored = localStorage.getItem('templateCustomizer-front-page--Theme');
@@ -39,7 +74,7 @@
     @if (ViewBag.Error is string error)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
 }
@@ -114,7 +149,7 @@
                                             <div class="form-check custom-option custom-option-icon">
                                                 <label class="form-check-label custom-option-content" for="roleCustomer">
                                                     <span class="custom-option-body">
-                                                        <i class="icon-base ri ri-user-line icon-32px mb-2"></i>
+                                                        <i class="icon-base ri ri-user-line icon-32px mb-2 text-primary"></i>
                                                         <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
                                                         <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
                                                     </span>
@@ -126,7 +161,7 @@
                                             <div class="form-check custom-option custom-option-icon">
                                                 <label class="form-check-label custom-option-content" for="roleCompany">
                                                     <span class="custom-option-body">
-                                                        <i class="icon-base ri ri-building-line icon-32px mb-2"></i>
+                                                        <i class="icon-base ri ri-building-line icon-32px mb-2 text-info"></i>
                                                         <span class="fs-6 d-block fw-medium text-heading mb-2">Company</span>
                                                         <small>I provide services and want to connect with customers</small>
                                                     </span>
@@ -165,17 +200,17 @@
                                         </div>
                                         <div class="col-sm-6 mb-5">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="text" id="number" name="number" class="form-control" placeholder="" value="@Model.Number" />
-                                                <label for="number">Identification Number</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6 mb-5">
-                                            <div class="form-floating form-floating-outline">
                                                 <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
-                                                <label for="mobile">Phone Number</label>
+                                                <label for="mobile">Mobile</label>
                                             </div>
                                         </div>
-                                        <div class="col-sm-6 mb-5 form-control-validation">
+                                        <div id="numberCol" class="col-sm-6 mb-5 d-none">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="number" name="number" class="form-control" placeholder="" value="@Model.Number" />
+                                                <label for="number">UID</label>
+                                            </div>
+                                        </div>
+                                        <div id="addressCol" class="col-sm-6 mb-5 form-control-validation d-none">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="text" id="address" name="address" class="form-control" placeholder="" value="@Model.Address" />
                                                 <label for="address">Address</label>
@@ -211,15 +246,7 @@
                                             <div class="form-check mb-0">
                                                 <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" />
                                                 <label class="form-check-label" for="agreeTerms">
-                                                    I agree
-                                                    @if (ViewBag.TermsFileKey is string termsKey)
-                                                    {
-                                                        <a href="@Url.Action("Download", "File", new { key = termsKey })" target="_blank">Terms &amp; Conditions</a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>Terms &amp; Conditions</span>
-                                                    }
+                                                    I agree <span class="text-primary" style="cursor:pointer;" id="termsLink">Terms &amp; Conditions</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -252,7 +279,7 @@
                                                                 <i class="icon-base ri ri-truck-line text-success"></i>
                                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Moving</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceMoving" id="serviceMoving" value="@ServiceEnum.Moving" checked="@(Model.ServiceMoving != null ? "checked" : null)" />
+                                                            <input class="form-check-input" type="checkbox" name="Interests" id="serviceMoving" value="@ServiceEnum.Moving" checked="@(Model.Interests?.Contains(ServiceEnum.Moving) == true ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -263,7 +290,7 @@
                                                                 <i class="icon-base ri ri-recycle-line text-danger"></i>
                                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Removal</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceJunk" id="serviceJunk" value="@ServiceEnum.Removal" checked="@(Model.ServiceJunk != null ? "checked" : null)" />
+                                                            <input class="form-check-input" type="checkbox" name="Interests" id="serviceJunk" value="@ServiceEnum.Removal" checked="@(Model.Interests?.Contains(ServiceEnum.Removal) == true ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -274,7 +301,7 @@
                                                                 <i class="icon-base ri ri-shopping-bag-4-line text-warning"></i>
                                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Pickup</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceStorePickup" id="serviceStorePickup" value="@ServiceEnum.Pickup" checked="@(Model.ServiceStorePickup != null ? "checked" : null)" />
+                                                            <input class="form-check-input" type="checkbox" name="Interests" id="serviceStorePickup" value="@ServiceEnum.Pickup" checked="@(Model.Interests?.Contains(ServiceEnum.Pickup) == true ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -285,7 +312,7 @@
                                                                 <i class="icon-base ri ri-car-line text-info"></i>
                                                                 <span class="custom-option-title mb-1">@AnnotationEnum.General.Service.Transport</span>
                                                             </span>
-                                                            <input class="form-check-input" type="checkbox" name="serviceVehicle" id="serviceVehicle" value="@ServiceEnum.Transport" checked="@(Model.ServiceVehicle != null ? "checked" : null)" />
+                                                            <input class="form-check-input" type="checkbox" name="Interests" id="serviceVehicle" value="@ServiceEnum.Transport" checked="@(Model.Interests?.Contains(ServiceEnum.Transport) == true ? "checked" : null)" />
                                                         </label>
                                                     </div>
                                                 </div>
@@ -336,6 +363,10 @@
             if (servicesSection) { servicesSection.classList.remove('d-none'); }
             const companyTermsUpload = document.querySelector('#companyTermsUpload');
             if (companyTermsUpload) { companyTermsUpload.classList.remove('d-none'); }
+            const numberCol = document.getElementById('numberCol');
+            if (numberCol) { numberCol.classList.remove('d-none'); }
+            const addressCol = document.getElementById('addressCol');
+            if (addressCol) { addressCol.classList.remove('d-none'); }
         }
     });
 </script>

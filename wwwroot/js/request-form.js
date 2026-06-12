@@ -17,7 +17,7 @@ Dropzone.autoDiscover = false;
   const _existingFiles = (typeof existingFiles !== 'undefined') ? existingFiles : [];
 
   // ── Notyf ─────────────────────────────────────────────────────────────────
-  const notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
+  const notyf = new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } });
 
   // ── Dropzone preview template ─────────────────────────────────────────────
   const previewTemplate = `<div class="dz-preview dz-file-preview">
@@ -54,7 +54,8 @@ Dropzone.autoDiscover = false;
       acceptedFiles:    '.png,.jpg,.jpeg,.mp4,.mov',
       previewTemplate:  previewTemplate,
       dictInvalidFileType: 'Only PNG, JPG, MP4 and MOV files are accepted.',
-      dictFileTooBig:   'File is too large.'
+      dictFileTooBig:   'File is too large.',
+      dictRemoveFile:   '<i class="icon-base ri ri-delete-bin-line text-danger me-1 icon-14px"></i>Remove file'
     });
 
     mediaDropzone.on('addedfile', function (file) {
@@ -184,12 +185,10 @@ Dropzone.autoDiscover = false;
   const dateInput = document.getElementById('proposedDate');
   if (dateInput && typeof flatpickr !== 'undefined') {
     datePicker = flatpickr(dateInput, {
-      dateFormat: 'Y-m-d',
-      altInput:   true,
-      altFormat:  'F j, Y',
+      dateFormat: 'F j, Y',
       minDate:    'today',
-      onChange:   function (selectedDates, dateStr, instance) {
-        instance.altInput?.classList.remove('is-invalid');
+      onChange:   function () {
+        dateInput.classList.remove('is-invalid');
       }
     });
   }
@@ -239,6 +238,35 @@ Dropzone.autoDiscover = false;
     });
   }
 
+  // ── Bootstrap-select (selectpicker) init ──────────────────────────────────
+  if (typeof $ !== 'undefined' && typeof $.fn.selectpicker !== 'undefined') {
+    $('#vehicleType, #vehicleCondition').selectpicker();
+    if (typeof handleBootstrapSelectEvents === 'function') {
+      handleBootstrapSelectEvents();
+    }
+  }
+
+  // ── Additional Details visibility ─────────────────────────────────────────
+  const noDetailsMsg        = document.getElementById('noDetailsMsg');
+  const transportFields     = document.getElementById('transportFields');
+  const elevatorParkingFields = document.getElementById('elevatorParkingFields');
+
+  function updateAdditionalDetails(service) {
+    if (!service) {
+      noDetailsMsg.classList.remove('d-none');
+      transportFields.classList.add('d-none');
+      elevatorParkingFields.classList.add('d-none');
+    } else if (service === 'transport') {
+      noDetailsMsg.classList.add('d-none');
+      transportFields.classList.remove('d-none');
+      elevatorParkingFields.classList.add('d-none');
+    } else {
+      noDetailsMsg.classList.add('d-none');
+      transportFields.classList.add('d-none');
+      elevatorParkingFields.classList.remove('d-none');
+    }
+  }
+
   const destAddressWrapper = document.getElementById('deliveryAddress')?.closest('.col-12');
 
   function toggleDestinationAddress(service) {
@@ -259,12 +287,16 @@ Dropzone.autoDiscover = false;
     radio.addEventListener('change', function () {
       document.getElementById('serviceError').classList.add('d-none');
       toggleDestinationAddress(this.value);
+      updateAdditionalDetails(this.value);
+      document.getElementById('vehicleTypeError').classList.add('d-none');
+      document.getElementById('vehicleConditionError').classList.add('d-none');
     });
   });
 
-  // Apply on page load (Edit mode may have Removal pre-selected)
-  const initialService = document.querySelector('input[name="service"]:checked')?.value;
+  // Apply on page load (Edit mode may have a service pre-selected)
+  const initialService = document.querySelector('input[name="service"]:checked')?.value ?? null;
   if (initialService) { toggleDestinationAddress(initialService); }
+  updateAdditionalDetails(initialService);
 
   // ── Form submission ───────────────────────────────────────────────────────
   const form      = document.getElementById('requestForm');
@@ -285,6 +317,8 @@ Dropzone.autoDiscover = false;
         el.classList.remove('is-invalid');
       });
       document.getElementById('serviceError').classList.add('d-none');
+      document.getElementById('vehicleTypeError').classList.add('d-none');
+      document.getElementById('vehicleConditionError').classList.add('d-none');
       const mediaErrorEl = document.getElementById('mediaError');
       mediaErrorEl.textContent = '';
       mediaErrorEl.classList.add('d-none');
@@ -368,10 +402,23 @@ Dropzone.autoDiscover = false;
         }
       }
 
+      if (selectedService === 'transport') {
+        const vType = document.getElementById('vehicleType').value;
+        if (!vType) {
+          document.getElementById('vehicleTypeError').classList.remove('d-none');
+          hasErrors = true;
+        }
+        const vCond = document.getElementById('vehicleCondition').value;
+        if (!vCond) {
+          document.getElementById('vehicleConditionError').classList.remove('d-none');
+          hasErrors = true;
+        }
+      }
+
       const isASAP = document.querySelector('input[name="isASAP"]:checked')?.value === 'true';
       if (!isASAP) {
         if (!dateInput || !dateInput.value) {
-          (datePicker?.altInput ?? dateInput)?.classList.add('is-invalid');
+          dateInput?.classList.add('is-invalid');
           hasErrors = true;
         }
         if (!timeInput || !timeInput.value) {

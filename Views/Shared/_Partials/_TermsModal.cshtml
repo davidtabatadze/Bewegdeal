@@ -1,0 +1,99 @@
+@inject Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository _termsRepo
+@{
+    var _termsContent = (await _termsRepo.Get()).TermsAndConditionsContent;
+    var _acceptMode = ViewData["AcceptMode"] as bool? == true;
+    var _lockedMode = ViewData["LockedMode"] as bool? == true;
+}
+
+@if (!string.IsNullOrWhiteSpace(_termsContent))
+{
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true"
+         @(_lockedMode ? Html.Raw("data-bs-backdrop=\"static\" data-bs-keyboard=\"false\"") : Html.Raw(""))>
+        <div class="modal-dialog modal-fullscreen" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary">Terms &amp; Conditions</h5>
+                    @if (!_lockedMode)
+                    {
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    }
+                </div>
+                <div class="modal-body" id="termsModalBody">
+                    @Html.Raw(_termsContent)
+                </div>
+                @if (_acceptMode)
+                {
+                    <div class="modal-footer justify-content-center">
+                        @if (_lockedMode)
+                        {
+                            <!-- Locked: form POST to persist acceptance -->
+                            <form method="post" action="/User/AcceptTerms" id="acceptTermsForm">
+                                @Html.AntiForgeryToken()
+                            </form>
+                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <button type="submit" form="acceptTermsForm" id="termsAcceptBtn" class="btn btn-primary" disabled>
+                                I Accept
+                            </button>
+                        }
+                        else
+                        {
+                            <!-- Registration: JS-handled, no POST -->
+                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <button type="button" id="termsAcceptBtn" class="btn btn-primary" disabled>
+                                I Accept
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (_acceptMode)
+    {
+        <script>
+            (function () {
+                var modalEl   = document.getElementById('termsModal');
+                if (!modalEl) { return; }
+                var acceptBtn  = document.getElementById('termsAcceptBtn');
+                var body       = document.getElementById('termsModalBody');
+                var scrollHint = document.getElementById('termsScrollHint');
+
+                // Unlock immediately if content fits without scrolling
+                modalEl.addEventListener('shown.bs.modal', function () {
+                    if (body.scrollHeight <= body.clientHeight) {
+                        acceptBtn.disabled = false;
+                        scrollHint.style.display = 'none';
+                    }
+                });
+
+                // Unlock accept button when scrolled to the bottom
+                body.addEventListener('scroll', function () {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                        acceptBtn.disabled = false;
+                        scrollHint.style.display = 'none';
+                    }
+                });
+
+                @if (!_lockedMode)
+                {
+                    <text>
+                // Accept: check the checkbox and close (registration flow)
+                acceptBtn.addEventListener('click', function () {
+                    var cb = document.getElementById('agreeTerms');
+                    if (cb) { cb.checked = true; }
+                    bootstrap.Modal.getInstance(modalEl).hide();
+                });
+
+                // Dismiss without accepting: ensure checkbox stays unchecked
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    if (!acceptBtn.disabled) { return; }
+                    var cb = document.getElementById('agreeTerms');
+                    if (cb) { cb.checked = false; }
+                });
+                    </text>
+                }
+            })();
+        </script>
+    }
+}

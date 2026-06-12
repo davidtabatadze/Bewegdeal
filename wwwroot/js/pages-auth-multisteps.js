@@ -117,11 +117,17 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       }).on('core.form.valid', function () {
         const selected = roleStep.querySelector('[name="role"]:checked');
-        if (selected && roleIndicator) {
+        if (selected) {
           const isCompany = selected.value === 'company';
-          const label = selected.value.charAt(0).toUpperCase() + selected.value.slice(1);
-          roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${label}`;
-          roleIndicator.className = 'badge bg-label-primary';
+          if (roleIndicator) {
+            const label = selected.value.charAt(0).toUpperCase() + selected.value.slice(1);
+            roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${label}`;
+            roleIndicator.className = 'badge bg-label-primary';
+          }
+          const numberCol  = document.getElementById('numberCol');
+          const addressCol = document.getElementById('addressCol');
+          if (numberCol)  numberCol.classList.toggle('d-none', !isCompany);
+          if (addressCol) addressCol.classList.toggle('d-none', !isCompany);
         }
         validationStepper.next();
       });
@@ -227,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
         const servicesSection = document.querySelector('#servicesSection');
         if (servicesSection && !servicesSection.classList.contains('d-none')) {
-          const anyService = accountStep.querySelectorAll('[name^="service"]:checked').length > 0;
+          const anyService = accountStep.querySelectorAll('[name="Interests"]:checked').length > 0;
           if (!anyService) return;
         }
 
@@ -255,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
               const servicesSection = document.querySelector('#servicesSection');
               if (servicesSection && !servicesSection.classList.contains('d-none')) {
-                const anyService = accountStep.querySelectorAll('[name^="service"]:checked').length > 0;
+                const anyService = accountStep.querySelectorAll('[name="Interests"]:checked').length > 0;
                 if (!anyService) {
                   let svcFb = servicesSection.querySelector('.services-invalid-feedback');
                   if (!svcFb) {
@@ -264,9 +270,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
                     servicesSection.appendChild(svcFb);
                   }
                   svcFb.textContent = 'Please select at least one service';
-                  servicesSection.querySelectorAll('[name^="service"]').forEach(function (cb) {
+                  servicesSection.querySelectorAll('[name="Interests"]').forEach(function (cb) {
                     cb.addEventListener('change', function () {
-                      if (servicesSection.querySelectorAll('[name^="service"]:checked').length > 0) {
+                      if (servicesSection.querySelectorAll('[name="Interests"]:checked').length > 0) {
                         if (svcFb) svcFb.textContent = '';
                       }
                     });

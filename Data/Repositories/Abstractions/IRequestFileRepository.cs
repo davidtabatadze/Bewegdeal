@@ -5,10 +5,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
 {
     public interface IRequestFileRepository : IRepository
     {
-        Task Create(List<RequestFileEntity> files);
-        Task SetMainImage(long requestId, long fileId);
-        Task<List<RequestFileEntity>> Load(long requestId);
-        Task<List<RequestFileEntity>> LoadMainImages(List<long> requestIds);
-        Task Delete(List<long> ids);
+        Task SetMain(long requestId, long fileId);
+        Task<List<RequestFileEntity>> Load(long? requestId, List<long>? requestIds = null, bool? isMain = null);
     }
 }

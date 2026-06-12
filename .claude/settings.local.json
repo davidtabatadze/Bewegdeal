@@ -51,7 +51,14 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Models\\\\CreateRequestViewModel.cs\" -Force)",
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Models\\\\EditRequestViewModel.cs\" -Force)",
       "Bash(cp -r \"C:/Software Templates/Materio/AspnetCoreMvcFull/wwwroot/vendor/libs/notiflix\" \"C:/Users/david.tabatadze/Sources/Bewegdeal/wwwroot/vendor/libs/notiflix\")",
-      "Bash(cp -r \"C:/Software Templates/Materio/AspnetCoreMvcFull/wwwroot/vendor/libs/spinkit\" \"C:/Users/david.tabatadze/Sources/Bewegdeal/wwwroot/vendor/libs/spinkit\")"
+      "Bash(cp -r \"C:/Software Templates/Materio/AspnetCoreMvcFull/wwwroot/vendor/libs/spinkit\" \"C:/Users/david.tabatadze/Sources/Bewegdeal/wwwroot/vendor/libs/spinkit\")",
+      "Bash(ls \"C:\\\\Users\\\\david.tabatadze\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\ea9f7ee1-a93b-4efa-8cdd-38cda262ced3\\\\36009175-27e0-4fe0-b5aa-949cf4ddf1f5\\\\memory\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Filters\\\\RequireLoginAttribute.cs\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Filters\\\\RequireAdminAttribute.cs\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Middleware\\\\RememberMeMiddleware.cs\" -Force)",
+      "Bash(Write-Host \"Deleted.\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Chat\")",
+      "Bash(Write-Output \"done\")"
     ]
   }
 }

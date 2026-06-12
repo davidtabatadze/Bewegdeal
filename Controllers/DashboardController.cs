@@ -1,21 +1,27 @@
 using Bewegdeal.Enums;
-using Bewegdeal.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers
 {
-    [RequireLogin]
-    public class DashboardController : Controller
+    [Authorize]
+    public class DashboardController : XBaseController
     {
         public IActionResult Index()
         {
-            return HttpContext.Session.GetString(ConstantEnum.SessionUserRole) switch
+            if (User.IsInRole(UserRoleEnum.Administrator))
             {
-                UserRoleEnum.Administrator => View("Admin"),
-                UserRoleEnum.Company => View("Company"),
-                UserRoleEnum.Customer => RedirectToAction("List", "Request"),
-                _ => RedirectToAction("Login", "Account")
-            };
+                return View("Admin");
+            }
+            if (User.IsInRole(UserRoleEnum.Company))
+            {
+                return View("Company");
+            }
+            if (User.IsInRole(UserRoleEnum.Customer))
+            {
+                return RedirectToAction("List", "Request");
+            }
+            return RedirectToAction("Login", "Account");
         }
     }
 }

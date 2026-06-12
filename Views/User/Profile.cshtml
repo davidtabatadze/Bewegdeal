@@ -1,5 +1,5 @@
-@using Bewegdeal.Data.Entities
-@using Bewegdeal.Enums
+﻿@using Bewegdeal.Enums
+@using Bewegdeal.Models
 
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
@@ -13,25 +13,23 @@
     Layout = "_HomeLayout";
     ViewData["Title"] = "Profile";
 
-    var user = (UserEntity)ViewBag.User;
-    var pictureUrl = ViewBag.PictureUrl as string;
-
-    var nameParts = user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var initials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
+    var profile = (UserProfileModel)ViewBag.Profile;
+    var user = profile.User;
+    var avatar = profile.Avatar;
+    var pictureUrl = avatar.Url;
+    var initials = avatar.Initials;
     var hasPicture = !string.IsNullOrWhiteSpace(pictureUrl);
     var previewHide = hasPicture ? "" : "display:none;";
     var initialsHide = hasPicture ? "display:none;" : "";
-    var numberDisabled = user.Role == UserRoleEnum.Company ? "disabled" : null;
     var isCompany = user.Role == UserRoleEnum.Company;
-    var serviceTermsFile = ViewBag.ServiceTermsFile as FileEntity;
-    var serviceTermsUrl = ViewBag.ServiceTermsUrl as string;
+    var hasServiceTerms = !string.IsNullOrWhiteSpace(profile.ServiceTermsFileName);
 }
 
 <div class="row g-6">
 
     <!-- 1. Picture -->
     <div class="col-12 col-sm-6">
-        <form id="pictureForm" asp-controller="User" asp-action="SavePicture" method="post" enctype="multipart/form-data">
+        <form id="pictureForm" asp-controller="User" asp-action="UpdateAvatar" method="post" enctype="multipart/form-data">
             <div class="card h-100">
 
                 <div class="card-header">
@@ -54,7 +52,7 @@
                             <label for="pictureInput" class="btn btn-outline-primary">
                                 <i class="icon-base ri ri-upload-2-line me-1_5"></i>Choose File
                             </label>
-                            <input type="file" id="pictureInput" name="picture" class="d-none" accept=".png,.jpg,.jpeg" />
+                            <input type="file" id="pictureInput" name="avatar" class="d-none" accept=".png,.jpg,.jpeg" />
                             <button type="button" id="pictureRemoveBtn" class="btn btn-outline-danger@(hasPicture ? "" : " d-none")">
                                 <i class="icon-base ri ri-delete-bin-line me-1_5"></i>Remove
                             </button>
@@ -70,7 +68,7 @@
 
     <!-- 2. Theme -->
     <div class="col-12 col-sm-6">
-        <form id="themeForm" asp-controller="User" asp-action="SaveTheme" method="post" class="h-100">
+        <form id="themeForm" asp-controller="User" asp-action="UpdateTheme" method="post" class="h-100">
             <div class="card h-100">
 
                 <div class="card-header">
@@ -119,7 +117,8 @@
 
     <!-- 3. Personal -->
     <div class="col-12">
-        <form asp-controller="User" asp-action="SavePersonal" method="post" enctype="multipart/form-data">
+        <form asp-controller="User" asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="Role" value="@user.Role" />
             <div class="card">
 
                 <div class="card-header">
@@ -203,45 +202,46 @@
                         </div>
                         <div class="col-12 col-sm-6">
                             <div class="form-floating form-floating-outline">
-                                <input type="text" id="number" name="number" class="form-control"
-                                       placeholder="" maxlength="16" value="@user.Number"
-                                       disabled="@numberDisabled" />
-                                <label for="number">Identification Number</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-5 mb-5">
-                        <div class="col-12 col-sm-6">
-                            <div class="form-floating form-floating-outline">
                                 <input type="text" id="mobile" name="mobile" class="form-control"
-                                       placeholder="" maxlength="16" value="@user.Mobile" />
-                                <label for="mobile">Phone Number</label>
-                                <div class="invalid-feedback">Phone number is required.</div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <div class="form-floating form-floating-outline">
-                                <input type="text" id="address" name="address" class="form-control"
-                                       placeholder="" maxlength="256" value="@user.Address" />
-                                <label for="address">Address</label>
-                                <div class="invalid-feedback">Address is required.</div>
+                                       placeholder="" maxlength="16" value="@user.Mobile" disabled />
+                                <label for="mobile">Mobile</label>
                             </div>
                         </div>
                     </div>
 
                     @if (isCompany)
                     {
+                        <div class="row g-5 mb-5">
+                            <div class="col-12 col-sm-6">
+                                <div class="form-floating form-floating-outline">
+                                    <input type="text" id="number" name="number" class="form-control"
+                                           placeholder="" maxlength="16" value="@user.Number" disabled />
+                                    <label for="number">UID</label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="form-floating form-floating-outline">
+                                    <input type="text" id="address" name="address" class="form-control"
+                                           placeholder="" maxlength="256" value="@user.Address" />
+                                    <label for="address">Address</label>
+                                    <div class="invalid-feedback">Address is required.</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isCompany)
+                    {
                         <div class="row g-5">
                             <div class="col-12 col-sm-6 align-self-center text-center">
-                                @if (serviceTermsFile is null)
+                                @if (!hasServiceTerms)
                                 {
                                     <span class="text-muted">No service terms file uploaded.</span>
                                 }
                                 else
                                 {
-                                    <a id="serviceTermsLink" href="@serviceTermsUrl" target="_blank">
-                                        <i class="ri ri-file-pdf-line me-1"></i>@serviceTermsFile.FileName
+                                    <a id="serviceTermsLink" href="@profile.ServiceTermsFileUrl" target="_blank">
+                                        <i class="ri ri-file-pdf-line me-1"></i>@profile.ServiceTermsFileName
                                     </a>
                                     <span id="serviceTermsRemovedLabel" class="text-muted d-none">File will be removed on save.</span>
                                     <i id="serviceTermsRemoveBtn" class="ri ri-delete-bin-line text-danger" style="cursor:pointer;"></i>
@@ -270,7 +270,7 @@
 
     <!-- 4. Change Password -->
     <div class="col-12">
-        <form asp-controller="User" asp-action="ChangePassword" method="post" id="passwordForm" novalidate>
+        <form asp-controller="User" asp-action="UpdatePassword" method="post" id="passwordForm" novalidate>
             <div class="card">
 
                 <div class="card-header">
@@ -281,9 +281,14 @@
 
                     <div class="d-flex flex-column align-items-center gap-4">
 
-                        <div class="alert alert-danger" role="alert" style="width:400px;">
-                            <span class="icon-base ri ri-information-line me-1_5"></span>
-                            Password change requires re-authorization — you will be signed out immediately after saving.
+                        <div class="alert alert-danger mb-4" role="alert">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                                <strong>Handle with care</strong>
+                            </div>
+                            <ul class="mb-0">
+                                <li>Password change requires re-authorization - you will be signed out immediately after saving.</li>
+                            </ul>
                         </div>
 
                         <div style="width:300px;">
@@ -320,82 +325,84 @@
 
 @section PageScripts {
     <script>
-        var notyf = new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } });
+        var notyf = new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } });
 
-        @if (TempData["PersonalError"] is string personalError) {
-            <text>notyf.error(@Json.Serialize(personalError));</text>
+        @if (TempData["ProfileError"] is string ProfileError)
+        {
+            <text>notyf.error(@Json.Serialize(ProfileError));</text>
         }
-        @if (TempData["PasswordError"] is string passwordError) {
+        @if (TempData["PasswordError"] is string passwordError)
+        {
             <text>notyf.error(@Json.Serialize(passwordError));</text>
         }
 
-        // Picture — instant preview + upload + remove
+        // Picture â€” instant preview + upload + remove
         (function () {
-            var form      = document.getElementById('pictureForm');
-            var token     = form.querySelector('input[name="__RequestVerificationToken"]').value;
-            var preview   = document.getElementById('picturePreview');
-            var initials  = document.getElementById('pictureInitials');
-            var removeBtn = document.getElementById('pictureRemoveBtn');
-            var badgeImg      = document.getElementById('menuBadgeImg');
-            var badgeInitials = document.getElementById('menuBadgeInitials');
+        var form      = document.getElementById('pictureForm');
+        var token     = form.querySelector('input[name="__RequestVerificationToken"]').value;
+        var preview   = document.getElementById('picturePreview');
+        var initials  = document.getElementById('pictureInitials');
+        var removeBtn = document.getElementById('pictureRemoveBtn');
+        var badgeImg      = document.getElementById('menuBadgeImg');
+        var badgeInitials = document.getElementById('menuBadgeInitials');
 
-            function setBadgePicture(src) {
-                if (badgeImg)      { badgeImg.src = src; badgeImg.style.display = ''; }
-                if (badgeInitials) { badgeInitials.style.display = 'none'; }
-            }
+        function setBadgePicture(src) {
+        if (badgeImg)      { badgeImg.src = src; badgeImg.style.display = ''; }
+        if (badgeInitials) { badgeInitials.style.display = 'none'; }
+        }
 
-            function clearBadgePicture() {
-                if (badgeImg)      { badgeImg.src = ''; badgeImg.style.display = 'none'; }
-                if (badgeInitials) { badgeInitials.style.display = 'flex'; }
-            }
+        function clearBadgePicture() {
+        if (badgeImg)      { badgeImg.src = ''; badgeImg.style.display = 'none'; }
+        if (badgeInitials) { badgeInitials.style.display = 'flex'; }
+        }
 
-            document.getElementById('pictureInput').addEventListener('change', function () {
-                var file = this.files[0];
-                if (!file) { return; }
+        document.getElementById('pictureInput').addEventListener('change', function () {
+        var file = this.files[0];
+        if (!file) { return; }
 
-                // instant preview
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src            = e.target.result;
-                    preview.style.display  = '';
-                    initials.style.display = 'none';
-                    if (removeBtn) { removeBtn.classList.remove('d-none'); }
-                    setBadgePicture(e.target.result);
-                };
-                reader.readAsDataURL(file);
+        // instant preview
+        var reader = new FileReader();
+        reader.onload = function (e) {
+        preview.src            = e.target.result;
+        preview.style.display  = '';
+        initials.style.display = 'none';
+        if (removeBtn) { removeBtn.classList.remove('d-none'); }
+        setBadgePicture(e.target.result);
+        };
+        reader.readAsDataURL(file);
 
-                // upload
-                var fd = new FormData();
-                fd.append('__RequestVerificationToken', token);
-                fd.append('picture', file);
-                fetch(form.action, { method: 'POST', body: fd })
-                    .then(function (res) {
-                        if (!res.ok) {
-                            return res.json().then(function (data) {
-                                notyf.error(data.error ?? 'Something went wrong. Please try again.');
-                            });
-                        }
-                    })
-                    .catch(function () { notyf.error('Something went wrong. Please try again.'); });
-            });
+        // upload
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', token);
+        fd.append('avatar', file);
+        fetch(form.action, { method: 'POST', body: fd })
+        .then(function (res) {
+        if (!res.ok) {
+        return res.json().then(function (data) {
+        notyf.error(data.error ?? 'Something went wrong. Please try again.');
+        });
+        }
+        })
+        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+        });
 
-            // optimistic remove
-            if (removeBtn) {
-                removeBtn.addEventListener('click', function () {
-                    preview.src            = '';
-                    preview.style.display  = 'none';
-                    initials.style.display = '';
-                    removeBtn.classList.add('d-none');
-                    clearBadgePicture();
-                    var fd = new FormData();
-                    fd.append('__RequestVerificationToken', token);
-                    fetch('@Url.Action("SavePicture", "User")', { method: 'POST', body: fd })
-                        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
-                });
-            }
+        // optimistic remove
+        if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+        preview.src            = '';
+        preview.style.display  = 'none';
+        initials.style.display = '';
+        removeBtn.classList.add('d-none');
+        clearBadgePicture();
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', token);
+        fetch('@Url.Action("UpdateAvatar", "User")', { method: 'POST', body: fd })
+        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+        });
+        }
         })();
 
-        // Theme — silent fetch, no page reload
+        // Theme â€” silent fetch, no page reload
         (function () {
         var form = document.getElementById('themeForm');
         form.addEventListener('change', function () {
@@ -410,163 +417,157 @@
         });
         })();
 
-        // Personal — client-side validation
+        // Personal â€” client-side validation
         (function () {
-            var form      = document.querySelector('form[action*="SavePersonal"]');
-            var isCompany = @(isCompany ? "true" : "false");
+        var form      = document.querySelector('form[action*="UpdateProfile"]');
+        var isCompany = @(isCompany ? "true" : "false");
 
-            function validate() {
-                var valid = true;
+        function validate() {
+        var valid = true;
 
-                ['name', 'mobile', 'address'].forEach(function (id) {
-                    var el = document.getElementById(id);
-                    if (el) { el.classList.remove('is-invalid'); }
-                });
-                var interestsError = document.getElementById('interestsError');
-                if (interestsError) { interestsError.classList.add('d-none'); }
+        ['name', 'address'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('is-invalid'); }
+        });
+        var interestsError = document.getElementById('interestsError');
+        if (interestsError) { interestsError.classList.add('d-none'); }
 
-                if (isCompany) {
-                    if (form.querySelectorAll('input[name="Interests"]:checked').length === 0) {
-                        interestsError.classList.remove('d-none');
-                        valid = false;
-                    }
-                }
+        if (isCompany) {
+        if (form.querySelectorAll('input[name="Interests"]:checked').length === 0) {
+        interestsError.classList.remove('d-none');
+        valid = false;
+        }
+        }
 
-                if (!document.getElementById('name').value.trim()) {
-                    document.getElementById('name').classList.add('is-invalid');
-                    valid = false;
-                }
+        if (!document.getElementById('name').value.trim()) {
+        document.getElementById('name').classList.add('is-invalid');
+        valid = false;
+        }
 
-                if (!document.getElementById('mobile').value.trim()) {
-                    document.getElementById('mobile').classList.add('is-invalid');
-                    valid = false;
-                }
+        if (isCompany && !document.getElementById('address').value.trim()) {
+        document.getElementById('address').classList.add('is-invalid');
+        valid = false;
+        }
 
-                if (isCompany && !document.getElementById('address').value.trim()) {
-                    document.getElementById('address').classList.add('is-invalid');
-                    valid = false;
-                }
+        return valid;
+        }
 
-                return valid;
-            }
+        function watchField(id) {
+        var el = document.getElementById(id);
+        if (!el) { return; }
+        el.addEventListener('input', function () {
+        this.classList.toggle('is-invalid', !this.value.trim());
+        });
+        }
+        watchField('name');
+        if (isCompany) { watchField('address'); }
 
-            function watchField(id) {
-                var el = document.getElementById(id);
-                if (!el) { return; }
-                el.addEventListener('input', function () {
-                    this.classList.toggle('is-invalid', !this.value.trim());
-                });
-            }
-            watchField('name');
-            watchField('mobile');
-            if (isCompany) { watchField('address'); }
+        if (isCompany) {
+        form.querySelectorAll('input[name="Interests"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+        if (form.querySelectorAll('input[name="Interests"]:checked').length > 0) {
+        document.getElementById('interestsError').classList.add('d-none');
+        }
+        });
+        });
+        }
 
-            if (isCompany) {
-                form.querySelectorAll('input[name="Interests"]').forEach(function (cb) {
-                    cb.addEventListener('change', function () {
-                        if (form.querySelectorAll('input[name="Interests"]:checked').length > 0) {
-                            document.getElementById('interestsError').classList.add('d-none');
-                        }
-                    });
-                });
-            }
-
-            form.addEventListener('submit', function (e) {
-                if (!validate()) { e.preventDefault(); }
-            });
+        form.addEventListener('submit', function (e) {
+        if (!validate()) { e.preventDefault(); }
+        });
         })();
 
-        // Service Terms — file name preview + Remove/Undo toggle
+        // Service Terms â€” file name preview + Remove/Undo toggle
         (function () {
-            var fileInput    = document.getElementById('serviceTermsInput');
-            if (!fileInput) { return; }
+        var fileInput    = document.getElementById('serviceTermsInput');
+        if (!fileInput) { return; }
 
-            var personalForm = fileInput.closest('form');
-            var selectedName = document.getElementById('serviceTermsSelectedName');
-            var removeBtn    = document.getElementById('serviceTermsRemoveBtn');
-            var undoBtn      = document.getElementById('serviceTermsUndoBtn');
-            var link         = document.getElementById('serviceTermsLink');
-            var removedLabel = document.getElementById('serviceTermsRemovedLabel');
-            var deleteInput  = null;
+        var personalForm = fileInput.closest('form');
+        var selectedName = document.getElementById('serviceTermsSelectedName');
+        var removeBtn    = document.getElementById('serviceTermsRemoveBtn');
+        var undoBtn      = document.getElementById('serviceTermsUndoBtn');
+        var link         = document.getElementById('serviceTermsLink');
+        var removedLabel = document.getElementById('serviceTermsRemovedLabel');
+        var deleteInput  = null;
 
-            document.getElementById('serviceTermsChooseBtn').addEventListener('click', function () {
-                fileInput.click();
-            });
+        document.getElementById('serviceTermsChooseBtn').addEventListener('click', function () {
+        fileInput.click();
+        });
 
-            fileInput.addEventListener('change', function () {
-                selectedName.textContent = this.files[0] ? this.files[0].name : '';
-            });
+        fileInput.addEventListener('change', function () {
+        selectedName.textContent = this.files[0] ? this.files[0].name : '';
+        });
 
-            if (removeBtn) {
-                removeBtn.addEventListener('click', function () {
-                    deleteInput = document.createElement('input');
-                    deleteInput.type  = 'hidden';
-                    deleteInput.name  = 'DeleteServiceTerms';
-                    deleteInput.value = 'true';
-                    personalForm.appendChild(deleteInput);
+        if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+        deleteInput = document.createElement('input');
+        deleteInput.type  = 'hidden';
+        deleteInput.name  = 'DeleteServiceTerms';
+        deleteInput.value = 'true';
+        personalForm.appendChild(deleteInput);
 
-                    link.classList.add('d-none');
-                    removedLabel.classList.remove('d-none');
-                    removeBtn.classList.add('d-none');
-                    undoBtn.classList.remove('d-none');
-                });
+        link.classList.add('d-none');
+        removedLabel.classList.remove('d-none');
+        removeBtn.classList.add('d-none');
+        undoBtn.classList.remove('d-none');
+        });
 
-                undoBtn.addEventListener('click', function () {
-                    if (deleteInput) { deleteInput.remove(); deleteInput = null; }
+        undoBtn.addEventListener('click', function () {
+        if (deleteInput) { deleteInput.remove(); deleteInput = null; }
 
-                    link.classList.remove('d-none');
-                    removedLabel.classList.add('d-none');
-                    removeBtn.classList.remove('d-none');
-                    undoBtn.classList.add('d-none');
-                });
-            }
+        link.classList.remove('d-none');
+        removedLabel.classList.add('d-none');
+        removeBtn.classList.remove('d-none');
+        undoBtn.classList.add('d-none');
+        });
+        }
         })();
 
         // Password change
         (function () {
-            var newPwd      = document.getElementById('newPassword');
-            var confirm     = document.getElementById('confirmPassword');
-            var newFeedback = document.getElementById('newPasswordFeedback');
-            var confFeedback = document.getElementById('confirmFeedback');
+        var newPwd      = document.getElementById('newPassword');
+        var confirm     = document.getElementById('confirmPassword');
+        var newFeedback = document.getElementById('newPasswordFeedback');
+        var confFeedback = document.getElementById('confirmFeedback');
 
-            function validateNew() {
-                newPwd.classList.remove('is-invalid');
-                if (!newPwd.value) {
-                    newFeedback.textContent = 'New password is required.';
-                    newPwd.classList.add('is-invalid');
-                    return false;
-                }
-                if (newPwd.value.length < 6) {
-                    newFeedback.textContent = 'Password must be at least 6 characters.';
-                    newPwd.classList.add('is-invalid');
-                    return false;
-                }
-                return true;
-            }
+        function validateNew() {
+        newPwd.classList.remove('is-invalid');
+        if (!newPwd.value) {
+        newFeedback.textContent = 'New password is required.';
+        newPwd.classList.add('is-invalid');
+        return false;
+        }
+        if (newPwd.value.length < 6) {
+        newFeedback.textContent = 'Password must be at least 6 characters.';
+        newPwd.classList.add('is-invalid');
+        return false;
+        }
+        return true;
+        }
 
-            function validateConfirm() {
-                confirm.classList.remove('is-invalid');
-                if (!confirm.value) {
-                    confFeedback.textContent = 'Please confirm your new password.';
-                    confirm.classList.add('is-invalid');
-                    return false;
-                }
-                if (newPwd.value !== confirm.value) {
-                    confFeedback.textContent = 'Passwords do not match.';
-                    confirm.classList.add('is-invalid');
-                    return false;
-                }
-                return true;
-            }
+        function validateConfirm() {
+        confirm.classList.remove('is-invalid');
+        if (!confirm.value) {
+        confFeedback.textContent = 'Please confirm your new password.';
+        confirm.classList.add('is-invalid');
+        return false;
+        }
+        if (newPwd.value !== confirm.value) {
+        confFeedback.textContent = 'Passwords do not match.';
+        confirm.classList.add('is-invalid');
+        return false;
+        }
+        return true;
+        }
 
-            newPwd.addEventListener('input', validateNew);
-            confirm.addEventListener('input', validateConfirm);
+        newPwd.addEventListener('input', validateNew);
+        confirm.addEventListener('input', validateConfirm);
 
-            document.getElementById('passwordForm').addEventListener('submit', function (e) {
-                var v1 = validateNew();
-                var v2 = validateConfirm();
-                if (!v1 || !v2) { e.preventDefault(); }
-            });
+        document.getElementById('passwordForm').addEventListener('submit', function (e) {
+        var v1 = validateNew();
+        var v2 = validateConfirm();
+        if (!v1 || !v2) { e.preventDefault(); }
+        });
         })();
     </script>
 }

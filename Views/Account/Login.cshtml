@@ -24,13 +24,13 @@
     @if (ViewBag.Error is string error)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).error(@Json.Serialize(error));
         </script>
     }
     @if (TempData["LoginSuccess"] is string loginSuccess)
     {
         <script>
-            new Notyf({ duration: 5000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(loginSuccess));
+            new Notyf({ duration: 10000, position: { x: 'center', y: 'top' } }).success(@Json.Serialize(loginSuccess));
         </script>
     }
 }

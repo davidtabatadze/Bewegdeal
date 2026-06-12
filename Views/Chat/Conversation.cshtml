@@ -1,0 +1,247 @@
+@using Bewegdeal.Data.Entities
+@using Bewegdeal.Enums
+@using System.Text.RegularExpressions
+@model Bewegdeal.Models.ChatHistoryModel
+
+@{
+    var proposalRegex = new Regex(@"^#bewegdeal-proposal-(\d+)$");
+}
+
+<style>
+    .chat-bubble-tail {
+        display: inline-block;
+        width: 45px;
+    }
+
+    .chat-message-right .chat-bubble-tail {
+        width: 65px;
+    }
+
+    .chat-bubble-meta {
+        float: right;
+        margin-top: -1.25em;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+</style>
+
+@if (Model.Mode == ChatModeEnum.Initiate)
+{
+    <div id="chatConversation"
+         data-mode="@Model.Mode"
+         style="block-size:100%"
+         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column">
+        <div class="bg-label-primary p-8 rounded-circle">
+            <i class="icon-base ri ri-wechat-line icon-48px"></i>
+        </div>
+        @* <div class="avatar avatar-lg mb-4">
+            @if (Model.OtherPartyPictureUrl is not null)
+            {
+                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                     style="object-fit:cover;width:100%;height:100%;"
+                     alt="@Model.OtherPartyName" />
+            }
+            else
+            {
+                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                      style="display:flex;align-items:center;justify-content:center;">@Model.OtherPartyInitials</span>
+            }
+        </div>
+        <h6 class="mb-1">@Model.OtherPartyName</h6>
+        <p class="text-muted small mb-5">Start a conversation about this request?</p> *@
+        <p class="my-4">Start a conversation about this request?</p>
+        <button id="chatInitiateBtn" class="btn btn-primary">
+            <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
+        </button>
+    </div>
+}
+else
+{
+    var isAdminView = User.IsInRole(UserRoleEnum.Administrator);
+    <div id="chatConversation"
+         data-mode="@Model.Mode"
+         data-chat-key="@Model.ChatKey"
+         data-viewer-id="@Model.ViewerId"
+         data-viewer-initials="@Model.ViewerInitials"
+         data-viewer-picture="@(Model.ViewerPictureUrl ?? "")"
+         data-other-initials="@Model.OtherPartyInitials"
+         data-other-picture="@(Model.OtherPartyPictureUrl ?? "")"
+         class="col app-chat-history"
+         style="block-size:100%">
+        <div class="chat-history-wrapper" style="block-size:100%;display:flex;flex-direction:column;">
+            @* Header *@
+            @if (!isAdminView)
+            {
+                @* <div class="chat-history-header border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex overflow-hidden align-items-center">
+                            <div class="flex-shrink-0 avatar avatar-online">
+                                @if (Model.OtherPartyPictureUrl is not null)
+                                {
+                                    <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                                         style="object-fit:cover;width:100%;height:100%;"
+                                         alt="@Model.OtherPartyName" />
+                                }
+                                else
+                                {
+                                    <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                          style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
+                                }
+                            </div>
+                            <div class="chat-contact-info flex-grow-1 ms-4">
+                                <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
+                                <small class="user-status text-body">NextJS developer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div> *@
+                <div class="alert alert-danger alert-dismissible m-2" role="alert">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                        <strong>Handle with care</strong>
+                    </div>
+                    <ul class="mb-0">
+                        <li>Make sure you follow the rules of <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">T&amp;M</strong>.</li>
+                        <li>Have in mind, the chat can and may be monitored by the system administration.</li>
+                    </ul>
+                </div>
+            }
+            @* Message list *@
+            <div class="chat-history-body" style="flex:1;block-size:0;">
+                <ul class="list-unstyled chat-history" id="chatMessageList">
+                    @{
+                        string GetDateLabel(DateTime d)
+                        {
+                            var today = DateTime.UtcNow.Date;
+                            if (d.Date == today) { return "Today"; }
+                            if (d.Date == today.AddDays(-1)) { return "Yesterday"; }
+                            return d.ToString("MMMM d, yyyy");
+                        }
+                        string? lastDay = null;
+                    }
+                    @foreach (var msg in Model.Messages)
+                    {
+                        var isMine = msg.SenderId == Model.ViewerId;
+                        var msgDay = msg.SentDate.ToString("yyyy-MM-dd");
+                        var proposalMatch = proposalRegex.Match(msg.Content);
+                        RequestProposalEntity? proposalCard = null;
+                        var isProposal = proposalMatch.Success &&
+                                         Model.Proposals.TryGetValue(long.Parse(proposalMatch.Groups[1].Value), out proposalCard);
+                        if (lastDay != msgDay)
+                        {
+                            lastDay = msgDay;
+                            <li class="chat-date-separator text-center my-6" data-date="@msgDay">
+                                <span class="badge bg-label-secondary px-3 py-1">@GetDateLabel(msg.SentDate)</span>
+                            </li>
+                        }
+                        <li class="chat-message @(isMine ? "chat-message-right" : "") mb-3">
+                            <div class="d-flex overflow-hidden">
+                                @if (isMine)
+                                {
+                                    @if (isProposal)
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")@(isAdminView && msg.IsFraud ? "border-left:3px solid var(--bs-danger);" : "")">
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@(isAdminView ? "width:45px;" : "")"></span></p>
+                                                <span class="chat-bubble-meta">
+                                                    @if (!isAdminView)
+                                                    {
+                                                        <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-warning" : "")"></i>
+                                                    }
+                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="user-avatar flex-shrink-0 ms-2">
+                                        <div class="avatar avatar-sm">
+                                            @if (Model.ViewerPictureUrl is not null)
+                                            {
+                                                <img src="@Model.ViewerPictureUrl" class="rounded-circle"
+                                                     style="object-fit:cover;width:100%;height:100%;" alt="Me" />
+                                            }
+                                            else
+                                            {
+                                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.ViewerInitials</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="user-avatar flex-shrink-0 me-2">
+                                        <div class="avatar avatar-sm">
+                                            @if (Model.OtherPartyPictureUrl is not null)
+                                            {
+                                                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                                                     style="object-fit:cover;width:100%;height:100%;"
+                                                     alt="@Model.OtherPartyName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (isProposal)
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            <div class="chat-message-text p-2" style="@(isAdminView && msg.IsFraud ? "border-right:3px solid var(--bs-danger);" : "")">
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
+                                                <span class="chat-bubble-meta">
+                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            @* Message input *@
+            @if (!isAdminView)
+            {
+                <div class="chat-history-footer shadow-xs mt-0 ps-2 pe-2">
+                    <form class="form-send-message d-flex justify-content-between align-items-center ">
+                        <textarea class="form-control message-input border-0 shadow-none ps-2 pe-2"
+                                  placeholder="Your message here..."
+                                  rows="1"
+                                  style="resize:none;overflow:hidden;max-height:120px;"></textarea>
+                        <div class="message-actions d-flex align-items-center">
+                            @if (User.IsInRole(UserRoleEnum.Company))
+                            {
+                                <span id="chatProposalBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer"
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
+                                    <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
+                                </span>
+                            }
+                            <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Chat">
+                                <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                            </span>
+                            <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">
+                                <span class="icon-base ri ri-send-plane-line icon-22px"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+}

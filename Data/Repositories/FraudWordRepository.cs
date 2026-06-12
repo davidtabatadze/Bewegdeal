@@ -1,97 +1,28 @@
+using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Filters;
-using Microsoft.EntityFrameworkCore;
+using Bewegdeal.Data.Repositories.Abstractions;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class FraudWordRepository(SqlContext context) : IFraudWordRepository
+    public class FraudWordRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IFraudWordRepository, IRepositorySeedable
     {
-        private readonly SqlContext _context = context;
-
-        public async Task<FraudWordEntity?> Get(FraudWordFilter filter)
+        public async Task Seed()
         {
-            var query = _context.FraudWords.AsQueryable();
-
-            if (filter.Id.HasValue)
+            var rows = new[]
             {
-                query = query.Where(w => w.Id == filter.Id.Value);
-            }
+                new FraudWordEntity { Id = 1, Word = "mobile" },
+                new FraudWordEntity { Id = 2, Word = "599*" },
+                new FraudWordEntity { Id = 3, Word = "*bank" },
+                new FraudWordEntity { Id = 4, Word = "*cash*" }
+            };
 
-            return await query.FirstOrDefaultAsync();
-        }
-
-        public async Task<int> Count(FraudWordFilter filter)
-        {
-            return await ApplyFilters(_context.FraudWords.AsQueryable(), filter).CountAsync();
-        }
-
-        public async Task<List<FraudWordEntity>> Load(FraudWordFilter filter)
-        {
-            var query = ApplyFilters(_context.FraudWords.AsQueryable(), filter);
-
-            query = query.OrderByDescending(w => w.CreatedAt);
-
-            if (filter.Start.HasValue && filter.Length.HasValue)
+            foreach (var row in rows)
             {
-                query = query.Skip(filter.Start.Value).Take(filter.Length.Value);
+                if (await Get<FraudWordEntity>(row.Id) == null)
+                {
+                    await Create(row);
+                }
             }
-
-            return await query.ToListAsync();
-        }
-
-        public async Task<FraudWordEntity> Create(FraudWordEntity entity)
-        {
-            _context.FraudWords.Add(entity);
-            await _context.SaveChangesAsync();
-            return entity;
-        }
-
-        public async Task Update(long id, string word, string description)
-        {
-            await _context.FraudWords
-                .Where(w => w.Id == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(w => w.Word, word)
-                    .SetProperty(w => w.Description, description)
-                );
-        }
-
-        public async Task SetStatus(long id, string status)
-        {
-            await _context.FraudWords
-                .Where(w => w.Id == id)
-                .ExecuteUpdateAsync(s => s.SetProperty(w => w.Status, status));
-        }
-
-        public async Task Delete(long id)
-        {
-            await _context.FraudWords
-                .Where(w => w.Id == id)
-                .ExecuteDeleteAsync();
-        }
-
-        private static IQueryable<FraudWordEntity> ApplyFilters(IQueryable<FraudWordEntity> query, FraudWordFilter filter)
-        {
-            if (filter.Id.HasValue)
-            {
-                query = query.Where(w => w.Id == filter.Id.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.Status))
-            {
-                query = query.Where(w => w.Status == filter.Status);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.Search))
-            {
-                var term = filter.Search.Trim().ToLower();
-                query = query.Where(w =>
-                    w.Word.ToLower().Contains(term) ||
-                    w.Description.ToLower().Contains(term)
-                );
-            }
-
-            return query;
         }
     }
 }

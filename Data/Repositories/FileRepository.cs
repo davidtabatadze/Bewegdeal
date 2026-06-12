@@ -5,41 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class FileRepository(SqlContext context) : IFileRepository
+    public class FileRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IFileRepository
     {
 
-        // ── Write ────────────────────────────────────────────────────────────────
-
-        public async Task<FileEntity> Create(FileEntity file)
-        {
-            context.Files.Add(file);
-            await context.SaveChangesAsync();
-            return file;
-        }
-
-        // ── Read ─────────────────────────────────────────────────────────────────
-
-        public async Task<FileEntity?> Get(long id)
-        {
-            return await context.Files.FirstOrDefaultAsync(f => f.Id == id);
-        }
-
-        public async Task<List<FileEntity>> Load(BaseFilter<long> filter)
+        public async Task<List<FileEntity>> Load(BaseFilter filter)
         {
             filter.Ids ??= [0];
-
-            return await context.Files
-                                .Where(i => filter.Ids.Contains(i.Id))
-                                .ToListAsync();
-        }
-
-        // ── Delete ───────────────────────────────────────────────────────────────
-
-        public async Task Delete(long id)
-        {
-            await context.Files
-                .Where(f => f.Id == id)
-                .ExecuteDeleteAsync();
+            return await Context.Files.Where(i => filter.Ids.Contains(i.Id))
+                                      .ToListAsync();
         }
 
     }

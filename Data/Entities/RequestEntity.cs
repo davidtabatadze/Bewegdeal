@@ -22,5 +22,9 @@ namespace Bewegdeal.Data.Entities
         public DateOnly? Date { get; set; }
         public TimeOnly? Time { get; set; }
         public long? AgreementId { get; set; }
+        public string? VehicleType { get; set; }
+        public string? VehicleCondition { get; set; }
+        public bool PresentElevator { get; set; }
+        public bool PresentParking { get; set; }
     }
 }

@@ -1,16 +1,12 @@
 @{
     string? currentPage = ViewContext.HttpContext.Request.Path;
 
-    var sessionName = Context.Session.GetString(ConstantEnum.SessionUserName) ?? "-";
-    var sessionEmail = Context.Session.GetString(ConstantEnum.SessionUserEmail) ?? "-";
-    var nameParts = sessionName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var userInitials = string.Concat(nameParts.Take(2).Select(p => char.ToUpper(p[0])));
-    if (string.IsNullOrEmpty(userInitials)) { userInitials = "?"; }
-
-    var pictureKey = Context.Session.GetString(ConstantEnum.SessionUserPictureKey);
-    var pictureUrl = !string.IsNullOrEmpty(pictureKey)
-        ? Url.Action("Download", "File", new { key = pictureKey })
-        : null;
+    var _menuName = User.FindFirstValue(IdentityFieldEnum.Name) ?? "?";
+    var _menuInitials = string.Concat(
+        _menuName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0]))
+    );
+    if (string.IsNullOrEmpty(_menuInitials)) { _menuInitials = "?"; }
+    var _menuPictureUrl = User.FindFirstValue(IdentityFieldEnum.AvatarUrl);
 }
 
 <!-- Menu -->
@@ -40,26 +36,21 @@
         <!-- User badge -->
         <li class='menu-item@(currentPage == "/User/Profile" ? " open" : "")'>
             <a href="javascript:void(0);" class="menu-link menu-toggle" style="padding-inline-start: 0.75rem;">
-                @if (pictureUrl is not null)
+                @if (!string.IsNullOrEmpty(_menuPictureUrl))
                 {
-                    <img id="menuBadgeImg" src="@pictureUrl" alt="@sessionName"
+                    <img id="menuBadgeImg" src="@_menuPictureUrl" alt="@_menuName"
                          class="menu-icon rounded-circle" style="object-fit:cover;width:45px;height:45px;" />
                     <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
-                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;display:none;">@userInitials</span>
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;display:none;">@_menuInitials</span>
                 }
                 else
                 {
                     <img id="menuBadgeImg" src="" alt="" class="menu-icon rounded-circle"
                          style="object-fit:cover;width:45px;height:45px;display:none;" />
                     <span id="menuBadgeInitials" class="menu-icon avatar-initial rounded-circle bg-label-primary"
-                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;">@userInitials</span>
+                          style="width:45px;height:45px;font-size:1rem;display:flex;align-items:center;justify-content:center;">@_menuInitials</span>
                 }
-                @* <div data-i18n="@sessionName">@sessionName</div> margin-inline-end: 0px;  *@
-                @* <div>
-                    <h6 class="mb-0 small">@sessionName</h6>
-                    <small class="text-body-secondary">@sessionEmail</small>
-                </div> *@
-                <div data-i18n="@sessionName">@sessionName</div>
+                <div data-i18n="@_menuName">@_menuName</div>
             </a>
             <ul class="menu-sub">
                 <li class='menu-item@(currentPage == "/User/Profile" ? " active" : "")'>
@@ -82,7 +73,7 @@
         </li>
 
         <!-- Dashboard -->
-        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) != UserRoleEnum.Customer)
+        @if (!User.IsInRole(UserRoleEnum.Customer))
         {
             <li class='menu-item@((currentPage == "/Dashboard/Index" || currentPage == "/Dashboard") ? " active" : "")'>
                 <a asp-controller="Dashboard" asp-action="Index" class="menu-link">
@@ -92,7 +83,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Customer)
+        @if (User.IsInRole(UserRoleEnum.Customer))
         {
             <!-- My Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>
@@ -111,7 +102,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Administrator)
+        @if (User.IsInRole(UserRoleEnum.Administrator))
         {
             <!-- Users -->
             <li class='menu-item@(currentPage == "/User/List" ? " active" : "")'>
@@ -121,11 +112,11 @@
                 </a>
             </li>
 
-            <!-- Fraud Dictionary -->
-            <li class='menu-item@(currentPage == "/FraudWord/Index" || currentPage == "/FraudWord" ? " active" : "")'>
-                <a asp-controller="FraudWord" asp-action="Index" class="menu-link">
-                    <i class="menu-icon icon-base ri ri-spam-2-line"></i>
-                    <div data-i18n="Fraud Dictionary">Fraud Dictionary</div>
+            <!-- Chats -->
+            <li class='menu-item@(currentPage == "/Chat/List" ? " active" : "")'>
+                <a asp-controller="Chat" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-wechat-line"></i>
+                    <div data-i18n="Chats">Chats</div>
                 </a>
             </li>
 
@@ -144,9 +135,17 @@
                     <div data-i18n="Settings">Settings</div>
                 </a>
             </li>
+
+            <!-- Fraud Words -->
+            <li class='menu-item@(currentPage == "/FraudWord/Index" || currentPage == "/FraudWord" ? " active" : "")'>
+                <a asp-controller="FraudWord" asp-action="Index" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-spam-2-line"></i>
+                    <div data-i18n="Fraud Words">Fraud Words</div>
+                </a>
+            </li>
         }
 
-        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Customer)
+        @if (User.IsInRole(UserRoleEnum.Customer))
         {
             <!-- How It Works -->
             <li class='menu-item@(currentPage == "/HowItWorks/Customer" ? " active" : "")'>
@@ -157,7 +156,7 @@
             </li>
         }
 
-        @if (Context.Session.GetString(ConstantEnum.SessionUserRole) == UserRoleEnum.Company)
+        @if (User.IsInRole(UserRoleEnum.Company))
         {
             <!-- Requests -->
             <li class='menu-item@((currentPage == "/Request/List" || currentPage == "/Request/View") ? " active" : "")'>
@@ -181,7 +180,7 @@
 </aside>
 
 <div class="menu-mobile-toggler d-xl-none rounded-1">
-    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-danger p-2 rounded-1">
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-danger p-2 rounded-1" style="box-shadow:0 1px 20px 8px rgba(var(--bs-danger-rgb),0.45);">
         <i class="ri ri-menu-line icon-base"></i>
         <i class="ri ri-arrow-right-s-line icon-base"></i>
     </a>
