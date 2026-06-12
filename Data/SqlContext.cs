@@ -205,28 +205,30 @@ namespace Bewegdeal.Data
             {
                 e.ToTable(_prefix + "RequestProposals");
 
-                e.HasKey(a => a.Id);
-                e.Property(a => a.Id).ValueGeneratedOnAdd();
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Id).ValueGeneratedOnAdd();
 
-                e.HasIndex(a => a.Status);
-                e.HasIndex(a => a.RequestId);
-                e.HasIndex(a => a.CompanyId);
+                e.HasIndex(p => p.Status);
+                e.HasIndex(p => p.ChatId);
+                e.HasIndex(p => p.RequestId);
+                e.HasIndex(p => p.CompanyId);
 
-                e.Property(a => a.RequestId).IsRequired();
-                e.Property(a => a.CompanyId).IsRequired();
-                e.Property(a => a.CreateDate).IsRequired();
-                e.Property(a => a.Cost).IsRequired().HasPrecision(18, 2);
-                e.Property(a => a.Currency).IsRequired().HasMaxLength(4);
-                e.Property(a => a.ServiceTerms).HasMaxLength(256).IsRequired(false);
-                e.Property(a => a.Status).IsRequired().HasMaxLength(16);
-                e.Property(a => a.ReactionDate).IsRequired(false);
-                e.Property(a => a.ReactionReason).IsRequired(false).HasMaxLength(1024);
-                e.Property(a => a.Date).IsRequired(true)
+                e.Property(p => p.ChatId).IsRequired(false);
+                e.Property(p => p.RequestId).IsRequired();
+                e.Property(p => p.CompanyId).IsRequired();
+                e.Property(p => p.CreateDate).IsRequired();
+                e.Property(p => p.Cost).IsRequired().HasPrecision(18, 2);
+                e.Property(p => p.Currency).IsRequired().HasMaxLength(4);
+                e.Property(p => p.ServiceTerms).HasMaxLength(256).IsRequired(false);
+                e.Property(p => p.Status).IsRequired().HasMaxLength(16);
+                e.Property(p => p.ReactionDate).IsRequired(false);
+                e.Property(p => p.ReactionReason).IsRequired(false).HasMaxLength(1024);
+                e.Property(p => p.Date).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
                         v => v.HasValue ? DateOnly.FromDateTime(v.Value) : null
                     );
-                e.Property(a => a.Time).IsRequired(true)
+                e.Property(p => p.Time).IsRequired(true)
                     .HasConversion(
                         v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null

@@ -68,12 +68,13 @@ namespace Bewegdeal.Services
                 return null;
             }
 
-            if (chat is not null && chat?.CompanyId != userId && chat?.CustomerId != userId)
+            if (chat?.CompanyId != userId && chat?.CustomerId != userId)
             {
                 return null;
             }
 
             var messages = await ChatService.LoadMessages(chat?.Id ?? 0);
+            var proposals = await RequestService.LoadProposals(request.Id, chat?.Id ?? 0);
 
             return new ChatHistoryModel
             {
@@ -85,7 +86,8 @@ namespace Bewegdeal.Services
                 OtherPartyName = "OTHER",
                 OtherPartyInitials = "O P",
                 OtherPartyPictureUrl = null,
-                Messages = messages
+                Messages = messages,
+                Proposals = proposals.ToDictionary(p => p.Id)
             };
         }
 
@@ -108,11 +110,13 @@ namespace Bewegdeal.Services
             var request = await RequestService.Get(model.RequestNumber ?? "-", [nameof(RequestEntity.Id)]);
             var chat = await ChatService.GetOngoing(null, request?.Id ?? 0);
 
+            model.ChatId = chat?.Id ?? 0;
             model.RequestId = request?.Id ?? 0;
             var proposal = await RequestService.CreateProposal(userId, model);
 
             if (proposal is not null && chat?.CompanyId == userId)
             {
+                await ChatHubService.Send(userId, chat, "Kindly, consider my proposal");
                 await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id);
             }
         }
@@ -127,14 +131,29 @@ namespace Bewegdeal.Services
                 await RequestService.UpdateProposal(proposalId, accepted, reason);
                 if (accepted)
                 {
-                    await ChatHubService.Send(userId, chat, "Deal, i accept");
+                    await ChatHubService.Send(userId, chat, "Deal, i accept!");
                 }
                 else
                 {
-                    await ChatHubService.Send(userId, chat, "I have to reject");
+                    await ChatHubService.Send(userId, chat, "Sorry, i have to reject");
                     await ChatHubService.Send(userId, chat, reason ?? "");
                 }
             }
+        }
+
+        public async Task<RequestProposalEntity?> GetProposal(long proposalId)
+        {
+            return await RequestService.GetProposal(
+                proposalId,
+                [
+                    nameof(RequestProposalEntity.Id),
+                    nameof(RequestProposalEntity.Cost),
+                    nameof(RequestProposalEntity.Currency),
+                    nameof(RequestProposalEntity.Date),
+                    nameof(RequestProposalEntity.Time),
+                    nameof(RequestProposalEntity.Status),
+                ]
+            );
         }
 
     }

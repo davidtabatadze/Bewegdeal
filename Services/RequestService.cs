@@ -45,8 +45,9 @@ namespace Bewegdeal.Services
 
             return await RequestProposalRepository.Create(new RequestProposalEntity
             {
-                RequestId = model.RequestId,
                 CompanyId = userId,
+                ChatId = model.ChatId,
+                RequestId = model.RequestId,
                 CreateDate = DateTime.Now,
                 Cost = model.Cost,
                 Currency = model.Currency,
@@ -102,9 +103,6 @@ namespace Bewegdeal.Services
         public async Task<RequestEntity?> Get(long id, string[]? properties = null)
             => await Get(new RequestFilter { Id = id }, properties);
 
-        public async Task<List<RequestEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
-            => await RequestRepository.Load<RequestEntity>(ids, properties);
-
         public async Task<RequestEntity?> Get(string number, string[]? properties = null)
             => await Get(new RequestFilter { Number = number ?? "-" }, properties);
 
@@ -116,6 +114,12 @@ namespace Bewegdeal.Services
 
         public async Task<RequestProposalEntity?> GetProposal(long id, string[]? properties = null)
             => await RequestProposalRepository.Get<RequestProposalEntity>(id, properties);
+
+        public async Task<List<RequestProposalEntity>> LoadProposals(long? requestId = null, long? chatId = null)
+            => await RequestProposalRepository.Load(requestId, chatId);
+
+        public async Task<List<RequestEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
+            => await RequestRepository.Load<RequestEntity>(ids, properties);
 
         public async Task<GenericResultModel<dynamic>> LoadGrid(long userId)
         {

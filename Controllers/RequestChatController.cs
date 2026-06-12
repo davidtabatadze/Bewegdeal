@@ -72,4 +72,15 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
         return Json(GenericResultModel.Ok());
     }
 
+    [HttpGet]
+    public async Task<IActionResult> ProposalCard(long proposalId)
+    {
+        var model = await RequestChatService.GetProposal(proposalId);
+        if (model is null)
+        {
+            return Content("");
+        }
+        return PartialView("~/Views/Chat/_ProposalCard.cshtml", model);
+    }
+
 }

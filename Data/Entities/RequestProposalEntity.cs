@@ -6,6 +6,7 @@ namespace Bewegdeal.Data.Entities
     public class RequestProposalEntity : IEntity
     {
         public long Id { get; set; }
+        public long? ChatId { get; set; }
         public long RequestId { get; set; }
         public long CompanyId { get; set; }
         public DateTime CreateDate { get; set; }

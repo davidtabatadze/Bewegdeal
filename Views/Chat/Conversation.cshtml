@@ -1,5 +1,11 @@
+@using Bewegdeal.Data.Entities
 @using Bewegdeal.Enums
+@using System.Text.RegularExpressions
 @model Bewegdeal.Models.ChatHistoryModel
+
+@{
+    var proposalRegex = new Regex(@"^#bewegdeal-proposal-(\d+)$");
+}
 
 <style>
     .chat-bubble-tail {
@@ -117,6 +123,10 @@ else
                     {
                         var isMine = msg.SenderId == Model.ViewerId;
                         var msgDay = msg.SentDate.ToString("yyyy-MM-dd");
+                        var proposalMatch = proposalRegex.Match(msg.Content);
+                        RequestProposalEntity? proposalCard = null;
+                        var isProposal = proposalMatch.Success &&
+                                         Model.Proposals.TryGetValue(long.Parse(proposalMatch.Groups[1].Value), out proposalCard);
                         if (lastDay != msgDay)
                         {
                             lastDay = msgDay;
@@ -128,18 +138,27 @@ else
                             <div class="d-flex overflow-hidden">
                                 @if (isMine)
                                 {
-                                    <div class="chat-message-wrapper flex-grow-1">
-                                        <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")@(isAdminView && msg.IsFraud ? "border-left:3px solid var(--bs-danger);" : "")">
-                                            <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@(isAdminView ? "width:45px;" : "")"></span></p>
-                                            <span class="chat-bubble-meta">
-                                                @if (!isAdminView)
-                                                {
-                                                    <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-warning" : "")"></i>
-                                                }
-                                                <small>@msg.SentDate.ToString("HH:mm")</small>
-                                            </span>
+                                    @if (isProposal)
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
                                         </div>
-                                    </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")@(isAdminView && msg.IsFraud ? "border-left:3px solid var(--bs-danger);" : "")">
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@(isAdminView ? "width:45px;" : "")"></span></p>
+                                                <span class="chat-bubble-meta">
+                                                    @if (!isAdminView)
+                                                    {
+                                                        <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-warning" : "")"></i>
+                                                    }
+                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
                                     <div class="user-avatar flex-shrink-0 ms-2">
                                         <div class="avatar avatar-sm">
                                             @if (Model.ViewerPictureUrl is not null)
@@ -172,14 +191,23 @@ else
                                             }
                                         </div>
                                     </div>
-                                    <div class="chat-message-wrapper flex-grow-1">
-                                        <div class="chat-message-text p-2" style="@(isAdminView && msg.IsFraud ? "border-right:3px solid var(--bs-danger);" : "")">
-                                            <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
-                                            <span class="chat-bubble-meta">
-                                                <small>@msg.SentDate.ToString("HH:mm")</small>
-                                            </span>
+                                    @if (isProposal)
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
                                         </div>
-                                    </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="chat-message-wrapper flex-grow-1">
+                                            <div class="chat-message-text p-2" style="@(isAdminView && msg.IsFraud ? "border-right:3px solid var(--bs-danger);" : "")">
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
+                                                <span class="chat-bubble-meta">
+                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
                                 }
                             </div>
                         </li>

@@ -13,5 +13,6 @@ namespace Bewegdeal.Models
         public string ViewerInitials { get; set; } = string.Empty;
         public string? ViewerPictureUrl { get; set; }
         public List<ChatMessageEntity> Messages { get; set; } = [];
+        public Dictionary<long, RequestProposalEntity> Proposals { get; set; } = [];
     }
 }
