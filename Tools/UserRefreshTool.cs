@@ -19,12 +19,12 @@ namespace Bewegdeal.Tools
             if (context.User.Identity?.IsAuthenticated == true)
             {
                 var status = UserStatusEnum.Active;
-                var forceTC = context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted) != "true";
+                var forceTC = context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted)?.ToLower() != "true";
                 var parse = long.TryParse(context.User.FindFirstValue(IdentityFieldEnum.Id), out var userId);
 
                 if (parse)
                 {
-                    var cacheKey = CacheKeyTool.Get("bewegdeal_user", userId);
+                    var cacheKey = CacheKeyTool.Get(CacheKeyEnum.User, userId);
                     if (!cache.TryGetValue(cacheKey, out _) || forceTC)
                     {
                         var settings = await settingService.Get();
@@ -54,7 +54,7 @@ namespace Bewegdeal.Tools
                     return;
                 }
 
-                if (!forceTC && context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted) != "true")
+                if (!forceTC && context.User.FindFirstValue(IdentityFieldEnum.TermsAccepted)?.ToLower() != "true")
                 {
                     await context.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,

@@ -5,11 +5,12 @@ using Bewegdeal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Cryptography;
 
 namespace Bewegdeal.Controllers;
 
-public class AccountController(AccountService AccountService) : XBaseController
+public class AccountController(AccountService AccountService, IMemoryCache Cache) : XBaseController
 {
 
     #region Login
@@ -55,11 +56,13 @@ public class AccountController(AccountService AccountService) : XBaseController
             }
         );
 
-        if (!user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
-        {
-            var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";
-            return RedirectToAction(action, "HowItWorks");
-        }
+        //if (!user.AcquaintedHIW && user.Role != UserRoleEnum.Administrator)
+        //{
+        //    var action = user.Role == UserRoleEnum.Customer ? "Customer" : "Company";
+        //    return RedirectToAction(action, "HowItWorks");
+        //}
+
+        Cache.Remove(CacheKeyTool.Get(CacheKeyEnum.User, user.Id));
 
         return RedirectToAction("Index", "Home");
     }
@@ -72,6 +75,7 @@ public class AccountController(AccountService AccountService) : XBaseController
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        Cache.Remove(CacheKeyTool.Get(CacheKeyEnum.User, UserId));
         return RedirectToAction("Index", "Landing");
     }
 

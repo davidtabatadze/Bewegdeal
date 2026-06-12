@@ -24,7 +24,7 @@ namespace Bewegdeal.Tools
                 new(IdentityFieldEnum.AvatarUrl, avatarUrl ?? string.Empty),
                 new(IdentityFieldEnum.AcquaintedHIW, user.AcquaintedHIW ? "true" : "false"),
                 new(IdentityFieldEnum.TermsAcceptDate, user.TermsAndConditionsAcceptDate.ToString("o")),
-                new(IdentityFieldEnum.TermsAccepted, "true")
+                new(IdentityFieldEnum.TermsAccepted, "false")
             };
 
             return new ClaimsPrincipal(

@@ -33,16 +33,17 @@ namespace Bewegdeal.Controllers
             => User.FindFirstValue(type)!.ToLower() == value.ToString()!.ToLower();
 
         protected async Task RefreshClaim(string type, object? value)
-            => await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(
-                    new ClaimsIdentity(
-                        User.Claims
-                            .Where(c => c.Type != type)
-                            .Append(new Claim(type, value is null ? string.Empty : value.ToString()!)),
-                        CookieAuthenticationDefaults.AuthenticationScheme
-                    )
+        {
+            var principal = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    User.Claims
+                        .Where(c => c.Type != type)
+                        .Append(new Claim(type, value is null ? string.Empty : value.ToString()!)),
+                    CookieAuthenticationDefaults.AuthenticationScheme
                 )
             );
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            HttpContext.User = principal;
+        }
     }
 }

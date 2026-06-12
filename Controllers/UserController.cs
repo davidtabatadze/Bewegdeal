@@ -102,7 +102,7 @@ namespace Bewegdeal.Controllers
                 Id = UserId,
                 Theme = theme
             });
-            await RefreshClaim(IdentityFieldEnum.Theme, true);
+            await RefreshClaim(IdentityFieldEnum.Theme, theme);
 
             return Ok();
         }
@@ -188,7 +188,7 @@ namespace Bewegdeal.Controllers
             {
                 Id = UserId
             });
-            await RefreshClaim(IdentityFieldEnum.TermsAcceptDate, DateTime.Now.AddMinutes(5));
+            await RefreshClaim(IdentityFieldEnum.TermsAcceptDate, DateTime.Now.AddMinutes(5).ToString("o"));
             await RefreshClaim(IdentityFieldEnum.TermsAccepted, true);
             return RedirectToAction("Index", "Home");
         }
