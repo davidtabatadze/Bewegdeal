@@ -70,6 +70,11 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.RequestId == filter.RequestId.Value);
             }
 
+            if (filter.CompanyId.HasValue)
+            {
+                query = query.Where(r => r.CompanyId == filter.CompanyId.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Key))
             {
                 query = query.Where(r => r.Key == filter.Key);

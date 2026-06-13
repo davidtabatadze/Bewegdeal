@@ -3,14 +3,130 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="row g-6">
-
-    <div class="col-12">
+<!-- Row 1: Chat Stats -->
+<div class="row g-6 mb-6">
+    <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Company Dashboard</h5>
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Total Chats</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.TotalChats</h4>
+                        </div>
+                        <small class="mb-0">All initiated chats</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-primary rounded">
+                            <div class="icon-base ri ri-chat-1-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Ongoing Chats</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.OngoingChats</h4>
+                        </div>
+                        <small class="mb-0">Active negotiations</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-info rounded">
+                            <div class="icon-base ri ri-message-2-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Agreed Deals</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.AgreedDeals</h4>
+                        </div>
+                        <small class="mb-0">Successfully agreed</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-success rounded">
+                            <div class="icon-base ri ri-handshake-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Cancelled Chats</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.CancelledChats</h4>
+                        </div>
+                        <small class="mb-0">Negotiations ended</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-danger rounded">
+                            <div class="icon-base ri ri-close-circle-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Row 2: My Requests + Potential Requests -->
+<div class="row g-6">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">My Requests</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.MyRequests</h4>
+                        </div>
+                        <small class="mb-0">Requests assigned to me</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <div class="icon-base ri ri-file-list-3-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="me-1">
+                        <p class="text-heading mb-1">Potential Requests</p>
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-1 me-2">@ViewBag.PotentialRequests</h4>
+                        </div>
+                        <small class="mb-0">Matching your services</small>
+                    </div>
+                    <div class="avatar">
+                        <div class="avatar-initial bg-label-secondary rounded">
+                            <div class="icon-base ri ri-search-eye-line icon-26px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
