@@ -82,7 +82,7 @@ namespace Bewegdeal.Services
             };
         }
 
-        public async Task<ChatHistoryModel?> GetAdminConversation(string key)
+        public async Task<ChatHistoryModel?> GetConversation(string key)
         {
             var chat = await Get(key, [
                 nameof(ChatEntity.Id), nameof(ChatEntity.Key),
@@ -91,6 +91,7 @@ namespace Bewegdeal.Services
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
+            var proposals = await RequestService.LoadProposals(null, chat.Id);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
@@ -110,7 +111,8 @@ namespace Bewegdeal.Services
                 OtherPartyName = companyAvatar.Name,
                 OtherPartyInitials = companyAvatar.Initials,
                 OtherPartyPictureUrl = companyAvatar.Url,
-                Messages = messages
+                Messages = messages,
+                Proposals = proposals.ToDictionary(p => p.Id)
             };
         }
     }

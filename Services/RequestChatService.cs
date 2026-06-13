@@ -5,7 +5,11 @@ using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
-    public class RequestChatService(RequestService RequestService, ChatService ChatService, ChatHubService ChatHubService)
+    public class RequestChatService(
+        RequestService RequestService,
+        ChatService ChatService,
+        ChatHubService ChatHubService,
+        FileService2 FileService)
     {
 
         public async Task<string> GetMode(string requestNumber, long userId, string userRole)
@@ -143,7 +147,7 @@ namespace Bewegdeal.Services
 
         public async Task<RequestProposalEntity?> GetProposal(long proposalId)
         {
-            return await RequestService.GetProposal(
+            var proposal = await RequestService.GetProposal(
                 proposalId,
                 [
                     nameof(RequestProposalEntity.Id),
@@ -152,8 +156,12 @@ namespace Bewegdeal.Services
                     nameof(RequestProposalEntity.Date),
                     nameof(RequestProposalEntity.Time),
                     nameof(RequestProposalEntity.Status),
+                    nameof(RequestProposalEntity.ServiceTerms),
                 ]
             );
+
+            proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
+            return proposal;
         }
 
     }
