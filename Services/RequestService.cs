@@ -54,7 +54,7 @@ namespace Bewegdeal.Services
                 Date = DateOnly.Parse(model.Date!),
                 Time = TimeOnly.Parse(model.Time!),
                 Status = RequestProposalStatusEnum.Pending,
-                ServiceTerms = "aaa"
+                ServiceTerms = company.ServiceTerms
             });
         }
 
