@@ -10,7 +10,7 @@
     };
 }
 
-<div class="border border-@color rounded p-3 text-center" style="min-width:220px;max-width:320px;">
+<div class="border border-@color rounded p-3 text-center" data-proposal-card-id="@Model.Id" style="min-width:220px;max-width:320px;">
     <div class="d-flex align-items-center justify-content-center mb-1 gap-2">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Proposal</span>
@@ -35,7 +35,7 @@
     }
     @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer))
     {
-        <div class="d-flex justify-content-center gap-2 mt-3">
+        <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
             <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
                   data-proposal-id="@Model.Id"
                   data-bs-toggle="tooltip" data-bs-placement="left" title="Accept">
