@@ -80,6 +80,11 @@ namespace Bewegdeal.Services
             var messages = await ChatService.LoadMessages(chat?.Id ?? 0);
             var proposals = await RequestService.LoadProposals(request.Id, chat?.Id ?? 0);
 
+            foreach (var proposal in proposals)
+            {
+                proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
+            }
+
             return new ChatHistoryModel
             {
                 Mode = request.Status == RequestStatusEnum.Pending ? ChatModeEnum.Initiate : ChatModeEnum.Ongoing,

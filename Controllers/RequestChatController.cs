@@ -80,7 +80,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
         {
             return Content("");
         }
-        return PartialView("~/Views/Chat/_ProposalCard.cshtml", model);
+        return PartialView("~/Views/Proposal/_ProposalCard.cshtml", model);
     }
 
 }
