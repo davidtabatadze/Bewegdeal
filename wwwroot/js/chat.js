@@ -69,56 +69,11 @@
         var rejectBtn = e.target.closest('.proposal-reject-btn');
         if (!acceptBtn && !rejectBtn) { return; }
 
-        var accepted = !!acceptBtn;
+        var accepted   = !!acceptBtn;
         var proposalId = (acceptBtn || rejectBtn).dataset.proposalId;
 
-        Swal.fire({
-            title: accepted ? 'Accept proposal?' : 'Reject proposal?',
-            html: accepted
-                ?
-                '<div class="alert alert-danger alert-dismissible m-2" role="alert">' +
-                '<div class="d-flex align-items-center mb-2">' +
-                '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
-                '<strong>By accepting the proposal, you accept:</strong>' +
-                '</div>' +
-                '<ul class="mb-0">' +
-                '<li>Proposed cost.</li>' +
-                '<li>Proposed date and time.</li>' +
-                '<li>Proposed service terms.</li>' +
-                '</ul>' +
-                '</div>'
-                :
-                '<textarea id="swal-reject-reason" class="form-control mt-1" rows="3" ' +
-                'placeholder="Reason for rejection (optional)"></textarea>',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: accepted ? 'Yes, accept' : 'Yes, reject',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                confirmButton: accepted ? 'btn btn-success me-3' : 'btn btn-danger me-3',
-                cancelButton: 'btn btn-label-secondary'
-            },
-            buttonsStyling: false
-        }).then(function (result) {
-            if (!result.isConfirmed) { return; }
-
-            var reason = accepted ? null : (document.getElementById('swal-reject-reason') || {}).value || null;
-
-            fetch('/RequestChat/ProposalReact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id=' + encodeURIComponent(proposalId) +
-                    '&accepted=' + encodeURIComponent(accepted) +
-                    (reason ? '&reason=' + encodeURIComponent(reason) : '')
-            })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (!data.success) {
-                        Block.remove('#chatCard');
-                    }
-                })
-                .catch(function () { Block.remove('#chatCard'); });
-        });
+        if (!window.ChatProposalReact) { return; }
+        window.ChatProposalReact.open(proposalId, accepted);
     });
 
     // ── Cancel flow ──────────────────────────────────────────────────────────
