@@ -74,6 +74,42 @@ namespace Bewegdeal.Data
                 }
             }
 
+            // Add columns that were introduced after the initial table creation.
+            // ALTER TABLE ADD COLUMN fails silently (try/catch) when the column already exists.
+            var tablePrefix = _prefix;
+            var columnMigrations = new[]
+            {
+                // Users
+                ($"{tablePrefix}Users", "ServiceTermsFileId",         "BIGINT NULL"),
+                ($"{tablePrefix}Users", "ProfilePictureFileId",       "BIGINT NULL"),
+                ($"{tablePrefix}Users", "Theme",                      "VARCHAR(8) NOT NULL DEFAULT 'light'"),
+                ($"{tablePrefix}Users", "AcquaintedHIW",              "TINYINT(1) NOT NULL DEFAULT 0"),
+
+                // Settings
+                ($"{tablePrefix}Settings", "TermsAndConditionsFileId",   "BIGINT NOT NULL DEFAULT 0"),
+                ($"{tablePrefix}Settings", "RequestNegotiationMinutes",  "SMALLINT NOT NULL DEFAULT 30"),
+                ($"{tablePrefix}Settings", "RequestImageMaxCount",       "SMALLINT NOT NULL DEFAULT 5"),
+                ($"{tablePrefix}Settings", "RequestImageMaxSize",        "SMALLINT NOT NULL DEFAULT 10"),
+                ($"{tablePrefix}Settings", "RequestVideoMaxCount",       "SMALLINT NOT NULL DEFAULT 2"),
+                ($"{tablePrefix}Settings", "RequestVideoMaxSize",        "SMALLINT NOT NULL DEFAULT 50"),
+
+                // Requests
+                ($"{tablePrefix}Requests", "AgreementId",               "BIGINT NULL"),
+                ($"{tablePrefix}Requests", "Cost",                      "DECIMAL(18,2) NOT NULL DEFAULT 0"),
+                ($"{tablePrefix}Requests", "Currency",                  "VARCHAR(4) NOT NULL DEFAULT 'EUR'"),
+                ($"{tablePrefix}Requests", "ASAP",                      "TINYINT(1) NOT NULL DEFAULT 0"),
+                ($"{tablePrefix}Requests", "Date",                      "DATETIME NULL"),
+                ($"{tablePrefix}Requests", "Time",                      "TIME NULL"),
+            };
+
+            foreach (var (table, column, definition) in columnMigrations)
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = $"ALTER TABLE `{table}` ADD COLUMN `{column}` {definition}";
+                try { await cmd.ExecuteNonQueryAsync(); }
+                catch { /* column already exists — ignore */ }
+            }
+
             await connection.CloseAsync();
         }
 
