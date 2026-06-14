@@ -130,9 +130,14 @@ namespace Bewegdeal.Services
             var proposal = await RequestService.GetProposal(proposalId);
             var chat = await ChatService.GetOngoing(null, proposal?.RequestId ?? 0);
 
-            if (proposal?.Status == RequestProposalStatusEnum.Pending)
+            if (chat is not null && proposal?.Status == RequestProposalStatusEnum.Pending)
             {
-                await RequestService.UpdateProposal(proposalId, accepted, reason);
+                reason = accepted ? null : reason;
+                var status = accepted ? RequestProposalStatusEnum.Accepted : RequestProposalStatusEnum.Rejected;
+
+                await RequestService.UpdateProposal(proposalId, status, reason);
+                await ChatHubService.NotifyProposal(chat.Key, proposalId, status);
+
                 if (accepted)
                 {
                     await ChatHubService.Send(userId, chat, "Deal, i accept!");

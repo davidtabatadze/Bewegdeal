@@ -86,14 +86,14 @@ namespace Bewegdeal.Services
         public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
             => await RequestRepository.Update(area, update);
 
-        public async Task UpdateProposal(long id, bool accepted, string? reason = null)
+        public async Task UpdateProposal(long id, string status, string? reason = null)
             => await RequestProposalRepository.Update(
                     RequestProposalUpdateAreaEnum.Status,
                     new RequestProposalEntity
                     {
                         Id = id,
                         ReactionReason = reason,
-                        Status = accepted ? RequestProposalStatusEnum.Accepted : RequestProposalStatusEnum.Rejected
+                        Status = status
                     }
                );
 

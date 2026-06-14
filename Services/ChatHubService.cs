@@ -119,6 +119,11 @@ namespace Bewegdeal.Services
             //}
         }
 
+        public async Task NotifyProposal(string chatKey, long proposalId, string proposalStatus)
+            => await HubContext.Clients
+                               .Group(ChatTool.GroupName(chatKey))
+                               .SendAsync("ProposalUpdated", new { proposalId, proposalStatus });
+
         private static bool IsParticipant(ChatEntity chat, long userId)
             => chat.CustomerId == userId || chat.CompanyId == userId;
     }

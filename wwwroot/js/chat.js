@@ -104,7 +104,6 @@
 
             var reason = accepted ? null : (document.getElementById('swal-reject-reason') || {}).value || null;
 
-            Block.pulse('#chatCard');
             fetch('/RequestChat/ProposalReact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -114,10 +113,7 @@
             })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (data.success) {
-                        contextLoaded = false;
-                        loadConversation();
-                    } else {
+                    if (!data.success) {
                         Block.remove('#chatCard');
                     }
                 })
@@ -271,6 +267,27 @@
             if (msg.senderId !== viewerId) {
                 connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
             }
+        });
+
+        connection.on('ProposalUpdated', function (data) {
+            var card = document.querySelector('[data-proposal-card-id="' + data.proposalId + '"]');
+            if (!card) { return; }
+            var color = data.proposalStatus === 'accepted' ? 'success'
+                      : data.proposalStatus === 'rejected' ? 'danger'
+                      : 'warning';
+            card.classList.remove('border-warning', 'border-success', 'border-danger');
+            card.classList.add('border-' + color);
+            var icon = card.querySelector('.ri-shake-hands-line');
+            if (icon) {
+                icon.classList.remove('text-warning', 'text-success', 'text-danger');
+                icon.classList.add('text-' + color);
+            }
+            var hr = card.querySelector('hr');
+            if (hr) {
+                hr.className = 'border border-' + color + ' mt-1 mb-3';
+            }
+            var actions = card.querySelector('.proposal-actions');
+            if (actions) { actions.remove(); }
         });
 
         connection.on('ChatCancelled', function () {

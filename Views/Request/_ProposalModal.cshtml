@@ -144,6 +144,7 @@ window.ChatProposal = (function () {
         if (hasErrors) { return; }
 
         if (sendBtn) { sendBtn.disabled = true; }
+        Block.pulse('#chatProposalModal .modal-content');
 
         fetch('/RequestChat/Propose', {
             method: 'POST',
@@ -155,6 +156,7 @@ window.ChatProposal = (function () {
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                Block.remove('#chatProposalModal .modal-content');
                 if (sendBtn) { sendBtn.disabled = false; }
                 if (data.success) {
                     if (modal) { modal.hide(); }
@@ -164,6 +166,7 @@ window.ChatProposal = (function () {
                 }
             })
             .catch(function () {
+                Block.remove('#chatProposalModal .modal-content');
                 if (sendBtn) { sendBtn.disabled = false; }
             });
     }
