@@ -2,20 +2,20 @@
 @model Bewegdeal.Data.Entities.RequestProposalEntity
 
 @{
-    var borderClass = Model.Status switch
+    var color = Model.Status switch
     {
-        RequestProposalStatusEnum.Accepted => "border-success",
-        RequestProposalStatusEnum.Rejected => "border-danger",
-        _ => "border-warning"
+        RequestProposalStatusEnum.Accepted => "success",
+        RequestProposalStatusEnum.Rejected => "danger",
+        _ => "warning"
     };
 }
 
-<div class="border @borderClass rounded p-3 text-center" style="min-width:220px;max-width:320px;">
+<div class="border border-@color rounded p-3 text-center" style="min-width:220px;max-width:320px;">
     <div class="d-flex align-items-center justify-content-center mb-1 gap-2">
-        <i class="icon-base ri ri-shake-hands-line text-warning icon-28px"></i>
+        <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Proposal</span>
     </div>
-    <hr class="border @borderClass mt-1 mb-3" />
+    <hr class="border border-@color mt-1 mb-3" />
     <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
         <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
         <span class="fw-semibold">@Model.Cost.ToString("N2")</span>@Model.Currency
