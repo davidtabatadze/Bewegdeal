@@ -20,8 +20,8 @@ namespace Bewegdeal.Services
                     new RequestProposalEntity
                     {
                         Id = id,
-                        ReactionReason = reason,
-                        Status = status
+                        Status = status,
+                        ReactionReason = reason
                     }
                );
     }

@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en"
       class="layout-menu-fixed layout-navbar-hidden"
@@ -139,7 +140,7 @@
         </script>
     }
 
-    <script src="~/js/pwa.js"></script>
+    @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
 
 </body>
 </html>

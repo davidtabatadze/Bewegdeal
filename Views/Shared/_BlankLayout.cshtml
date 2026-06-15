@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en"
       class="customizer-hide"
@@ -66,7 +67,7 @@
 
   @RenderSection("PageScripts", required: false)
 
-  <script src="~/js/pwa.js"></script>
+  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
 
 </body>
 </html>

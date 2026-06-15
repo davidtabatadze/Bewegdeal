@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en" class="layout-navbar-fixed layout-wide"
       data-skin="default" data-bs-theme="light"
@@ -99,7 +100,7 @@
 
   @RenderSection("PageScripts", required: false)
 
-  <script src="~/js/pwa.js"></script>
+  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
 
   <!-- Footer -->
   @await Html.PartialAsync("Sections/Footer/_FooterLanding")

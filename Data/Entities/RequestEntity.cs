@@ -1,5 +1,4 @@
 using Bewegdeal.Data.Base;
-using Bewegdeal.Enums;
 
 namespace Bewegdeal.Data.Entities
 {
@@ -8,7 +7,7 @@ namespace Bewegdeal.Data.Entities
         public long Id { get; set; }
         public string Number { get; set; } = "";
         public DateTime CreateDate { get; set; }
-        public string Status { get; set; } = RequestStatusEnum.Pending;
+        public string Status { get; set; } = "";
         public string Service { get; set; } = "";
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";

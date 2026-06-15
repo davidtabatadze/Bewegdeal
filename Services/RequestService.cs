@@ -10,7 +10,6 @@ namespace Bewegdeal.Services
     public class RequestService(
         IRequestRepository RequestRepository,
         IRequestFileRepository RequestFileRepository,
-        IRequestProposalRepository RequestProposalRepository,
         UserService UserService,
         FileService2 FileService,
         SettingService SettingService)
@@ -318,10 +317,10 @@ namespace Bewegdeal.Services
             {
                 Number = Guid.NewGuid().ToString("N"),
                 CreateDate = DateTime.UtcNow,
-                Status = RequestStatusEnum.Pending,
                 RequesterId = userId
             };
 
+            entity.Status = RequestStatusEnum.Pending;
             entity.Service = request.Service;
             entity.Title = request.Title.Trim();
             entity.Description = request.Description?.Trim() ?? "";

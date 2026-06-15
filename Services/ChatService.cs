@@ -119,6 +119,7 @@ namespace Bewegdeal.Services
                 Mode = ChatModeEnum.Ongoing,
                 ChatKey = chat.Key,
                 ChatStatus = chat.Status,
+                RequestStatus = "not-important-here",
                 ViewerId = chat.CustomerId,
                 ViewerInitials = customerAvatar.Initials,
                 ViewerPictureUrl = customerAvatar.Url,
@@ -126,7 +127,8 @@ namespace Bewegdeal.Services
                 OtherPartyInitials = companyAvatar.Initials,
                 OtherPartyPictureUrl = companyAvatar.Url,
                 Messages = messages,
-                Proposals = proposals.ToDictionary(p => p.Id)
+                Proposals = proposals.ToDictionary(p => p.Id),
+                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }
     }

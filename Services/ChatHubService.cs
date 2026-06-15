@@ -37,12 +37,12 @@ namespace Bewegdeal.Services
                 return;
             }
 
-            if (chat is null || !IsParticipant(chat, userId) || chat.Status != ChatStatusEnum.Ongoing)
+            if (chat is null || !IsParticipant(chat, userId) || chat.Status == ChatStatusEnum.Cancelled)
             {
                 return;
             }
 
-            var isFraud = await FraudWordService.IsFraud(content);
+            var isFraud = chat.Status == ChatStatusEnum.Ongoing && await FraudWordService.IsFraud(content);
 
             var message = await ChatService.AddMessage(new ChatMessageEntity
             {

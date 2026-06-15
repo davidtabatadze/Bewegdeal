@@ -22,13 +22,13 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [Authorize(Roles = UserRoleEnum.Company)]
     public async Task<IActionResult> Initiate(string requestNumber)
     {
-        return Json(await RequestChatService.Initiate(requestNumber, UserId));
+        return Json(await RequestChatService.Initiate(requestNumber, UserId, UserRoleEnum.Company));
     }
 
     [HttpGet]
     public async Task<IActionResult> Conversation(string requestNumber)
     {
-        var conversation = await RequestChatService.Conversation(requestNumber, UserId);
+        var conversation = await RequestChatService.Conversation(requestNumber, UserId, UserRole);
         return PartialView("~/Views/Chat/Conversation.cshtml", conversation);
     }
 

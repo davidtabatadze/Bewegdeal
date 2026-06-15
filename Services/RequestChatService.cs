@@ -52,9 +52,9 @@ namespace Bewegdeal.Services
             return (mode, request, requestChat);
         }
 
-        public async Task<GenericResultModel> Initiate(string requestNumber, long userId)
+        public async Task<GenericResultModel> Initiate(string requestNumber, long userId, string userRole)
         {
-            var data = await GetMode(requestNumber, userId, UserRoleEnum.Company);
+            var data = await GetMode(requestNumber, userId, userRole);
 
             if (data.request is null || data.mode != ChatModeEnum.Initiate)
             {
@@ -81,9 +81,9 @@ namespace Bewegdeal.Services
             return GenericResultModel.Ok();
         }
 
-        public async Task<ChatHistoryModel?> Conversation(string requestNumber, long userId)
+        public async Task<ChatHistoryModel?> Conversation(string requestNumber, long userId, string userRole)
         {
-            var data = await GetMode(requestNumber, userId, UserRoleEnum.Company);
+            var data = await GetMode(requestNumber, userId, userRole);
 
             if (data.mode != ChatModeEnum.Ongoing)
             {
@@ -124,6 +124,7 @@ namespace Bewegdeal.Services
                 Mode = ChatModeEnum.Ongoing,
                 ChatKey = data.chat?.Key ?? "",
                 ChatStatus = data.chat?.Status ?? "",
+                RequestStatus = data.request?.Status ?? "",
                 ViewerId = userId,
                 ViewerInitials = viewerAvatar.Name,
                 ViewerPictureUrl = viewerAvatar.Url,
@@ -131,7 +132,8 @@ namespace Bewegdeal.Services
                 OtherPartyInitials = otherPartyAvatar.Initials,
                 OtherPartyPictureUrl = otherPartyAvatar.Url,
                 Messages = messages,
-                Proposals = proposals.ToDictionary(p => p.Id)
+                Proposals = proposals.ToDictionary(p => p.Id),
+                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }
 
@@ -151,7 +153,10 @@ namespace Bewegdeal.Services
 
         public async Task Propose(long userId, RequestProposalViewModel model)
         {
-            var request = await RequestService.Get(model.RequestNumber ?? "-", [nameof(RequestEntity.Id)]);
+            var request = await RequestService.Get(
+                model.RequestNumber ?? "-",
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]
+            );
             var chat = await ChatService.GetActual(model.RequestNumber ?? "-");
             var existing = await ProposalService.GetActual(chat?.Id ?? 0);
             var company = await UserService.Get(userId, [nameof(UserEntity.ServiceTerms)]);
@@ -196,7 +201,13 @@ namespace Bewegdeal.Services
                 var status = accepted ? RequestProposalStatusEnum.Accepted : RequestProposalStatusEnum.Rejected;
 
                 await ProposalService.Update(proposalId, status, reason);
-                await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat?.Id ?? 0, Status = ChatStatusEnum.Agreed });
+                if (accepted)
+                {
+                    await ChatService.Update(
+                        ChatUpdateAreaEnum.Status,
+                        new() { Id = chat?.Id ?? 0, Status = ChatStatusEnum.Agreed }
+                    );
+                }
                 await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposalId, status);
 
                 if (accepted)
