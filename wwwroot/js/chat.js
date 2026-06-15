@@ -30,8 +30,7 @@
     fetch('/RequestChat/Visibility?requestNumber=' + encodeURIComponent(requestNumber))
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            mode = data.mode || ChatMode.None;
-            if (mode === ChatMode.None) { return; }
+            if (!data) { return; }
             floatingBtn.style.display = '';
         })
         .catch(function (e) { console.error('Chat visibility failed:', e); });
@@ -118,8 +117,7 @@
         if (!btn) { return; }
 
         btn.disabled = true;
-        btn.innerHTML =
-            '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Starting…';
+        Block.pulse('#chatConversation');
 
         fetch('/RequestChat/Initiate', {
             method: 'POST',
@@ -129,18 +127,20 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (!data.success) {
+                    Block.remove('#chatConversation');
                     btn.disabled = false;
-                    btn.innerHTML =
-                        '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation';
+                    if (data.message) {
+                        new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
+                            .error(data.message);
+                    }
                     return;
                 }
                 contextLoaded = false;
                 loadConversation();
             })
             .catch(function () {
+                Block.remove('#chatConversation');
                 btn.disabled = false;
-                btn.innerHTML =
-                    '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation';
             });
     });
 

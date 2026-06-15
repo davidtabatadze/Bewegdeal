@@ -6,6 +6,7 @@ namespace Bewegdeal.Models
     {
         public string Mode { get; set; } = string.Empty;
         public string ChatKey { get; set; } = string.Empty;
+        public string ChatStatus { get; set; } = string.Empty;
         public string OtherPartyName { get; set; } = string.Empty;
         public string OtherPartyInitials { get; set; } = string.Empty;
         public string? OtherPartyPictureUrl { get; set; }

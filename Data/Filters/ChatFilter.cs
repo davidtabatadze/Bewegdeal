@@ -9,5 +9,7 @@ namespace Bewegdeal.Data.Filters
         public string? Fraud { get; set; }
         public string? Search { get; set; }
         public long? RequestId { get; set; }
+        public string? RequestNumber { get; set; }
+        public long? CompanyId { get; set; }
     }
 }

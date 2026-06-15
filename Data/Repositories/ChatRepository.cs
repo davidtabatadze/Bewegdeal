@@ -17,7 +17,7 @@ namespace Bewegdeal.Data.Repositories
                 case ChatUpdateAreaEnum.Status:
                     await Context.Chats.Where(c => c.Id == update.Id)
                                        .ExecuteUpdateAsync(c =>
-                                            c.SetProperty(p => p.Status, ChatStatusEnum.Cancelled)
+                                            c.SetProperty(p => p.Status, update.Status)
                                        );
                     break;
 
@@ -65,9 +65,19 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.Id == filter.Id.Value);
             }
 
+            if (filter.CompanyId.HasValue)
+            {
+                query = query.Where(r => r.CompanyId == filter.CompanyId.Value);
+            }
+
             if (filter.RequestId.HasValue)
             {
                 query = query.Where(r => r.RequestId == filter.RequestId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.RequestNumber))
+            {
+                query = query.Where(r => r.RequestNumber == filter.RequestNumber);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Key))
