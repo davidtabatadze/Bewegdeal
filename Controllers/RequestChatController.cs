@@ -14,10 +14,8 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [HttpGet]
     public async Task<IActionResult> Visibility(string requestNumber)
     {
-        return Json(new
-        {
-            mode = await RequestChatService.GetMode(requestNumber, UserId, UserRole)
-        });
+        var data = await RequestChatService.GetMode(requestNumber, UserId, UserRole);
+        return Json(data.mode != ChatModeEnum.None);
     }
 
     [HttpPost]
@@ -31,10 +29,6 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     public async Task<IActionResult> Conversation(string requestNumber)
     {
         var conversation = await RequestChatService.Conversation(requestNumber, UserId);
-        if (conversation is null)
-        {
-            return Content("");
-        }
         return PartialView("~/Views/Chat/Conversation.cshtml", conversation);
     }
 

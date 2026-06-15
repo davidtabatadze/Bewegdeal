@@ -25,34 +25,32 @@
     }
 </style>
 
-@if (Model.Mode == ChatModeEnum.Initiate)
+@if (Model.Mode != ChatModeEnum.Ongoing)
 {
+    var color = Model.Mode == ChatModeEnum.Initiate ? "primary" : "danger";
+    var icon = Model.Mode == ChatModeEnum.None ? "ri-error-warning-line" : "ri-wechat-line";
+    var text = Model.Mode switch
+    {
+        ChatModeEnum.Queued => "You are already negotiating another request. Try again when it's done.",
+        ChatModeEnum.Initiate => "Start a negotiation about this request?",
+        ChatModeEnum.Reserved => "The request is already being negotiated with another party. Try again later.",
+        _ => "Something went wrong. Please, try again later."
+    };
+
     <div id="chatConversation"
          data-mode="@Model.Mode"
          style="block-size:100%"
-         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column">
-        <div class="bg-label-primary p-8 rounded-circle">
-            <i class="icon-base ri ri-wechat-line icon-48px"></i>
+         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column p-12">
+        <div class="bg-label-@color p-8 rounded-circle">
+            <i class="icon-base ri @icon icon-48px"></i>
         </div>
-        @* <div class="avatar avatar-lg mb-4">
-            @if (Model.OtherPartyPictureUrl is not null)
-            {
-                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
-                     style="object-fit:cover;width:100%;height:100%;"
-                     alt="@Model.OtherPartyName" />
-            }
-            else
-            {
-                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
-                      style="display:flex;align-items:center;justify-content:center;">@Model.OtherPartyInitials</span>
-            }
-        </div>
-        <h6 class="mb-1">@Model.OtherPartyName</h6>
-        <p class="text-muted small mb-5">Start a conversation about this request?</p> *@
-        <p class="my-4">Start a conversation about this request?</p>
-        <button id="chatInitiateBtn" class="btn btn-primary">
-            <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
-        </button>
+        <p class="my-4">@text</p>
+        @if (Model.Mode == ChatModeEnum.Initiate)
+        {
+            <button id="chatInitiateBtn" class="btn btn-primary">
+                <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
+            </button>
+        }
     </div>
 }
 else
@@ -96,6 +94,7 @@ else
                     </div>
                 </div> *@
                 <div class="alert alert-danger alert-dismissible m-2" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="d-flex align-items-center mb-2">
                         <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                         <strong>Handle with care</strong>

@@ -279,10 +279,12 @@ namespace Bewegdeal.Data
 
                 e.HasIndex(c => c.Key).IsUnique();
                 e.HasIndex(c => c.RequestId);
+                e.HasIndex(c => c.RequestNumber);
                 e.HasIndex(c => c.Fraud);
                 e.HasIndex(c => c.Status);
 
                 e.Property(c => c.Key).IsRequired().HasMaxLength(32);
+                e.Property(r => r.RequestNumber).IsRequired().HasMaxLength(36);
                 e.Property(c => c.RequestId).IsRequired();
                 e.Property(c => c.CustomerId).IsRequired();
                 e.Property(c => c.CompanyId).IsRequired();
