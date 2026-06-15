@@ -1,13 +1,7 @@
 const CACHE = 'bewegdeal-v1';
 
 const PRECACHE = [
-  '/offline.html',
-  '/css/site.css',
-  '/css/demo.css',
-  '/img/branding/logo.png',
-  '/img/branding/brand-img-light.png',
-  '/img/branding/brand-img-dark.png',
-  '/img/branding/brand-img-small.png'
+  '/offline.html'
 ];
 
 self.addEventListener('install', function (e) {

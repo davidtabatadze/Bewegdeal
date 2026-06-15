@@ -126,6 +126,14 @@ namespace Bewegdeal
 
             // ── Routes ────────────────────────────────────────────────────────────
             // Default route lands on the public landing page, not the admin dashboard.
+            app.MapGet("/sw.js", async context =>
+            {
+                context.Response.Headers["Cache-Control"] = "no-cache";
+                context.Response.ContentType = "application/javascript";
+                await context.Response.SendFileAsync(
+                    Path.Combine(app.Environment.WebRootPath, "sw.js"));
+            });
+
             app.MapStaticAssets();
             app.MapHub<ChatTool>("/hubs/chat");
             app.MapControllerRoute(
