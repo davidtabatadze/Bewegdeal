@@ -24,6 +24,7 @@
     var lastMessageDate = '';
     var waitingForEcho = false;
     var echoTimer = null;
+    var savedFooterHtml = '';
 
     // ── Phase 1: visibility check (fast) ─────────────────────────────────────
 
@@ -214,6 +215,18 @@
             }
             appendMessage(msg.senderId, msg.content, msg.sentDate, msg.sentDay);
             scrollToBottom();
+            if (proposalPattern.exec(msg.content)) {
+                var footer = body.querySelector('.chat-history-footer');
+                if (footer) {
+                    footer.outerHTML =
+                        '<div class="chat-history-footer shadow-xs mt-0 p-0">' +
+                        '<div class="alert alert-warning m-0" role="alert">' +
+                        '<div class="d-flex align-items-center">' +
+                        '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
+                        '<strong>Pending proposal reaction</strong>' +
+                        '</div></div></div>';
+                }
+            }
             if (msg.senderId !== viewerId) {
                 connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
             }
@@ -238,6 +251,10 @@
             }
             var actions = card.querySelector('.proposal-actions');
             if (actions) { actions.remove(); }
+            if (savedFooterHtml && (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected')) {
+                var footer = body.querySelector('.chat-history-footer');
+                if (footer) { footer.outerHTML = savedFooterHtml; }
+            }
         });
 
         connection.on('ChatCancelled', function () {
@@ -285,6 +302,8 @@
                     if (historyBody) { new PerfectScrollbar(historyBody); }
                     var separators = body.querySelectorAll('.chat-date-separator[data-date]');
                     lastMessageDate = separators.length ? separators[separators.length - 1].getAttribute('data-date') : '';
+                    var footer = body.querySelector('.chat-history-footer');
+                    savedFooterHtml = footer ? footer.outerHTML : '';
                     connectSignalR(chatKey);
                     scrollToBottom();
                 }

@@ -140,7 +140,10 @@ namespace Bewegdeal.Services
 
         public async Task Cancel(string requestNumber, long userId)
         {
-            var request = await RequestService.Get(requestNumber, [nameof(RequestEntity.Id)]);
+            var request = await RequestService.Get(
+                requestNumber,
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]
+            );
             var chat = await ChatService.GetActual(requestNumber);
 
             if (request?.Status == RequestStatusEnum.Negotiation && chat?.Status == ChatStatusEnum.Ongoing && (chat?.CompanyId == userId || chat?.CustomerId == userId))
@@ -191,10 +194,7 @@ namespace Bewegdeal.Services
                 proposalId,
                 [nameof(RequestProposalEntity.ChatId), nameof(RequestProposalEntity.Status)]
             );
-            var chat = await ChatService.Get(
-                proposal?.ChatId ?? 0,
-                [nameof(ChatEntity.Id), nameof(ChatEntity.Key), nameof(ChatEntity.Status)]
-            );
+            var chat = await ChatService.Get(proposal?.ChatId ?? 0);
 
             if (chat?.Status == ChatStatusEnum.Ongoing && proposal?.Status == RequestProposalStatusEnum.Pending)
             {
