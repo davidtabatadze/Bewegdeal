@@ -254,6 +254,12 @@
             if (savedFooterHtml && (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected')) {
                 var footer = body.querySelector('.chat-history-footer');
                 if (footer) { footer.outerHTML = savedFooterHtml; }
+                if (data.proposalStatus === 'accepted') {
+                    var cancelBtn = body.querySelector('#chatCancelBtn');
+                    if (cancelBtn) { cancelBtn.remove(); }
+                    var proposalBtn = body.querySelector('#chatProposalBtn');
+                    if (proposalBtn) { proposalBtn.remove(); }
+                }
             }
         });
 

@@ -74,10 +74,7 @@ namespace Bewegdeal.Services
                 CreateDate = DateTime.UtcNow
             });
 
-            await RequestService.Update(
-                RequestUpdateAreaEnum.ChatActivate,
-                new() { Id = data.request.Id, ExecutorId = userId }
-            );
+            await RequestService.Update(RequestUpdateAreaEnum.ChatActivate, new() { Id = data.request.Id });
 
             return GenericResultModel.Ok();
         }
@@ -127,7 +124,7 @@ namespace Bewegdeal.Services
                 ChatStatus = data.chat?.Status ?? "",
                 RequestStatus = data.request?.Status ?? "",
                 ViewerId = userId,
-                ViewerInitials = viewerAvatar.Name,
+                ViewerInitials = viewerAvatar.Initials,
                 ViewerPictureUrl = viewerAvatar.Url,
                 OtherPartyName = otherPartyAvatar.Name,
                 OtherPartyInitials = otherPartyAvatar.Initials,
@@ -207,6 +204,10 @@ namespace Bewegdeal.Services
                     await ChatService.Update(
                         ChatUpdateAreaEnum.Status,
                         new() { Id = chat?.Id ?? 0, Status = ChatStatusEnum.Agreed }
+                    );
+                    await RequestService.Update(
+                        RequestUpdateAreaEnum.ChatDeal,
+                        new() { Id = chat?.RequestId ?? 0, ExecutorId = chat?.CompanyId ?? 0 }
                     );
                 }
                 await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposalId, status);

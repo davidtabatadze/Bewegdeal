@@ -18,10 +18,25 @@ namespace Bewegdeal.Data.Repositories
                     await Update(update);
                     break;
 
+                case RequestUpdateAreaEnum.Status:
+                    await Context.Requests.Where(r => r.Id == update.Id)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, update.Status)
+                                          );
+                    break;
+
                 case RequestUpdateAreaEnum.ChatActivate:
                     await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Pending)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Negotiation)
+                                               .SetProperty(p => p.ExecutorId, (long?)null)
+                                          );
+                    break;
+
+                case RequestUpdateAreaEnum.ChatDeal:
+                    await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Negotiation)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, RequestStatusEnum.Agreed)
                                                .SetProperty(p => p.ExecutorId, update.ExecutorId)
                                           );
                     break;
