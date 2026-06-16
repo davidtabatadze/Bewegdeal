@@ -18,7 +18,7 @@ namespace Bewegdeal.Tools
             => await ChatHubService.MarkRead(UserId, chatKey, Context.ConnectionId);
 
         public async Task Notify()
-            => await ChatHubService.Notify();
+            => await ChatHubService.Notify(UserId, Context.ConnectionId);
 
         public static string GroupName(string chatKey) => "bewegdeal-chat-" + chatKey;
         private long UserId => long.TryParse(Context.User?.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;

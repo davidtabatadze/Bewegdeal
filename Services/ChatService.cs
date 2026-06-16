@@ -29,6 +29,26 @@ namespace Bewegdeal.Services
         public async Task<int> Count(ChatFilter filter)
             => await ChatRepository.Count(filter);
 
+        public async Task<ChatUnreadSummary?> GetMessageUnread(long userId)
+        {
+            var message = await ChatRepository.GetMessageUnread(userId);
+
+            if (message is null)
+            {
+                return null;
+            }
+
+            var chat = await Get(message.ChatId, [nameof(ChatEntity.RequestNumber)]);
+            var sender = await UserService.Get(message.SenderId, [nameof(UserEntity.Name)]);
+
+            return new ChatUnreadSummary
+            {
+                Preview = message.Content.Length > 80 ? message.Content[..80] + "…" : message.Content,
+                RequestNumber = chat?.RequestNumber ?? "-",
+                SenderName = sender?.Name ?? "unknown"
+            };
+        }
+
         public async Task<ChatEntity?> GetActual(string requestNumber, long? userId = null, string? userRole = null)
         {
             var chats = await Load(new ChatFilter { RequestNumber = requestNumber });

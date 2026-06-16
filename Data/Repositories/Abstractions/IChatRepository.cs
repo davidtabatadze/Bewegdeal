@@ -12,6 +12,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<List<ChatEntity>> Load(ChatFilter filter);
         Task<int> Count(ChatFilter filter);
         Task ReadMessages(long chatId, long viewerId);
+        Task<ChatMessageEntity?> GetMessageUnread(long userId);
         Task<ChatMessageEntity> AddMessage(ChatMessageEntity message);
         Task<List<ChatMessageEntity>> LoadMessages(long chatId);
     }
