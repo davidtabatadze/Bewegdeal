@@ -20,8 +20,7 @@
     var chatKey = '';
     var viewerId = 0;
     var connection = null;
-    var contextLoaded = false;
-    var lastMessageDate = '';
+var lastMessageDate = '';
     var waitingForEcho = false;
     var echoTimer = null;
     var savedFooterHtml = '';
@@ -40,10 +39,6 @@
 
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
         window.chatOpen = true;
-        if (contextLoaded && mode === ChatMode.Ongoing) {
-            connectSignalR(chatKey);
-            return;
-        }
         loadConversation();
     });
 
@@ -131,7 +126,6 @@
                     loadConversation();
                     return;
                 }
-                contextLoaded = false;
                 loadConversation();
             })
             .catch(function () {
@@ -290,7 +284,6 @@
             .then(function (html) {
                 Block.remove('#chatCard');
                 body.innerHTML = html;
-                contextLoaded = true;
 
                 body.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                     new bootstrap.Tooltip(el);
