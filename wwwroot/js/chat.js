@@ -39,8 +39,8 @@
 
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
         window.chatOpen = true;
-        if (contextLoaded) {
-            if (mode === ChatMode.Ongoing && chatKey) { connectSignalR(chatKey); }
+        if (contextLoaded && mode === ChatMode.Ongoing) {
+            connectSignalR(chatKey);
             return;
         }
         loadConversation();
@@ -127,12 +127,7 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (!data.success) {
-                    Block.remove('#chatConversation');
-                    btn.disabled = false;
-                    if (data.message) {
-                        new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
-                            .error(data.message);
-                    }
+                    loadConversation();
                     return;
                 }
                 contextLoaded = false;

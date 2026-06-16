@@ -34,7 +34,7 @@
         ChatModeEnum.Queued => "You are already negotiating another request. Try again when it's done.",
         ChatModeEnum.Initiate => "Start a negotiation about this request?",
         ChatModeEnum.Reserved => "The request is already being negotiated with another party. Try again later.",
-        _ => "Something went wrong. Please, try again later."
+        _ => "This request is no longer available."
     };
 
     <div id="chatConversation"
@@ -218,17 +218,6 @@ else
             {
 
             }
-            else if (Model.ProposalPending == true)
-            {
-                <div class="chat-history-footer shadow-xs mt-0 p-0">
-                    <div class="alert alert-warning m-0" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Pending proposal reaction</strong>
-                        </div>
-                    </div>
-                </div>
-            }
             else if (Model.ChatStatus == ChatStatusEnum.Cancelled)
             {
                 <div class="chat-history-footer shadow-xs mt-0 p-0">
@@ -240,13 +229,24 @@ else
                     </div>
                 </div>
             }
-            else if (!new List<string>() { RequestStatusEnum.Agreed, RequestStatusEnum.Negotiation }.Contains(Model.ChatStatus))
+            else if (!new List<string>() { RequestStatusEnum.Agreed, RequestStatusEnum.Negotiation }.Contains(Model.RequestStatus))
             {
                 <div class="chat-history-footer shadow-xs mt-0 p-0">
                     <div class="alert alert-danger m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                             <strong>Current request status is not negotiable</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.ProposalPending == true)
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-warning m-0" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Pending proposal reaction</strong>
                         </div>
                     </div>
                 </div>

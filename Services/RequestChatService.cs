@@ -55,10 +55,11 @@ namespace Bewegdeal.Services
         public async Task<GenericResultModel> Initiate(string requestNumber, long userId, string userRole)
         {
             var data = await GetMode(requestNumber, userId, userRole);
+            var chat = await ChatService.GetActual(requestNumber);
 
-            if (data.request is null || data.mode != ChatModeEnum.Initiate)
+            if (data.request is null || chat is not null || data.mode != ChatModeEnum.Initiate)
             {
-                return GenericResultModel.Fail("This request is no longer available.");
+                return GenericResultModel.Fail();
             }
 
             await ChatService.Create(new ChatEntity

@@ -22,7 +22,8 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [Authorize(Roles = UserRoleEnum.Company)]
     public async Task<IActionResult> Initiate(string requestNumber)
     {
-        return Json(await RequestChatService.Initiate(requestNumber, UserId, UserRoleEnum.Company));
+        var data = await RequestChatService.Initiate(requestNumber, UserId, UserRoleEnum.Company);
+        return Json(data.Success);
     }
 
     [HttpGet]
