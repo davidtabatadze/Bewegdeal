@@ -54,14 +54,14 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<ChatMessageEntity?> GetMessageUnread(long userId)
         {
-            var chat = await Context.Chats
+            var chats = await Context.Chats
                                      .Where(c => c.CustomerId == userId || c.CompanyId == userId)
                                      .Select(BuildSelect<ChatEntity>([nameof(ChatEntity.Id)]))
-                                     .FirstOrDefaultAsync();
-            chat ??= new ChatEntity { };
+                                     .ToListAsync();
+            var chatIds = chats.Select(c => c.Id).ToList().Concat([0]);
 
             return await Context.ChatMessages
-                                .Where(m => m.ChatId == chat.Id && m.SenderId != userId && !m.IsRead)
+                                .Where(m => chatIds.Contains(m.ChatId) && m.SenderId != userId && !m.IsRead)
                                 .OrderByDescending(m => m.Id)
                                 .FirstOrDefaultAsync();
         }

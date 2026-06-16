@@ -22,9 +22,6 @@ namespace Bewegdeal.Services
 
         public async Task Leave(string chatKey)
             => await HubContext.Clients.Group(ChatTool.GroupName(chatKey)).SendAsync("ChatCancelled");
-        //var chat = await ChatService.Get(chatKey);
-        //if (chat is null || !IsParticipant(chat, UserId)) { return; }
-        //await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(chatKey));
 
         public async Task Send(long userId, string chatKey, string content)
             => await Send(userId, await ChatService.Get(chatKey), content);
@@ -68,18 +65,7 @@ namespace Bewegdeal.Services
                 await ChatService.Update(ChatUpdateAreaEnum.Fraud, new() { Id = chat.Id, Fraud = ChatFraudEnum.Dubious });
             }
 
-            // notify the recipient's personal group (for other-page toast / browser notification)
-            //var recipientId = UserId == chat.CompanyId ? chat.CustomerId : chat.CompanyId;
-            //var sender = await userService.Get(UserId);
-            //var request = await requestRepository.Get<RequestEntity>(chat.RequestId);
-            //var preview = content.Length > 80 ? content[..80] + "…" : content;
-
-            //await Clients.Group("user-" + recipientId).SendAsync("NewMessageNotification", new
-            //{
-            //    senderName = sender?.Name ?? "Someone",
-            //    preview = preview,
-            //    requestNumber = request?.Number ?? ""
-            //});
+            await Notify(userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId);
         }
 
         public async Task MarkRead(long userId, string chatKey, string connectionId, ChatEntity? chat = null)
@@ -96,27 +82,19 @@ namespace Bewegdeal.Services
                             .SendAsync("MessagesRead");
         }
 
-        public async Task Notify()
+        public async Task Notify(long userId, string connectionId)
         {
-            return;
+            await HubContext.Groups.AddToGroupAsync(connectionId, "user-" + userId);
+            await Notify(userId);
+        }
 
-            // TODO: temporarly unavaliable, but we get back to this soon
-
-            //if (UserId == 0) { return; }
-
-            //await Groups.AddToGroupAsync(Context.ConnectionId, "user-" + UserId);
-
-            //// Catchup: fire one notification per chat with unread messages
-            //var unread = await chatRepository.LoadUnreadForUser(UserId);
-            //foreach (var summary in unread)
-            //{
-            //    await Clients.Caller.SendAsync("NewMessageNotification", new
-            //    {
-            //        senderName = summary.SenderName,
-            //        preview = summary.Preview,
-            //        requestNumber = summary.RequestNumber
-            //    });
-            //}
+        public async Task Notify(long userId)
+        {
+            var notification = await ChatService.GetMessageUnread(userId);
+            if (notification is not null)
+            {
+                await HubContext.Clients.Group("user-" + userId).SendAsync("NewMessageNotification", notification);
+            }
         }
 
         public async Task NotifyProposal(string chatKey, long proposalId, string proposalStatus)

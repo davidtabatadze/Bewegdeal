@@ -31,8 +31,8 @@
     });
 
     connection.start()
-        .then(function () { return connection.invoke('JoinNotifications'); })
-        .catch(function (e) { console.error('Notification hub error:', e); });
+        .then(function () { return connection.invoke('Notify'); })
+        .catch(function (e) { });
 
     // ── Bootstrap toast ───────────────────────────────────────────────────────
 
@@ -47,14 +47,14 @@
         el.setAttribute('aria-atomic', 'true');
         el.innerHTML =
             '<div class="toast-header">' +
-                '<i class="icon-base ri ri-wechat-line icon-sm text-primary me-2"></i>' +
-                '<div class="me-auto fw-medium">' + esc(senderName) + '</div>' +
-                '<small class="text-body-secondary">just now</small>' +
-                '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
+            '<i class="icon-base ri ri-wechat-line icon-sm text-primary me-2"></i>' +
+            '<div class="me-auto fw-medium">' + esc(senderName) + '</div>' +
+            '<small class="text-body-secondary">just now</small>' +
+            '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
             '</div>' +
             '<div class="toast-body">' +
-                '<p class="mb-2" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
-                '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '" class="btn btn-sm btn-primary">View request</a>' +
+            '<p class="mb-2" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
+            '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '" class="btn btn-sm btn-primary">View request</a>' +
             '</div>';
 
         container.appendChild(el);
