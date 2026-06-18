@@ -24,6 +24,11 @@ self.addEventListener('activate', function (e) {
   self.clients.claim();
 });
 
+function isStaticAsset(url) {
+  var pathname = new URL(url).pathname;
+  return /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/.test(pathname);
+}
+
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') { return; }
 
@@ -35,6 +40,8 @@ self.addEventListener('fetch', function (e) {
     );
     return;
   }
+
+  if (!isStaticAsset(e.request.url)) { return; }
 
   e.respondWith(
     caches.match(e.request).then(function (cached) {
