@@ -18,6 +18,7 @@ namespace Bewegdeal.Data
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
         public DbSet<RequestProposalEntity> RequestProposals => Set<RequestProposalEntity>();
         public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
+        public DbSet<InvoiceEntity> Invoices => Set<InvoiceEntity>();
         public DbSet<ChatEntity> Chats => Set<ChatEntity>();
         public DbSet<ChatMessageEntity> ChatMessages => Set<ChatMessageEntity>();
 
@@ -86,6 +87,7 @@ namespace Bewegdeal.Data
             ConfigureRequestFiles(modelBuilder);
             ConfigureRequestProposals(modelBuilder);
             ConfigureFraudWords(modelBuilder);
+            ConfigureInvoices(modelBuilder);
             ConfigureChats(modelBuilder);
             ConfigureChatMessages(modelBuilder);
         }
@@ -268,6 +270,42 @@ namespace Bewegdeal.Data
             });
         }
 
+        private void ConfigureInvoices(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<InvoiceEntity>(e =>
+            {
+                e.ToTable(_prefix + "Invoices");
+
+                e.HasKey(i => i.Id);
+                e.Property(i => i.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(i => i.Number).IsUnique();
+                e.HasIndex(i => i.RequestNumber).IsUnique();
+                e.HasIndex(i => i.Status);
+                e.HasIndex(i => i.RequestId);
+                e.HasIndex(i => i.ProposalId);
+                e.HasIndex(i => i.CustomerId);
+                e.HasIndex(i => i.CompanyId);
+                e.HasIndex(i => i.NotificationSent);
+
+                e.Property(i => i.Number).IsRequired().HasMaxLength(36);
+                e.Property(i => i.RequestNumber).IsRequired().HasMaxLength(36);
+                e.Property(i => i.Status).IsRequired().HasMaxLength(16);
+                e.Property(i => i.RequestId).IsRequired();
+                e.Property(i => i.ProposalId).IsRequired();
+                e.Property(i => i.CustomerId).IsRequired();
+                e.Property(i => i.CompanyId).IsRequired();
+
+                e.Property(i => i.Currency).IsRequired().HasMaxLength(4);
+                e.Property(i => i.ServiceCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.SubtotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.TotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.NotificationSent).IsRequired();
+                e.Property(i => i.CreateDate).IsRequired();
+                e.Property(i => i.PaymentDate).IsRequired(false);
+            });
+        }
+
         private void ConfigureChats(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ChatEntity>(e =>
@@ -279,10 +317,12 @@ namespace Bewegdeal.Data
 
                 e.HasIndex(c => c.Key).IsUnique();
                 e.HasIndex(c => c.RequestId);
+                e.HasIndex(c => c.RequestNumber);
                 e.HasIndex(c => c.Fraud);
                 e.HasIndex(c => c.Status);
 
                 e.Property(c => c.Key).IsRequired().HasMaxLength(32);
+                e.Property(r => r.RequestNumber).IsRequired().HasMaxLength(36);
                 e.Property(c => c.RequestId).IsRequired();
                 e.Property(c => c.CustomerId).IsRequired();
                 e.Property(c => c.CompanyId).IsRequired();

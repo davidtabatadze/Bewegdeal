@@ -27,7 +27,7 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        public async Task<List<RequestProposalEntity>> Load(long? requestId, long? chatId)
+        public async Task<List<RequestProposalEntity>> Load(long? requestId, long? chatId, string? status)
         {
             var query = Context.RequestProposals.AsQueryable();
 
@@ -39,6 +39,11 @@ namespace Bewegdeal.Data.Repositories
             if (chatId is not null)
             {
                 query = query.Where(i => i.ChatId == chatId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(i => i.Status == status);
             }
 
             return await query.ToListAsync();

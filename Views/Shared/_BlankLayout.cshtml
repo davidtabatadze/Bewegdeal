@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en"
       class="customizer-hide"
@@ -6,7 +7,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>@ViewData["Title"] - Bewegdeal</title>
+  <title>@ViewData["Title"]</title>
 
   <!-- Sync theme from landing page — must run before stylesheets to prevent flash -->
   <script>
@@ -66,7 +67,7 @@
 
   @RenderSection("PageScripts", required: false)
 
-  <script src="~/js/pwa.js"></script>
+  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
 
 </body>
 </html>

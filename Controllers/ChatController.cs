@@ -27,7 +27,7 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> Conversation(string key)
         {
-            var conversation = await ChatService.GetAdminConversation(key);
+            var conversation = await ChatService.GetConversation(key);
             if (conversation is null)
             {
                 return Content("");

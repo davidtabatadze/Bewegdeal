@@ -11,6 +11,11 @@
     var requestNumber = cfg.requestNumber || '';
     if (!requestNumber) { return; }
 
+    if (new URLSearchParams(window.location.search).get('chat') === 'open') {
+        var _oc = document.getElementById('requestChatOffcanvas');
+        if (_oc) { bootstrap.Offcanvas.getOrCreateInstance(_oc).show(); }
+    }
+
     var floatingBtn = document.getElementById('chatFloatingBtn');
     var offcanvas = document.getElementById('requestChatOffcanvas');
     var body = document.getElementById('chatOffcanvasBody');
@@ -20,18 +25,17 @@
     var chatKey = '';
     var viewerId = 0;
     var connection = null;
-    var contextLoaded = false;
-    var lastMessageDate = '';
+var lastMessageDate = '';
     var waitingForEcho = false;
     var echoTimer = null;
+    var savedFooterHtml = '';
 
     // ── Phase 1: visibility check (fast) ─────────────────────────────────────
 
     fetch('/RequestChat/Visibility?requestNumber=' + encodeURIComponent(requestNumber))
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            mode = data.mode || ChatMode.None;
-            if (mode === ChatMode.None) { return; }
+            if (!data) { return; }
             floatingBtn.style.display = '';
         })
         .catch(function (e) { console.error('Chat visibility failed:', e); });
@@ -40,10 +44,6 @@
 
     offcanvas.addEventListener('shown.bs.offcanvas', function () {
         window.chatOpen = true;
-        if (contextLoaded) {
-            if (mode === ChatMode.Ongoing && chatKey) { connectSignalR(chatKey); }
-            return;
-        }
         loadConversation();
     });
 
@@ -60,6 +60,20 @@
     body.addEventListener('click', function (e) {
         if (!e.target.closest('#chatProposalBtn')) { return; }
         if (window.ChatProposal) { window.ChatProposal.open(requestNumber); }
+    });
+
+    // ── Proposal accept / reject ──────────────────────────────────────────────
+
+    body.addEventListener('click', function (e) {
+        var acceptBtn = e.target.closest('.proposal-accept-btn');
+        var rejectBtn = e.target.closest('.proposal-reject-btn');
+        if (!acceptBtn && !rejectBtn) { return; }
+
+        var accepted   = !!acceptBtn;
+        var proposalId = (acceptBtn || rejectBtn).dataset.proposalId;
+
+        if (!window.ChatProposalReact) { return; }
+        window.ChatProposalReact.open(proposalId, accepted);
     });
 
     // ── Cancel flow ──────────────────────────────────────────────────────────
@@ -104,8 +118,7 @@
         if (!btn) { return; }
 
         btn.disabled = true;
-        btn.innerHTML =
-            '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Starting…';
+        Block.pulse('#chatConversation');
 
         fetch('/RequestChat/Initiate', {
             method: 'POST',
@@ -115,18 +128,14 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (!data.success) {
-                    btn.disabled = false;
-                    btn.innerHTML =
-                        '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation';
+                    loadConversation();
                     return;
                 }
-                contextLoaded = false;
                 loadConversation();
             })
             .catch(function () {
+                Block.remove('#chatConversation');
                 btn.disabled = false;
-                btn.innerHTML =
-                    '<i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation';
             });
     });
 
@@ -205,8 +214,55 @@
             }
             appendMessage(msg.senderId, msg.content, msg.sentDate, msg.sentDay);
             scrollToBottom();
+            if (proposalPattern.exec(msg.content)) {
+                var footer = body.querySelector('.chat-history-footer');
+                if (footer) {
+                    footer.outerHTML =
+                        '<div class="chat-history-footer shadow-xs mt-0 p-0">' +
+                        '<div class="alert alert-warning m-0" role="alert">' +
+                        '<div class="d-flex align-items-center">' +
+                        '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
+                        '<strong>Pending proposal reaction</strong>' +
+                        '</div></div></div>';
+                }
+            }
             if (msg.senderId !== viewerId) {
                 connection.invoke('MarkRead', key).catch(function (err) { console.error('MarkRead error:', err); });
+            }
+        });
+
+        connection.on('ProposalUpdated', function (data) {
+            var card = document.querySelector('[data-proposal-card-id="' + data.proposalId + '"]');
+            if (!card) { return; }
+            var color = data.proposalStatus === 'accepted' ? 'success'
+                      : data.proposalStatus === 'rejected' ? 'danger'
+                      : 'warning';
+            card.classList.remove('border-warning', 'border-success', 'border-danger');
+            card.classList.add('border-' + color);
+            var icon = card.querySelector('.ri-shake-hands-line');
+            if (icon) {
+                icon.classList.remove('text-warning', 'text-success', 'text-danger');
+                icon.classList.add('text-' + color);
+            }
+            var hr = card.querySelector('hr');
+            if (hr) {
+                hr.className = 'border border-' + color + ' mt-1 mb-3';
+            }
+            var actions = card.querySelector('.proposal-actions');
+            if (actions) { actions.remove(); }
+            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected') {
+                if (savedFooterHtml) {
+                    var footer = body.querySelector('.chat-history-footer');
+                    if (footer) { footer.outerHTML = savedFooterHtml; }
+                    if (data.proposalStatus === 'accepted') {
+                        var cancelBtn = body.querySelector('#chatCancelBtn');
+                        if (cancelBtn) { cancelBtn.remove(); }
+                        var proposalBtn = body.querySelector('#chatProposalBtn');
+                        if (proposalBtn) { proposalBtn.remove(); }
+                    }
+                } else {
+                    loadConversation();
+                }
             }
         });
 
@@ -217,7 +273,7 @@
         connection.on('MessagesRead', function () {
             var icons = document.querySelectorAll('.msg-read-receipt');
             for (var i = 0; i < icons.length; i++) {
-                icons[i].classList.add('text-success');
+                icons[i].classList.add('text-warning');
             }
         });
 
@@ -237,7 +293,6 @@
             .then(function (html) {
                 Block.remove('#chatCard');
                 body.innerHTML = html;
-                contextLoaded = true;
 
                 body.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                     new bootstrap.Tooltip(el);
@@ -255,6 +310,8 @@
                     if (historyBody) { new PerfectScrollbar(historyBody); }
                     var separators = body.querySelectorAll('.chat-date-separator[data-date]');
                     lastMessageDate = separators.length ? separators[separators.length - 1].getAttribute('data-date') : '';
+                    var footer = body.querySelector('.chat-history-footer');
+                    savedFooterHtml = (footer && footer.querySelector('.form-send-message')) ? footer.outerHTML : '';
                     connectSignalR(chatKey);
                     scrollToBottom();
                 }

@@ -1,0 +1,109 @@
+<style>
+    #chatProposalReactModal {
+        --bs-modal-zindex: 1100;
+    }
+</style>
+
+<div class="modal fade" id="chatProposalReactModal" tabindex="-1" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:fit-content;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatProposalReactTitle"></h5>
+            </div>
+            <div class="modal-body">
+                <div id="chatProposalReactAcceptBody" class="d-none" style="width:300px;">
+                    <div class="alert alert-danger mb-0" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>By this action, you do accept:</strong>
+                        </div>
+                        <ul class="mb-0">
+                            <li>Proposed cost.</li>
+                            <li>Proposed date and time.</li>
+                            <li>Proposed terms of service.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline" style="width:300px;">
+                    <input id="proposalRejectReason" type="text" class="form-control" placeholder="" />
+                    <label for="proposalRejectReason">Reason (optional)</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="chatProposalReactConfirmBtn" class="btn"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    'use strict';
+
+    window.ChatProposalReact = (function () {
+        var modal      = null;
+        var modalEl    = document.getElementById('chatProposalReactModal');
+        var titleEl    = document.getElementById('chatProposalReactTitle');
+        var acceptBody = document.getElementById('chatProposalReactAcceptBody');
+        var rejectBody = document.getElementById('chatProposalReactRejectBody');
+        var reasonEl   = document.getElementById('proposalRejectReason');
+        var confirmBtn = document.getElementById('chatProposalReactConfirmBtn');
+
+        var _proposalId = null;
+        var _accepted   = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (modalEl) { modal = new bootstrap.Modal(modalEl); }
+        });
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                var reason = (!_accepted && reasonEl) ? (reasonEl.value.trim() || null) : null;
+                Block.pulse('#chatProposalReactModal .modal-content');
+                confirmBtn.disabled = true;
+                fetch('/RequestChat/ProposalReact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id='        + encodeURIComponent(_proposalId) +
+                          '&accepted=' + encodeURIComponent(_accepted) +
+                          (reason ? '&reason=' + encodeURIComponent(reason) : '')
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        Block.remove('#chatProposalReactModal .modal-content');
+                        confirmBtn.disabled = false;
+                        if (data.success && modal) { modal.hide(); }
+                    })
+                    .catch(function () {
+                        Block.remove('#chatProposalReactModal .modal-content');
+                        confirmBtn.disabled = false;
+                    });
+            });
+        }
+
+        return {
+            open: function (proposalId, accepted) {
+                _proposalId = proposalId;
+                _accepted   = accepted;
+
+                if (titleEl) {
+                    var iconColor = accepted ? 'text-success' : 'text-danger';
+                    var label     = accepted ? 'Accept proposal' : 'Reject proposal';
+                    titleEl.innerHTML = '<i class="icon-base ri ri-shake-hands-line ' + iconColor + ' me-2 icon-28px"></i>' + label;
+                }
+
+                if (acceptBody) { acceptBody.classList.toggle('d-none', !accepted); }
+                if (rejectBody) { rejectBody.classList.toggle('d-none', accepted); }
+                if (reasonEl)   { reasonEl.value = ''; }
+
+                if (confirmBtn) {
+                    confirmBtn.textContent = accepted ? 'Yes, accept' : 'Yes, reject';
+                    confirmBtn.className   = 'btn ' + (accepted ? 'btn-success' : 'btn-danger');
+                }
+
+                if (modal) { modal.show(); }
+            }
+        };
+    })();
+</script>

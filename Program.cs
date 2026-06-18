@@ -71,6 +71,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
             builder.Services.AddScoped<IRequestProposalRepository, RequestProposalRepository>();
             builder.Services.AddScoped<IFraudWordRepository, FraudWordRepository>();
+            builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
             // ── Storage ───────────────────────────────────────────────────────────
@@ -86,10 +87,12 @@ namespace Bewegdeal
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();
             builder.Services.AddScoped<FraudWordService>();
+            builder.Services.AddScoped<ProposalService>();
             builder.Services.AddScoped<ChatService>();
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<RequestChatService>();
+            builder.Services.AddScoped<InvoiceService>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.

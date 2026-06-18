@@ -10,7 +10,6 @@ namespace Bewegdeal.Services
     public class RequestService(
         IRequestRepository RequestRepository,
         IRequestFileRepository RequestFileRepository,
-        IRequestProposalRepository RequestProposalRepository,
         UserService UserService,
         FileService2 FileService,
         SettingService SettingService)
@@ -32,30 +31,6 @@ namespace Bewegdeal.Services
             }
 
             return GenericResultModel<RequestEntity>.Ok(request);
-        }
-
-        public async Task<RequestProposalEntity?> CreateProposal(long userId, RequestProposalViewModel model)
-        {
-            var company = await UserService.Get(userId, [nameof(UserEntity.Role), nameof(UserEntity.ServiceTerms)]);
-
-            if (company?.Role != UserRoleEnum.Company)
-            {
-                return null;
-            }
-
-            return await RequestProposalRepository.Create(new RequestProposalEntity
-            {
-                CompanyId = userId,
-                ChatId = model.ChatId,
-                RequestId = model.RequestId,
-                CreateDate = DateTime.Now,
-                Cost = model.Cost,
-                Currency = model.Currency,
-                Date = DateOnly.Parse(model.Date!),
-                Time = TimeOnly.Parse(model.Time!),
-                Status = RequestProposalStatusEnum.Pending,
-                ServiceTerms = "aaa"
-            });
         }
 
         public async Task<GenericResultModel<RequestEntity>> Update(long userId, RequestViewModel model)
@@ -86,17 +61,6 @@ namespace Bewegdeal.Services
         public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
             => await RequestRepository.Update(area, update);
 
-        public async Task UpdateProposal(long id, bool accepted, string? reason = null)
-            => await RequestProposalRepository.Update(
-                    RequestProposalUpdateAreaEnum.Status,
-                    new RequestProposalEntity
-                    {
-                        Id = id,
-                        ReactionReason = reason,
-                        Status = accepted ? RequestProposalStatusEnum.Accepted : RequestProposalStatusEnum.Rejected
-                    }
-               );
-
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.Get() };
 
@@ -111,12 +75,6 @@ namespace Bewegdeal.Services
 
         public async Task<GenericResultModel<RequestModel>> Get(string number, long userId)
             => await Get(userId, await Get(number), false);
-
-        public async Task<RequestProposalEntity?> GetProposal(long id, string[]? properties = null)
-            => await RequestProposalRepository.Get<RequestProposalEntity>(id, properties);
-
-        public async Task<List<RequestProposalEntity>> LoadProposals(long? requestId = null, long? chatId = null)
-            => await RequestProposalRepository.Load(requestId, chatId);
 
         public async Task<List<RequestEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
             => await RequestRepository.Load<RequestEntity>(ids, properties);
@@ -359,10 +317,10 @@ namespace Bewegdeal.Services
             {
                 Number = Guid.NewGuid().ToString("N"),
                 CreateDate = DateTime.UtcNow,
-                Status = RequestStatusEnum.Pending,
                 RequesterId = userId
             };
 
+            entity.Status = RequestStatusEnum.Pending;
             entity.Service = request.Service;
             entity.Title = request.Title.Trim();
             entity.Description = request.Description?.Trim() ?? "";

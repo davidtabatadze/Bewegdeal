@@ -14,27 +14,22 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [HttpGet]
     public async Task<IActionResult> Visibility(string requestNumber)
     {
-        return Json(new
-        {
-            mode = await RequestChatService.GetMode(requestNumber, UserId, UserRole)
-        });
+        var data = await RequestChatService.GetMode(requestNumber, UserId, UserRole);
+        return Json(data.mode != ChatModeEnum.None);
     }
 
     [HttpPost]
     [Authorize(Roles = UserRoleEnum.Company)]
     public async Task<IActionResult> Initiate(string requestNumber)
     {
-        return Json(await RequestChatService.Initiate(requestNumber, UserId));
+        var data = await RequestChatService.Initiate(requestNumber, UserId, UserRoleEnum.Company);
+        return Json(data.Success);
     }
 
     [HttpGet]
     public async Task<IActionResult> Conversation(string requestNumber)
     {
-        var conversation = await RequestChatService.Conversation(requestNumber, UserId);
-        if (conversation is null)
-        {
-            return Content("");
-        }
+        var conversation = await RequestChatService.Conversation(requestNumber, UserId, UserRole);
         return PartialView("~/Views/Chat/Conversation.cshtml", conversation);
     }
 
@@ -80,7 +75,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
         {
             return Content("");
         }
-        return PartialView("~/Views/Chat/_ProposalCard.cshtml", model);
+        return PartialView("~/Views/Proposal/_ProposalCard.cshtml", model);
     }
 
 }

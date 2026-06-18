@@ -25,34 +25,32 @@
     }
 </style>
 
-@if (Model.Mode == ChatModeEnum.Initiate)
+@if (Model.Mode != ChatModeEnum.Ongoing)
 {
+    var color = Model.Mode == ChatModeEnum.Initiate ? "primary" : "danger";
+    var icon = Model.Mode == ChatModeEnum.None ? "ri-error-warning-line" : "ri-wechat-line";
+    var text = Model.Mode switch
+    {
+        ChatModeEnum.Queued => "You are already negotiating another request. Try again when it's done.",
+        ChatModeEnum.Initiate => "Start a negotiation about this request?",
+        ChatModeEnum.Reserved => "The request is already being negotiated with another party. Try again later.",
+        _ => "This request is no longer available."
+    };
+
     <div id="chatConversation"
          data-mode="@Model.Mode"
          style="block-size:100%"
-         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column">
-        <div class="bg-label-primary p-8 rounded-circle">
-            <i class="icon-base ri ri-wechat-line icon-48px"></i>
+         class="col app-chat-conversation d-flex align-items-center justify-content-center flex-column p-12">
+        <div class="bg-label-@color p-8 rounded-circle">
+            <i class="icon-base ri @icon icon-48px"></i>
         </div>
-        @* <div class="avatar avatar-lg mb-4">
-            @if (Model.OtherPartyPictureUrl is not null)
-            {
-                <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
-                     style="object-fit:cover;width:100%;height:100%;"
-                     alt="@Model.OtherPartyName" />
-            }
-            else
-            {
-                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
-                      style="display:flex;align-items:center;justify-content:center;">@Model.OtherPartyInitials</span>
-            }
-        </div>
-        <h6 class="mb-1">@Model.OtherPartyName</h6>
-        <p class="text-muted small mb-5">Start a conversation about this request?</p> *@
-        <p class="my-4">Start a conversation about this request?</p>
-        <button id="chatInitiateBtn" class="btn btn-primary">
-            <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
-        </button>
+        <p class="my-4">@text</p>
+        @if (Model.Mode == ChatModeEnum.Initiate)
+        {
+            <button id="chatInitiateBtn" class="btn btn-primary">
+                <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
+            </button>
+        }
     </div>
 }
 else
@@ -96,6 +94,7 @@ else
                     </div>
                 </div> *@
                 <div class="alert alert-danger alert-dismissible m-2" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="d-flex align-items-center mb-2">
                         <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                         <strong>Handle with care</strong>
@@ -141,7 +140,7 @@ else
                                     @if (isProposal)
                                     {
                                         <div class="chat-message-wrapper flex-grow-1">
-                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
+                                            @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", proposalCard)
                                         </div>
                                     }
                                     else
@@ -194,7 +193,7 @@ else
                                     @if (isProposal)
                                     {
                                         <div class="chat-message-wrapper flex-grow-1">
-                                            @await Html.PartialAsync("~/Views/Chat/_ProposalCard.cshtml", proposalCard)
+                                            @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", proposalCard)
                                         </div>
                                     }
                                     else
@@ -215,7 +214,44 @@ else
                 </ul>
             </div>
             @* Message input *@
-            @if (!isAdminView)
+            @if (isAdminView)
+            {
+                // ...
+            }
+            else if (Model.ChatStatus == ChatStatusEnum.Cancelled)
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-danger m-0" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>The chat is cancelled</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!new List<string>() { RequestStatusEnum.Agreed, RequestStatusEnum.Negotiation }.Contains(Model.RequestStatus))
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-danger m-0" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Current request status is not negotiable</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.ProposalPending == true)
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-warning m-0" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Pending proposal reaction</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (new List<string>() { ChatStatusEnum.Agreed, ChatStatusEnum.Ongoing }.Contains(Model.ChatStatus))
             {
                 <div class="chat-history-footer shadow-xs mt-0 ps-2 pe-2">
                     <form class="form-send-message d-flex justify-content-between align-items-center ">
@@ -224,17 +260,20 @@ else
                                   rows="1"
                                   style="resize:none;overflow:hidden;max-height:120px;"></textarea>
                         <div class="message-actions d-flex align-items-center">
-                            @if (User.IsInRole(UserRoleEnum.Company))
+                            @if (User.IsInRole(UserRoleEnum.Company) && Model.ChatStatus != ChatStatusEnum.Agreed)
                             {
-                                <span id="chatProposalBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer"
+                                <span id="chatProposalBtn" class="btn btn-text-warning btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
                                     <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
                                 </span>
                             }
-                            <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
-                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Chat">
-                                <i class="icon-base ri ri-hand icon-md text-danger"></i>
-                            </span>
+                            @if (Model.ChatStatus == ChatStatusEnum.Ongoing)
+                            {
+                                <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Chat">
+                                    <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                                </span>
+                            }
                             <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">
                                 <span class="icon-base ri ri-send-plane-line icon-22px"></span>
                             </button>

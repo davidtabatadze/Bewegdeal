@@ -1,0 +1,51 @@
+@using Bewegdeal.Enums
+@model Bewegdeal.Data.Entities.RequestProposalEntity
+
+@{
+    var color = Model.Status switch
+    {
+        RequestProposalStatusEnum.Accepted => "success",
+        RequestProposalStatusEnum.Rejected => "danger",
+        _ => "warning"
+    };
+}
+
+<div class="border border-@color rounded p-3 text-center" data-proposal-card-id="@Model.Id" style="min-width:220px;max-width:320px;">
+    <div class="d-flex align-items-center justify-content-center mb-1 gap-2">
+        <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
+        <span class="fw-bolder">Proposal</span>
+    </div>
+    <hr class="border border-@color mt-1 mb-3" />
+    <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+        <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
+        <span class="fw-semibold">@Model.Cost.ToString("N2")</span>@Model.Currency
+    </div>
+    <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+        <i class="icon-base ri ri-calendar-line icon-18px"></i>
+        <span class="fw-semibold">@Model.Date!.Value.ToString("dd MMM yyyy")</span>
+        <i class="icon-base ri ri-time-line icon-18px"></i>
+        <span class="fw-semibold">@Model.Time!.Value.ToString("HH:mm")</span>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.ServiceTerms))
+    {
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+            <i class="icon-base ri ri-file-text-line icon-18px"></i>
+            <a href="@Model.ServiceTerms" target="_blank" rel="noopener noreferrer">Service Terms</a>
+        </div>
+    }
+    @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer))
+    {
+        <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
+            <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
+                  data-proposal-id="@Model.Id"
+                  data-bs-toggle="tooltip" data-bs-placement="left" title="Accept">
+                <i class="icon-base ri ri-check-line icon-md text-success"></i>
+            </span>
+            <span class="btn btn-text-danger btn-icon bg-label-danger p-2 rounded-circle proposal-reject-btn"
+                  data-proposal-id="@Model.Id"
+                  data-bs-toggle="tooltip" data-bs-placement="right" title="Reject">
+                <i class="icon-base ri ri-close-line icon-md text-danger"></i>
+            </span>
+        </div>
+    }
+</div>

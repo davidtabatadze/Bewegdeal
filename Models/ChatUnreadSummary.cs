@@ -5,5 +5,6 @@ namespace Bewegdeal.Models
         public string SenderName { get; set; } = "";
         public string Preview { get; set; } = "";
         public string RequestNumber { get; set; } = "";
+        public DateTime Date { get; set; }
     }
 }

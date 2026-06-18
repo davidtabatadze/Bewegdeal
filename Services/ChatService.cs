@@ -6,7 +6,7 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class ChatService(IChatRepository ChatRepository, UserService UserService, RequestService RequestService)
+    public class ChatService(IChatRepository ChatRepository, ProposalService ProposalService, UserService UserService)
     {
         public async Task<ChatEntity> Create(ChatEntity chat)
             => await ChatRepository.Create(chat);
@@ -16,9 +16,7 @@ namespace Bewegdeal.Services
             => await Get(new ChatFilter { Id = id }, properties);
         public async Task<ChatEntity?> Get(string key, string[]? properties = null)
             => await Get(new ChatFilter { Key = key }, properties);
-        public async Task<ChatEntity?> GetOngoing(string? key = null, long? requestId = null)
-            => await Get(new ChatFilter { Key = key, RequestId = requestId, Status = ChatStatusEnum.Ongoing });
-        private async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
+        public async Task<ChatEntity?> Get(ChatFilter filter, string[]? properties = null)
             => await ChatRepository.Get(filter, properties);
         public async Task ReadMessages(long chatId, long viewerId)
             => await ChatRepository.ReadMessages(chatId, viewerId);
@@ -30,6 +28,55 @@ namespace Bewegdeal.Services
             => await ChatRepository.Load(filter);
         public async Task<int> Count(ChatFilter filter)
             => await ChatRepository.Count(filter);
+
+        public async Task<ChatUnreadSummary?> GetMessageUnread(long userId, long excludeId = 0)
+        {
+            var message = await ChatRepository.GetMessageUnread(userId, excludeId);
+
+            if ((message?.Content ?? "").StartsWith(ConstantEnum.ProposalPrefix))
+            {
+                message = await ChatRepository.GetMessageUnread(userId, message?.Id ?? 0);
+            }
+
+            if (message is null)
+            {
+                return null;
+            }
+
+            var chat = await Get(message.ChatId, [nameof(ChatEntity.RequestNumber)]);
+            var sender = await UserService.Get(message.SenderId, [nameof(UserEntity.Name)]);
+
+            return new ChatUnreadSummary
+            {
+                Preview = message.Content.Length > 80 ? message.Content[..80] + "…" : message.Content,
+                RequestNumber = chat?.RequestNumber ?? "-",
+                SenderName = sender?.Name ?? "unknown",
+                Date = message.SentDate
+            };
+        }
+
+        public async Task<ChatEntity?> GetActual(string requestNumber, long? userId = null, string? userRole = null)
+        {
+            var chats = await Load(new ChatFilter { RequestNumber = requestNumber });
+            var ongoing = chats.FirstOrDefault(c => c.Status == ChatStatusEnum.Ongoing);
+
+            if (userRole is null)
+            {
+                return ongoing;
+            }
+            else if (userRole == UserRoleEnum.Administrator)
+            {
+                return null;
+            }
+            else if (userRole == UserRoleEnum.Customer)
+            {
+                return ongoing ?? chats.OrderByDescending(c => c.Id).FirstOrDefault();
+            }
+            else
+            {
+                return chats.OrderByDescending(c => c.Id).FirstOrDefault(c => c.CompanyId == (userId ?? 0));
+            }
+        }
 
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {
@@ -46,14 +93,6 @@ namespace Bewegdeal.Services
             );
             var userMap = users.ToDictionary(u => u.Id);
 
-            var requests = await RequestService.Load(
-                chats.Select(c => c.RequestId)
-                     .Concat([0])
-                     .Distinct(),
-                [nameof(RequestEntity.Id), nameof(RequestEntity.Number)]
-            );
-            var requestMap = requests.ToDictionary(r => r.Id);
-
             return new GridResultModel<object>
             {
                 Draw = draw,
@@ -63,13 +102,12 @@ namespace Bewegdeal.Services
                 {
                     userMap.TryGetValue(c.CustomerId, out var customer);
                     userMap.TryGetValue(c.CompanyId, out var company);
-                    requestMap.TryGetValue(c.RequestId, out var request);
                     return (object)new
                     {
                         id = c.Id,
                         key = c.Key,
                         requestId = c.RequestId,
-                        requestNumber = request?.Number ?? "-",
+                        requestNumber = c.RequestNumber,
                         status = c.Status,
                         fraud = c.Fraud,
                         customer = UserService.GetAvatar(customer),
@@ -82,15 +120,17 @@ namespace Bewegdeal.Services
             };
         }
 
-        public async Task<ChatHistoryModel?> GetAdminConversation(string key)
+        public async Task<ChatHistoryModel?> GetConversation(string key)
         {
             var chat = await Get(key, [
-                nameof(ChatEntity.Id), nameof(ChatEntity.Key),
+                nameof(ChatEntity.Id),
+                nameof(ChatEntity.Key), nameof(ChatEntity.Status),
                 nameof(ChatEntity.CustomerId), nameof(ChatEntity.CompanyId)
             ]);
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
+            var proposals = await ProposalService.Load(chat.Id, null);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
@@ -104,13 +144,17 @@ namespace Bewegdeal.Services
             {
                 Mode = ChatModeEnum.Ongoing,
                 ChatKey = chat.Key,
+                ChatStatus = chat.Status,
+                RequestStatus = "not-important-here",
                 ViewerId = chat.CustomerId,
                 ViewerInitials = customerAvatar.Initials,
                 ViewerPictureUrl = customerAvatar.Url,
                 OtherPartyName = companyAvatar.Name,
                 OtherPartyInitials = companyAvatar.Initials,
                 OtherPartyPictureUrl = companyAvatar.Url,
-                Messages = messages
+                Messages = messages,
+                Proposals = proposals.ToDictionary(p => p.Id),
+                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }
     }

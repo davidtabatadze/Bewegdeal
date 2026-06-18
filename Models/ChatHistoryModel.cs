@@ -6,6 +6,8 @@ namespace Bewegdeal.Models
     {
         public string Mode { get; set; } = string.Empty;
         public string ChatKey { get; set; } = string.Empty;
+        public string ChatStatus { get; set; } = string.Empty;
+        public string RequestStatus { get; set; } = string.Empty;
         public string OtherPartyName { get; set; } = string.Empty;
         public string OtherPartyInitials { get; set; } = string.Empty;
         public string? OtherPartyPictureUrl { get; set; }
@@ -14,5 +16,6 @@ namespace Bewegdeal.Models
         public string? ViewerPictureUrl { get; set; }
         public List<ChatMessageEntity> Messages { get; set; } = [];
         public Dictionary<long, RequestProposalEntity> Proposals { get; set; } = [];
+        public bool ProposalPending { get; set; }
     }
 }

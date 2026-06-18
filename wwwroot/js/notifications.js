@@ -24,19 +24,19 @@
 
     connection.on('NewMessageNotification', function (data) {
         if (window.chatOpen) { return; }
-        showToast(data.senderName, data.preview, data.requestNumber);
+        showToast(data.senderName, data.preview, data.requestNumber, data.date);
         if (document.hidden) {
             showBrowserNotification(data.senderName, data.preview, data.requestNumber);
         }
     });
 
     connection.start()
-        .then(function () { return connection.invoke('JoinNotifications'); })
-        .catch(function (e) { console.error('Notification hub error:', e); });
+        .then(function () { return connection.invoke('Notify'); })
+        .catch(function (e) { });
 
     // ── Bootstrap toast ───────────────────────────────────────────────────────
 
-    function showToast(senderName, preview, requestNumber) {
+    function showToast(senderName, preview, requestNumber, date) {
         var container = document.getElementById('notifToastContainer');
         if (!container) { return; }
 
@@ -47,18 +47,18 @@
         el.setAttribute('aria-atomic', 'true');
         el.innerHTML =
             '<div class="toast-header">' +
-                '<i class="icon-base ri ri-wechat-line icon-sm text-primary me-2"></i>' +
-                '<div class="me-auto fw-medium">' + esc(senderName) + '</div>' +
-                '<small class="text-body-secondary">just now</small>' +
-                '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
+            '<i class="icon-base ri ri-wechat-line icon-sm text-primary me-2"></i>' +
+            '<div class="me-auto fw-medium">' + esc(senderName) + '</div>' +
+            '<small class="text-body-secondary">' + esc(getDateLabel(date)) + '</small>' +
+            '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
             '</div>' +
-            '<div class="toast-body">' +
-                '<p class="mb-2" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
-                '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '" class="btn btn-sm btn-primary">View request</a>' +
+            '<div class="toast-body d-flex align-items-center gap-2">' +
+            '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '&chat=open" class="btn btn-text-primary btn-icon btn-sm rounded-pill flex-shrink-0"><i class="ri ri-search-eye-line icon-md"></i></a>' +
+            '<p class="mb-0" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
             '</div>';
 
         container.appendChild(el);
-        var toast = new bootstrap.Toast(el, { delay: 8000 });
+        var toast = new bootstrap.Toast(el, { delay: 5000 });
         toast.show();
         el.addEventListener('hidden.bs.toast', function () { el.remove(); });
     }
@@ -79,6 +79,21 @@
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function getDateLabel(dateStr) {
+        if (!dateStr) { return ''; }
+        var d = new Date(dateStr);
+        var now = new Date();
+        if (now - d < 2 * 60 * 1000) { return 'Just now'; }
+        var toStr = function (dt) { return dt.toISOString().slice(0, 10); };
+        var todayStr = toStr(now);
+        var yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        var dStr = toStr(d);
+        if (dStr === todayStr) { return 'Today'; }
+        if (dStr === toStr(yesterday)) { return 'Yesterday'; }
+        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
 
     function esc(str) {
         return String(str)

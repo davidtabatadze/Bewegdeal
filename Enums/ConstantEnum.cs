@@ -5,5 +5,6 @@ namespace Bewegdeal.Enums
         public const short UserCacheTimeout = 60;
         public const short ResetPasswordTimeout = 10;
         public const short VerificationTimeout = 10;
+        public const string ProposalPrefix = "#bewegdeal-proposal-";
     }
 }
