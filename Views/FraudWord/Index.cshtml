@@ -1,4 +1,4 @@
-@model List<string>
+﻿@model List<string>
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Fraud Words";
@@ -13,7 +13,7 @@
 }
 
 @section PageScripts {
-    <script src="~/js/app-fraud-word.js"></script>
+    <script src="~/js/app-fraud-word.js" asp-append-version="true"></script>
 }
 
 <div class="d-flex flex-column gap-6" style="min-height: calc(100dvh - 8rem)">

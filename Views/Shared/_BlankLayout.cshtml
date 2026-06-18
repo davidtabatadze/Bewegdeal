@@ -1,4 +1,4 @@
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en"
       class="customizer-hide"
@@ -40,15 +40,15 @@
   <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
   <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
   <link rel="stylesheet" href="~/vendor/css/core.css" />
-  <link rel="stylesheet" href="~/css/demo.css" />
-  <link rel="stylesheet" href="~/css/site.css" />
+  <link rel="stylesheet" href="~/css/demo.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
   @RenderSection("VendorStyles", required: false)
   @RenderSection("PageStyles", required: false)
 
   <!-- Template helpers & config (must be in <head>) -->
   <script src="~/vendor/js/helpers.js"></script>
-  <script src="~/js/config.js"></script>
+  <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 <body>
 
@@ -59,15 +59,15 @@
   <script src="~/vendor/libs/popper/popper.js"></script>
   <script src="~/vendor/js/bootstrap.js"></script>
   <script src="~/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="~/js/site.js"></script>
+  <script src="~/js/site.js" asp-append-version="true"></script>
 
   @RenderSection("VendorScripts", required: false)
 
-  <script src="~/js/main.js"></script>
+  <script src="~/js/main.js" asp-append-version="true"></script>
 
   @RenderSection("PageScripts", required: false)
 
-  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
+  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js" asp-append-version="true"></script> }
 
 </body>
 </html>

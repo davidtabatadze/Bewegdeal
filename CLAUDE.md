@@ -28,7 +28,8 @@ Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData 
 - Location: `Views/Shared/_HomeLayout.cshtml`
 - Used by: `Dashboard/Admin`, `Dashboard/Company`, `Settings/Index`, `User/List`, `Request/*`
 - Loads: Inter font, iconify-icons, node-waves, pickr-themes, core.css, demo.css, perfect-scrollbar.css, site.css, VendorStyles/PageStyles, then head scripts (helpers.js, **no template-customizer**, config.js)
-- Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts
+- Body scripts: jquery, popper, bootstrap, node-waves, @algolia/autocomplete-js, pickr, perfect-scrollbar, hammer, i18n, menu.js, site.js, VendorScripts, **main.js**, PageScripts, then signalr + **notifications.js**
+- Sets `window.notificationConfig = { userId }` before notifications.js; renders toast container `#notifToastContainer` (bottom-center, z-index 9999)
 - Renders: vertical menu → body → `_FooterHome` (**navbar is intentionally removed**)
 - `<html>` has class `layout-menu-fixed layout-navbar-hidden`; `.layout-page` has `padding-top: 0px !important`
 - Template Customizer is intentionally **not loaded** on admin pages
@@ -278,14 +279,14 @@ Enums/
 ├── UserUpdateAreaEnum.cs        # Status, Password, Theme, Profile, Avatar, AcceptHIW, AcceptTerms
 ├── UserThemeEnum.cs             # "light", "dark"
 ├── ChatStatusEnum.cs            # "agreed", "ongoing", "cancelled"
-├── ChatModeEnum.cs              # "none", "initiate", "ongoing"
+├── ChatModeEnum.cs              # "none", "initiate", "ongoing", "queued", "reserved"
 ├── ChatFraudEnum.cs             # "safe", "dubious", "resolved"
 ├── ChatUpdateAreaEnum.cs        # C# enum: Status=1, Fraud
 ├── ServiceEnum.cs               # "moving", "removal", "pickup", "transport"
 ├── FileTypeEnum.cs              # MIME type constants: PDF, PNG, JPEG, MP4, MOV
 ├── SortFieldEnum.cs             # "status"
 ├── SortDirectionEnum.cs         # "asc", "desc"
-├── RequestStatusEnum.cs         # "pending", "negotiation", "resolved", "cancelled"
+├── RequestStatusEnum.cs         # "pending", "negotiation", "agreed", "resolved", "cancelled", "declined"
 ├── RequestFileTypeEnum.cs       # "image", "video"
 ├── RequestUpdateAreaEnum.cs     # C# enum: Full=1, ChatActivate, ChatDeactivate
 ├── RequestAgreementStatusEnum.cs
@@ -305,8 +306,10 @@ Models/
 ├── GridResultModel.cs           # Server-side DataTables response envelope
 ├── RequestModel.cs              # Create + Edit request form model
 ├── RequestFileModel.cs
-├── ChatHistoryModel.cs          # @model for Conversation.cshtml: Mode, ChatKey, viewer/other party info, Messages
-├── ChatUnreadSummary.cs
+├── ChatHistoryModel.cs          # @model for Conversation.cshtml: Mode, ChatKey, ChatStatus, RequestStatus,
+│                                #   ViewerId/Initials/PictureUrl, OtherParty Name/Initials/PictureUrl,
+│                                #   Messages, Proposals (Dictionary<long, RequestProposalEntity>), ProposalPending
+├── ChatUnreadSummary.cs         # SenderName, Preview, RequestNumber, Date — returned by ChatService.GetMessageUnread()
 ├── UserProfileModel.cs          # Profile page model: UserEntity User, Avatar, ServiceTermsFileName/Url
 └── UserAvatarModel.cs           # Url, Initials, Name
 Services/
@@ -319,7 +322,10 @@ Services/
 ├── RequestService.cs
 ├── ChatService.cs               # Scoped — chat CRUD, AddMessage, ReadMessages, LoadGrid, GetAdminConversation
 ├── RequestChatService.cs        # Scoped — GetMode, Initiate, Conversation, Cancel (user-facing chat flow)
-├── ChatHubService.cs            # Scoped — Join, Send, MarkRead, Notify; called by ChatTool hub
+├── ChatHubService.cs            # Scoped — Join, Send, MarkRead, NotifyProposal; called by ChatTool hub
+│                                #   Notify(userId, connectionId) — adds to "user-{userId}" personal group + sends catchup
+│                                #   Notify(userId) — sends NewMessageNotification to "user-{userId}" group
+│                                #   Send() notifies recipient via Notify(recipientId) after saving message
 └── FraudWordService.cs          # Scoped — IsFraud() with * wildcard pattern matching; cached
 Storage/                         # Git-ignored; local file storage root
 Tools/
@@ -335,7 +341,9 @@ Tools/
 │                                #   (non-admin only); signs out blocked/missing users; TTL = UserCacheTimeout
 └── ChatTool.cs                  # SignalR Hub (in Tools/, not Hubs/); delegates to ChatHubService
                                  #   Methods: Join(chatKey), Send(chatKey, content), MarkRead(chatKey), Notify()
-                                 #   Group name: "bewegdeal-chat-{chatKey}" via ChatTool.GroupName()
+                                 #   Notify() passes UserId + Context.ConnectionId to ChatHubService.Notify
+                                 #   Chat group: "bewegdeal-chat-{chatKey}" via ChatTool.GroupName()
+                                 #   Personal group: "user-{userId}" — used for NewMessageNotification
                                  #   Reads UserId via IdentityFieldEnum.Id claim
 Views/
 ├── Dashboard/
@@ -375,7 +383,17 @@ wwwroot/js/
 ├── pages-auth-multisteps.js     # Register stepper; Step 2 fields toggled by role; Interests via name="Interests"
 ├── request-form.js
 ├── app-request-list.js
-└── chat.js                      # Request-page chat: Phase 1 visibility, Phase 2 conversation, SignalR
+├── chat.js                      # Request-page chat: Phase 1 visibility, Phase 2 conversation, SignalR
+│                                #   Always reloads conversation on every offcanvas open (no caching)
+│                                #   ?chat=open query param auto-opens the offcanvas on page load
+│                                #   savedFooterHtml captured only when footer has .form-send-message
+│                                #   Live: blocks footer on proposal send, restores on ProposalUpdated
+│                                #   window.chatOpen = true/false tracks offcanvas state (used by notifications.js)
+└── notifications.js             # Global SignalR listener (loaded by _HomeLayout on all authenticated pages)
+                                 #   Connects to /hubs/chat, invokes Notify() to join personal group + get catchup
+                                 #   Handles NewMessageNotification → Bootstrap toast (bottom-center) + browser notification
+                                 #   Suppresses toast if window.chatOpen is true
+                                 #   window.notificationConfig = { userId } must be set before this script loads
 ```
 
 ### Entities
@@ -641,11 +659,32 @@ All tables use `serverSide: true`. Key conventions:
 
 ### SignalR (`ChatTool` hub at `/hubs/chat`)
 - `Join(chatKey)`, `Send(chatKey, content)`, `MarkRead(chatKey)`, `Notify()`
-- Client events: `ReceiveMessage`, `ChatCancelled`, `MessagesRead`
-- Group name: `"bewegdeal-chat-{chatKey}"`
+- Chat client events: `ReceiveMessage`, `ChatCancelled`, `MessagesRead`, `ProposalUpdated`
+- Notification client event: `NewMessageNotification` — `{ senderName, preview, requestNumber, date }`
+- Chat group: `"bewegdeal-chat-{chatKey}"`
+- Personal group: `"user-{userId}"` — joined via `Notify()`; receives `NewMessageNotification`
 - Client lib: `wwwroot/vendor/libs/signalr/signalr.min.js`
 
 ### Fraud Word Management
 - Admin manages fraud words at `GET /FraudWord/Index`
 - `POST /FraudWord/Create` / `POST /FraudWord/Delete`
 - Patterns cached in `IMemoryCache` under `CacheKeyEnum.FraudeWords` / `CacheKeyEnum.FraudeWordsCompiled`
+
+---
+
+## PWA & Cache Busting
+
+### Service Worker (`wwwroot/sw.js`)
+- Cache name: `const CACHE = 'bewegdeal-v1'` — bump this string on each deploy to purge old cached assets
+- Format is flexible: `'bewegdeal-v2.1.1'`, `'bewegdeal-2026-06-19'`, any unique string works
+- SW uses `skipWaiting()` + `clients.claim()` — updates activate immediately on next page load, no tab close required
+- Strategy: network-first for navigation (HTML pages), cache-first for static assets
+
+### `asp-append-version`
+- All non-vendor CSS/JS files in all three layouts and all view `@section PageScripts` blocks have `asp-append-version="true"`
+- ASP.NET Core appends a content hash to the URL (e.g. `site.css?v=abc123`) — when file content changes, URL changes, SW fetches fresh
+- Vendor files (`~/vendor/...`) are excluded — they don't change between deploys
+
+### Deploy checklist
+1. Bump `const CACHE` in `wwwroot/sw.js` to a new value
+2. Deploy — `asp-append-version` handles JS/CSS cache invalidation automatically

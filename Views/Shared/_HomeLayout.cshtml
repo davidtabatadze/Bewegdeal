@@ -1,4 +1,4 @@
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en"
       class="layout-menu-fixed layout-navbar-hidden"
@@ -40,9 +40,9 @@
     <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
     <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
     <link rel="stylesheet" href="~/vendor/css/core.css" />
-    <link rel="stylesheet" href="~/css/demo.css" />
+    <link rel="stylesheet" href="~/css/demo.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/vendor/libs/animate-css/animate.css" />
 
     @RenderSection("VendorStyles", required: false)
@@ -50,7 +50,7 @@
 
     <!-- Template helpers & config (must be in <head>) -->
     <script src="~/vendor/js/helpers.js"></script>
-    <script src="~/js/config.js"></script>
+    <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 <body>
 
@@ -105,11 +105,11 @@
     <script src="~/vendor/libs/hammer/hammer.js"></script>
     <script src="~/vendor/libs/i18n/i18n.js"></script>
     <script src="~/vendor/js/menu.js"></script>
-    <script src="~/js/site.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @RenderSection("VendorScripts", required: false)
 
-    <script src="~/js/main.js"></script>
+    <script src="~/js/main.js" asp-append-version="true"></script>
 
     @RenderSection("PageScripts", required: false)
 
@@ -118,7 +118,7 @@
         window.notificationConfig = { userId: '@User.FindFirstValue(IdentityFieldEnum.Id)' };
     </script>
     <script src="~/vendor/libs/signalr/signalr.min.js"></script>
-    <script src="~/js/notifications.js"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
 
     <!-- Notification toast container (bottom-center) -->
     <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" id="notifToastContainer" style="z-index:9999;"></div>
@@ -140,7 +140,7 @@
         </script>
     }
 
-    @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js"></script> }
+    @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js" asp-append-version="true"></script> }
 
 </body>
 </html>

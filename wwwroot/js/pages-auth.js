@@ -1,5 +1,6 @@
 /**
- *  Pages Authentication
+ * Pages Authentication
+ * v1.0.0
  */
 'use strict';
 

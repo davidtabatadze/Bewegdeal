@@ -1,5 +1,6 @@
 /**
- *  Page auth register multi-steps
+ * Page auth register multi-steps
+ * v1.0.0
  */
 
 'use strict';

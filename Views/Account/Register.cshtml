@@ -1,4 +1,4 @@
-@model Bewegdeal.ViewModels.RegistrationViewModel
+﻿@model Bewegdeal.ViewModels.RegistrationViewModel
 @{
     Layout = "_BlankLayout";
     ViewData["Title"] = "Register";
@@ -27,7 +27,7 @@
 }
 
 @section PageScripts {
-    <script src="~/js/pages-auth-multisteps.js"></script>
+    <script src="~/js/pages-auth-multisteps.js" asp-append-version="true"></script>
     @{ ViewData["AcceptMode"] = true; }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
     @{ ViewData.Remove("AcceptMode"); }

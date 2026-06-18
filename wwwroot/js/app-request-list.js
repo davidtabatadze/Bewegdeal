@@ -1,5 +1,6 @@
 /**
  * Requests List — Bewegdeal
+ * v1.0.0
  */
 
 'use strict';

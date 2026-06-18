@@ -1,4 +1,4 @@
-@using Bewegdeal.Enums
+﻿@using Bewegdeal.Enums
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Requests";
@@ -34,7 +34,7 @@
 }
 
 @section PageScripts {
-    <script src="~/js/app-request-list.js"></script>
+    <script src="~/js/app-request-list.js" asp-append-version="true"></script>
 }
 
 @if (viewerRole != UserRoleEnum.Customer)

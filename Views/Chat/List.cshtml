@@ -1,4 +1,4 @@
-@using Bewegdeal.Enums
+﻿@using Bewegdeal.Enums
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Chats";
@@ -22,7 +22,7 @@
 }
 
 @section PageScripts {
-    <script src="~/js/app-chat-list.js"></script>
+    <script src="~/js/app-chat-list.js" asp-append-version="true"></script>
 }
 
 <!-- Chats Table -->
