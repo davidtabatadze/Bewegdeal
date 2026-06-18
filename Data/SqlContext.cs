@@ -272,35 +272,37 @@ namespace Bewegdeal.Data
 
         private void ConfigureInvoices(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<InvoiceEntity>(i =>
+            modelBuilder.Entity<InvoiceEntity>(e =>
             {
-                i.ToTable(_prefix + "Invoices");
+                e.ToTable(_prefix + "Invoices");
 
-                i.HasKey(r => r.Id);
-                i.Property(r => r.Id).ValueGeneratedOnAdd();
+                e.HasKey(i => i.Id);
+                e.Property(i => i.Id).ValueGeneratedOnAdd();
 
-                i.HasIndex(r => r.Number).IsUnique();
-                i.HasIndex(r => r.RequestNumber).IsUnique();
-                i.HasIndex(r => r.Status);
-                i.HasIndex(r => r.RequestId);
-                i.HasIndex(r => r.ProposalId);
-                i.HasIndex(r => r.CustomerId);
-                i.HasIndex(r => r.CompanyId);
+                e.HasIndex(i => i.Number).IsUnique();
+                e.HasIndex(i => i.RequestNumber).IsUnique();
+                e.HasIndex(i => i.Status);
+                e.HasIndex(i => i.RequestId);
+                e.HasIndex(i => i.ProposalId);
+                e.HasIndex(i => i.CustomerId);
+                e.HasIndex(i => i.CompanyId);
+                e.HasIndex(i => i.NotificationSent);
 
-                i.Property(r => r.Number).IsRequired().HasMaxLength(36);
-                i.Property(r => r.RequestNumber).IsRequired().HasMaxLength(36);
-                i.Property(r => r.Status).IsRequired().HasMaxLength(16);
-                i.Property(r => r.RequestId).IsRequired();
-                i.Property(r => r.ProposalId).IsRequired();
-                i.Property(r => r.CustomerId).IsRequired();
-                i.Property(r => r.CompanyId).IsRequired();
+                e.Property(i => i.Number).IsRequired().HasMaxLength(36);
+                e.Property(i => i.RequestNumber).IsRequired().HasMaxLength(36);
+                e.Property(i => i.Status).IsRequired().HasMaxLength(16);
+                e.Property(i => i.RequestId).IsRequired();
+                e.Property(i => i.ProposalId).IsRequired();
+                e.Property(i => i.CustomerId).IsRequired();
+                e.Property(i => i.CompanyId).IsRequired();
 
-                i.Property(r => r.Currency).IsRequired().HasMaxLength(4);
-                i.Property(r => r.ServiceCost).IsRequired().HasPrecision(18, 2);
-                i.Property(r => r.SubtotalCost).IsRequired().HasPrecision(18, 2);
-                i.Property(r => r.TotalCost).IsRequired().HasPrecision(18, 2);
-                i.Property(r => r.CreateDate).IsRequired();
-                i.Property(r => r.PaymentDate).IsRequired(false);
+                e.Property(i => i.Currency).IsRequired().HasMaxLength(4);
+                e.Property(i => i.ServiceCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.SubtotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.TotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.NotificationSent).IsRequired();
+                e.Property(i => i.CreateDate).IsRequired();
+                e.Property(i => i.PaymentDate).IsRequired(false);
             });
         }
 

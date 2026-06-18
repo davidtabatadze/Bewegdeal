@@ -16,6 +16,7 @@ namespace Bewegdeal.Data.Entities
         public decimal ServiceCost { get; set; }
         public decimal SubtotalCost { get; set; }
         public decimal TotalCost { get; set; }
+        public bool NotificationSent { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? PaymentDate { get; set; }
     }
