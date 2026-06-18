@@ -71,7 +71,7 @@ namespace Bewegdeal.Services
                 CompanyId = userId,
                 Fraud = ChatFraudEnum.Safe,
                 Status = ChatStatusEnum.Ongoing,
-                CreateDate = DateTime.UtcNow
+                CreateDate = DateTime.Now
             });
 
             await RequestService.Update(RequestUpdateAreaEnum.ChatActivate, new() { Id = data.request.Id });

@@ -10,7 +10,7 @@
 
     string TimeAgo(DateTime date)
     {
-        var diff = DateTime.UtcNow - date;
+        var diff = DateTime.Now - date;
         if (diff.TotalSeconds < 60) { return "just now"; }
         if (diff.TotalMinutes < 60) { var m = (int)diff.TotalMinutes; return $"{m} minute{(m == 1 ? "" : "s")} ago"; }
         if (diff.TotalHours < 24) { var h = (int)diff.TotalHours; return $"{h} hour{(h == 1 ? "" : "s")} ago"; }

@@ -295,6 +295,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (html) {
                 Block.remove('#adminChatOffcanvasBody');
                 body.innerHTML = html;
+                const histBody = body.querySelector('.chat-history-body');
+                if (histBody) { new PerfectScrollbar(histBody); }
             })
             .catch(function () { Block.remove('#adminChatOffcanvasBody'); });
     });

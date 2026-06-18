@@ -46,7 +46,7 @@ namespace Bewegdeal.Services
                 ChatId = chat.Id,
                 SenderId = userId,
                 Content = content,
-                SentDate = DateTime.UtcNow,
+                SentDate = DateTime.Now,
                 IsRead = false,
                 IsFraud = isFraud
             });

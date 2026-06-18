@@ -111,7 +111,7 @@ else
                     @{
                         string GetDateLabel(DateTime d)
                         {
-                            var today = DateTime.UtcNow.Date;
+                            var today = DateTime.Now.Date;
                             if (d.Date == today) { return "Today"; }
                             if (d.Date == today.AddDays(-1)) { return "Yesterday"; }
                             return d.ToString("MMMM d, yyyy");
@@ -216,7 +216,14 @@ else
             @* Message input *@
             @if (isAdminView)
             {
-                // ...
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-info m-0" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Administrator readonly view</strong>
+                        </div>
+                    </div>
+                </div>
             }
             else if (Model.ChatStatus == ChatStatusEnum.Cancelled)
             {
