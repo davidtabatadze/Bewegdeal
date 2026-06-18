@@ -65,7 +65,10 @@ namespace Bewegdeal.Services
                 await ChatService.Update(ChatUpdateAreaEnum.Fraud, new() { Id = chat.Id, Fraud = ChatFraudEnum.Dubious });
             }
 
-            await Notify(userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId);
+            if (!content.StartsWith(ConstantEnum.ProposalPrefix))
+            {
+                await Notify(userId == chat.CompanyId ? chat.CustomerId : chat.CompanyId);
+            }
         }
 
         public async Task MarkRead(long userId, string chatKey, string connectionId, ChatEntity? chat = null)

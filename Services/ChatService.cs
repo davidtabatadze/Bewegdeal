@@ -29,9 +29,14 @@ namespace Bewegdeal.Services
         public async Task<int> Count(ChatFilter filter)
             => await ChatRepository.Count(filter);
 
-        public async Task<ChatUnreadSummary?> GetMessageUnread(long userId)
+        public async Task<ChatUnreadSummary?> GetMessageUnread(long userId, long excludeId = 0)
         {
-            var message = await ChatRepository.GetMessageUnread(userId);
+            var message = await ChatRepository.GetMessageUnread(userId, excludeId);
+
+            if ((message?.Content ?? "").StartsWith(ConstantEnum.ProposalPrefix))
+            {
+                message = await ChatRepository.GetMessageUnread(userId, message?.Id ?? 0);
+            }
 
             if (message is null)
             {
@@ -45,7 +50,8 @@ namespace Bewegdeal.Services
             {
                 Preview = message.Content.Length > 80 ? message.Content[..80] + "…" : message.Content,
                 RequestNumber = chat?.RequestNumber ?? "-",
-                SenderName = sender?.Name ?? "unknown"
+                SenderName = sender?.Name ?? "unknown",
+                Date = message.SentDate
             };
         }
 

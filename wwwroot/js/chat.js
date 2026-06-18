@@ -11,6 +11,11 @@
     var requestNumber = cfg.requestNumber || '';
     if (!requestNumber) { return; }
 
+    if (new URLSearchParams(window.location.search).get('chat') === 'open') {
+        var _oc = document.getElementById('requestChatOffcanvas');
+        if (_oc) { bootstrap.Offcanvas.getOrCreateInstance(_oc).show(); }
+    }
+
     var floatingBtn = document.getElementById('chatFloatingBtn');
     var offcanvas = document.getElementById('requestChatOffcanvas');
     var body = document.getElementById('chatOffcanvasBody');
@@ -245,14 +250,18 @@ var lastMessageDate = '';
             }
             var actions = card.querySelector('.proposal-actions');
             if (actions) { actions.remove(); }
-            if (savedFooterHtml && (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected')) {
-                var footer = body.querySelector('.chat-history-footer');
-                if (footer) { footer.outerHTML = savedFooterHtml; }
-                if (data.proposalStatus === 'accepted') {
-                    var cancelBtn = body.querySelector('#chatCancelBtn');
-                    if (cancelBtn) { cancelBtn.remove(); }
-                    var proposalBtn = body.querySelector('#chatProposalBtn');
-                    if (proposalBtn) { proposalBtn.remove(); }
+            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected') {
+                if (savedFooterHtml) {
+                    var footer = body.querySelector('.chat-history-footer');
+                    if (footer) { footer.outerHTML = savedFooterHtml; }
+                    if (data.proposalStatus === 'accepted') {
+                        var cancelBtn = body.querySelector('#chatCancelBtn');
+                        if (cancelBtn) { cancelBtn.remove(); }
+                        var proposalBtn = body.querySelector('#chatProposalBtn');
+                        if (proposalBtn) { proposalBtn.remove(); }
+                    }
+                } else {
+                    loadConversation();
                 }
             }
         });
@@ -302,7 +311,7 @@ var lastMessageDate = '';
                     var separators = body.querySelectorAll('.chat-date-separator[data-date]');
                     lastMessageDate = separators.length ? separators[separators.length - 1].getAttribute('data-date') : '';
                     var footer = body.querySelector('.chat-history-footer');
-                    savedFooterHtml = footer ? footer.outerHTML : '';
+                    savedFooterHtml = (footer && footer.querySelector('.form-send-message')) ? footer.outerHTML : '';
                     connectSignalR(chatKey);
                     scrollToBottom();
                 }

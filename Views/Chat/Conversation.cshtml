@@ -262,7 +262,7 @@ else
                         <div class="message-actions d-flex align-items-center">
                             @if (User.IsInRole(UserRoleEnum.Company) && Model.ChatStatus != ChatStatusEnum.Agreed)
                             {
-                                <span id="chatProposalBtn" class="btn btn-text-success btn-icon rounded-pill cursor-pointer"
+                                <span id="chatProposalBtn" class="btn btn-text-warning btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
                                     <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
                                 </span>
