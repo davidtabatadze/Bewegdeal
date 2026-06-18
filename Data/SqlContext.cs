@@ -18,6 +18,7 @@ namespace Bewegdeal.Data
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
         public DbSet<RequestProposalEntity> RequestProposals => Set<RequestProposalEntity>();
         public DbSet<FraudWordEntity> FraudWords => Set<FraudWordEntity>();
+        public DbSet<InvoiceEntity> Invoices => Set<InvoiceEntity>();
         public DbSet<ChatEntity> Chats => Set<ChatEntity>();
         public DbSet<ChatMessageEntity> ChatMessages => Set<ChatMessageEntity>();
 
@@ -86,6 +87,7 @@ namespace Bewegdeal.Data
             ConfigureRequestFiles(modelBuilder);
             ConfigureRequestProposals(modelBuilder);
             ConfigureFraudWords(modelBuilder);
+            ConfigureInvoices(modelBuilder);
             ConfigureChats(modelBuilder);
             ConfigureChatMessages(modelBuilder);
         }
@@ -265,6 +267,40 @@ namespace Bewegdeal.Data
                 e.HasKey(w => w.Id);
                 e.Property(w => w.Id).ValueGeneratedOnAdd();
                 e.Property(w => w.Word).IsRequired().HasMaxLength(128);
+            });
+        }
+
+        private void ConfigureInvoices(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<InvoiceEntity>(i =>
+            {
+                i.ToTable(_prefix + "Invoices");
+
+                i.HasKey(r => r.Id);
+                i.Property(r => r.Id).ValueGeneratedOnAdd();
+
+                i.HasIndex(r => r.Number).IsUnique();
+                i.HasIndex(r => r.RequestNumber).IsUnique();
+                i.HasIndex(r => r.Status);
+                i.HasIndex(r => r.RequestId);
+                i.HasIndex(r => r.ProposalId);
+                i.HasIndex(r => r.CustomerId);
+                i.HasIndex(r => r.CompanyId);
+
+                i.Property(r => r.Number).IsRequired().HasMaxLength(36);
+                i.Property(r => r.RequestNumber).IsRequired().HasMaxLength(36);
+                i.Property(r => r.Status).IsRequired().HasMaxLength(16);
+                i.Property(r => r.RequestId).IsRequired();
+                i.Property(r => r.ProposalId).IsRequired();
+                i.Property(r => r.CustomerId).IsRequired();
+                i.Property(r => r.CompanyId).IsRequired();
+
+                i.Property(r => r.Currency).IsRequired().HasMaxLength(4);
+                i.Property(r => r.ServiceCost).IsRequired().HasPrecision(18, 2);
+                i.Property(r => r.SubtotalCost).IsRequired().HasPrecision(18, 2);
+                i.Property(r => r.TotalCost).IsRequired().HasPrecision(18, 2);
+                i.Property(r => r.CreateDate).IsRequired();
+                i.Property(r => r.PaymentDate).IsRequired(false);
             });
         }
 
