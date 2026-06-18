@@ -30,6 +30,7 @@ namespace Bewegdeal.Data.Repositories
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Negotiation)
                                                .SetProperty(p => p.ExecutorId, (long?)null)
+                                               .SetProperty(p => p.AgreementId, (long?)null)
                                           );
                     break;
 
@@ -38,6 +39,7 @@ namespace Bewegdeal.Data.Repositories
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Agreed)
                                                .SetProperty(p => p.ExecutorId, update.ExecutorId)
+                                               .SetProperty(p => p.AgreementId, update.AgreementId)
                                           );
                     break;
 
@@ -46,6 +48,7 @@ namespace Bewegdeal.Data.Repositories
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Pending)
                                                .SetProperty(p => p.ExecutorId, (long?)null)
+                                               .SetProperty(p => p.AgreementId, (long?)null)
                                           );
                     break;
 

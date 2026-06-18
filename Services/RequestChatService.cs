@@ -207,7 +207,7 @@ namespace Bewegdeal.Services
                     );
                     await RequestService.Update(
                         RequestUpdateAreaEnum.ChatDeal,
-                        new() { Id = chat?.RequestId ?? 0, ExecutorId = chat?.CompanyId ?? 0 }
+                        new() { Id = chat?.RequestId ?? 0, ExecutorId = chat?.CompanyId ?? 0, AgreementId = proposalId }
                     );
                 }
                 await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposalId, status);
