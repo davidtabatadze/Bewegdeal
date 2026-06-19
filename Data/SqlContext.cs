@@ -12,7 +12,7 @@ namespace Bewegdeal.Data
 
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
-        public DbSet<FileEntity> Files => Set<FileEntity>();
+        public DbSet<UserRatingEntity> UserRatings => Set<UserRatingEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
@@ -81,7 +81,7 @@ namespace Bewegdeal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureUsers(modelBuilder);
-            ConfigureFiles(modelBuilder);
+            ConfigureUserRatings(modelBuilder);
             ConfigureSettings(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
@@ -107,6 +107,7 @@ namespace Bewegdeal.Data
                 e.HasIndex(u => u.Status);
                 e.HasIndex(u => u.Number);
 
+                e.Property(r => r.Rating).IsRequired().HasPrecision(18, 1);
                 e.Property(u => u.Password).IsRequired().HasMaxLength(64);
                 e.Property(u => u.Salt).IsRequired();
                 e.Property(u => u.Role).IsRequired().HasMaxLength(16);
@@ -136,21 +137,21 @@ namespace Bewegdeal.Data
             });
         }
 
-        private void ConfigureFiles(ModelBuilder modelBuilder)
+        private void ConfigureUserRatings(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FileEntity>(e =>
+            modelBuilder.Entity<UserRatingEntity>(e =>
             {
-                e.ToTable(_prefix + "Files");
+                e.ToTable(_prefix + "UserRatings");
 
                 e.HasKey(f => f.Id);
                 e.Property(f => f.Id).ValueGeneratedOnAdd();
 
-                e.HasIndex(f => f.Key).IsUnique();
+                e.HasIndex(f => f.UserId);
 
-                e.Property(f => f.Size).IsRequired();
-                e.Property(f => f.Key).IsRequired().HasMaxLength(64);
-                e.Property(f => f.MimeType).IsRequired().HasMaxLength(16);
-                e.Property(f => f.FileName).IsRequired().HasMaxLength(256);
+                e.Property(f => f.UserId).IsRequired();
+                e.Property(f => f.EvaluatorId).IsRequired();
+                e.Property(i => i.CreateDate).IsRequired();
+                e.Property(r => r.Value).IsRequired().HasPrecision(18, 1);
             });
         }
 

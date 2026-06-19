@@ -51,6 +51,17 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
+        public async Task Rate(long userId, long evaluatorId, decimal value)
+        {
+            await Create(new UserRatingEntity
+            {
+                Value = value,
+                UserId = userId,
+                EvaluatorId = evaluatorId,
+                CreateDate = DateTime.Now
+            });
+        }
+
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
         {
             switch (area)
