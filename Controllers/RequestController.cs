@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bewegdeal.Controllers;
 
 [Authorize]
-public class RequestController(RequestService RequestService) : XBaseController
+public class RequestController(RequestService RequestService, RequestChatService RequestChatService) : XBaseController
 {
     #region List
 
@@ -157,6 +157,25 @@ public class RequestController(RequestService RequestService) : XBaseController
 
         ViewBag.Request = result.Result;
         return View("View");
+    }
+
+    #endregion
+
+    #region Actions
+
+    [HttpPost]
+    [Authorize(Roles = UserRoleEnum.Customer)]
+    public async Task<IActionResult> Resolve(string number)
+    {
+        return Json(await RequestService.Resolve(number, UserId));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = UserRoleEnum.Customer)]
+    public async Task<IActionResult> Cancel(string number)
+    {
+        await RequestChatService.Cancel(number, UserId);
+        return Json(await RequestService.Cancel(number, UserId));
     }
 
     #endregion

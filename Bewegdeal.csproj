@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\FileService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Storage\" />
   </ItemGroup>
 

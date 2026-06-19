@@ -2,6 +2,6 @@
 {
     public enum InvoiceUpdateAreaEnum
     {
-        Paid = 1
+        Status = 1
     }
 }

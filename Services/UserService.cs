@@ -8,7 +8,7 @@ using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
-    public class UserService(IUserRepository UserRepository, FileService2 FileService)
+    public class UserService(IUserRepository UserRepository, FileService FileService)
     {
 
         #region Repository

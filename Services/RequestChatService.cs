@@ -12,7 +12,7 @@ namespace Bewegdeal.Services
         UserService UserService,
         ChatService ChatService,
         ChatHubService ChatHubService,
-        FileService2 FileService)
+        FileService FileService)
     {
 
         public async Task<(string mode, RequestEntity? request, ChatEntity? chat)> GetMode(string requestNumber, long userId, string userRole)
@@ -142,9 +142,14 @@ namespace Bewegdeal.Services
                 [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]
             );
             var chat = await ChatService.GetActual(requestNumber);
+            var proposal = await ProposalService.GetActual(chat?.Id ?? 0);
 
             if (request?.Status == RequestStatusEnum.Negotiation && chat?.Status == ChatStatusEnum.Ongoing && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {
+                if (proposal is not null)
+                {
+                    await ProposalReact(userId, proposal.Id, false, null);
+                }
                 await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });

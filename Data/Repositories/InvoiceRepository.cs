@@ -13,11 +13,11 @@ namespace Bewegdeal.Data.Repositories
             switch (area)
             {
 
-                case InvoiceUpdateAreaEnum.Paid:
-                    await Context.Invoices.Where(r => r.Id == update.Id && r.Status == InvoiceStatusEnum.Pending)
+                case InvoiceUpdateAreaEnum.Status:
+                    await Context.Invoices.Where(r => r.Id == update.Id || r.RequestId == update.RequestId)
                                           .ExecuteUpdateAsync(r => r
-                                               .SetProperty(p => p.Status, InvoiceStatusEnum.Paid)
-                                               .SetProperty(p => p.PaymentDate, DateTime.Now)
+                                               .SetProperty(p => p.Status, update.Status)
+                                               .SetProperty(p => p.PaymentDate, update.PaymentDate)
                                           );
                     break;
 
@@ -40,6 +40,11 @@ namespace Bewegdeal.Data.Repositories
             if (filter.Id.HasValue)
             {
                 query = query.Where(r => r.Id == filter.Id.Value);
+            }
+
+            if (filter.RequestId.HasValue)
+            {
+                query = query.Where(r => r.RequestId == filter.RequestId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Number))

@@ -6,8 +6,8 @@ namespace Bewegdeal.Data.Entities
     {
         public long Id { get; set; }
         public string Number { get; set; } = "";
-        public string RequestNumber { get; set; } = "";
         public string Status { get; set; } = "";
+        public string RequestNumber { get; set; } = "";
         public long RequestId { get; set; }
         public long ProposalId { get; set; }
         public long CompanyId { get; set; }
