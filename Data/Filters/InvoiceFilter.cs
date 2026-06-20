@@ -8,5 +8,9 @@ namespace Bewegdeal.Data.Filters
         public string? Number { get; set; }
         public string? Search { get; set; }
         public string? Status { get; set; }
+        public string? ViewerRole { get; set; }
+        public long? ViewerId { get; set; }
+        public decimal? AmountFrom { get; set; }
+        public decimal? AmountTo { get; set; }
     }
 }

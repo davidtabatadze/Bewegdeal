@@ -47,6 +47,22 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.RequestId == filter.RequestId.Value);
             }
 
+            if (filter.AmountFrom.HasValue)
+            {
+                query = query.Where(r =>
+                   r.ServiceCost >= filter.AmountFrom.Value ||
+                   r.TotalCost >= filter.AmountFrom.Value
+               );
+            }
+
+            if (filter.AmountTo.HasValue)
+            {
+                query = query.Where(r =>
+                   r.ServiceCost <= filter.AmountTo.Value ||
+                   r.TotalCost <= filter.AmountTo.Value
+               );
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Number))
             {
                 query = query.Where(r => r.Number == filter.Number);
@@ -65,6 +81,23 @@ namespace Bewegdeal.Data.Repositories
                     r.Status.ToLower().Contains(term) ||
                     r.RequestId.ToString().ToLower().Contains(term)
                 );
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.ViewerRole) && filter.ViewerId.HasValue)
+            {
+                var viewerId = filter.ViewerId.Value;
+                if (filter.ViewerRole == UserRoleEnum.Administrator)
+                {
+                    // ...
+                }
+                else if (filter.ViewerRole == UserRoleEnum.Company)
+                {
+                    query = query.Where(r => r.CompanyId == viewerId);
+                }
+                else
+                {
+                    query = query.Where(r => r.Id == 0);
+                }
             }
 
             query = ApplySorting(query, filter);

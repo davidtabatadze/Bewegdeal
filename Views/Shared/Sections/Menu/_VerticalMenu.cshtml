@@ -83,6 +83,17 @@
             </li>
         }
 
+        <!-- Invoices -->
+        @if (!User.IsInRole(UserRoleEnum.Customer))
+        {
+            <li class='menu-item@(currentPage == "/Invoice/List" ? " active" : "")'>
+                <a asp-controller="Invoice" asp-action="List" class="menu-link">
+                    <i class="menu-icon icon-base ri ri-bill-line"></i>
+                    <div data-i18n="Invoices">Invoices</div>
+                </a>
+            </li>
+        }
+
         @if (User.IsInRole(UserRoleEnum.Customer))
         {
             <!-- My Requests -->

@@ -1,0 +1,83 @@
+@using Bewegdeal.Enums
+@{
+    Layout = "_HomeLayout";
+    ViewData["Title"] = "Invoices";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/app-invoice-list.js" asp-append-version="true"></script>
+}
+
+<!-- Invoices Table -->
+<div class="card">
+    <div class="card-header border-bottom">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-6">
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="icon-base ri ri-search-line icon-20px"></i></span>
+                    <input type="text" id="invoicesSearch" class="form-control" placeholder="Search invoices..." />
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="row g-3">
+                            <div class="form-floating form-floating-outline col-6">
+                                <input type="number" id="amountFrom" class="form-control" placeholder="" min="1" max="10000" step="1" />
+                                <label for="amountFrom">Amount From</label>
+                            </div>
+                            <div class="form-floating form-floating-outline col-6">
+                                <input type="number" id="amountTo" class="form-control" placeholder="" min="1" max="10000" step="1" />
+                                <label for="amountTo">Amount To</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
+                            <option value="">All Statuses</option>
+                            <option data-divider="true"></option>
+                            <option value="@InvoiceStatusEnum.Pending">Pending</option>
+                            <option value="@InvoiceStatusEnum.Paid">Paid</option>
+                            <option value="@InvoiceStatusEnum.Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-datatable">
+        <table class="datatables-invoices table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    @if (User.IsInRole(UserRoleEnum.Administrator))
+                    {
+                        <th>Company</th>
+                    }
+                    else
+                    {
+                        <th>Customer</th>
+                    }
+                    <th>Cost</th>
+                    <th>Fee</th>
+                    <th>Request</th>
+                    <th>Invoice</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
