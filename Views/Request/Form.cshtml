@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
     <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
     <link rel="stylesheet" href="~/vendor/libs/spinkit/spinkit.css" />
+    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+    {
+        <link rel="stylesheet" href="~/vendor/libs/raty-js/raty-js.css" />
+    }
 }
 
 @section VendorScripts {
@@ -27,6 +31,10 @@
     <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
     <script src="~/vendor/libs/notyf/notyf.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+    {
+        <script src="~/vendor/libs/raty-js/raty-js.js"></script>
+    }
 }
 
 @section PageScripts {
@@ -303,10 +311,19 @@
                     <div class="action-btns">
                         <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
                         <button id="btnSubmitRequest" type="button" class="btn btn-primary me-4">@(isEdit ? "Save Changes" : "Place Request")</button>
-                        <button id="btnResolve" type="button" class="btn btn-info me-4">Resolve</button>
+                        @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+                        {
+                            <button id="btnResolve" type="button" class="btn btn-info me-4"
+                                    onclick="ResolveModal.open('@req.Number')">Resolve</button>
+                        }
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
+
+@if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+{
+    @await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
+}

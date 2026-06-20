@@ -8,6 +8,7 @@
         AcceptTerms,
         AcceptHIW,
         Profile,
-        Avatar
+        Avatar,
+        Rating
     }
 }

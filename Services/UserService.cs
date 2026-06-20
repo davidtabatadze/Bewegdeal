@@ -37,6 +37,9 @@ namespace Bewegdeal.Services
         public async Task<List<UserEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
             => await UserRepository.Load<UserEntity>(ids, properties);
 
+        public async Task Rate(long userId, long evaluatorId, decimal value)
+            => await UserRepository.Rate(userId, evaluatorId, value);
+
         #endregion
 
         public async Task<GenericResultModel> UpdateProfile(long id, ProfileViewModel model)

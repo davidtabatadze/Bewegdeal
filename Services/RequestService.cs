@@ -98,7 +98,7 @@ namespace Bewegdeal.Services
             return GenericResultModel.Ok();
         }
 
-        public async Task<GenericResultModel> Resolve(string number, long userId)
+        public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
         {
             var request = await Get(number);
 
@@ -136,6 +136,8 @@ namespace Bewegdeal.Services
                     RequestUpdateAreaEnum.Status,
                     new() { Id = request.Id, Status = RequestStatusEnum.Resolved }
                 );
+
+                await UserService.Rate(proposal.CompanyId, userId, rating ?? 0);
             }
 
             return GenericResultModel.Ok();

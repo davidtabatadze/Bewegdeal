@@ -1,0 +1,58 @@
+@{
+    var containerId = (string)(ViewData["RatingStarsId"] ?? "ratingStars");
+    var readOnly    = (bool)(ViewData["RatingStarsReadOnly"] ?? false);
+    var score       = (decimal)(ViewData["RatingStarsScore"] ?? 0m);
+    var size        = (string)(ViewData["RatingStarsSize"] ?? "md");
+
+    var sizeClass = size switch
+    {
+        "sm" => "",
+        "lg" => " icon-42px",
+        _    => " icon-xl"   // md (default)
+    };
+}
+
+<div id="@containerId"></div>
+
+<script>
+(function () {
+    window.RatyInstances = window.RatyInstances || {};
+
+    var containerId = '@containerId';
+    var readOnly    = @(readOnly ? "true" : "false");
+    var score       = @score.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    var currentScore = score;
+
+    function init() {
+        var el = document.getElementById(containerId);
+        if (!el || typeof Raty === 'undefined') { return; }
+
+        el.innerHTML = '';
+        delete el.dataset.score;
+        currentScore = score;
+
+        new Raty(el, {
+            starType: 'i',
+            starOn:   'icon-base@(sizeClass) ri ri-star-fill text-warning',
+            starHalf: 'icon-base@(sizeClass) ri ri-star-half-line text-warning',
+            starOff:  'icon-base@(sizeClass) ri ri-star-line text-muted',
+            half:     true,
+            readOnly: readOnly,
+            score:    score > 0 ? score : undefined,
+            click:    readOnly ? undefined : function (s) { currentScore = s || 0; }
+        }).init();
+
+        window.RatyInstances[containerId] = {
+            score: function () { return currentScore; },
+            reset: function () {
+                score = 0;
+                currentScore = 0;
+                init();
+            }
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+})();
+</script>

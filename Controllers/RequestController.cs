@@ -165,9 +165,9 @@ public class RequestController(RequestService RequestService, RequestChatService
 
     [HttpPost]
     [Authorize(Roles = UserRoleEnum.Customer)]
-    public async Task<IActionResult> Resolve(string number)
+    public async Task<IActionResult> Resolve(string number, decimal? rating)
     {
-        return Json(await RequestService.Resolve(number, UserId));
+        return Json(await RequestService.Resolve(number, UserId, rating));
     }
 
     [HttpPost]
