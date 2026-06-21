@@ -2,6 +2,9 @@
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Invoices";
+
+    string FormatAmount(decimal value)
+        => value < 1000 ? value.ToString("0.##") : (value / 1000m).ToString("0.##") + "K";
 }
 
 @section VendorStyles {
@@ -24,6 +27,76 @@
     <script src="~/js/app-invoice-list.js" asp-append-version="true"></script>
 }
 
+<div class="card mb-6">
+    <div class="card-widget-separator-wrapper">
+        <div class="card-body card-widget-separator pt-3 pb-3">
+            <div class="row gy-4 gy-sm-1">
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-primary">@ViewBag.Total</h4>
+                            <p class="mb-0">Invoices</p>
+                        </div>
+                        <div class="avatar me-lg-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-primary">
+                                <i class="icon-base ri ri-pages-line icon-26px"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="d-none d-sm-block d-lg-none me-6" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-info">@ViewBag.Users</h4>
+                            @if (User.IsInRole(UserRoleEnum.Administrator))
+                            {
+                                <p class="mb-0">Companies</p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">Customers</p>
+                            }
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-info">
+                                <i class="icon-base ri @(User.IsInRole(UserRoleEnum.Administrator) ? "ri-building-line" : "ri-user-line") icon-26px"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="d-none d-sm-block d-lg-none" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-3 border-bottom-0 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-success">€@FormatAmount((decimal)ViewBag.Paid)</h4>
+                            <p class="mb-0">Paid</p>
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="icon-base ri ri-wallet-line icon-26px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="mb-0 text-warning">€@FormatAmount((decimal)ViewBag.Pending)</h4>
+                            <p class="mb-0">Pending</p>
+                        </div>
+                        <div class="avatar mt-2">
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="icon-base ri ri-timer-flash-line icon-26px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Invoices Table -->
 <div class="card">
     <div class="card-header border-bottom">
@@ -36,7 +109,7 @@
             </div>
             <div class="col-12 col-lg-6">
                 <div class="row g-3">
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <div class="row g-3">
                             <div class="form-floating form-floating-outline col-6">
                                 <input type="number" id="amountFrom" class="form-control" placeholder="" min="1" max="10000" step="1" />
@@ -48,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                             <option value="">All Statuses</option>
                             <option data-divider="true"></option>
@@ -78,7 +151,10 @@
                     <th>Fee</th>
                     <th>Request</th>
                     <th>Invoice</th>
-                    <th>Actions</th>
+                    @if (User.IsInRole(UserRoleEnum.Administrator))
+                    {
+                        <th>Actions</th>
+                    }
                 </tr>
             </thead>
         </table>

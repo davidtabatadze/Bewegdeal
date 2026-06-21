@@ -32,6 +32,30 @@ namespace Bewegdeal.Data.Repositories
         public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
             => await ApplyFilters(Context.Invoices.AsQueryable(), filter).ToListAsync();
 
+        public async Task<decimal> Sum(InvoiceFilter filter, string property)
+        {
+            var query = ApplyFilters(Context.Invoices.AsQueryable(), filter);
+            return property switch
+            {
+                nameof(InvoiceEntity.ServiceCost)  => await query.SumAsync(s => s.ServiceCost),
+                nameof(InvoiceEntity.SubtotalCost) => await query.SumAsync(s => s.SubtotalCost),
+                nameof(InvoiceEntity.TotalCost)    => await query.SumAsync(s => s.TotalCost),
+                _ => throw new ArgumentException("Invalid sum property", nameof(property))
+            };
+        }
+
+        public async Task<int> CountDistinct(InvoiceFilter filter, string property)
+        {
+            var query = ApplyFilters(Context.Invoices.AsQueryable(), filter);
+            return property switch
+            {
+                nameof(InvoiceEntity.CompanyId)  => await query.Select(s => s.CompanyId).Distinct().CountAsync(),
+                nameof(InvoiceEntity.CustomerId) => await query.Select(s => s.CustomerId).Distinct().CountAsync(),
+                nameof(InvoiceEntity.RequestId)  => await query.Select(s => s.RequestId).Distinct().CountAsync(),
+                _ => throw new ArgumentException("Invalid distinct property", nameof(property))
+            };
+        }
+
         public async Task<int> Count(InvoiceFilter filter)
             => await ApplyFilters(Context.Invoices.AsQueryable(), filter).CountAsync();
 

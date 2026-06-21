@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Status → icon HTML
     const statusIconObj = {
         pending: '<i class="icon-base ri ri-timer-flash-line    icon-22px text-warning me-2"></i>',
-        paid: '<i class="icon-base ri ri-secure-payment-line icon-22px text-success me-2"></i>',
+        paid: '<i class="icon-base ri ri-wallet-line icon-22px text-success me-2"></i>',
         cancelled: '<i class="icon-base ri ri-hand               icon-22px text-danger  me-2"></i>'
     };
 
@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'requestId', 5: 'id' };
 
     if (!dt_invoice_table) { return; }
+
+    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 7;
 
     const dt_invoice = new DataTable(dt_invoice_table, {
         serverSide: true,
@@ -37,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 d.search = document.getElementById('invoicesSearch').value;
                 d.status = document.getElementById('filterStatus').value;
+                d.amountFrom = document.getElementById('amountFrom').value || null;
+                d.amountTo = document.getElementById('amountTo').value || null;
 
                 return d;
             }
@@ -48,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'totalCost' },    // 3 — fee (sortable)
             { data: 'requestId' },    // 4 — request (sortable)
             { data: 'id' },           // 5 — invoice (sortable)
-            { data: 'status' }            // 6 — actions (not sortable)
+            ...(isAdmin ? [{ data: 'status' }] : [])  // 6 — actions (admin only)
         ],
         columnDefs: [
             {
@@ -117,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
             },
-            {
+            ...(isAdmin ? [{
                 // Actions
                 targets: 6,
                 width: '90px',
@@ -129,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<button type="button" class="btn btn-text-success invoice-status-btn"' +
                         ' data-invoice-id="' + id + '" data-new-status="paid"' +
                         ' data-bs-toggle="tooltip" data-bs-placement="top" title="Mark as Paid">' +
-                        '<span class="icon-base ri ri-secure-payment-line icon-22px"></span>' +
+                        '<span class="icon-base ri ri-wallet-line icon-22px"></span>' +
                         '</button>'
                     );
                     const cancelled = data === 'cancelled' ? '' : (
@@ -141,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                     return '<div class="d-flex align-items-center">' + paid + cancelled + '</div>';
                 }
-            }
+            }] : [])
         ],
         pageLength: 10,
         order: [[0, 'desc']],
@@ -190,65 +194,78 @@ document.addEventListener('DOMContentLoaded', function () {
         dt_invoice.ajax.reload(null, true);
     });
 
-    // Status change — confirm → POST → reload grid
-    const confirmTextMap = {
-        paid:      'Sure you want to mark this invoice as <span class="text-success fw-medium">Paid</span>?',
-        cancelled: 'Sure you want to mark this invoice as <span class="text-danger fw-medium">Cancel</span>?'
-    };
+    let amountTimeout;
+    document.getElementById('amountFrom').addEventListener('input', function () {
+        clearTimeout(amountTimeout);
+        amountTimeout = setTimeout(function () { dt_invoice.ajax.reload(null, true); }, 500);
+    });
 
-    dt_invoice_table.addEventListener('click', function (e) {
-        const btn = e.target.closest('.invoice-status-btn');
-        if (!btn) { return; }
+    document.getElementById('amountTo').addEventListener('input', function () {
+        clearTimeout(amountTimeout);
+        amountTimeout = setTimeout(function () { dt_invoice.ajax.reload(null, true); }, 500);
+    });
 
-        const invoiceId = btn.dataset.invoiceId;
-        const newStatus = btn.dataset.newStatus;
-        const confirmHtml = confirmTextMap[newStatus];
-        const dtRow = dt_invoice.row(btn.closest('tr'));
+    // Status change — confirm → POST → row update (admin only)
+    if (isAdmin) {
+        const confirmTextMap = {
+            paid:      'Sure you want to mark this invoice as <span class="text-success fw-medium">Paid</span>?',
+            cancelled: 'Sure you want to <span class="text-danger fw-medium">Cancel</span> this invoice?'
+        };
 
-        if (!confirmHtml) { return; }
+        dt_invoice_table.addEventListener('click', function (e) {
+            const btn = e.target.closest('.invoice-status-btn');
+            if (!btn) { return; }
 
-        Swal.fire({
-            title: 'Confirm Action',
-            html: confirmHtml,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, confirm',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                confirmButton: 'btn btn-primary me-3',
-                cancelButton: 'btn btn-label-secondary'
-            },
-            buttonsStyling: false
-        }).then(function (result) {
-            if (!result.isConfirmed) { return; }
+            const invoiceId = btn.dataset.invoiceId;
+            const newStatus = btn.dataset.newStatus;
+            const confirmHtml = confirmTextMap[newStatus];
+            const dtRow = dt_invoice.row(btn.closest('tr'));
 
-            Block.pulse('.card-datatable');
+            if (!confirmHtml) { return; }
 
-            fetch('/Invoice/UpdateInvoiceStatus', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id=' + encodeURIComponent(invoiceId) + '&status=' + encodeURIComponent(newStatus)
-            }).then(function (res) {
-                if (res.ok) {
-                    res.json().then(function (body) {
-                        const rowData = dtRow.data();
-                        rowData.status = body.status;
-                        dtRow.data(rowData).draw(false);
-                    });
-                    Swal.fire({
-                        title: 'Done!',
-                        text: 'Invoice status has been updated.',
-                        icon: 'success',
-                        customClass: { confirmButton: 'btn btn-primary' },
-                        buttonsStyling: false
-                    });
-                } else {
-                    Block.remove('.card-datatable');
-                    Swal.fire({ title: 'Error', text: 'Failed to update invoice status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
-                }
+            Swal.fire({
+                title: 'Confirm Action',
+                html: confirmHtml,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, confirm',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (!result.isConfirmed) { return; }
+
+                Block.pulse('.card-datatable');
+
+                fetch('/Invoice/UpdateInvoiceStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id=' + encodeURIComponent(invoiceId) + '&status=' + encodeURIComponent(newStatus)
+                }).then(function (res) {
+                    if (res.ok) {
+                        res.json().then(function (body) {
+                            const rowData = dtRow.data();
+                            rowData.status = body.status;
+                            dtRow.data(rowData).draw(false);
+                        });
+                        Swal.fire({
+                            title: 'Done!',
+                            text: 'Invoice status has been updated.',
+                            icon: 'success',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        Block.remove('.card-datatable');
+                        Swal.fire({ title: 'Error', text: 'Failed to update invoice status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    }
+                });
             });
         });
-    });
+    }
 
     // Layout tweaks (same as template)
     setTimeout(function () {

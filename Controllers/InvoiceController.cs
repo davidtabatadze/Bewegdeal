@@ -15,13 +15,19 @@ namespace Bewegdeal.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
+            var data = await InvoiceService.LoadGrid(UserId, UserRole);
+            ViewBag.Total = data.Result?.total ?? 0;
+            ViewBag.Paid = (int)(data.Result?.paid ?? 0);
+            ViewBag.Pending = (int)(data.Result?.pending ?? 0);
+            ViewBag.Users = data.Result?.users ?? 0;
+
             return View();
         }
 
         [HttpGet]
         public async Task<IActionResult> LoadInvoices([FromQuery] InvoiceFilter filter, [FromQuery] int draw = 1)
         {
-            return Json(await InvoiceService.LoadGrid(filter, draw, UserId));
+            return Json(await InvoiceService.LoadGrid(filter, draw, UserId, UserRole));
         }
 
         [Authorize(Roles = UserRoleEnum.Administrator)]

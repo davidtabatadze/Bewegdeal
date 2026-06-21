@@ -16,25 +16,46 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
         public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
             => await InvoiceRepository.Get(filter, properties);
+        private async Task<decimal> Sum(InvoiceFilter filter, string property)
+            => await InvoiceRepository.Sum(filter, property);
+        private async Task<int> Count(InvoiceFilter filter)
+            => await InvoiceRepository.Count(filter);
+        private async Task<int> CountDistinct(InvoiceFilter filter, string property)
+            => await InvoiceRepository.CountDistinct(filter, property);
 
-        public async Task<GridResultModel<object>> LoadGrid(InvoiceFilter filter, int draw, long userId)
+        public async Task<GenericResultModel<dynamic>> LoadGrid(long userId, string userRole)
         {
-            var user = await UserService.Get(userId,
-                [nameof(UserEntity.Id), nameof(UserEntity.Role)]
-            );
-            filter.ViewerId = user?.Id ?? 0;
-            filter.ViewerRole = user?.Role ?? "-";
+            var filter = new InvoiceFilter { ViewerId = userId, ViewerRole = userRole };
+
+            var total = await Count(filter);
+            var distinct = userRole == UserRoleEnum.Administrator ?
+                           nameof(InvoiceEntity.CompanyId) : nameof(InvoiceEntity.CustomerId);
+            var users = await CountDistinct(filter, distinct);
+
+            filter.Status = InvoiceStatusEnum.Paid;
+            var paid = await Sum(filter, nameof(InvoiceEntity.TotalCost));
+
+            filter.Status = InvoiceStatusEnum.Pending;
+            var pending = await Sum(filter, nameof(InvoiceEntity.TotalCost));
+
+            return GenericResultModel<dynamic>.Ok(new { total, paid, pending, users });
+        }
+
+        public async Task<GridResultModel<object>> LoadGrid(InvoiceFilter filter, int draw, long userId, string userRole)
+        {
+            filter.ViewerId = userId;
+            filter.ViewerRole = userRole;
 
             var invoices = await InvoiceRepository.Load(filter);
-            var filtered = await InvoiceRepository.Count(filter);
-            var total = await InvoiceRepository.Count(new InvoiceFilter
+            var filtered = await Count(filter);
+            var total = await Count(new InvoiceFilter
             {
-                ViewerId = user?.Id ?? 0,
-                ViewerRole = user?.Role ?? "-"
+                ViewerId = userId,
+                ViewerRole = userRole
             });
             var users = await UserService.Load(
                 invoices.Count == 0 ? [0] :
-                user?.Role == UserRoleEnum.Company ? [.. invoices.Select(r => r.CustomerId)] :
+                userRole == UserRoleEnum.Company ? [.. invoices.Select(r => r.CustomerId)] :
                 [.. invoices.Select(r => r.CompanyId)],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
             );
