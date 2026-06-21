@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status → icon HTML
     const statusIconObj = {
-        pending:   '<i class="icon-base ri ri-timer-flash-line    icon-22px text-warning me-2"></i>',
-        paid:      '<i class="icon-base ri ri-secure-payment-line icon-22px text-success me-2"></i>',
+        pending: '<i class="icon-base ri ri-timer-flash-line    icon-22px text-warning me-2"></i>',
+        paid: '<i class="icon-base ri ri-secure-payment-line icon-22px text-success me-2"></i>',
         cancelled: '<i class="icon-base ri ri-hand               icon-22px text-danger  me-2"></i>'
     };
 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             url: '/Invoice/LoadInvoices',
             data: function (d) {
                 const order = d.order && d.order[0];
-                d.sortField     = columnToField[order ? order.column : 0] || 'status';
+                d.sortField = columnToField[order ? order.column : 0] || 'status';
                 d.sortDirection = order ? order.dir : 'desc';
 
                 delete d.order;
@@ -47,7 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'serviceCost' },  // 2 — cost (sortable)
             { data: 'totalCost' },    // 3 — fee (sortable)
             { data: 'requestId' },    // 4 — request (sortable)
-            { data: 'id' }            // 5 — invoice (sortable)
+            { data: 'id' },           // 5 — invoice (sortable)
+            { data: 'status' }            // 6 — actions (not sortable)
         ],
         columnDefs: [
             {
@@ -56,8 +57,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '60px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const icon   = statusIconObj[status] || '';
-                    const label  = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
+                    const icon = statusIconObj[status] || '';
+                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
                     return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
                 }
             },
@@ -115,6 +116,31 @@ document.addEventListener('DOMContentLoaded', function () {
                         '</button>'
                     );
                 }
+            },
+            {
+                // Actions
+                targets: 6,
+                width: '90px',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, full) {
+                    const id = full['id'];
+                    const paid = data === 'paid' ? '' : (
+                        '<button type="button" class="btn btn-text-success invoice-status-btn"' +
+                        ' data-invoice-id="' + id + '" data-new-status="paid"' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Mark as Paid">' +
+                        '<span class="icon-base ri ri-secure-payment-line icon-22px"></span>' +
+                        '</button>'
+                    );
+                    const cancelled = data === 'cancelled' ? '' : (
+                        '<button type="button" class="btn btn-text-danger invoice-status-btn"' +
+                        ' data-invoice-id="' + id + '" data-new-status="cancelled"' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel">' +
+                        '<span class="icon-base ri ri-hand icon-22px"></span>' +
+                        '</button>'
+                    );
+                    return '<div class="d-flex align-items-center">' + paid + cancelled + '</div>';
+                }
             }
         ],
         pageLength: 10,
@@ -138,10 +164,10 @@ document.addEventListener('DOMContentLoaded', function () {
         language: {
             search: '',
             paginate: {
-                next:     '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
+                next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
-                first:    '<i class="icon-base ri ri-skip-back-mini-line    scaleX-n1-rtl icon-22px"></i>',
-                last:     '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
+                first: '<i class="icon-base ri ri-skip-back-mini-line    scaleX-n1-rtl icon-22px"></i>',
+                last: '<i class="icon-base ri ri-skip-forward-mini-line scaleX-n1-rtl icon-22px"></i>'
             }
         },
         responsive: false
@@ -151,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Block.pulse('.card-datatable');
 
     dt_invoice.on('preXhr.dt', function () { Block.pulse('.card-datatable'); });
-    dt_invoice.on('xhr.dt',    function () { Block.remove('.card-datatable'); });
+    dt_invoice.on('xhr.dt', function () { Block.remove('.card-datatable'); });
 
     // Filters
     let searchTimeout;
@@ -164,23 +190,83 @@ document.addEventListener('DOMContentLoaded', function () {
         dt_invoice.ajax.reload(null, true);
     });
 
+    // Status change — confirm → POST → reload grid
+    const confirmTextMap = {
+        paid:      'Sure you want to mark this invoice as <span class="text-success fw-medium">Paid</span>?',
+        cancelled: 'Sure you want to mark this invoice as <span class="text-danger fw-medium">Cancel</span>?'
+    };
+
+    dt_invoice_table.addEventListener('click', function (e) {
+        const btn = e.target.closest('.invoice-status-btn');
+        if (!btn) { return; }
+
+        const invoiceId = btn.dataset.invoiceId;
+        const newStatus = btn.dataset.newStatus;
+        const confirmHtml = confirmTextMap[newStatus];
+        const dtRow = dt_invoice.row(btn.closest('tr'));
+
+        if (!confirmHtml) { return; }
+
+        Swal.fire({
+            title: 'Confirm Action',
+            html: confirmHtml,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, confirm',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            Block.pulse('.card-datatable');
+
+            fetch('/Invoice/UpdateInvoiceStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + encodeURIComponent(invoiceId) + '&status=' + encodeURIComponent(newStatus)
+            }).then(function (res) {
+                if (res.ok) {
+                    res.json().then(function (body) {
+                        const rowData = dtRow.data();
+                        rowData.status = body.status;
+                        dtRow.data(rowData).draw(false);
+                    });
+                    Swal.fire({
+                        title: 'Done!',
+                        text: 'Invoice status has been updated.',
+                        icon: 'success',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false
+                    });
+                } else {
+                    Block.remove('.card-datatable');
+                    Swal.fire({ title: 'Error', text: 'Failed to update invoice status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                }
+            });
+        });
+    });
+
     // Layout tweaks (same as template)
     setTimeout(function () {
         [
-            { selector: '.dt-buttons .btn',             classToRemove: 'btn-secondary' },
-            { selector: '.dt-length .form-select',      classToAdd: 'ms-0' },
-            { selector: '.dt-length',                   classToAdd: 'mb-md-4 mb-0' },
-            { selector: '.dt-layout-end',               classToRemove: 'justify-content-between', classToAdd: 'd-flex gap-md-4 justify-content-md-between justify-content-center gap-md-2 flex-wrap mt-0' },
-            { selector: '.dt-layout-start',             classToAdd: 'mt-md-0 mt-5' },
+            { selector: '.dt-buttons .btn', classToRemove: 'btn-secondary' },
+            { selector: '.dt-length .form-select', classToAdd: 'ms-0' },
+            { selector: '.dt-length', classToAdd: 'mb-md-4 mb-0' },
+            { selector: '.dt-layout-end', classToRemove: 'justify-content-between', classToAdd: 'd-flex gap-md-4 justify-content-md-between justify-content-center gap-md-2 flex-wrap mt-0' },
+            { selector: '.dt-layout-start', classToAdd: 'mt-md-0 mt-5' },
             { selector: '.dt-layout-start .dt-buttons', classToAdd: 'd-md-flex d-block gap-4 justify-content-center' },
-            { selector: '.dt-layout-end .dt-buttons',   classToAdd: 'd-md-flex d-block gap-4 mb-md-0 mb-5 justify-content-center' },
-            { selector: '.dt-layout-table',             classToRemove: 'row mt-2' },
-            { selector: '.dt-layout-full',              classToRemove: 'col-md col-12' },
-            { selector: '.dt-layout-full .table',       classToAdd: 'table-responsive' }
+            { selector: '.dt-layout-end .dt-buttons', classToAdd: 'd-md-flex d-block gap-4 mb-md-0 mb-5 justify-content-center' },
+            { selector: '.dt-layout-table', classToRemove: 'row mt-2' },
+            { selector: '.dt-layout-full', classToRemove: 'col-md col-12' },
+            { selector: '.dt-layout-full .table', classToAdd: 'table-responsive' }
         ].forEach(function ({ selector, classToRemove, classToAdd }) {
             document.querySelectorAll(selector).forEach(function (el) {
                 if (classToRemove) { classToRemove.split(' ').forEach(function (c) { el.classList.remove(c); }); }
-                if (classToAdd)    { classToAdd.split(' ').forEach(function (c) { el.classList.add(c); }); }
+                if (classToAdd) { classToAdd.split(' ').forEach(function (c) { el.classList.add(c); }); }
             });
         });
     }, 100);

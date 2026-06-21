@@ -12,6 +12,8 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Create(invoice);
         public async Task Update(InvoiceUpdateAreaEnum area, InvoiceEntity update)
             => await InvoiceRepository.Update(area, update);
+        public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
+            => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
         public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
             => await InvoiceRepository.Get(filter, properties);
 
