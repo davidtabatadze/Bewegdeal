@@ -259,17 +259,39 @@
     </div>
     <div class="col-12 col-md-4">
         <div class="card h-100">
-            <div class="card-header d-flex">
-                @* m-0 p-3 *@
+            <div class="card-header d-flex align-items-center justify-content-between gap-2 flex-wrap p-3">
                 <div class="card-title m-0">
                     <h5 class="m-0 me-2">Details</h5>
+                </div>
+                <div class="btn-group">
+                    @* <button type="button" class="btn btn-outline-primary btn-icon rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="icon-base ri ri-more-2-line"></i>
+                    </button> *@
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/Request/Edit?id=@req.Id" class="dropdown-item d-flex align-items-center text-primary ps-2 pe-2">
+                                <i class="icon-base ri ri-exchange-line scaleX-n1-rtl text-warning me-1"></i>Edit Request
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center text-primary ps-2 pe-2">
+                                <i class="icon-base ri ri-hand scaleX-n1-rtl text-danger me-1"></i>Cancel Request
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center text-primary ps-2 pe-2">
+                                <i class="icon-base ri ri-check-double-line scaleX-n1-rtl text-success me-1"></i>Resolve Request
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="card-body p-5 pt-0">
                 <hr class="m-0" />
                 <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                     <li class="list-group-item flex-fill border-0 p-0">
-                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
+                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Terms</h6>
                         <address class="text-dark mb-0">
                             <dl class="row mb-0">
                                 @if (req.ASAP)
