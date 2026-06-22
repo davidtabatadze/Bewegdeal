@@ -37,9 +37,9 @@ namespace Bewegdeal.Data.Repositories
             var query = ApplyFilters(Context.Invoices.AsQueryable(), filter);
             return property switch
             {
-                nameof(InvoiceEntity.ServiceCost)  => await query.SumAsync(s => s.ServiceCost),
+                nameof(InvoiceEntity.ServiceCost) => await query.SumAsync(s => s.ServiceCost),
                 nameof(InvoiceEntity.SubtotalCost) => await query.SumAsync(s => s.SubtotalCost),
-                nameof(InvoiceEntity.TotalCost)    => await query.SumAsync(s => s.TotalCost),
+                nameof(InvoiceEntity.TotalCost) => await query.SumAsync(s => s.TotalCost),
                 _ => throw new ArgumentException("Invalid sum property", nameof(property))
             };
         }
@@ -49,9 +49,9 @@ namespace Bewegdeal.Data.Repositories
             var query = ApplyFilters(Context.Invoices.AsQueryable(), filter);
             return property switch
             {
-                nameof(InvoiceEntity.CompanyId)  => await query.Select(s => s.CompanyId).Distinct().CountAsync(),
+                nameof(InvoiceEntity.CompanyId) => await query.Select(s => s.CompanyId).Distinct().CountAsync(),
                 nameof(InvoiceEntity.CustomerId) => await query.Select(s => s.CustomerId).Distinct().CountAsync(),
-                nameof(InvoiceEntity.RequestId)  => await query.Select(s => s.RequestId).Distinct().CountAsync(),
+                nameof(InvoiceEntity.RequestId) => await query.Select(s => s.RequestId).Distinct().CountAsync(),
                 _ => throw new ArgumentException("Invalid distinct property", nameof(property))
             };
         }
