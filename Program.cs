@@ -65,7 +65,6 @@ namespace Bewegdeal
             // ── Repositories ──────────────────────────────────────────────────────
             // Scoped per request — each request gets its own DbContext and repository instance.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IFileRepository, FileRepository>();
             builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
             builder.Services.AddScoped<IRequestRepository, RequestRepository>();
             builder.Services.AddScoped<IRequestFileRepository, RequestFileRepository>();
@@ -82,7 +81,7 @@ namespace Bewegdeal
             // ── Services ──────────────────────────────────────────────────────────
             // Scoped because FileService wraps IFileRepository (also scoped).
             builder.Services.AddScoped<BrevoService>();
-            builder.Services.AddScoped<FileService2>();
+            builder.Services.AddScoped<FileService>();
             builder.Services.AddScoped<SettingService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AccountService>();

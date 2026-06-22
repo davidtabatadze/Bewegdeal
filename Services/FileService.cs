@@ -1,80 +1,74 @@
-﻿using Bewegdeal.Data.Base;
-using Bewegdeal.Data.Entities;
-using Bewegdeal.Data.Repositories.Abstractions;
-using Bewegdeal.Models;
+﻿using Bewegdeal.Models;
 using Bewegdeal.Tools;
 
 namespace Bewegdeal.Services
 {
-    public class FileService(IFileRepository FileRepository, IFileStorageTool StorageTool)
+    public class FileService(IFileStorageTool StorageTool)
     {
-
-        public async Task<List<FileEntity>> Load(BaseFilter filter)
-            => await FileRepository.Load(filter);
-
-        public async Task<FileEntity?> Get(long? id, string[]? properties = null)
-            => id is not null ? await FileRepository.Get<FileEntity>(id.Value, properties) : null;
-
-        public async Task<string?> GetUrl(long? id, string? baseUrl = null)
-            => GetUrl(await Get(id, [nameof(FileEntity.Key)]), baseUrl);
-
-        public async Task<ResultModel> Create(IFormFile file, long? replaceId, short? maxSize, string[] allowedTypes)
+        public async Task<GenericResultModel<string>> Create(IFormFile file, string? replaceToken, short? maxSize, string[] allowedTypes)
         {
+            var fileName = file.FileName;
+            var fileLength = file.Length;
+            var fileContentType = file.ContentType;
+
             // validate type
-            if (allowedTypes.Length > 0 && !allowedTypes.Contains(file.ContentType))
+            if (allowedTypes.Length > 0 && !allowedTypes.Contains(fileContentType))
             {
-                return ResultModel.Fail(
+                return GenericResultModel<string>.Fail(
                      $"Invalid file type uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
                 );
             }
 
             // validate size
-            if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < file.Length)
+            if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < fileLength)
             {
-                return ResultModel.Fail(
+                return GenericResultModel<string>.Fail(
                      $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
+                );
+            }
+
+            // validate name
+            if (fileName is null || fileName.Length > 128)
+            {
+                return GenericResultModel<string>.Fail(
+                     $"Invalid file name uploaded. Accepted name length: 128 characters."
                 );
             }
 
             // upload
             using var stream = file.OpenReadStream();
-            var key = await StorageTool.Create(stream, file.FileName, file.ContentType);
+            var key = await StorageTool.Create(stream, fileName, fileContentType);
 
-            // create new
-            var entity = await FileRepository.Create(new FileEntity
-            {
-                Key = key,
-                FileName = file.FileName,
-                MimeType = file.ContentType,
-                Size = file.Length
-            });
+            // token
+            var token = ComposeToken(key, fileName);
 
             // delete old
-            await Delete(replaceId);
+            await Delete(replaceToken);
 
             // all good
-            return ResultModel.Ok(entity.Id);
+            return GenericResultModel<string>.Ok(token);
         }
 
-        public async Task Delete(long? id)
+        public async Task Delete(string? token)
         {
-            if (id is not null)
+            if (token is not null)
             {
-                var record = await Get(id, [nameof(FileEntity.Key)]);
-                if (record is not null)
-                {
-                    await FileRepository.Delete<FileEntity>(id.Value);
-                    await StorageTool.Delete(record.Key);
-                }
+                await StorageTool.Delete(DecomposeToken(token));
             }
         }
 
-        public string? GetUrl(FileEntity? file, string? baseUrl = null)
-        {
-            if (file is null) { return null; }
-            var relative = StorageTool.GetUrl(file.Key);
-            return string.IsNullOrWhiteSpace(baseUrl) ? relative : $"{baseUrl}{relative}";
-        }
+        //public List<string> GetUrls(List<string?> tokens, string? baseUrl = null)
+        //    => [.. (tokens ?? []).Select(i => GetUrl(i, baseUrl)).Where(i => i is not null)];
 
+        public string? GetUrl(string? token, string? baseUrl = null)
+            => token is not null ? $"{baseUrl ?? ""}{StorageTool.GetUrl(DecomposeToken(token))}" : null;
+
+        public string? GetName(string? token)
+            => token is not null ? Uri.UnescapeDataString(token.Replace(DecomposeToken(token) + "=", "")) : null;
+
+        private static string ComposeToken(string key, string name)
+            => key + "=" + Uri.EscapeDataString(name);
+        private static string DecomposeToken(string? token)
+            => token is null ? "-" : Uri.UnescapeDataString(token.Split('=')[0]);
     }
 }

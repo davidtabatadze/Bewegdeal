@@ -8,7 +8,7 @@ using Bewegdeal.ViewModels;
 
 namespace Bewegdeal.Services
 {
-    public class UserService(IUserRepository UserRepository, FileService2 FileService)
+    public class UserService(IUserRepository UserRepository, FileService FileService)
     {
 
         #region Repository
@@ -36,6 +36,9 @@ namespace Bewegdeal.Services
 
         public async Task<List<UserEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
             => await UserRepository.Load<UserEntity>(ids, properties);
+
+        public async Task Rate(long userId, long evaluatorId, decimal value)
+            => await UserRepository.Rate(userId, evaluatorId, value);
 
         #endregion
 

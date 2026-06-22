@@ -10,8 +10,10 @@ namespace Bewegdeal.Services
     public class RequestService(
         IRequestRepository RequestRepository,
         IRequestFileRepository RequestFileRepository,
+        ProposalService ProposalService,
+        InvoiceService InvoiceService,
         UserService UserService,
-        FileService2 FileService,
+        FileService FileService,
         SettingService SettingService)
     {
 
@@ -64,20 +66,82 @@ namespace Bewegdeal.Services
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.Get() };
 
-        public async Task<RequestEntity?> Get(long id, string[]? properties = null)
-            => await Get(new RequestFilter { Id = id }, properties);
-
         public async Task<RequestEntity?> Get(string number, string[]? properties = null)
             => await Get(new RequestFilter { Number = number ?? "-" }, properties);
 
         public async Task<GenericResultModel<RequestModel>> Get(long id, long userId)
-            => await Get(userId, await Get(id), true);
+            => await Get(userId, await Get(new RequestFilter { Id = id }), true);
 
         public async Task<GenericResultModel<RequestModel>> Get(string number, long userId)
             => await Get(userId, await Get(number), false);
 
-        public async Task<List<RequestEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
-            => await RequestRepository.Load<RequestEntity>(ids, properties);
+        public async Task<GenericResultModel> Cancel(string number, long userId)
+        {
+            var request = await Get(number);
+
+            if (
+                request is not null && request.RequesterId == userId &&
+                (request.Status == RequestStatusEnum.Pending || request.Status == RequestStatusEnum.Negotiation)
+            )
+            {
+                await InvoiceService.Update(
+                    InvoiceUpdateAreaEnum.Status,
+                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                );
+
+                await Update(
+                    RequestUpdateAreaEnum.Status,
+                    new() { Id = request.Id, Status = RequestStatusEnum.Cancelled }
+                );
+            }
+
+            return GenericResultModel.Ok();
+        }
+
+        public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
+        {
+            var request = await Get(number);
+
+            if (request is not null && request.RequesterId == userId && request.Status == RequestStatusEnum.Agreed)
+            {
+                var proposal = await ProposalService.Get(request.AgreementId ?? 0);
+                if (proposal is null || proposal.CompanyId != request.ExecutorId || proposal.Status != RequestProposalStatusEnum.Accepted)
+                {
+                    return GenericResultModel.Fail("Something went wrong: no proposal found.");
+                }
+
+                await InvoiceService.Update(
+                    InvoiceUpdateAreaEnum.Status,
+                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                );
+
+                await InvoiceService.Create(new InvoiceEntity
+                {
+                    Number = Guid.NewGuid().ToString("N"),
+                    Status = InvoiceStatusEnum.Pending,
+                    RequestId = request.Id,
+                    RequestNumber = request.Number,
+                    ProposalId = proposal.Id,
+                    CompanyId = proposal.CompanyId,
+                    CustomerId = request.RequesterId,
+                    Currency = proposal.Currency,
+                    ServiceCost = proposal.Cost,
+                    SubtotalCost = 100,
+                    TotalCost = 200,
+                    NotificationSent = false,
+                    CreateDate = DateTime.Now
+                });
+
+                await Update(
+                    RequestUpdateAreaEnum.Status,
+                    new() { Id = request.Id, Status = RequestStatusEnum.Resolved }
+                );
+
+                await UserService.Rate(proposal.CompanyId, userId, rating ?? 0);
+            }
+
+            return GenericResultModel.Ok();
+        }
 
         public async Task<GenericResultModel<dynamic>> LoadGrid(long userId)
         {
@@ -316,7 +380,7 @@ namespace Bewegdeal.Services
             entity ??= new RequestEntity
             {
                 Number = Guid.NewGuid().ToString("N"),
-                CreateDate = DateTime.UtcNow,
+                CreateDate = DateTime.Now,
                 RequesterId = userId
             };
 

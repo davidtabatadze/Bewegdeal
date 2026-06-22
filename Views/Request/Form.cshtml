@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
     <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
     <link rel="stylesheet" href="~/vendor/libs/spinkit/spinkit.css" />
+    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+    {
+        <link rel="stylesheet" href="~/vendor/libs/raty-js/raty-js.css" />
+    }
 }
 
 @section VendorScripts {
@@ -27,6 +31,10 @@
     <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
     <script src="~/vendor/libs/notyf/notyf.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+    {
+        <script src="~/vendor/libs/raty-js/raty-js.js"></script>
+    }
 }
 
 @section PageScripts {
@@ -245,7 +253,7 @@
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="input-group input-group-merge">
                                             <div class="form-floating form-floating-outline">
-                                                <input type="number" id="proposedCost" name="cost" class="form-control" placeholder="" min="1" max="10000" step="0.01" value="@(isEdit ? req!.Cost : "")" />
+                                                <input type="number" id="proposedCost" name="cost" class="form-control" placeholder="" min="1" max="10000" step="1" value="@(isEdit ? req!.Cost : "")" />
                                                 <label for="proposedCost">Cost</label>
                                             </div>
                                             <span class="input-group-text">EUR</span>
@@ -302,10 +310,20 @@
                 <div class="card-footer sticky-element d-flex justify-content-center align-items-center" style="bottom: 0;">
                     <div class="action-btns">
                         <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
-                        <button id="btnSubmitRequest" type="button" class="btn btn-primary">@(isEdit ? "Save Changes" : "Place Request")</button>
+                        <button id="btnSubmitRequest" type="button" class="btn btn-primary me-4">@(isEdit ? "Save Changes" : "Place Request")</button>
+                        @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+                        {
+                            <button id="btnResolve" type="button" class="btn btn-info me-4"
+                                    onclick="ResolveModal.open('@req.Number')">Resolve</button>
+                        }
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
+
+@if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+{
+    @await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
+}

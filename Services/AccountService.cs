@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService2 FileService, BrevoService BrevoService, IMemoryCache Cache)
+    public class AccountService(UserService UserService, FileService FileService, BrevoService BrevoService, IMemoryCache Cache)
     {
         public async Task<GenericResultModel<UserEntity>> Login(string email, string password)
         {

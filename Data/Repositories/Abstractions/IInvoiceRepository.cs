@@ -9,6 +9,8 @@ namespace Bewegdeal.Data.Repositories.Abstractions
     {
         Task Update(InvoiceUpdateAreaEnum area, InvoiceEntity update);
         Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null);
+        Task<decimal> Sum(InvoiceFilter filter, string property);
+        Task<int> CountDistinct(InvoiceFilter filter, string property);
         Task<int> Count(InvoiceFilter filter);
         Task<List<InvoiceEntity>> Load(InvoiceFilter filter);
     }

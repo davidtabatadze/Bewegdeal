@@ -21,5 +21,6 @@ namespace Bewegdeal.Data.Entities
         public bool AcquaintedHIW { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime TermsAndConditionsAcceptDate { get; set; }
+        public decimal Rating { get; set; }
     }
 }

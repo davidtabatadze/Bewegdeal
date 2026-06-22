@@ -7,6 +7,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
 {
     public interface IUserRepository : IRepository
     {
+        Task Rate(long userId, long evaluatorId, decimal value);
         Task Update(UserUpdateAreaEnum area, UserEntity update);
         Task<UserEntity?> Get(UserFilter filter, string[]? properties = null);
         Task<UserEntity?> GetRegistered(string email, string mobile);

@@ -1,0 +1,90 @@
+<div class="modal modal-transparent fade" id="resolveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:fit-content;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <a href="javascript:void(0);" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></a>
+                <div class="input-group input-group-lg mb-4">
+                    @* <input type="text" class="form-control bg-white border-0" placeholder="Your email" aria-describedby="subscribe" /> *@
+                    <div class="card p-2">
+                        <p class="text-secondary m-0">Rate the service (optional)</p>
+                        <div class="ms-1">
+                            @await Html.PartialAsync("~/Views/Shared/_Partials/_RatingStars.cshtml",
+                                new ViewDataDictionary(ViewData) {
+                                { "RatingStarsId", "resolveRatingStars" },
+                                { "RatingStarsReadOnly", false },
+                                { "RatingStarsScore", 0m },
+                                { "RatingStarsSize", "md" }
+                            })
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="button" id="resolveConfirmBtn">Resolve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    'use strict';
+
+    window.ResolveModal = (function () {
+        var modal      = null;
+        var modalEl    = document.getElementById('resolveModal');
+        var confirmBtn = document.getElementById('resolveConfirmBtn');
+
+        var _requestNumber = '';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (modalEl) {
+                modal = new bootstrap.Modal(modalEl);
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    if (window.RatyInstances && window.RatyInstances['resolveRatingStars']) {
+                        window.RatyInstances['resolveRatingStars'].reset();
+                    }
+                });
+            }
+        });
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                confirmBtn.disabled = true;
+                Block.pulse('#resolveModal .modal-content');
+
+                var score  = (window.RatyInstances && window.RatyInstances['resolveRatingStars'])
+                           ? window.RatyInstances['resolveRatingStars'].score()
+                           : 0;
+                var body   = 'number=' + encodeURIComponent(_requestNumber) +
+                             '&rating=' + encodeURIComponent(score);
+
+                fetch('/Request/Resolve', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body:    body
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        Block.remove('#resolveModal .modal-content');
+                        confirmBtn.disabled = false;
+                        if (data.success) {
+                            if (modal) { modal.hide(); }
+                            window.location.reload();
+                        } else {
+                            new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
+                                .error(data.message || 'Failed to resolve request.');
+                        }
+                    })
+                    .catch(function () {
+                        Block.remove('#resolveModal .modal-content');
+                        confirmBtn.disabled = false;
+                    });
+            });
+        }
+
+        return {
+            open: function (requestNumber) {
+                _requestNumber = requestNumber || '';
+                if (modal) { modal.show(); }
+            }
+        };
+    })();
+</script>

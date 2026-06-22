@@ -51,6 +51,30 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
+        public async Task Rate(long userId, long evaluatorId, decimal value)
+        {
+            if (value == 0)
+            {
+                return;
+            }
+
+            await Create(new UserRatingEntity
+            {
+                Value = value,
+                UserId = userId,
+                EvaluatorId = evaluatorId,
+                CreateDate = DateTime.Now
+            });
+
+            var average = await Context.UserRatings
+                .Where(r => r.UserId == userId)
+                .AverageAsync(r => (double)r.Value);
+
+            var rating = (decimal)(Math.Ceiling(average * 2) / 2);
+
+            await Update(UserUpdateAreaEnum.Rating, new UserEntity { Id = userId, Rating = rating });
+        }
+
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
         {
             switch (area)
@@ -96,6 +120,13 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u =>
                                             u.SetProperty(p => p.Avatar, update.Avatar)
+                                       );
+                    break;
+
+                case UserUpdateAreaEnum.Rating:
+                    await Context.Users.Where(u => u.Id == update.Id)
+                                       .ExecuteUpdateAsync(u =>
+                                            u.SetProperty(p => p.Rating, update.Rating)
                                        );
                     break;
 

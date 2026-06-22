@@ -1,6 +1,6 @@
 /**
  * Request Create / Edit
- * v1.0.0
+ * v1.0.1
  *
  * Works for both the Create and Edit views.
  * The Edit view defines `existingFiles` in an inline <script> block before this file loads.

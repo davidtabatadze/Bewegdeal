@@ -1,6 +1,6 @@
 /**
  * Chats List — Bewegdeal
- * v1.0.0
+ * v1.0.1
  */
 
 'use strict';
@@ -295,6 +295,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (html) {
                 Block.remove('#adminChatOffcanvasBody');
                 body.innerHTML = html;
+                const histBody = body.querySelector('.chat-history-body');
+                if (histBody) { new PerfectScrollbar(histBody); }
             })
             .catch(function () { Block.remove('#adminChatOffcanvasBody'); });
     });
