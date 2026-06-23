@@ -389,7 +389,9 @@ namespace Bewegdeal.Services
             entity.Title = request.Title.Trim();
             entity.Description = request.Description?.Trim() ?? "";
             entity.PickupAddress = request.PickupAddress?.Trim() ?? "";
+            entity.PickupZip = request.PickupZip?.Trim();
             entity.DeliveryAddress = request.DeliveryAddress?.Trim() ?? "";
+            entity.DeliveryZip = request.DeliveryZip?.Trim();
             entity.Cost = request.Cost;
             entity.Currency = "EUR";
             entity.ASAP = request.IsASAP;

@@ -75,6 +75,28 @@ namespace Bewegdeal.Data
                 }
             }
 
+            // Add new nullable columns to existing tables (idempotent: ignore "duplicate column" errors)
+            var requestsTable = _prefix + "Requests";
+            var alterColumns = new[]
+            {
+                $"ALTER TABLE \"{requestsTable}\" ADD COLUMN \"PickupZip\" TEXT NULL",
+                $"ALTER TABLE \"{requestsTable}\" ADD COLUMN \"DeliveryZip\" TEXT NULL",
+            };
+            if (isMySql)
+            {
+                alterColumns =
+                [
+                    $"ALTER TABLE `{requestsTable}` ADD COLUMN `PickupZip` VARCHAR(16) NULL",
+                    $"ALTER TABLE `{requestsTable}` ADD COLUMN `DeliveryZip` VARCHAR(16) NULL",
+                ];
+            }
+            foreach (var alter in alterColumns)
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = alter;
+                try { await cmd.ExecuteNonQueryAsync(); } catch { /* column already exists */ }
+            }
+
             await connection.CloseAsync();
         }
 
@@ -178,7 +200,9 @@ namespace Bewegdeal.Data
                 e.Property(r => r.Title).IsRequired().HasMaxLength(64);
                 e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
                 e.Property(r => r.PickupAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.PickupZip).IsRequired(false).HasMaxLength(16);
                 e.Property(r => r.DeliveryAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.DeliveryZip).IsRequired(false).HasMaxLength(16);
                 e.Property(r => r.RequesterId).IsRequired();
                 e.Property(r => r.ExecutorId).IsRequired(false);
                 e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);

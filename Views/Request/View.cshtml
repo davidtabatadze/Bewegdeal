@@ -316,14 +316,14 @@
                 <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                     <li class="list-group-item flex-fill border-0 p-0">
                         <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
-                        <address class="text-dark mb-0">@req.PickupAddress</address>
+                        <address class="text-dark mb-0">@req.PickupAddress@(string.IsNullOrWhiteSpace(req.PickupZip) ? "" : $", {req.PickupZip}")</address>
                     </li>
                 </ul>
                 <hr class="m-0" />
                 <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                     <li class="list-group-item flex-fill border-0 p-0">
                         <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
-                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
+                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress + (string.IsNullOrWhiteSpace(req.DeliveryZip) ? "" : $", {req.DeliveryZip}"))</address>
                     </li>
                 </ul>
                 <hr class="m-0" />
