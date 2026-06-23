@@ -55,7 +55,7 @@
             '</div>' +
             '<div class="toast-body d-flex align-items-center gap-2">' +
             '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '&chat=open" class="btn btn-text-primary btn-icon btn-sm rounded-pill flex-shrink-0"><i class="ri ri-search-eye-line icon-md"></i></a>' +
-            '<p class="mb-0" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
+            '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '&chat=open" class="text-body text-decoration-none mb-0 flex-grow-1" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</a>' +
             '</div>';
 
         container.appendChild(el);
