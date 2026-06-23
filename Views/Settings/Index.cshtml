@@ -29,17 +29,26 @@
         ['link']
         ];
 
-        var quill = new Quill('#termsEditor', {
-        bounds: '#termsEditor',
+        var quillCustomer = new Quill('#termsEditorCustomer', {
+        bounds: '#termsEditorCustomer',
         placeholder: '',
         modules: { toolbar: fullToolbar },
         theme: 'snow'
         });
+        quillCustomer.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContent));
+        document.getElementById('termsFormCustomer').addEventListener('submit', function () {
+        document.getElementById('termsContentCustomer').value = quillCustomer.root.innerHTML;
+        });
 
-        quill.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContent));
-
-        document.getElementById('termsForm').addEventListener('submit', function () {
-        document.getElementById('termsContent').value = quill.root.innerHTML;
+        var quillCompany = new Quill('#termsEditorCompany', {
+        bounds: '#termsEditorCompany',
+        placeholder: '',
+        modules: { toolbar: fullToolbar },
+        theme: 'snow'
+        });
+        quillCompany.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContentCompany));
+        document.getElementById('termsFormCompany').addEventListener('submit', function () {
+        document.getElementById('termsContentCompany').value = quillCompany.root.innerHTML;
         });
         })();
     </script>
@@ -133,25 +142,25 @@
         </form>
     </div>
 
-    <!-- Terms & Conditions -->
+    <!-- Terms & Conditions — Customer -->
     <div class="col-12">
-        <form id="termsForm" asp-controller="Settings" asp-action="SaveTermAndConditionSettings" method="post">
-            <input type="hidden" id="termsContent" name="termsContent" />
+        <form id="termsFormCustomer" asp-controller="Settings" asp-action="SaveTermAndConditionSettings" method="post">
+            <input type="hidden" id="termsContentCustomer" name="termsContent" />
             <div class="card">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Terms &amp; Conditions</h5>
+                    <h5 class="card-title m-0">Terms &amp; Conditions — Customer</h5>
                 </div>
 
                 <div class="card-body">
 
-                    @if (TempData["TermsError"] is string termsError)
+                    @if (TempData["TermsCustomerError"] is string termsCustomerError)
                     {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsCustomerError</div>
                     }
-                    @if (TempData["TermsSuccess"] is string termsSuccess)
+                    @if (TempData["TermsCustomerSuccess"] is string termsCustomerSuccess)
                     {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
+                        <div class="alert alert-success mb-4 text-center" role="alert">@termsCustomerSuccess</div>
                     }
 
                     <div class="alert alert-danger mb-4" role="alert">
@@ -160,11 +169,54 @@
                             <strong>Handle with care</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing users to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Saving changes will require existing customers to re-agree to the Terms &amp; Conditions.</li>
                         </ul>
                     </div>
 
-                    <div id="termsEditor" style="min-height: 320px;"></div>
+                    <div id="termsEditorCustomer" style="min-height: 320px;"></div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Terms & Conditions — Company -->
+    <div class="col-12">
+        <form id="termsFormCompany" asp-controller="Settings" asp-action="SaveTermAndConditionSettingsCompany" method="post">
+            <input type="hidden" id="termsContentCompany" name="termsContent" />
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Terms &amp; Conditions — Company</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["TermsCompanyError"] is string termsCompanyError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsCompanyError</div>
+                    }
+                    @if (TempData["TermsCompanySuccess"] is string termsCompanySuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@termsCompanySuccess</div>
+                    }
+
+                    <div class="alert alert-danger mb-4" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Handle with care</strong>
+                        </div>
+                        <ul class="mb-0">
+                            <li>Saving changes will require existing companies to re-agree to the Terms &amp; Conditions.</li>
+                        </ul>
+                    </div>
+
+                    <div id="termsEditorCompany" style="min-height: 320px;"></div>
 
                 </div>
 

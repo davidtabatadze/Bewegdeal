@@ -77,10 +77,13 @@ namespace Bewegdeal.Data
 
             // Add new nullable columns to existing tables (idempotent: ignore "duplicate column" errors)
             var requestsTable = _prefix + "Requests";
+            var settingsTable = _prefix + "Settings";
             var alterColumns = new[]
             {
                 $"ALTER TABLE \"{requestsTable}\" ADD COLUMN \"PickupZip\" TEXT NULL",
                 $"ALTER TABLE \"{requestsTable}\" ADD COLUMN \"DeliveryZip\" TEXT NULL",
+                $"ALTER TABLE \"{settingsTable}\" ADD COLUMN \"TermsAndConditionsContentCompany\" TEXT NOT NULL DEFAULT ''",
+                $"ALTER TABLE \"{settingsTable}\" ADD COLUMN \"TermsAndConditionsContentDateCompany\" TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'",
             };
             if (isMySql)
             {
@@ -88,6 +91,8 @@ namespace Bewegdeal.Data
                 [
                     $"ALTER TABLE `{requestsTable}` ADD COLUMN `PickupZip` VARCHAR(16) NULL",
                     $"ALTER TABLE `{requestsTable}` ADD COLUMN `DeliveryZip` VARCHAR(16) NULL",
+                    $"ALTER TABLE `{settingsTable}` ADD COLUMN `TermsAndConditionsContentCompany` LONGTEXT NOT NULL DEFAULT ''",
+                    $"ALTER TABLE `{settingsTable}` ADD COLUMN `TermsAndConditionsContentDateCompany` DATETIME NOT NULL DEFAULT '0001-01-01 00:00:00'",
                 ];
             }
             foreach (var alter in alterColumns)
@@ -389,6 +394,8 @@ namespace Bewegdeal.Data
 
                 e.Property(s => s.TermsAndConditionsContent).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentDate).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentCompany).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDateCompany).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();

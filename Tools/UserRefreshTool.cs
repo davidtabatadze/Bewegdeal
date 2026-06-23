@@ -31,9 +31,13 @@ namespace Bewegdeal.Tools
                         var user = await userService.Get(userId, [nameof(UserEntity.Status)]);
 
                         DateTime.TryParse(context.User.FindFirstValue(IdentityFieldEnum.TermsAcceptDate), out var termsAcceptDate);
+                        var role = context.User.FindFirstValue(IdentityFieldEnum.Role);
+                        var tcDate = role == UserRoleEnum.Company
+                            ? settings.TermsAndConditionsContentDateCompany
+                            : settings.TermsAndConditionsContentDate;
                         if (
-                            context.User.FindFirstValue(IdentityFieldEnum.Role) != UserRoleEnum.Administrator &&
-                            termsAcceptDate < settings.TermsAndConditionsContentDate
+                            role != UserRoleEnum.Administrator &&
+                            termsAcceptDate < tcDate
                         )
                         {
                             context.Items["ShowTCModal"] = true;

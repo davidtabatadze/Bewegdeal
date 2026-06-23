@@ -29,7 +29,19 @@ public class SettingsController(ISettingsRepository settingsRepository) : XBaseC
         settings.TermsAndConditionsContentDate = DateTime.Now;
         await settingsRepository.Update(settings);
 
-        TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";
+        TempData["TermsCustomerSuccess"] = "Customer Terms & Conditions updated successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveTermAndConditionSettingsCompany(string? termsContent)
+    {
+        var settings = await settingsRepository.Get();
+        settings.TermsAndConditionsContentCompany = termsContent ?? string.Empty;
+        settings.TermsAndConditionsContentDateCompany = DateTime.Now;
+        await settingsRepository.Update(settings);
+
+        TempData["TermsCompanySuccess"] = "Company Terms & Conditions updated successfully.";
         return RedirectToAction(nameof(Index));
     }
 

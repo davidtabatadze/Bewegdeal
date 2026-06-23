@@ -28,9 +28,23 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js" asp-append-version="true"></script>
-    @{ ViewData["AcceptMode"] = true; }
+    @{
+        ViewData["AcceptMode"] = true;
+        ViewData["TermsRole"] = Bewegdeal.Enums.UserRoleEnum.Customer;
+    }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
-    @{ ViewData.Remove("AcceptMode"); }
+    @{
+        ViewData.Remove("AcceptMode");
+        ViewData.Remove("TermsRole");
+    }
+    @{
+        var _regSettings = await (Context.RequestServices
+            .GetRequiredService<Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository>()).Get();
+    }
+    <script>
+        var _tcCustomer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_regSettings.TermsAndConditionsContent));
+        var _tcCompany  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_regSettings.TermsAndConditionsContentCompany));
+    </script>
     <script>
         (function () {
             var modalEl = document.getElementById('termsModal');
@@ -41,25 +55,40 @@
             var body       = document.getElementById('termsModalBody');
             var scrollHint = document.getElementById('termsScrollHint');
 
+            function getSelectedRole() {
+                var el = document.querySelector('input[name="role"]:checked');
+                return el ? el.value : 'customer';
+            }
+
+            function openModal() {
+                var role = getSelectedRole();
+                var content = role === 'company' ? _tcCompany : _tcCustomer;
+
+                if (!content || !content.trim()) {
+                    // No T&C configured for this role — let checkbox work normally
+                    return false;
+                }
+
+                body.innerHTML = content;
+                acceptBtn.disabled = true;
+                scrollHint.style.display = '';
+                body.scrollTop = 0;
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                return true;
+            }
+
             // Intercept clicks on the checkbox
             checkbox.addEventListener('click', function (e) {
                 if (this.checked) {
-                    // User is trying to check → prevent and open modal
                     e.preventDefault();
-                    acceptBtn.disabled = true;
-                    scrollHint.style.display = '';
-                    body.scrollTop = 0;
-                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    openModal();
                 }
                 // User is unchecking → allow normally
             });
 
             // Also intercept clicks on the "Terms & Conditions" text link
             document.getElementById('termsLink').addEventListener('click', function () {
-                acceptBtn.disabled = true;
-                scrollHint.style.display = '';
-                body.scrollTop = 0;
-                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                openModal();
             });
         })();
     </script>

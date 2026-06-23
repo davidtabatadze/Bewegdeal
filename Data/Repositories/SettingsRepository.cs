@@ -17,6 +17,8 @@ namespace Bewegdeal.Data.Repositories
                     Id = 1,
                     TermsAndConditionsContent = "This is a free T&C",
                     TermsAndConditionsContentDate = DateTime.Now,
+                    TermsAndConditionsContentCompany = string.Empty,
+                    TermsAndConditionsContentDateCompany = DateTime.MinValue,
                     RequestImageMaxCount = 5,
                     RequestImageMaxSize = 4,
                     RequestVideoMaxCount = 1,

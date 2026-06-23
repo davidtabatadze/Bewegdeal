@@ -1,6 +1,12 @@
+@using System.Security.Claims
 @inject Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository _termsRepo
 @{
-    var _termsContent = (await _termsRepo.Get()).TermsAndConditionsContent;
+    var _termsSettings = await _termsRepo.Get();
+    var _termsRoleOverride = ViewData["TermsRole"] as string;
+    var _termsEffectiveRole = _termsRoleOverride ?? User.FindFirstValue(Bewegdeal.Enums.IdentityFieldEnum.Role);
+    var _termsContent = _termsEffectiveRole == Bewegdeal.Enums.UserRoleEnum.Company
+        ? _termsSettings.TermsAndConditionsContentCompany
+        : _termsSettings.TermsAndConditionsContent;
     var _acceptMode = ViewData["AcceptMode"] as bool? == true;
     var _lockedMode = ViewData["LockedMode"] as bool? == true;
 }
