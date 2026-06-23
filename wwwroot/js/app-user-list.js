@@ -62,11 +62,12 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         columns: [
             { data: 'status' },   // 0 — status (sortable)
-            { data: 'role' },   // 1 — role
+            { data: 'role' },     // 1 — role
             { data: 'avatar' },   // 2 — user cell
             { data: 'mobile' },   // 3 — contact
-            { data: 'createDate' },   // 4 — date (sortable)
-            { data: 'interests' },   // 5 — interests
+            { data: 'createDate' }, // 4 — date (sortable)
+            { data: 'interests' }, // 5 — interests
+            { data: 'id' },       // 6 — actions
         ],
         columnDefs: [
             {
@@ -154,6 +155,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     td.style.minWidth = '135px';
                 },
                 render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
+            },
+            {
+                // Actions — delete button (hidden for administrators)
+                targets: 6,
+                width: '80px',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, full) {
+                    if (full['role'] === 'administrator') { return ''; }
+                    return (
+                        '<div class="text-center">' +
+                        '<button type="button" class="btn btn-icon btn-text-danger delete-user-btn"' +
+                        ' data-user-id="' + full['id'] + '"' +
+                        ' data-user-name="' + full['name'] + '">' +
+                        '<i class="icon-base ri ri-delete-bin-line icon-20px"></i>' +
+                        '</button>' +
+                        '</div>'
+                    );
+                }
             },
             {
                 // Status button
@@ -294,6 +314,53 @@ document.addEventListener('DOMContentLoaded', function () {
                     Swal.fire({ title: 'Not allowed', text: 'You cannot change your own status.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 } else {
                     Swal.fire({ title: 'Error', text: 'Failed to update status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                }
+            });
+        });
+    });
+
+    // Delete user
+    dt_user_table.addEventListener('click', function (e) {
+        const btn = e.target.closest('.delete-user-btn');
+        if (!btn) { return; }
+
+        const userId = btn.dataset.userId;
+        const userName = btn.dataset.userName;
+        const dtRow = dt_user.row(btn.closest('tr'));
+
+        Swal.fire({
+            title: 'Delete User',
+            html: 'Are you sure you want to permanently delete <strong>' + userName + '</strong>? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'btn btn-danger me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            fetch('/User/DeleteUser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + encodeURIComponent(userId)
+            }).then(function (res) {
+                if (res.ok) {
+                    dtRow.remove().draw(false);
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: userName + ' has been deleted.',
+                        icon: 'success',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false
+                    });
+                } else if (res.status === 400) {
+                    Swal.fire({ title: 'Not allowed', text: 'You cannot delete this user.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                } else {
+                    Swal.fire({ title: 'Error', text: 'Failed to delete user.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 }
             });
         });

@@ -60,6 +60,21 @@ namespace Bewegdeal.Controllers
             return Json(new { status = newStatus });
         }
 
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(long id)
+        {
+            var user = await UserService.Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role)]);
+
+            if (user is null || UserId == user.Id || user.Role == UserRoleEnum.Administrator)
+            {
+                return BadRequest();
+            }
+
+            await UserService.Delete(id);
+            return Ok();
+        }
+
         #endregion
 
         #region Profile
