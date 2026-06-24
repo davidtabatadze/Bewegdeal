@@ -30,33 +30,29 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js" asp-append-version="true"></script>
-    @{ ViewData["AcceptMode"] = true; }
+    @{ ViewData["AcceptMode"] = true; ViewData["RegistrationMode"] = true; }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
-    @{ ViewData.Remove("AcceptMode"); }
+    @{ ViewData.Remove("AcceptMode"); ViewData.Remove("RegistrationMode"); }
     <script>
         (function () {
             var modalEl = document.getElementById('termsModal');
-            if (!modalEl) { return; } // no T&C content configured yet
+            if (!modalEl) { return; }
 
             var checkbox   = document.getElementById('agreeTerms');
             var acceptBtn  = document.getElementById('termsAcceptBtn');
             var body       = document.getElementById('termsModalBody');
             var scrollHint = document.getElementById('termsScrollHint');
 
-            // Intercept clicks on the checkbox
             checkbox.addEventListener('click', function (e) {
                 if (this.checked) {
-                    // User is trying to check → prevent and open modal
                     e.preventDefault();
                     acceptBtn.disabled = true;
                     scrollHint.style.display = '';
                     body.scrollTop = 0;
                     bootstrap.Modal.getOrCreateInstance(modalEl).show();
                 }
-                // User is unchecking → allow normally
             });
 
-            // Also intercept clicks on the "Terms & Conditions" text link
             document.getElementById('termsLink').addEventListener('click', function () {
                 acceptBtn.disabled = true;
                 scrollHint.style.display = '';
