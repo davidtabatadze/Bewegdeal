@@ -2,13 +2,16 @@
 @{
     var _settings = (await _settingsService.GetCached());
     var _termsContent = User.IsInRole(UserRoleEnum.Customer) ? _settings.TermsAndConditionsContentCustomer :
-                        User.IsInRole(UserRoleEnum.Company) ? _settings.TermsAndConditionsContentCompany : "";
+                        User.IsInRole(UserRoleEnum.Company) ? _settings.TermsAndConditionsContentCompany : 
+                        "No contant for Administrator";
     var _acceptMode = ViewData["AcceptMode"] as bool? == true;
     var _lockedMode = ViewData["LockedMode"] as bool? == true;
 }
 
 @if (!string.IsNullOrWhiteSpace(_termsContent))
 {
+    <link rel="stylesheet" href="~/vendor/libs/quill/editor.css" />
+    <link rel="stylesheet" href="~/vendor/libs/quill/typography.css" />
     <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true"
          @(_lockedMode ? Html.Raw("data-bs-backdrop=\"static\" data-bs-keyboard=\"false\"") : Html.Raw(""))>
         <div class="modal-dialog modal-fullscreen" role="document">
@@ -20,8 +23,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     }
                 </div>
-                <div class="modal-body" id="termsModalBody">
-                    @Html.Raw(_termsContent)
+                <div class="modal-body ql-snow" id="termsModalBody">
+                    <div class="ql-editor">
+                        @Html.Raw(_termsContent)
+                    </div>
                 </div>
                 @if (_acceptMode)
                 {

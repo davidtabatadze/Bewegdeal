@@ -60,6 +60,22 @@
         document.getElementById('tcFormCompany').addEventListener('submit', function () {
         document.getElementById('tcCompany').value = quillCompany.root.innerHTML;
         });
+
+        var quillAboutUs = new Quill('#aboutUsEditor', {
+        bounds: '#aboutUsEditor',
+        placeholder: '',
+        modules: { toolbar: fullToolbar },
+        theme: 'snow'
+        });
+
+        quillAboutUs.root.style.maxHeight = '300px';
+        quillAboutUs.root.style.overflowY = 'auto';
+
+        quillAboutUs.root.innerHTML = @Html.Raw(Json.Serialize(Model.AboutUs));
+
+        document.getElementById('aboutUsForm').addEventListener('submit', function () {
+        document.getElementById('aboutUsContent').value = quillAboutUs.root.innerHTML;
+        });
         })();
     </script>
 }
@@ -152,6 +168,39 @@
         </form>
     </div>
 
+    <!-- About Us -->
+    <div class="col-12">
+        <form id="aboutUsForm" asp-controller="Settings" asp-action="SaveAboutUs" method="post">
+            <input type="hidden" id="aboutUsContent" name="content" />
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">About Us</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @* @if (TempData["TermsError"] is string termsError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
+                    }
+                    @if (TempData["TermsSuccess"] is string termsSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
+                    } *@
+
+                    <div id="aboutUsEditor"></div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
     <!-- Terms & Conditions for Customer -->
     <div class="col-12">
         <form id="tcFormCustomer" asp-controller="Settings" asp-action="SaveTermsAndConditionsCustomer" method="post">
@@ -164,14 +213,14 @@
 
                 <div class="card-body">
 
-                    @if (TempData["TermsError"] is string termsError)
+                    @* @if (TempData["TermsError"] is string termsError)
                     {
                         <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
                     }
                     @if (TempData["TermsSuccess"] is string termsSuccess)
                     {
                         <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
-                    }
+                    } *@
 
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
@@ -207,14 +256,14 @@
 
                 <div class="card-body">
 
-                    @if (TempData["TermsError"] is string termsError)
+                    @* @if (TempData["TermsError"] is string termsError)
                     {
                         <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
                     }
                     @if (TempData["TermsSuccess"] is string termsSuccess)
                     {
                         <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
-                    }
+                    } *@
 
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
