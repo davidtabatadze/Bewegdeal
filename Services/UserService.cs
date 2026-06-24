@@ -16,6 +16,9 @@ namespace Bewegdeal.Services
         public async Task<UserEntity> Create(UserEntity user)
             => await UserRepository.Create(user);
 
+        public async Task Delete(long id)
+            => await UserRepository.Delete<UserEntity>(id);
+
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
             => await UserRepository.Update(area, update);
 

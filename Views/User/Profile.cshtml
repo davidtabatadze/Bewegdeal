@@ -1,5 +1,6 @@
 ﻿@using Bewegdeal.Enums
 @using Bewegdeal.Models
+@inject Bewegdeal.Services.SettingService _settingsService
 
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
@@ -23,6 +24,7 @@
     var initialsHide = hasPicture ? "display:none;" : "";
     var isCompany = user.Role == UserRoleEnum.Company;
     var hasServiceTerms = !string.IsNullOrWhiteSpace(profile.ServiceTermsFileName);
+    var _settings = await _settingsService.GetCached();
 }
 
 <div class="row g-6">
@@ -201,10 +203,13 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6">
-                            <div class="form-floating form-floating-outline">
-                                <input type="text" id="mobile" name="mobile" class="form-control"
-                                       placeholder="" maxlength="16" value="@user.Mobile" disabled />
-                                <label for="mobile">Mobile</label>
+                            <div class="input-group input-group-merge" disabled>
+                                <span class="input-group-text">@_settings.MobilePrefix</span>
+                                <div class="form-floating form-floating-outline">
+                                    <input type="text" id="mobile" name="mobile" class="form-control"
+                                           placeholder="" maxlength="16" value="@user.Mobile" />
+                                    <label for="mobile">Mobile</label>
+                                </div>
                             </div>
                         </div>
                     </div>

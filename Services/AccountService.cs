@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService FileService, BrevoService BrevoService, IMemoryCache Cache)
+    public class AccountService(UserService UserService, FileService FileService, SettingService SettingService, BrevoService BrevoService, IMemoryCache Cache)
     {
         public async Task<GenericResultModel<UserEntity>> Login(string email, string password)
         {
@@ -217,7 +217,16 @@ namespace Bewegdeal.Services
 
         public async Task<GenericResultModel> Register(RegistrationViewModel model)
         {
-            // validate email uniqueness
+            // fix mobile
+            model.Mobile = model.Mobile.Replace(" ", "").Trim();
+
+            var settings = await SettingService.GetCached();
+            if (!string.IsNullOrWhiteSpace(settings.MobilePrefix))
+            {
+                model.Mobile = settings.MobilePrefix + model.Mobile;
+            }
+
+            // validate uniqueness
             var existing = await UserService.GetRegistered(model.Email, model.Mobile);
             if (existing is not null)
             {
@@ -259,7 +268,7 @@ namespace Bewegdeal.Services
                 TermsAndConditionsAcceptDate = DateTime.Now
             });
 
-            // send verification email
+            // send verification
             var verification = await VerifySend(user.Email, user.Mobile);
             if (!verification.Success)
             {

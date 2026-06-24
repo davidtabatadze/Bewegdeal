@@ -1,6 +1,6 @@
 @inject Bewegdeal.Services.SettingService _settingsService
 @{
-    var _settings = (await _settingsService.GetCached());
+    var _settings = await _settingsService.GetCached();
     var _termsContent = User.IsInRole(UserRoleEnum.Customer) ? _settings.TermsAndConditionsContentCustomer :
                         User.IsInRole(UserRoleEnum.Company) ? _settings.TermsAndConditionsContentCompany : 
                         "No contant for Administrator";

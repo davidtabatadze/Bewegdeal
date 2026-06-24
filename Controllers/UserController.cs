@@ -1,6 +1,7 @@
 ﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
+using Bewegdeal.Models;
 using Bewegdeal.Services;
 using Bewegdeal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -58,6 +59,21 @@ namespace Bewegdeal.Controllers
             });
 
             return Json(new { status = newStatus });
+        }
+
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(long id)
+        {
+            var user = await UserService.Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Status)]);
+
+            if (user?.Status != UserStatusEnum.Pending)
+            {
+                return BadRequest();
+            }
+
+            await UserService.Delete(id);
+            return Json(GenericResultModel.Ok());
         }
 
         #endregion

@@ -1,7 +1,9 @@
-﻿@model Bewegdeal.ViewModels.RegistrationViewModel
+﻿@inject Bewegdeal.Services.SettingService _settingsService
+@model Bewegdeal.ViewModels.RegistrationViewModel
 @{
     Layout = "_BlankLayout";
     ViewData["Title"] = "Register";
+    var _settings = await _settingsService.GetCached();
 }
 
 @section VendorStyles {
@@ -199,9 +201,12 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5">
-                                            <div class="form-floating form-floating-outline">
-                                                <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
-                                                <label for="mobile">Mobile</label>
+                                            <div class="input-group input-group-merge">
+                                                <span class="input-group-text">@_settings.MobilePrefix</span>
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
+                                                    <label for="mobile">Mobile</label>
+                                                </div>
                                             </div>
                                         </div>
                                         <div id="numberCol" class="col-sm-6 mb-5 d-none">
