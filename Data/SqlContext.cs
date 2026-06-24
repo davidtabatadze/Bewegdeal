@@ -363,6 +363,7 @@ namespace Bewegdeal.Data
                 e.HasKey(s => s.Id);
                 e.Property(s => s.Id).ValueGeneratedNever();
 
+                e.Property(s => s.AboutUs).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentCustomer).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentCompany).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentDateCustomer).IsRequired();

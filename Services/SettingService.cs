@@ -30,6 +30,14 @@ namespace Bewegdeal.Services
             return settings;
         }
 
+        public async Task SaveAboutUs(string? content)
+        {
+            var settings = await Get();
+            settings.AboutUs = content ?? string.Empty;
+            await Update(settings);
+            ClearCache();
+        }
+
         public async Task SaveTermsAndConditionsCustomer(string? content)
         {
             var settings = await Get();

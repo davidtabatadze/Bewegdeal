@@ -44,6 +44,22 @@
         document.getElementById('tcFormCustomer').addEventListener('submit', function () {
         document.getElementById('tcCustomer').value = quill.root.innerHTML;
         });
+
+        var quillCompany = new Quill('#tcEditorCompany', {
+        bounds: '#tcEditorCompany',
+        placeholder: '',
+        modules: { toolbar: fullToolbar },
+        theme: 'snow'
+        });
+
+        quillCompany.root.style.maxHeight = '300px';
+        quillCompany.root.style.overflowY = 'auto';
+
+        quillCompany.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContentCompany));
+
+        document.getElementById('tcFormCompany').addEventListener('submit', function () {
+        document.getElementById('tcCompany').value = quillCompany.root.innerHTML;
+        });
         })();
     </script>
 }
@@ -136,7 +152,7 @@
         </form>
     </div>
 
-    <!-- Terms & Conditions -->
+    <!-- Terms & Conditions for Customer -->
     <div class="col-12">
         <form id="tcFormCustomer" asp-controller="Settings" asp-action="SaveTermsAndConditionsCustomer" method="post">
             <input type="hidden" id="tcCustomer" name="content" />
@@ -168,6 +184,49 @@
                     </div>
 
                     <div id="tcEditorCustomer"></div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Terms & Conditions for Company -->
+    <div class="col-12">
+        <form id="tcFormCompany" asp-controller="Settings" asp-action="SaveTermsAndConditionsCompany" method="post">
+            <input type="hidden" id="tcCompany" name="content" />
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">T&amp;C for the <strong>Company</strong></h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["TermsError"] is string termsError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
+                    }
+                    @if (TempData["TermsSuccess"] is string termsSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
+                    }
+
+                    <div class="alert alert-danger mb-4" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Handle with care</strong>
+                        </div>
+                        <ul class="mb-0">
+                            <li>Saving changes will require existing companies to re-agree to the Terms &amp; Conditions.</li>
+                        </ul>
+                    </div>
+
+                    <div id="tcEditorCompany"></div>
 
                 </div>
 

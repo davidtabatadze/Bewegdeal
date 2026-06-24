@@ -15,6 +15,7 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new SettingsEntity
                 {
                     Id = 1,
+                    AboutUs = "Bewegdeal.at",
                     TermsAndConditionsContentCustomer = "This is a free T&C for customers",
                     TermsAndConditionsContentCompany = "This is a free T&C for companies",
                     TermsAndConditionsContentDateCustomer = DateTime.Now,

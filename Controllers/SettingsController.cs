@@ -19,7 +19,20 @@ public class SettingsController(SettingService SettingService) : XBaseController
 
     #endregion
 
-    #region Save Term And Condition Settings
+    #region Save About Us
+
+    [HttpPost]
+    public async Task<IActionResult> SaveAboutUs(string? content)
+    {
+        await SettingService.SaveAboutUs(content);
+
+        TempData["TermsSuccess"] = "About us updated successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Save Term And Condition
 
     [HttpPost]
     public async Task<IActionResult> SaveTermsAndConditionsCustomer(string? content)
@@ -41,7 +54,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
 
     #endregion
 
-    #region Save Mobile Settings
+    #region Save Mobile 
 
     [HttpPost]
     public async Task<IActionResult> SaveMobile(string? mobilePrefix)
@@ -54,7 +67,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
 
     #endregion
 
-    #region Save Invoice Settings
+    #region Save Invoice
 
     [HttpPost]
     public async Task<IActionResult> SaveInvoice(short commissionPersent, short taxPersent)
@@ -73,7 +86,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
 
     #endregion
 
-    #region Save Request Settings
+    #region Save Request
 
     [HttpPost]
     public async Task<IActionResult> SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize)
