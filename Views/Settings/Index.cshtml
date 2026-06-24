@@ -82,6 +82,55 @@
 
 <div class="row g-6">
 
+    <!-- Invoice -->
+    <div class="col-12">
+        <form asp-controller="Settings" asp-action="SaveInvoice" method="post">
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Invoice</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @* @if (TempData["InvoiceError"] is string invoiceError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@invoiceError</div>
+                    }
+                    @if (TempData["InvoiceSuccess"] is string invoiceSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@invoiceSuccess</div>
+                    }*@
+
+                    <div class="row justify-content-center g-5">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="commissionPersent"
+                                       name="commissionPersent" value="@Model.InvoiceCommissionPersent"
+                                       min="1" placeholder="0" />
+                                <label for="commissionPersent">Commission %</label>
+                            </div>
+                        </div>
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="taxPersent"
+                                       name="taxPersent" value="@Model.InvoiceTaxPersent"
+                                       min="1" placeholder="0" />
+                                <label for="taxPersent">Tax %</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
     <!-- Request -->
     <div class="col-12">
         <form asp-controller="Settings" asp-action="SaveRequest" method="post">
@@ -93,14 +142,14 @@
 
                 <div class="card-body">
 
-                    @if (TempData["RequestError"] is string requestError)
+                    @* @if (TempData["RequestError"] is string requestError)
                     {
                         <div class="alert alert-danger mb-4 text-center" role="alert">@requestError</div>
                     }
                     @if (TempData["RequestSuccess"] is string requestSuccess)
                     {
                         <div class="alert alert-success mb-4 text-center" role="alert">@requestSuccess</div>
-                    }
+                    } *@
 
                     <!-- Negotiation -->
                     @* <div class="row justify-content-center">
