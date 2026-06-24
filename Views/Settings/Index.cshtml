@@ -82,6 +82,47 @@
 
 <div class="row g-6">
 
+    <!-- Mobile -->
+    <div class="col-12">
+        <form asp-controller="Settings" asp-action="SaveMobile" method="post">
+            <div class="card">
+
+                <div class="card-header">
+                    <h5 class="card-title m-0">Mobile</h5>
+                </div>
+
+                <div class="card-body">
+
+                    @* @if (TempData["MobileError"] is string mobileError)
+                    {
+                        <div class="alert alert-danger mb-4 text-center" role="alert">@mobileError</div>
+                    }
+                    @if (TempData["MobileSuccess"] is string mobileSuccess)
+                    {
+                        <div class="alert alert-success mb-4 text-center" role="alert">@mobileSuccess</div>
+                    } *@
+
+                    <div class="row justify-content-center">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="mobilePrefix"
+                                       name="mobilePrefix" value="@Model.MobilePrefix"
+                                       placeholder="+43" />
+                                <label for="mobilePrefix">Mobile Prefix</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
     <!-- Invoice -->
     <div class="col-12">
         <form asp-controller="Settings" asp-action="SaveInvoice" method="post">
