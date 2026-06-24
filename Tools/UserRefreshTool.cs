@@ -27,14 +27,15 @@ namespace Bewegdeal.Tools
                     var cacheKey = CacheKeyTool.Get(CacheKeyEnum.User, userId);
                     if (!cache.TryGetValue(cacheKey, out _) || forceTC)
                     {
-                        var settings = await settingService.Get();
                         var user = await userService.Get(userId, [nameof(UserEntity.Status)]);
+                        var userRole = context.User.FindFirstValue(IdentityFieldEnum.Role);
+                        var settings = await settingService.GetCached();
+                        var dateOfTC = userRole == UserRoleEnum.Customer ?
+                                       settings.TermsAndConditionsContentDateCustomer :
+                                       settings.TermsAndConditionsContentDateCompany;
 
                         DateTime.TryParse(context.User.FindFirstValue(IdentityFieldEnum.TermsAcceptDate), out var termsAcceptDate);
-                        if (
-                            context.User.FindFirstValue(IdentityFieldEnum.Role) != UserRoleEnum.Administrator &&
-                            termsAcceptDate < settings.TermsAndConditionsContentDate
-                        )
+                        if (userRole != UserRoleEnum.Administrator && termsAcceptDate < dateOfTC)
                         {
                             context.Items["ShowTCModal"] = true;
                         }

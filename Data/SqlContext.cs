@@ -363,13 +363,18 @@ namespace Bewegdeal.Data
                 e.HasKey(s => s.Id);
                 e.Property(s => s.Id).ValueGeneratedNever();
 
-                e.Property(s => s.TermsAndConditionsContent).IsRequired();
-                e.Property(s => s.TermsAndConditionsContentDate).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentCustomer).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentCompany).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDateCustomer).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDateCompany).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();
                 e.Property(s => s.RequestVideoMaxCount).IsRequired();
                 e.Property(s => s.RequestVideoMaxSize).IsRequired();
+                e.Property(s => s.InvoiceCommissionPersent).IsRequired();
+                e.Property(s => s.InvoiceTaxPersent).IsRequired();
+                e.Property(s => s.MobilePrefix).IsRequired();
             });
         }
     }

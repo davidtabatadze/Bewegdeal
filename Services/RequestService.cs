@@ -64,7 +64,7 @@ namespace Bewegdeal.Services
             => await RequestRepository.Update(area, update);
 
         public async Task<RequestModel> Get()
-            => new() { Data = null, Requester = null, Settings = await SettingService.Get() };
+            => new() { Data = null, Requester = null, Settings = await SettingService.GetCached() };
 
         public async Task<RequestEntity?> Get(string number, string[]? properties = null)
             => await Get(new RequestFilter { Number = number ?? "-" }, properties);
@@ -219,7 +219,7 @@ namespace Bewegdeal.Services
         public async Task<GenericResultModel<RequestViewModel>> PrepareValidation(RequestViewModel model)
         {
             // load data
-            var settings = await SettingService.Get();
+            var settings = await SettingService.GetCached();
             var requestFiles = await RequestFileRepository.Load(model.Id);
 
             // prepare ...
@@ -277,7 +277,7 @@ namespace Bewegdeal.Services
                 }
             }
 
-            var settings = await SettingService.Get();
+            var settings = await SettingService.GetCached();
             var files = await RequestFileRepository.Load(request.Id);
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 

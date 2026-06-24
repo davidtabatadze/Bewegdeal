@@ -36,7 +36,7 @@
         theme: 'snow'
         });
 
-        quill.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContent));
+        quill.root.innerHTML = @Html.Raw(Json.Serialize(Model.TermsAndConditionsContentCompany));
 
         document.getElementById('termsForm').addEventListener('submit', function () {
         document.getElementById('termsContent').value = quill.root.innerHTML;
@@ -68,7 +68,7 @@
                     }
 
                     <!-- Negotiation -->
-                    <div class="row justify-content-center">
+                    @* <div class="row justify-content-center">
                         <div class="col-auto" style="width: 200px">
                             <div class="form-floating form-floating-outline">
                                 <input type="number" class="form-control" id="requestNegotiationMinutes"
@@ -77,9 +77,9 @@
                                 <label for="requestNegotiationMinutes">Negotiation Minutes</label>
                             </div>
                         </div>
-                    </div>
+                    </div> *@
 
-                    <hr class="my-6 mx-n4" />
+                    @* <hr class="my-6 mx-n4" /> *@
 
                     <!-- Images -->
                     <div class="row justify-content-center g-5">
@@ -140,7 +140,7 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Terms &amp; Conditions</h5>
+                    <h5 class="card-title m-0">Terms &amp; Conditions for customers</h5>
                 </div>
 
                 <div class="card-body">
@@ -160,7 +160,7 @@
                             <strong>Handle with care</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing users to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Saving changes will require existing customers to re-agree to the Terms &amp; Conditions.</li>
                         </ul>
                     </div>
 

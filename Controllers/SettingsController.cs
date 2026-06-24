@@ -1,12 +1,12 @@
-using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bewegdeal.Controllers;
 
 [Authorize(Roles = UserRoleEnum.Administrator)]
-public class SettingsController(ISettingsRepository settingsRepository) : XBaseController
+public class SettingsController(SettingService SettingService) : XBaseController
 {
 
     #region Index
@@ -14,7 +14,7 @@ public class SettingsController(ISettingsRepository settingsRepository) : XBaseC
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        return View(await settingsRepository.Get());
+        return View(await SettingService.Get());
     }
 
     #endregion
@@ -22,14 +22,52 @@ public class SettingsController(ISettingsRepository settingsRepository) : XBaseC
     #region Save Term And Condition Settings
 
     [HttpPost]
-    public async Task<IActionResult> SaveTermAndConditionSettings(string? termsContent)
+    public async Task<IActionResult> SaveTermsAndConditionsCustomer(string? content)
     {
-        var settings = await settingsRepository.Get();
-        settings.TermsAndConditionsContent = termsContent ?? string.Empty;
-        settings.TermsAndConditionsContentDate = DateTime.Now;
-        await settingsRepository.Update(settings);
+        await SettingService.SaveTermsAndConditionsCustomer(content);
 
         TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveTermsAndConditionsCompany(string? content)
+    {
+        await SettingService.SaveTermsAndConditionsCompany(content);
+
+        TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Save Mobile Settings
+
+    [HttpPost]
+    public async Task<IActionResult> SaveMobile(string? mobilePrefix)
+    {
+        await SettingService.SaveMobile(mobilePrefix);
+
+        TempData["RequestSuccess"] = "Mobile settings saved successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Save Invoice Settings
+
+    [HttpPost]
+    public async Task<IActionResult> SaveInvoice(short commissionPersent, short taxPersent)
+    {
+        if (commissionPersent <= 0 || taxPersent <= 0)
+        {
+            TempData["RequestError"] = "All invoice settings must be greater than zero.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        await SettingService.SaveInvoice(commissionPersent, taxPersent);
+
+        TempData["RequestSuccess"] = "Invoice settings saved successfully.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -38,32 +76,15 @@ public class SettingsController(ISettingsRepository settingsRepository) : XBaseC
     #region Save Request Settings
 
     [HttpPost]
-    public async Task<IActionResult> SaveRequestSettings(
-        short requestNegotiationMinutes,
-        short requestImageMaxCount,
-        short requestImageMaxSize,
-        short requestVideoMaxCount,
-        short requestVideoMaxSize)
+    public async Task<IActionResult> SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize)
     {
-        if (requestNegotiationMinutes <= 0 ||
-            requestImageMaxCount <= 0 ||
-            requestImageMaxSize <= 0 ||
-            requestVideoMaxCount <= 0 ||
-            requestVideoMaxSize <= 0)
+        if (imageMaxCount <= 0 || imageMaxSize <= 0 || videoMaxCount <= 0 || videoMaxSize <= 0)
         {
             TempData["RequestError"] = "All request settings must be greater than zero.";
             return RedirectToAction(nameof(Index));
         }
 
-        var settings = await settingsRepository.Get();
-
-        settings.RequestNegotiationMinutes = requestNegotiationMinutes;
-        settings.RequestImageMaxCount = requestImageMaxCount;
-        settings.RequestImageMaxSize = requestImageMaxSize;
-        settings.RequestVideoMaxCount = requestVideoMaxCount;
-        settings.RequestVideoMaxSize = requestVideoMaxSize;
-
-        await settingsRepository.Update(settings);
+        await SettingService.SaveRequest(imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize);
 
         TempData["RequestSuccess"] = "Request settings saved successfully.";
         return RedirectToAction(nameof(Index));
