@@ -21,8 +21,8 @@ namespace Bewegdeal.Controllers
         {
             var data = await UserService.LoadGrid();
             ViewBag.Total = data.Result?.total ?? 0;
-            ViewBag.Customer = (int)(data.Result?.customer ?? 0);
-            ViewBag.Company = (int)(data.Result?.company ?? 0);
+            ViewBag.Customer = data.Result?.customer ?? 0;
+            ViewBag.Company = data.Result?.company ?? 0;
             ViewBag.Pending = data.Result?.pending ?? 0;
 
             return View();

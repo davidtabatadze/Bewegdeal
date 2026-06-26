@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 2,
                 width: '120px',
                 render: function (data) {
-                    return '<span class="text-heading fw-medium">' + (data != null ? data + ' EUR' : '—') + '</span>';
+                    return '<span class="text-heading fw-medium">' + (data != null ? '€' + data : '—') + '</span>';
                 }
             },
             {
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 3,
                 width: '120px',
                 render: function (data) {
-                    return '<span class="text-heading fw-medium">' + (data != null ? data + ' EUR' : '—') + '</span>';
+                    return '<span class="text-heading fw-medium">' + (data != null ? '€' + data : '—') + '</span>';
                 }
             },
             {

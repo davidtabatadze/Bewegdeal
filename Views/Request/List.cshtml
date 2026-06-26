@@ -39,82 +39,68 @@
 
 @if (viewerRole != UserRoleEnum.Customer)
 {
-    <!-- Stat Cards -->
-    <div class="row g-6 mb-6">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div class="me-1">
-                            <p class="text-heading mb-1">Total Requests</p>
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-1 me-2">@ViewBag.TotalCount</h4>
+    <div class="card mb-6">
+        <div class="card-widget-separator-wrapper">
+            <div class="card-body card-widget-separator pt-3 pb-3">
+                <div class="row gy-4 gy-sm-1">
+                    <div class="col-6 col-sm-6 col-lg-3">
+                        <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+                            <div>
+                                <h4 class="mb-0 text-primary">@ViewBag.Total</h4>
+                                <p class="mb-0 fw-bold">Requests</p>
                             </div>
-                            <small class="mb-0">All placed requests</small>
+                            <div class="avatar me-lg-6 mt-2">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="icon-base ri ri-file-list-3-line icon-26px"></i>
+                                </span>
+                            </div>
                         </div>
-                        <div class="avatar">
-                            <div class="avatar-initial bg-label-primary rounded">
-                                <div class="icon-base ri ri-file-list-3-line icon-26px"></div>
+                        <hr class="d-none d-sm-block d-lg-none me-6" />
+                    </div>
+                    <div class="col-6 col-sm-6 col-lg-3">
+                        <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+                            <div>
+                                <h4 class="mb-0 text-warning">@ViewBag.Pending</h4>
+                                @if (User.IsInRole(UserRoleEnum.Administrator))
+                                {
+                                    <p class="mb-0 fw-bold">Pending</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 fw-bold">Potential</p>
+                                }
+                            </div>
+                            <div class="avatar me-sm-6 mt-2">
+                                <span class="avatar-initial rounded bg-label-warning">
+                                    <i class="icon-base ri @(User.IsInRole(UserRoleEnum.Administrator) ? "ri-timer-flash-line" : "ri-lightbulb-line") icon-26px"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <hr class="d-none d-sm-block d-lg-none" />
+                    </div>
+                    <div class="col-6 col-sm-6 col-lg-3">
+                        <div class="d-flex justify-content-between align-items-start card-widget-3 border-bottom-0 border-end pb-4 pb-sm-0">
+                            <div>
+                                <h4 class="mb-0 text-success">@ViewBag.Agreed</h4>
+                                <p class="mb-0 fw-bold">Agreed</p>
+                            </div>
+                            <div class="avatar me-sm-6 mt-2">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="icon-base ri ri-shake-hands-line icon-26px"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div class="me-1">
-                            <p class="text-heading mb-1">Pending</p>
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-1 me-2">@ViewBag.PendingCount</h4>
+                    <div class="col-6 col-sm-6 col-lg-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h4 class="mb-0 text-success">@ViewBag.Resolved</h4>
+                                <p class="mb-0 fw-bold">Resolved</p>
                             </div>
-                            <small class="mb-0">Awaiting executor</small>
-                        </div>
-                        <div class="avatar">
-                            <div class="avatar-initial bg-label-warning rounded">
-                                <div class="icon-base ri ri-time-line icon-26px"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div class="me-1">
-                            <p class="text-heading mb-1">Negotiation</p>
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-1 me-2">@ViewBag.NegotiationCount</h4>
-                            </div>
-                            <small class="mb-0">Under agreement</small>
-                        </div>
-                        <div class="avatar">
-                            <div class="avatar-initial bg-label-info rounded">
-                                <div class="icon-base ri ri-shake-hands-line icon-26px"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div class="me-1">
-                            <p class="text-heading mb-1">Resolved</p>
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-1 me-2">@ViewBag.ResolvedCount</h4>
-                            </div>
-                            <small class="mb-0">Successfully completed</small>
-                        </div>
-                        <div class="avatar">
-                            <div class="avatar-initial bg-label-success rounded">
-                                <div class="icon-base ri ri-checkbox-circle-line icon-26px"></div>
+                            <div class="avatar mt-2">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="icon-base ri ri-check-double-line icon-26px"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -123,7 +109,6 @@
         </div>
     </div>
 }
-@* end stat cards *@
 
 @if (viewerRole == UserRoleEnum.Customer && !(bool)ViewBag.CustomerHasRequests)
 {
@@ -164,8 +149,8 @@ else
                                 <select id="filterRequest" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                                     <option value="">All Requests</option>
                                     <option data-divider="true"></option>
-                                    <option value="@RequestViewerFocusEnum.Potential">Potential</option>
-                                    <option value="@RequestViewerFocusEnum.Mine">Only Mine</option>
+                                    <option data-icon="icon-base ri ri-lightbulb-line icon-sm text-warning" value="@RequestViewerFocusEnum.Potential">Potential</option>
+                                    <option data-icon="icon-base ri ri-medal-2-line icon-sm text-success" value="@RequestViewerFocusEnum.Mine">Only Mine</option>
                                 </select>
                             </div>
                         </div>
@@ -184,11 +169,11 @@ else
                             <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                                 <option value="">All Statuses</option>
                                 <option data-divider="true"></option>
-                                <option value="@RequestStatusEnum.Pending">Pending</option>
-                                <option value="@RequestStatusEnum.Negotiation">Negotiation</option>
-                                <option value="@RequestStatusEnum.Agreed">Agreed</option>
-                                <option value="@RequestStatusEnum.Resolved">Resolved</option>
-                                <option value="@RequestStatusEnum.Cancelled">Cancelled</option>
+                                <option data-icon="icon-base ri ri-timer-flash-line icon-sm text-warning" value="@RequestStatusEnum.Pending">Pending</option>
+                                <option data-icon="icon-base ri ri-wechat-line icon-sm text-info" value="@RequestStatusEnum.Negotiation">Negotiation</option>
+                                <option data-icon="icon-base ri ri-shake-hands-line icon-sm text-success" value="@RequestStatusEnum.Agreed">Agreed</option>
+                                <option data-icon="icon-base ri ri-check-double-line icon-sm text-success" value="@RequestStatusEnum.Resolved">Resolved</option>
+                                <option data-icon="icon-base ri ri-hand icon-sm text-danger" value="@RequestStatusEnum.Cancelled">Cancelled</option>
                             </select>
                         </div>
                         <div class="col-6">
@@ -197,7 +182,15 @@ else
                                 <option data-divider="true"></option>
                                 @foreach (var (value, label) in serviceOptions)
                                 {
-                                    <option value="@value">@label</option>
+                                    var icon = value == "moving" ? "ri-truck-line" :
+                                               value == "removal" ? "ri-recycle-line" :
+                                               value == "pickup" ? "ri-shopping-bag-4-line" :
+                                               value == "transport" ? "ri-car-line" : "";
+                                    var color = value == "moving" ? "success" :
+                                                value == "removal" ? "danger" :
+                                                value == "pickup" ? "warning" :
+                                                value == "transport" ? "info" : "";
+                                    <option data-icon="icon-base ri @icon icon-sm text-@color" value="@value">@label</option>
                                 }
                             </select>
                         </div>

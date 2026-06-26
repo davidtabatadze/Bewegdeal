@@ -75,6 +75,9 @@ namespace Bewegdeal.Services
         public async Task<GenericResultModel<RequestModel>> Get(string number, long userId)
             => await Get(userId, await Get(number), false);
 
+        private async Task<int> Count(RequestFilter filter)
+            => await RequestRepository.Count(filter);
+
         public async Task<GenericResultModel> Cancel(string number, long userId)
         {
             var request = await Get(number);
@@ -155,17 +158,31 @@ namespace Bewegdeal.Services
             var viewerId = user?.Id ?? 0;
             var viewerRole = user?.Role ?? "-";
             var viewerInterests = user?.Interests ?? [];
+            var filter = new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, ViewerInterests = viewerInterests };
+
+            var total = await Count(filter);
+
+            filter.ViewerFocus = RequestViewerFocusEnum.Potential;
+            filter.Status = viewerRole == UserRoleEnum.Company ? null : RequestStatusEnum.Pending;
+            var pending = await Count(filter);
+
+            filter.ViewerFocus = null;
+            filter.Status = RequestStatusEnum.Agreed;
+            var agreed = await Count(filter);
+
+            filter.ViewerFocus = null;
+            filter.Status = RequestStatusEnum.Resolved;
+            var resolved = await Count(filter);
 
             return GenericResultModel<dynamic>.Ok(new
             {
                 viewerRole,
                 viewerInterests,
-                customerHasRequests = viewerRole != UserRoleEnum.Customer ||
-                                      await RequestRepository.Count(new RequestFilter
-                                      {
-                                          ViewerId = viewerId,
-                                          ViewerRole = viewerRole
-                                      }) > 0
+                customerHasRequests = total > 0,
+                total,
+                pending,
+                agreed,
+                resolved
             });
         }
 
@@ -178,21 +195,30 @@ namespace Bewegdeal.Services
             filter.ViewerRole = user?.Role ?? "-";
             filter.ViewerInterests = user?.Interests ?? [];
 
+            var viewerIsCompany = filter.ViewerRole == UserRoleEnum.Company;
+
             var requests = await RequestRepository.Load(filter);
-            var filtered = await RequestRepository.Count(filter);
-            var total = await RequestRepository.Count(new RequestFilter
+            var filtered = await Count(filter);
+            var total = await Count(new RequestFilter
             {
                 ViewerId = user?.Id ?? 0,
                 ViewerRole = user?.Role ?? "-",
                 ViewerInterests = user?.Interests ?? []
             });
+
             var files = await RequestFileRepository.Load(
                 null,
                 requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
                 true
             );
-            var requesters = await UserService.Load(
-                requests.Count == 0 ? [0] : [.. requests.Select(r => r.RequesterId)],
+            var proposals = await ProposalService.Load(
+                requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)], null, null
+            );
+
+            var requesters = requests.Select(r => r.RequesterId);
+            var executors = viewerIsCompany ? [] : proposals.Select(p => p.CompanyId);
+            var users = await UserService.Load(
+                requests.Count == 0 ? [0] : requesters.Concat(executors),
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
             );
 
@@ -201,21 +227,38 @@ namespace Bewegdeal.Services
                 Draw = draw,
                 RecordsTotal = total,
                 RecordsFiltered = filtered,
-                Data = requests.Select(r => new
+                Data = requests.Select(r =>
                 {
-                    id = r.Id,
-                    number = r.Number,
-                    status = r.Status,
-                    service = r.Service,
-                    title = r.Title,
-                    createDate = r.CreateDate.ToString("MMM d, yyyy"),
-                    cost = r.Cost,
-                    currency = r.Currency,
-                    asap = r.ASAP,
-                    date = r.Date?.ToString("MMM d, yyyy"),
-                    time = r.Time?.ToString("HH:mm"),
-                    imageUrl = FileService.GetUrl(files.FirstOrDefault(f => f.RequestId == r.Id)?.File, baseUrl),
-                    requester = UserService.GetAvatar(requesters.FirstOrDefault(u => u.Id == r.RequesterId))
+                    var proposal = proposals.Where(p => !viewerIsCompany || p.CompanyId == filter.ViewerId)
+                                            .Where(p => p.Status != RequestProposalStatusEnum.Rejected)
+                                            .Where(p => p.RequestId == r.Id)
+                                            .OrderBy(p => p.Status).FirstOrDefault();
+
+                    return new
+                    {
+                        id = r.Id,
+                        number = r.Number,
+                        status = r.Status,
+                        service = r.Service,
+                        title = r.Title,
+                        createDate = r.CreateDate.ToString("MMM d, yyyy"),
+                        currency = r.Currency,
+                        asap = r.ASAP,
+                        cost = r.Cost,
+                        date = r.Date?.ToString("MMM d, yyyy"),
+                        time = r.Time?.ToString("HH:mm"),
+                        proposal = proposal == null ? null : new
+                        {
+                            cost = proposal.Cost,
+                            date = proposal.Date?.ToString("MMM d, yyyy"),
+                            time = proposal.Time?.ToString("HH:mm"),
+                            status = proposal.Status
+                        },
+                        imageUrl = FileService.GetUrl(files.FirstOrDefault(f => f.RequestId == r.Id)?.File, baseUrl),
+                        requester = UserService.GetAvatar(
+                            users.FirstOrDefault(u => u.Id == (viewerIsCompany ? r.RequesterId : proposal?.CompanyId ?? r.RequesterId))
+                        )
+                    };
                 })
             };
         }

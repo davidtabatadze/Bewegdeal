@@ -10,12 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status → icon HTML + label
     const statusMap = {
-        pending: { icon: '<i class="icon-base ri ri-timer-flash-line  icon-22px text-warning me-2"></i>', label: 'Pending' },
-        cancelled: { icon: '<i class="icon-base ri ri-hand              icon-22px text-danger  me-2"></i>', label: 'Cancelled' },
-        negotiation: { icon: '<i class="icon-base ri ri-wechat-line       icon-22px text-info    me-2"></i>', label: 'Negotiation' },
-        agreed: { icon: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success me-2"></i>', label: 'Agreed' },
-        resolved: { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success me-2"></i>', label: 'Resolved' },
-        declined: { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark me-2"></i>', label: 'Declined' },
+        pending: { icon: '<i class="icon-base ri ri-timer-flash-line  icon-22px text-warning"></i>', label: 'Pending' },
+        cancelled: { icon: '<i class="icon-base ri ri-hand              icon-22px text-danger"></i>', label: 'Cancelled' },
+        negotiation: { icon: '<i class="icon-base ri ri-wechat-line       icon-22px text-info"></i>', label: 'Negotiation' },
+        agreed: { icon: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success"></i>', label: 'Agreed' },
+        resolved: { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success"></i>', label: 'Resolved' },
+        declined: { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark"></i>', label: 'Declined' },
     };
     const statusMap2 = {
         pending: { icon: 'ri-timer-flash-line', color: 'warning', label: 'Pending' },
@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function () {
         transport: { icon: 'ri-car-line', color: 'bg-label-info', title: 'Vehicle Transport' }
     };
     const serviceMap = {
-        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success me-2"></i>', label: 'Moving Service', color: 'text-success' },
-        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger  me-2"></i>', label: 'Junk Removal', color: 'text-danger' },
-        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning me-2"></i>', label: 'Store Pickup', color: 'text-warning' },
-        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info    me-2"></i>', label: 'Vehicle Transport', color: 'text-info' }
+        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success"></i>', label: 'Moving Service', color: 'text-success' },
+        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger"></i>', label: 'Junk Removal', color: 'text-danger' },
+        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning"></i>', label: 'Store Pickup', color: 'text-warning' },
+        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info"></i>', label: 'Vehicle Transport', color: 'text-info' }
     };
 
     // Column index → sort field sent to the server (only sortable columns listed)
@@ -212,19 +212,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     td.style.minWidth = '200px';
                 },
                 render: function (data, type, full) {
-                    const cost = full['cost'];
-                    const currency = full['currency'];
-                    const asap = full['asap'];
-                    const date = full['date'];
-                    const time = full['time'];
+                    var asap = full['asap'];
+                    var cost = full['cost'];
+                    var date = full['date'];
+                    var time = full['time'];
                     const avatar = full['requester'] || {};
+
+                    const proposal = full['proposal'] || {};
+                    const proposalColor = proposal.status == 'pending' ? 'warning' :
+                        proposal.status == 'accepted' ? 'success' : '';
+                    const proposalIcon = !proposal.status ? '' :
+                        '<i class="icon-base ri ri-shake-hands-line icon-18px text-' + proposalColor + ' me-1"></i>'
+                    if (proposal.status) {
+                        asap = false;
+                        cost = proposal.cost;
+                        date = proposal.date;
+                        time = proposal.time;
+                    }
 
                     let timing;
                     if (asap) {
                         timing = 'As soon as possible';
                     } else {
                         timing = date || '';
-                        if (time) { timing += ' at ' + time; }
+                        if (time) { timing += ' - ' + time; }
                     }
 
                     const avatarInner = avatar.url
@@ -237,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<div class="avatar avatar-m me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="' + avatar.name + '">' + avatarInner + '</div>' +
                         '</div>' +
                         '<div class="d-flex flex-column">' +
-                        '<span class="fw-medium">' + currency + ' ' + parseFloat(cost).toFixed(2) + '</span>' +
+                        '<span class="fw-medium">' + proposalIcon + '€' + parseFloat(cost).toFixed(2) + '</span>' +
                         '<small class="text-muted">' + timing + '</small>' +
                         '</div>' +
                         '</div>'
