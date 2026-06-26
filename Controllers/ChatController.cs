@@ -11,8 +11,14 @@ namespace Bewegdeal.Controllers
     public class ChatController(ChatService ChatService) : XBaseController
     {
         [Authorize(Roles = UserRoleEnum.Administrator)]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
+            var data = await ChatService.LoadGrid();
+            ViewBag.Total = data.Result?.total ?? 0;
+            ViewBag.Dubious = data.Result?.dubious ?? 0;
+            ViewBag.Ongoing = data.Result?.ongoing ?? 0;
+            ViewBag.Agreed = data.Result?.agreed ?? 0;
+
             return View();
         }
 

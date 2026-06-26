@@ -78,6 +78,16 @@ namespace Bewegdeal.Services
             }
         }
 
+        public async Task<GenericResultModel<dynamic>> LoadGrid()
+        {
+            var total = await Count(new ChatFilter { });
+            var dubious = await Count(new ChatFilter { Fraud = ChatFraudEnum.Dubious });
+            var ongoing = await Count(new ChatFilter { Status = ChatStatusEnum.Ongoing });
+            var agreed = await Count(new ChatFilter { Status = ChatStatusEnum.Agreed });
+
+            return GenericResultModel<dynamic>.Ok(new { total, dubious, ongoing, agreed });
+        }
+
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {
             var chats = await Load(filter);
