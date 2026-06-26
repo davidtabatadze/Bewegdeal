@@ -1,9 +1,16 @@
 <style>
     /* Offcanvas and modal both default to 1090 in this template; push the modal above. */
-    #chatProposalModal { --bs-modal-zindex: 1100; }
+    #chatProposalModal {
+        --bs-modal-zindex: 1100;
+    }
     /* Flatpickr defaults to 1074 — keep pickers above the modal. */
-    .flatpickr-calendar.open { z-index: 9999 !important; }
-    .ui-timepicker-wrapper { z-index: 9999 !important; }
+    .flatpickr-calendar.open {
+        z-index: 9999 !important;
+    }
+
+    .ui-timepicker-wrapper {
+        z-index: 9999 !important;
+    }
 </style>
 
 <div class="modal fade" id="chatProposalModal" tabindex="-1" aria-hidden="true"
@@ -15,37 +22,37 @@
             </div>
             <div class="modal-body">
                 <form id="proposalForm" onsubmit="return false;">
-                <div class="mb-4">
-                    <div class="input-group input-group-merge" style="width:200px;">
-                        <div class="form-floating form-floating-outline flex-grow-1">
-                            <input type="number" id="proposalCost" class="form-control" placeholder=""
-                                   min="1" max="10000" step="1" />
-                            <label for="proposalCost">Cost</label>
+                    <div class="mb-4">
+                        <div class="input-group input-group-merge" style="width:200px;">
+                            <div class="form-floating form-floating-outline flex-grow-1">
+                                <input type="number" id="proposalCost" class="form-control" placeholder=""
+                                       min="1" max="10000" step="1" />
+                                <label for="proposalCost">Cost</label>
+                            </div>
+                            <span class="input-group-text"><i class="icon-base ri ri-money-euro-circle-line"></i></span>
                         </div>
-                        <span class="input-group-text">EUR</span>
+                        <div id="proposalCostError" class="text-danger small d-none mt-1">Please enter a valid cost.</div>
                     </div>
-                    <div id="proposalCostError" class="text-danger small d-none mt-1">Please enter a valid cost.</div>
-                </div>
-                <div class="mb-4">
-                    <div class="input-group input-group-merge" style="width:200px;">
-                        <div class="form-floating form-floating-outline flex-grow-1">
-                            <input type="text" id="proposalDate" class="form-control" placeholder="" />
-                            <label for="proposalDate">Date</label>
+                    <div class="mb-4">
+                        <div class="input-group input-group-merge" style="width:200px;">
+                            <div class="form-floating form-floating-outline flex-grow-1">
+                                <input type="text" id="proposalDate" class="form-control" placeholder="" />
+                                <label for="proposalDate">Date</label>
+                            </div>
+                            <span class="input-group-text"><i class="icon-base ri ri-calendar-line"></i></span>
                         </div>
-                        <span class="input-group-text"><i class="icon-base ri ri-calendar-line"></i></span>
+                        <div id="proposalDateError" class="text-danger small d-none mt-1">Please select a date.</div>
                     </div>
-                    <div id="proposalDateError" class="text-danger small d-none mt-1">Please select a date.</div>
-                </div>
-                <div class="mb-2">
-                    <div class="input-group input-group-merge" style="width:200px;">
-                        <div class="form-floating form-floating-outline flex-grow-1">
-                            <input type="text" id="proposalTime" class="form-control" placeholder="" />
-                            <label for="proposalTime">Time</label>
+                    <div class="mb-2">
+                        <div class="input-group input-group-merge" style="width:200px;">
+                            <div class="form-floating form-floating-outline flex-grow-1">
+                                <input type="text" id="proposalTime" class="form-control" placeholder="" />
+                                <label for="proposalTime">Time</label>
+                            </div>
+                            <span class="input-group-text"><i class="icon-base ri ri-time-line"></i></span>
                         </div>
-                        <span class="input-group-text"><i class="icon-base ri ri-time-line"></i></span>
+                        <div id="proposalTimeError" class="text-danger small d-none mt-1">Please select a time.</div>
                     </div>
-                    <div id="proposalTimeError" class="text-danger small d-none mt-1">Please select a time.</div>
-                </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -57,133 +64,133 @@
 </div>
 
 <script>
-'use strict';
+    'use strict';
 
-window.ChatProposal = (function () {
-    var modal      = null;
-    var datePicker = null;
-    var _requestNumber = '';
+    window.ChatProposal = (function () {
+        var modal      = null;
+        var datePicker = null;
+        var _requestNumber = '';
 
-    var costEl  = document.getElementById('proposalCost');
-    var dateEl  = document.getElementById('proposalDate');
-    var timeEl  = document.getElementById('proposalTime');
-    var sendBtn = document.getElementById('chatProposalSendBtn');
-    var modalEl = document.getElementById('chatProposalModal');
+        var costEl  = document.getElementById('proposalCost');
+        var dateEl  = document.getElementById('proposalDate');
+        var timeEl  = document.getElementById('proposalTime');
+        var sendBtn = document.getElementById('chatProposalSendBtn');
+        var modalEl = document.getElementById('chatProposalModal');
 
-    // ── Deferred init (Bootstrap/flatpickr/timepicker load after this script) ─
-    document.addEventListener('DOMContentLoaded', function () {
-        if (modalEl) { modal = new bootstrap.Modal(modalEl); }
+        // ── Deferred init (Bootstrap/flatpickr/timepicker load after this script) ─
+        document.addEventListener('DOMContentLoaded', function () {
+            if (modalEl) { modal = new bootstrap.Modal(modalEl); }
 
-        if (dateEl && typeof flatpickr !== 'undefined') {
-            datePicker = flatpickr(dateEl, {
-                dateFormat: 'F j, Y',
-                minDate:    'today',
-                appendTo:   document.body,
-                onChange: function () {
-                    dateEl.classList.remove('is-invalid');
-                    document.getElementById('proposalDateError').classList.add('d-none');
-                }
-            });
-        }
+            if (dateEl && typeof flatpickr !== 'undefined') {
+                datePicker = flatpickr(dateEl, {
+                    dateFormat: 'F j, Y',
+                    minDate:    'today',
+                    appendTo:   document.body,
+                    onChange: function () {
+                        dateEl.classList.remove('is-invalid');
+                        document.getElementById('proposalDateError').classList.add('d-none');
+                    }
+                });
+            }
 
-        if (timeEl && typeof $ !== 'undefined' && typeof $.fn.timepicker !== 'undefined') {
-            $(timeEl).timepicker({ timeFormat: 'H:i', step: 15 });
-            timeEl.addEventListener('change', function () {
-                timeEl.classList.remove('is-invalid');
-                document.getElementById('proposalTimeError').classList.add('d-none');
-            });
-        }
-    });
-
-    // ── Cost ──────────────────────────────────────────────────────────────────
-    if (costEl) {
-        costEl.addEventListener('keydown', function (e) {
-            if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
-                e.preventDefault();
+            if (timeEl && typeof $ !== 'undefined' && typeof $.fn.timepicker !== 'undefined') {
+                $(timeEl).timepicker({ timeFormat: 'H:i', step: 15 });
+                timeEl.addEventListener('change', function () {
+                    timeEl.classList.remove('is-invalid');
+                    document.getElementById('proposalTimeError').classList.add('d-none');
+                });
             }
         });
-        costEl.addEventListener('input', function () {
-            costEl.classList.remove('is-invalid');
-            document.getElementById('proposalCostError').classList.add('d-none');
-            var val = parseFloat(costEl.value);
-            if (!isNaN(val) && val > 10000) { costEl.value = 10000; }
-        });
-        costEl.addEventListener('blur', function () {
-            var val = parseFloat(costEl.value);
-            if (!isNaN(val) && val < 1) { costEl.value = 1; }
-        });
-    }
 
-    // ── Send ──────────────────────────────────────────────────────────────────
-    if (sendBtn) { sendBtn.addEventListener('click', submit); }
-
-    function submit() {
-        var hasErrors = false;
-
-        var cost = parseFloat(costEl ? costEl.value : '');
-        if (!costEl || !costEl.value || isNaN(cost) || cost < 1 || cost > 10000) {
-            if (costEl) { costEl.classList.add('is-invalid'); }
-            document.getElementById('proposalCostError').classList.remove('d-none');
-            hasErrors = true;
-        }
-
-        var dateValue = dateEl ? dateEl.value : '';
-        if (!dateValue) {
-            if (dateEl) { dateEl.classList.add('is-invalid'); }
-            document.getElementById('proposalDateError').classList.remove('d-none');
-            hasErrors = true;
-        }
-
-        var timeValue = timeEl ? timeEl.value : '';
-        if (!timeValue) {
-            if (timeEl) { timeEl.classList.add('is-invalid'); }
-            document.getElementById('proposalTimeError').classList.remove('d-none');
-            hasErrors = true;
-        }
-
-        if (hasErrors) { return; }
-
-        if (sendBtn) { sendBtn.disabled = true; }
-        Block.pulse('#chatProposalModal .modal-content');
-
-        fetch('/RequestChat/Propose', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'requestNumber=' + encodeURIComponent(_requestNumber) +
-                  '&cost='         + encodeURIComponent(cost) +
-                  '&date='         + encodeURIComponent(dateValue) +
-                  '&time='         + encodeURIComponent(timeValue)
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                Block.remove('#chatProposalModal .modal-content');
-                if (sendBtn) { sendBtn.disabled = false; }
-                if (data.success) {
-                    if (modal) { modal.hide(); }
-                } else {
-                    new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
-                        .error(data.message || 'Failed to send proposal.');
+        // ── Cost ──────────────────────────────────────────────────────────────────
+        if (costEl) {
+            costEl.addEventListener('keydown', function (e) {
+                if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                    e.preventDefault();
                 }
-            })
-            .catch(function () {
-                Block.remove('#chatProposalModal .modal-content');
-                if (sendBtn) { sendBtn.disabled = false; }
             });
-    }
-
-    // ── Public API ────────────────────────────────────────────────────────────
-    return {
-        open: function (requestNumber) {
-            _requestNumber = requestNumber || '';
-            if (costEl)  { costEl.value = ''; costEl.classList.remove('is-invalid'); }
-            if (datePicker) { datePicker.clear(); }
-            if (dateEl)  { dateEl.classList.remove('is-invalid'); }
-            if (timeEl)  { timeEl.value = ''; timeEl.classList.remove('is-invalid'); }
-            document.getElementById('proposalCostError').classList.add('d-none');
-            document.getElementById('proposalDateError').classList.add('d-none');
-            document.getElementById('proposalTimeError').classList.add('d-none');
-            if (modal) { modal.show(); }
+            costEl.addEventListener('input', function () {
+                costEl.classList.remove('is-invalid');
+                document.getElementById('proposalCostError').classList.add('d-none');
+                var val = parseFloat(costEl.value);
+                if (!isNaN(val) && val > 10000) { costEl.value = 10000; }
+            });
+            costEl.addEventListener('blur', function () {
+                var val = parseFloat(costEl.value);
+                if (!isNaN(val) && val < 1) { costEl.value = 1; }
+            });
         }
-    };
-})();
+
+        // ── Send ──────────────────────────────────────────────────────────────────
+        if (sendBtn) { sendBtn.addEventListener('click', submit); }
+
+        function submit() {
+            var hasErrors = false;
+
+            var cost = parseFloat(costEl ? costEl.value : '');
+            if (!costEl || !costEl.value || isNaN(cost) || cost < 1 || cost > 10000) {
+                if (costEl) { costEl.classList.add('is-invalid'); }
+                document.getElementById('proposalCostError').classList.remove('d-none');
+                hasErrors = true;
+            }
+
+            var dateValue = dateEl ? dateEl.value : '';
+            if (!dateValue) {
+                if (dateEl) { dateEl.classList.add('is-invalid'); }
+                document.getElementById('proposalDateError').classList.remove('d-none');
+                hasErrors = true;
+            }
+
+            var timeValue = timeEl ? timeEl.value : '';
+            if (!timeValue) {
+                if (timeEl) { timeEl.classList.add('is-invalid'); }
+                document.getElementById('proposalTimeError').classList.remove('d-none');
+                hasErrors = true;
+            }
+
+            if (hasErrors) { return; }
+
+            if (sendBtn) { sendBtn.disabled = true; }
+            Block.pulse('#chatProposalModal .modal-content');
+
+            fetch('/RequestChat/Propose', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'requestNumber=' + encodeURIComponent(_requestNumber) +
+                      '&cost='         + encodeURIComponent(cost) +
+                      '&date='         + encodeURIComponent(dateValue) +
+                      '&time='         + encodeURIComponent(timeValue)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    Block.remove('#chatProposalModal .modal-content');
+                    if (sendBtn) { sendBtn.disabled = false; }
+                    if (data.success) {
+                        if (modal) { modal.hide(); }
+                    } else {
+                        new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
+                            .error(data.message || 'Failed to send proposal.');
+                    }
+                })
+                .catch(function () {
+                    Block.remove('#chatProposalModal .modal-content');
+                    if (sendBtn) { sendBtn.disabled = false; }
+                });
+        }
+
+        // ── Public API ────────────────────────────────────────────────────────────
+        return {
+            open: function (requestNumber) {
+                _requestNumber = requestNumber || '';
+                if (costEl)  { costEl.value = ''; costEl.classList.remove('is-invalid'); }
+                if (datePicker) { datePicker.clear(); }
+                if (dateEl)  { dateEl.classList.remove('is-invalid'); }
+                if (timeEl)  { timeEl.value = ''; timeEl.classList.remove('is-invalid'); }
+                document.getElementById('proposalCostError').classList.add('d-none');
+                document.getElementById('proposalDateError').classList.add('d-none');
+                document.getElementById('proposalTimeError').classList.add('d-none');
+                if (modal) { modal.show(); }
+            }
+        };
+    })();
 </script>

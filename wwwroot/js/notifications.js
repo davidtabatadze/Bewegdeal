@@ -53,10 +53,10 @@
             '<small class="text-body-secondary">' + esc(getDateLabel(date)) + '</small>' +
             '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' +
             '</div>' +
-            '<div class="toast-body d-flex align-items-center gap-2">' +
-            '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '&chat=open" class="btn btn-text-primary btn-icon btn-sm rounded-pill flex-shrink-0"><i class="ri ri-search-eye-line icon-md"></i></a>' +
+            '<a href="/Request/View?number=' + encodeURIComponent(requestNumber) + '&chat=open" class="toast-body d-flex align-items-center gap-2 text-body text-decoration-none" style="cursor:pointer;">' +
+            '<i class="ri ri-search-eye-line icon-md text-primary flex-shrink-0"></i>' +
             '<p class="mb-0" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + esc(preview) + '</p>' +
-            '</div>';
+            '</a>';
 
         container.appendChild(el);
         var toast = new bootstrap.Toast(el, { delay: 5000 });
