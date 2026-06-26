@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_invoice_table = document.querySelector('.datatables-invoices');
 
     // Status → icon HTML
-    const statusIconObj = {
-        pending: '<i class="icon-base ri ri-timer-flash-line    icon-22px text-warning me-2"></i>',
-        paid: '<i class="icon-base ri ri-wallet-line icon-22px text-success me-2"></i>',
-        cancelled: '<i class="icon-base ri ri-hand               icon-22px text-danger  me-2"></i>'
+    const statusMap = {
+        pending: { icon: 'ri-timer-flash-line', color: 'warning' },
+        paid: { icon: 'ri-wallet-line', color: 'success' },
+        cancelled: { icon: 'ri-hand', color: 'danger' }
     };
 
     // Column index → sort field name
@@ -61,9 +61,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '60px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const icon = statusIconObj[status] || '';
                     const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
-                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
+                    const map = statusMap[status];
+                    return (
+                        '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
+                        '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
+                        '</div>' +
+                        '</li>' +
+                        '</ul>'
+                    );
                 }
             },
             {
@@ -98,11 +106,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const id = full['requestId'];
                     const number = full['requestNumber'];
                     return (
-                        '<button type="button" class="btn btn-text-primary" style="max-width:100px"' +
-                        ' onclick="window.location.href=\'/Request/View?number=' + encodeURIComponent(number) + '\'">' +
-                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
-                        '#' + id +
-                        '</button>'
+                        '<a style="max-width:100px" class="text-primary" href=\'/Request/View?number=' + encodeURIComponent(number) + '\'">' +
+                        '<strong class="text-decoration-underline">#' + id + '</strong>' +
+                        '</a>'
                     );
                 }
             },
@@ -114,10 +120,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const id = full['id'];
                     const number = full['number'];
                     return (
-                        '<button type="button" class="btn btn-text-primary" style="max-width:100px">' +
-                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
-                        '#' + id +
-                        '</button>'
+                        '<a style="max-width:100px" class="text-primary" href="#">' +
+                        '<strong class="text-decoration-underline">#' + id + '</strong>' +
+                        '</a>'
                     );
                 }
             },
@@ -130,17 +135,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 render: function (data, type, full) {
                     const id = full['id'];
                     const paid = data === 'paid' ? '' : (
-                        '<button type="button" class="btn btn-text-success invoice-status-btn"' +
+                        '<button type="button" class="btn btn-icon btn-label-success invoice-status-btn me-1"' +
                         ' data-invoice-id="' + id + '" data-new-status="paid"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Mark as Paid">' +
-                        '<span class="icon-base ri ri-wallet-line icon-22px"></span>' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Paid">' +
+                        '<span class="icon-base ri ri-wallet-line icon-22px text-success"></span>' +
                         '</button>'
                     );
                     const cancelled = data === 'cancelled' ? '' : (
-                        '<button type="button" class="btn btn-text-danger invoice-status-btn"' +
+                        '<button type="button" class="btn btn-icon btn-label-danger invoice-status-btn"' +
                         ' data-invoice-id="' + id + '" data-new-status="cancelled"' +
                         ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel">' +
-                        '<span class="icon-base ri ri-hand icon-22px"></span>' +
+                        '<span class="icon-base ri ri-hand icon-22px text-danger"></span>' +
                         '</button>'
                     );
                     return '<div class="d-flex align-items-center">' + paid + cancelled + '</div>';
@@ -208,8 +213,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Status change — confirm → POST → row update (admin only)
     if (isAdmin) {
         const confirmTextMap = {
-            paid:      'Sure you want to mark this invoice as <span class="text-success fw-medium">Paid</span>?',
-            cancelled: 'Sure you want to <span class="text-danger fw-medium">Cancel</span> this invoice?'
+            paid: 'Sure you want to mark the invoice as <span class="text-success fw-bold">Paid</span>?',
+            cancelled: 'Sure you want to <span class="text-danger fw-bold">Cancel</span> the invoice?'
         };
 
         dt_invoice_table.addEventListener('click', function (e) {

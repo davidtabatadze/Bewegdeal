@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_chat_table = document.querySelector('.datatables-chats');
 
     // Status → icon HTML (tooltip style, like Role column in user list)
-    const statusBadgeObj = {
-        ongoing: '<i class="icon-base ri ri-wechat-line       icon-22px text-info    me-2"></i>',
-        agreed: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success me-2"></i>',
-        cancelled: '<i class="icon-base ri ri-hand              icon-22px text-danger  me-2"></i>'
+    const statusMap = {
+        ongoing: { icon: 'ri-wechat-line', color: 'info' },
+        agreed: { icon: 'ri-shake-hands-line', color: 'success' },
+        cancelled: { icon: 'ri-hand', color: 'danger' }
     };
 
     // Fraud → badge color (like Status column in user list)
@@ -92,9 +92,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '70px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const icon = statusBadgeObj[status] || '';
                     const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
-                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
+                    const map = statusMap[status];
+                    return (
+                        '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
+                        '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
+                        '</div>' +
+                        '</li>' +
+                        '</ul>'
+                    );
                 }
             },
             {
@@ -127,11 +135,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 render: function (data, type, full) {
                     const number = full['requestNumber'];
                     return (
-                        '<button type="button" class="btn btn-text-primary" style="max-width:100px"' +
-                        ' onclick="window.location.href=\'/Request/View?number=' + encodeURIComponent(number) + '\'">' +
-                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
-                        '#' + data +
-                        '</button>'
+                        '<a style="max-width:100px" class="text-primary" href=\'/Request/View?number=' + encodeURIComponent(number) + '\'">' +
+                        '<strong class="text-decoration-underline">#' + data + '</strong>' +
+                        '</a>'
                     );
                 }
             },
@@ -141,11 +147,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '110px',
                 render: function (data, type, full) {
                     return (
-                        '<button type="button" class="btn btn-text-primary chat-view-btn" style="max-width:100px"' +
-                        ' data-chat-key="' + full['key'] + '">' +
-                        '<span class="icon-base ri ri-search-eye-line icon-16px me-1_5"></span>' +
-                        '#' + data +
-                        '</button>'
+                        '<a style="max-width:100px" href="javascript:void(0);" class="text-primary chat-view-btn" data-chat-key="' + full['key'] + '">' +
+                        '<strong class="text-decoration-underline">#' + data + '</strong>' +
+                        '</a>'
                     );
                 }
             }

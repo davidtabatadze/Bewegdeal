@@ -192,6 +192,16 @@ namespace Bewegdeal.Services
             return avatar;
         }
 
+        public async Task<GenericResultModel<dynamic>> LoadGrid()
+        {
+            var total = await Count(new UserFilter { Status = UserStatusEnum.Active });
+            var customer = await Count(new UserFilter { Status = UserStatusEnum.Active, Role = UserRoleEnum.Customer });
+            var company = await Count(new UserFilter { Status = UserStatusEnum.Active, Role = UserRoleEnum.Company });
+            var pending = await Count(new UserFilter { Status = UserStatusEnum.Pending });
+
+            return GenericResultModel<dynamic>.Ok(new { total, customer, company, pending });
+        }
+
         public async Task<GridResultModel<object>> LoadGrid(UserFilter filter, int draw)
         {
             var users = await Load(filter);

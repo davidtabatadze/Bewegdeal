@@ -8,12 +8,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     const dt_user_table = document.querySelector('.datatables-users');
 
-    // Status → button class + display label
-    const statusObj = {
-        active: { title: 'Active', class: 'btn-text-success' },
-        pending: { title: 'Pending', class: 'btn-text-warning' },
-        blocked: { title: 'Blocked', class: 'btn-text-danger' },
-        unverified: { title: 'Unverified', class: 'btn-text-dark' }
+    // Status → icon + color + label
+    const statusMap = {
+        active:     { title: 'Active',     icon: 'ri-user-follow-line',   color: 'success' },
+        pending:    { title: 'Pending',    icon: 'ri-user-forbid-line',   color: 'warning' },
+        blocked:    { title: 'Blocked',    icon: 'ri-admin-line',         color: 'danger' },
+        unverified: { title: 'Unverified', icon: 'ri-user-settings-line', color: 'secondary' }
     };
 
     // Interest → icon + color + label
@@ -25,14 +25,14 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Role → icon HTML
-    const roleBadgeObj = {
-        customer: '<i class="icon-base ri ri-user-line       icon-22px text-primary me-2"></i>',
-        company: '<i class="icon-base ri ri-building-line   icon-22px text-info    me-2"></i>',
-        administrator: '<i class="icon-base ri ri-computer-line   icon-22px text-danger  me-2"></i>'
+    const roleMap = {
+        customer: { icon: 'ri-user-2-line', color: 'success' },
+        company: { icon: 'ri-building-line', color: 'info' },
+        administrator: { icon: 'ri-computer-line', color: 'danger' }
     };
 
     // Column index → sort field name sent to the server (only orderable columns listed)
-    const columnToField = { 0: 'status', 4: 'createDate' };
+    const columnToField = { 0: 'status', 1: 'role', 4: 'createDate' };
 
     if (!dt_user_table) { return; }
 
@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'mobile' },   // 3 — contact
             { data: 'createDate' },   // 4 — date (sortable)
             { data: 'interests' },   // 5 — interests
+            { data: null },          // 6 — actions
         ],
         columnDefs: [
             {
@@ -115,12 +116,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Role
                 targets: 1,
                 width: '60px',
-                orderable: false,
+                orderable: true,
                 render: function (data, type, full) {
                     const role = full['role'];
-                    const icon = roleBadgeObj[role] || '';
                     const label = role ? (role.charAt(0).toUpperCase() + role.slice(1)) : role;
-                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + label + "'>" + icon + '</span>';
+                    const map = roleMap[role];
+                    return (
+                        '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
+                        '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
+                        '</div>' +
+                        '</li>' +
+                        '</ul>'
+                    );
                 }
             },
             {
@@ -147,38 +156,61 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
+                // Actions
+                targets: 6,
+                width: '90px',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, full) {
+                    const status = full['status'];
+                    const id = full['id'];
+                    const actionsConfig = {
+                        active:     [{ action: 'block',    icon: 'ri-admin-line',         color: 'danger',  title: 'Block' }],
+                        pending:    [{ action: 'activate', icon: 'ri-user-follow-line',   color: 'success', title: 'Activate' },
+                                     { action: 'delete',   icon: 'ri-user-unfollow-line', color: 'danger',  title: 'Delete' }],
+                        blocked:    [{ action: 'activate', icon: 'ri-user-follow-line',   color: 'success', title: 'Activate' }],
+                        unverified: [{ action: 'delete',   icon: 'ri-user-unfollow-line', color: 'danger',  title: 'Delete' }]
+                    };
+                    const actions = actionsConfig[status] || [];
+                    return actions.map(function (a) {
+                        return (
+                            '<button type="button" class="btn btn-icon btn-label-' + a.color + ' user-action-btn me-1"' +
+                            ' data-user-id="' + id + '"' +
+                            ' data-action="' + a.action + '"' +
+                            ' data-current-status="' + status + '"' +
+                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="' + a.title + '">' +
+                            '<span class="icon-base ri ' + a.icon + ' icon-22px text-' + a.color + '"></span>' +
+                            '</button>'
+                        );
+                    }).join('');
+                }
+            },
+            {
                 // Date
                 targets: 4,
                 width: '130px',
+                orderable: true,
                 createdCell: function (td) {
                     td.style.minWidth = '135px';
                 },
                 render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
             },
             {
-                // Status button
+                // Status icon
                 targets: 0,
-                width: '120px',
+                width: '60px',
+                orderable: true,
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const obj = statusObj[status] || { title: status, class: 'btn-text-secondary' };
-                    const id = full['id'];
-
-                    if (status === 'unverified') {
-                        return (
-                            '<button type="button" class="btn ' + obj.class + '" style="pointer-events:none">' +
-                            obj.title +
-                            '</button>'
-                        );
-                    }
-
+                    const map = statusMap[status] || { title: status, icon: 'ri-question-line', color: 'secondary' };
                     return (
-                        '<button type="button" class="btn ' + obj.class + ' status-toggle-btn"' +
-                        ' data-user-id="' + id + '"' +
-                        ' data-current-status="' + status + '">' +
-                        '<span class="icon-base ri ri-exchange-line icon-16px me-1_5"></span>' +
-                        obj.title +
-                        '</button>'
+                        '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.title + '">' +
+                        '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
+                        '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
+                        '</div>' +
+                        '</li>' +
+                        '</ul>'
                     );
                 }
             },
@@ -239,20 +271,21 @@ document.addEventListener('DOMContentLoaded', function () {
         dt_user.ajax.reload(null, true);
     });
 
-    // Status change — delegated click on the table wrapper
+    // Action button — delegated click on the table wrapper
     const confirmTextMap = {
-        active: 'Sure you want to change status to <span class="text-danger fw-medium">Blocked</span>?',
-        blocked: 'Sure you want to change status to <span class="text-success fw-medium">Active</span>?',
-        pending: 'Sure you want to change status to <span class="text-success fw-medium">Active</span>?'
+        block:    'Sure you want to <span class="text-danger fw-bold">Block</span> the user?',
+        activate: 'Sure you want to <span class="text-success fw-bold">Activate</span> the user?',
+        delete:   'Sure you want to <span class="text-danger fw-bold">Delete</span> the user?'
     };
 
     dt_user_table.addEventListener('click', function (e) {
-        const btn = e.target.closest('.status-toggle-btn');
+        const btn = e.target.closest('.user-action-btn');
         if (!btn) { return; }
 
         const userId = btn.dataset.userId;
+        const action = btn.dataset.action;
         const currentStatus = btn.dataset.currentStatus;
-        const confirmHtml = confirmTextMap[currentStatus];
+        const confirmHtml = confirmTextMap[action];
         const dtRow = dt_user.row(btn.closest('tr'));
 
         if (!confirmHtml) { return; }
@@ -262,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
             html: confirmHtml,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, change it',
+            confirmButtonText: 'Yes, confirm',
             cancelButtonText: 'Cancel',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
@@ -271,6 +304,30 @@ document.addEventListener('DOMContentLoaded', function () {
             buttonsStyling: false
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
+
+            if (action === 'delete') {
+                fetch('/User/DeleteUser', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id=' + encodeURIComponent(userId)
+                }).then(function (res) {
+                    if (res.ok) {
+                        dtRow.remove().draw(false);
+                        Swal.fire({
+                            title: 'Done!',
+                            text: 'User has been deleted.',
+                            icon: 'success',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false
+                        });
+                    } else if (res.status === 400) {
+                        Swal.fire({ title: 'Not allowed', text: 'You cannot delete this user.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    } else {
+                        Swal.fire({ title: 'Error', text: 'Failed to delete user.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    }
+                });
+                return;
+            }
 
             fetch('/User/UpdateUserStatus', {
                 method: 'POST',

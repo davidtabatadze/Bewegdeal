@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', function () {
         resolved: { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success me-2"></i>', label: 'Resolved' },
         declined: { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark me-2"></i>', label: 'Declined' },
     };
+    const statusMap2 = {
+        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: 'Pending' },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: 'Cancelled' },
+        negotiation: { icon: 'ri-wechat-line', color: 'info', label: 'Negotiation' },
+        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: 'Agreed' },
+        resolved: { icon: 'ri-check-double-line', color: 'success', label: 'Resolved' },
+        declined: { icon: 'ri-rest-time-line', color: 'dark', label: 'Declined' },
+    };
 
     // Service → icon HTML + label + text color
     const serviceMap2 = {
@@ -126,8 +134,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 1,
                 width: '60px',
                 render: function (data, type, full) {
-                    const s = statusMap[full['status']] || { icon: '', label: full['status'] };
-                    return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + s.label + "'>" + s.icon + '</span>';
+                    //const s = statusMap[full['status']] || { icon: '', label: full['status'] };
+                    //return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + s.label + "'>" + s.icon + '</span>';
+                    const map = statusMap2[full['status']];
+                    return (
+                        '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
+                        '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
+                        '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
+                        '</div>' +
+                        '</li>' +
+                        '</ul>'
+                    );
                 }
             },
             {
