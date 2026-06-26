@@ -12,7 +12,9 @@ namespace Bewegdeal.Data.Entities
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public string PickupAddress { get; set; } = "";
+        public string PickupZipCode { get; set; } = "";
         public string DeliveryAddress { get; set; } = "";
+        public string DeliveryZipCode { get; set; } = "";
         public long RequesterId { get; set; }
         public long? ExecutorId { get; set; }
         public decimal Cost { get; set; }

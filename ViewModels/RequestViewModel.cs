@@ -24,8 +24,14 @@ namespace Bewegdeal.ViewModels
         [MaxLength(512)]
         public string? PickupAddress { get; set; }
 
+        [MaxLength(8)]
+        public string? PickupZipCode { get; set; }
+
         [MaxLength(512)]
         public string? DeliveryAddress { get; set; }
+
+        [MaxLength(8)]
+        public string? DeliveryZipCode { get; set; }
 
         [Required]
         public decimal Cost { get; set; }
@@ -123,7 +129,9 @@ namespace Bewegdeal.ViewModels
             Title = Title.Trim();
             Description = Description?.Trim();
             PickupAddress = PickupAddress?.Trim();
+            PickupZipCode = PickupZipCode?.Trim();
             DeliveryAddress = DeliveryAddress?.Trim();
+            DeliveryZipCode = DeliveryZipCode?.Trim();
         }
     }
 }
