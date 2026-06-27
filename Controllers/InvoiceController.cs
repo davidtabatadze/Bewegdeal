@@ -30,6 +30,12 @@ namespace Bewegdeal.Controllers
             return Json(await InvoiceService.LoadGrid(filter, draw, UserId, UserRole));
         }
 
+        [HttpGet]
+        public IActionResult Print(long id)
+        {
+            return View();
+        }
+
         [Authorize(Roles = UserRoleEnum.Administrator)]
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceStatus(long id, string status)

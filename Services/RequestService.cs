@@ -104,7 +104,6 @@ namespace Bewegdeal.Services
         public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
         {
             var request = await Get(number);
-            var settings = await SettingService.GetCached();
 
             if (request is not null && request.RequesterId == userId && request.Status == RequestStatusEnum.Agreed)
             {
@@ -119,25 +118,7 @@ namespace Bewegdeal.Services
                     new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
                 );
 
-                var commision = proposal.Cost / 100 * settings.InvoiceCommissionPersent;
-                var tax = commision / 100 * settings.InvoiceTaxPersent;
-
-                await InvoiceService.Create(new InvoiceEntity
-                {
-                    Number = Guid.NewGuid().ToString("N"),
-                    Status = InvoiceStatusEnum.Pending,
-                    RequestId = request.Id,
-                    RequestNumber = request.Number,
-                    ProposalId = proposal.Id,
-                    CompanyId = proposal.CompanyId,
-                    CustomerId = request.RequesterId,
-                    Currency = proposal.Currency,
-                    ServiceCost = proposal.Cost,
-                    SubtotalCost = commision,
-                    TotalCost = commision + tax,
-                    NotificationSent = false,
-                    CreateDate = DateTime.Now
-                });
+                await InvoiceService.Create(request, proposal);
 
                 await Update(
                     RequestUpdateAreaEnum.Status,

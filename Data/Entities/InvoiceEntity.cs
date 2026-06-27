@@ -7,6 +7,7 @@ namespace Bewegdeal.Data.Entities
         public long Id { get; set; }
         public string Number { get; set; } = "";
         public string Status { get; set; } = "";
+        public string Service { get; set; } = "";
         public string RequestNumber { get; set; } = "";
         public long RequestId { get; set; }
         public long ProposalId { get; set; }
@@ -14,10 +15,14 @@ namespace Bewegdeal.Data.Entities
         public long CustomerId { get; set; }
         public string Currency { get; set; } = "EUR";
         public decimal ServiceCost { get; set; }
-        public decimal SubtotalCost { get; set; }
+        public short CommissionPersent { get; set; }
+        public decimal CommissionCost { get; set; }
+        public short TaxPersent { get; set; }
+        public decimal TaxCost { get; set; }
         public decimal TotalCost { get; set; }
         public bool NotificationSent { get; set; }
         public DateTime CreateDate { get; set; }
+        public DateTime DueDate { get; set; }
         public DateTime? PaymentDate { get; set; }
     }
 }

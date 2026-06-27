@@ -27,6 +27,7 @@ namespace Bewegdeal.Data.Repositories
                     RequestNegotiationMinutes = 60,
                     InvoiceCommissionPersent = 10,
                     InvoiceTaxPersent = 20,
+                    InvoiceDueDays = 10,
                     MobilePrefix = "+43"
                 });
             }

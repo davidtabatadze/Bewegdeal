@@ -38,7 +38,6 @@ namespace Bewegdeal.Data.Repositories
             return property switch
             {
                 nameof(InvoiceEntity.ServiceCost) => await query.SumAsync(s => s.ServiceCost),
-                nameof(InvoiceEntity.SubtotalCost) => await query.SumAsync(s => s.SubtotalCost),
                 nameof(InvoiceEntity.TotalCost) => await query.SumAsync(s => s.TotalCost),
                 _ => throw new ArgumentException("Invalid sum property", nameof(property))
             };

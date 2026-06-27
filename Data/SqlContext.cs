@@ -285,6 +285,7 @@ namespace Bewegdeal.Data
                 e.HasIndex(i => i.Number).IsUnique();
                 e.HasIndex(i => i.RequestNumber).IsUnique();
                 e.HasIndex(i => i.Status);
+                e.HasIndex(i => i.Service);
                 e.HasIndex(i => i.RequestId);
                 e.HasIndex(i => i.ProposalId);
                 e.HasIndex(i => i.CustomerId);
@@ -294,17 +295,22 @@ namespace Bewegdeal.Data
                 e.Property(i => i.Number).IsRequired().HasMaxLength(36);
                 e.Property(i => i.RequestNumber).IsRequired().HasMaxLength(36);
                 e.Property(i => i.Status).IsRequired().HasMaxLength(16);
+                e.Property(i => i.Service).IsRequired().HasMaxLength(16);
                 e.Property(i => i.RequestId).IsRequired();
                 e.Property(i => i.ProposalId).IsRequired();
                 e.Property(i => i.CustomerId).IsRequired();
                 e.Property(i => i.CompanyId).IsRequired();
 
                 e.Property(i => i.Currency).IsRequired().HasMaxLength(4);
+                e.Property(i => i.TaxPersent).IsRequired();
+                e.Property(i => i.CommissionPersent).IsRequired();
                 e.Property(i => i.ServiceCost).IsRequired().HasPrecision(18, 2);
-                e.Property(i => i.SubtotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.TaxCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.CommissionCost).IsRequired().HasPrecision(18, 2);
                 e.Property(i => i.TotalCost).IsRequired().HasPrecision(18, 2);
                 e.Property(i => i.NotificationSent).IsRequired();
                 e.Property(i => i.CreateDate).IsRequired();
+                e.Property(i => i.DueDate).IsRequired();
                 e.Property(i => i.PaymentDate).IsRequired(false);
             });
         }
@@ -377,6 +383,7 @@ namespace Bewegdeal.Data
                 e.Property(s => s.RequestVideoMaxSize).IsRequired();
                 e.Property(s => s.InvoiceCommissionPersent).IsRequired();
                 e.Property(s => s.InvoiceTaxPersent).IsRequired();
+                e.Property(s => s.InvoiceDueDays).IsRequired();
                 e.Property(s => s.MobilePrefix).IsRequired();
             });
         }

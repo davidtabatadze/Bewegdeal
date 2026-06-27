@@ -1,6 +1,6 @@
 /**
  * Invoices List — Bewegdeal
- * v1.0.3
+ * v1.0.4
  */
 
 'use strict';
@@ -118,9 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['id'];
-                    const number = full['number'];
                     return (
-                        '<a style="max-width:100px" class="text-primary" href="#">' +
+                        '<a style="max-width:100px" class="text-primary" target="_blank" href=\'/Invoice/Print?id=' + id + '\'>' +
                         '<strong class="text-decoration-underline">#' + id + '</strong>' +
                         '</a>'
                     );

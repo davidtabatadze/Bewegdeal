@@ -17,6 +17,7 @@ namespace Bewegdeal.Data.Entities
         public short RequestVideoMaxSize { get; set; }
         public short InvoiceCommissionPersent { get; set; }
         public short InvoiceTaxPersent { get; set; }
+        public short InvoiceDueDays { get; set; }
         public string MobilePrefix { get; set; } = string.Empty;
 
     }

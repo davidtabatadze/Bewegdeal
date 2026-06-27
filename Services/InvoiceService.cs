@@ -6,10 +6,39 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService)
+    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService, SettingService SettingService)
     {
-        public async Task<InvoiceEntity> Create(InvoiceEntity invoice)
-            => await InvoiceRepository.Create(invoice);
+        public async Task<InvoiceEntity> Create(RequestEntity request, RequestProposalEntity proposal)
+        {
+            var settings = await SettingService.GetCached();
+            var commision = proposal.Cost / 100 * settings.InvoiceCommissionPersent;
+            var tax = commision / 100 * settings.InvoiceTaxPersent;
+
+            return await InvoiceRepository.Create(new InvoiceEntity
+            {
+                Number = Guid.NewGuid().ToString("N"),
+                Status = InvoiceStatusEnum.Pending,
+                Service = request.Service,
+                RequestId = request.Id,
+                RequestNumber = request.Number,
+                ProposalId = proposal.Id,
+                CompanyId = proposal.CompanyId,
+                CustomerId = request.RequesterId,
+                Currency = proposal.Currency,
+
+                TaxPersent = settings.InvoiceTaxPersent,
+                CommissionPersent = settings.InvoiceCommissionPersent,
+
+                TaxCost = tax,
+                CommissionCost = commision,
+                ServiceCost = proposal.Cost,
+                TotalCost = commision + tax,
+
+                NotificationSent = false,
+                CreateDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(settings.InvoiceDueDays)
+            });
+        }
         public async Task Update(InvoiceUpdateAreaEnum area, InvoiceEntity update)
             => await InvoiceRepository.Update(area, update);
         public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
@@ -74,7 +103,7 @@ namespace Bewegdeal.Services
                     status = i.Status,
                     totalCost = i.TotalCost,
                     serviceCost = i.ServiceCost,
-                    subtotalCost = i.SubtotalCost,
+                    subtotalCost = i.CommissionCost,
                     user = UserService.GetAvatar(users.FirstOrDefault(u => u.Id == i.CompanyId || u.Id == i.CustomerId))
                 })
             };
