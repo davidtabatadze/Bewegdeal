@@ -1,6 +1,6 @@
 /**
  * Global notification listener
- * v1.0.1
+ * v1.0.3
  * Connects to /hubs/chat, joins the user's personal group, and handles incoming
  * NewMessageNotification events with a Bootstrap toast + Browser Notification.
  */
