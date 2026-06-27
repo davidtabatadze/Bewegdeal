@@ -1,7 +1,9 @@
-﻿@model Bewegdeal.ViewModels.RegistrationViewModel
+﻿@inject Bewegdeal.Services.SettingService _settingsService
+@model Bewegdeal.ViewModels.RegistrationViewModel
 @{
     Layout = "_BlankLayout";
     ViewData["Title"] = "Register";
+    var _settings = await _settingsService.GetCached();
 }
 
 @section VendorStyles {
@@ -28,33 +30,29 @@
 
 @section PageScripts {
     <script src="~/js/pages-auth-multisteps.js" asp-append-version="true"></script>
-    @{ ViewData["AcceptMode"] = true; }
+    @{ ViewData["AcceptMode"] = true; ViewData["RegistrationMode"] = true; }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
-    @{ ViewData.Remove("AcceptMode"); }
+    @{ ViewData.Remove("AcceptMode"); ViewData.Remove("RegistrationMode"); }
     <script>
         (function () {
             var modalEl = document.getElementById('termsModal');
-            if (!modalEl) { return; } // no T&C content configured yet
+            if (!modalEl) { return; }
 
             var checkbox   = document.getElementById('agreeTerms');
             var acceptBtn  = document.getElementById('termsAcceptBtn');
             var body       = document.getElementById('termsModalBody');
             var scrollHint = document.getElementById('termsScrollHint');
 
-            // Intercept clicks on the checkbox
             checkbox.addEventListener('click', function (e) {
                 if (this.checked) {
-                    // User is trying to check → prevent and open modal
                     e.preventDefault();
                     acceptBtn.disabled = true;
                     scrollHint.style.display = '';
                     body.scrollTop = 0;
                     bootstrap.Modal.getOrCreateInstance(modalEl).show();
                 }
-                // User is unchecking → allow normally
             });
 
-            // Also intercept clicks on the "Terms & Conditions" text link
             document.getElementById('termsLink').addEventListener('click', function () {
                 acceptBtn.disabled = true;
                 scrollHint.style.display = '';
@@ -149,7 +147,7 @@
                                             <div class="form-check custom-option custom-option-icon">
                                                 <label class="form-check-label custom-option-content" for="roleCustomer">
                                                     <span class="custom-option-body">
-                                                        <i class="icon-base ri ri-user-line icon-32px mb-2 text-primary"></i>
+                                                        <i class="icon-base ri ri-user-2-line icon-32px mb-2 text-success"></i>
                                                         <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
                                                         <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
                                                     </span>
@@ -199,15 +197,18 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5">
-                                            <div class="form-floating form-floating-outline">
-                                                <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
-                                                <label for="mobile">Mobile</label>
+                                            <div class="input-group input-group-merge">
+                                                <span class="input-group-text">@_settings.MobilePrefix</span>
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
+                                                    <label for="mobile">Mobile</label>
+                                                </div>
                                             </div>
                                         </div>
                                         <div id="numberCol" class="col-sm-6 mb-5 d-none">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="text" id="number" name="number" class="form-control" placeholder="" value="@Model.Number" />
-                                                <label for="number">UID</label>
+                                                <label for="number">UID/GISA</label>
                                             </div>
                                         </div>
                                         <div id="addressCol" class="col-sm-6 mb-5 form-control-validation d-none">

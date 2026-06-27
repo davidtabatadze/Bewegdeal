@@ -2,50 +2,90 @@
 @model Bewegdeal.Data.Entities.RequestProposalEntity
 
 @{
+    var userId = long.TryParse(User.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
     var color = Model.Status switch
     {
         RequestProposalStatusEnum.Accepted => "success",
         RequestProposalStatusEnum.Rejected => "danger",
-        _ => "warning"
+        RequestProposalStatusEnum.Pending => "warning",
+        _ => "secondary"
     };
 }
 
-<div class="border border-@color rounded p-3 text-center" data-proposal-card-id="@Model.Id" style="min-width:220px;max-width:320px;">
-    <div class="d-flex align-items-center justify-content-center mb-1 gap-2">
+<div class="@(ViewData["RequestMode"] is true ? "" : $"border border-{color} rounded") @(ViewData["RequestMode"] is true ? "p-0" : "p-3") text-center"
+     data-proposal-card-id="@Model.Id"
+     style="@(ViewData["RequestMode"] is true ? "width:80%;" : "min-width:220px;")">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Proposal</span>
     </div>
     <hr class="border border-@color mt-1 mb-3" />
-    <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
-        <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
-        <span class="fw-semibold">@Model.Cost.ToString("N2")</span>@Model.Currency
-    </div>
-    <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
-        <i class="icon-base ri ri-calendar-line icon-18px"></i>
-        <span class="fw-semibold">@Model.Date!.Value.ToString("dd MMM yyyy")</span>
-        <i class="icon-base ri ri-time-line icon-18px"></i>
-        <span class="fw-semibold">@Model.Time!.Value.ToString("HH:mm")</span>
-    </div>
-    @if (!string.IsNullOrWhiteSpace(Model.ServiceTerms))
+    @if (Model.Id == 0)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
-            <i class="icon-base ri ri-file-text-line icon-18px"></i>
-            <a href="@Model.ServiceTerms" target="_blank" rel="noopener noreferrer">Service Terms</a>
+            <span class="fw-bold">No proposal exists yet.</span>
         </div>
     }
-    @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer))
+    else if (User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
     {
-        <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
-            <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
-                  data-proposal-id="@Model.Id"
-                  data-bs-toggle="tooltip" data-bs-placement="left" title="Accept">
-                <i class="icon-base ri ri-check-line icon-md text-success"></i>
-            </span>
-            <span class="btn btn-text-danger btn-icon bg-label-danger p-2 rounded-circle proposal-reject-btn"
-                  data-proposal-id="@Model.Id"
-                  data-bs-toggle="tooltip" data-bs-placement="right" title="Reject">
-                <i class="icon-base ri ri-close-line icon-md text-danger"></i>
-            </span>
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-danger">
+            <span class="fw-bold text-danger h4">Classified</span>
         </div>
+    }
+    else
+    {
+        @if (ViewData["Author"] is Bewegdeal.Models.UserAvatarModel author)
+        {
+            <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                <div class="avatar">
+                    @if (author.Url is not null)
+                    {
+                        <img src="@author.Url" alt="@author.Name" class="rounded-circle" style="object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                              style="display:flex;align-items:center;justify-content:center;">@author.Initials</span>
+                    }
+                    @if (author.Rating > 0)
+                    {
+                        <span class="position-absolute top-10 start-100 translate-middle badge badge-center border rounded-pill bg-primary fw-bold">@author.Rating</span>
+                    }
+                </div>
+                <span class="fw-semibold text-body">@author.Name</span>
+            </div>
+        }
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+            <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
+            <span class="fw-semibold">@Model.Cost.ToString("N2")</span>@* @Model.Currency *@
+        </div>
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+            <i class="icon-base ri ri-calendar-line icon-18px"></i>
+            <span class="fw-semibold">@Model.Date!.Value.ToString("dd MMM yyyy")</span>
+            <i class="icon-base ri ri-time-line icon-18px"></i>
+            <span class="fw-semibold">@Model.Time!.Value.ToString("HH:mm")</span>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ServiceTerms))
+        {
+            <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+                <i class="icon-base ri ri-file-text-line icon-18px"></i>
+                <a href="@Model.ServiceTerms" target="_blank" rel="noopener noreferrer">Service Terms</a>
+            </div>
+        }
+        @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer) && ViewData["RequestMode"] is not true)
+        {
+            <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
+                <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
+                      data-proposal-id="@Model.Id"
+                      data-bs-toggle="tooltip" data-bs-placement="left" title="Accept">
+                    <i class="icon-base ri ri-check-line icon-md text-success"></i>
+                </span>
+                <span class="btn btn-text-danger btn-icon bg-label-danger p-2 rounded-circle proposal-reject-btn"
+                      data-proposal-id="@Model.Id"
+                      data-bs-toggle="tooltip" data-bs-placement="right" title="Reject">
+                    <i class="icon-base ri ri-close-line icon-md text-danger"></i>
+                </span>
+            </div>
+        }
     }
 </div>

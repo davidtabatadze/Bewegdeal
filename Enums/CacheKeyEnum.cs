@@ -8,5 +8,6 @@
         public const string PasswordReset = "PasswordReset";
         public const string FraudeWords = "FraudeWords";
         public const string FraudeWordsCompiled = "FraudeWordsCompiled";
+        public const string Settings = "Settings";
     }
 }

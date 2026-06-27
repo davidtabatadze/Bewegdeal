@@ -78,6 +78,16 @@ namespace Bewegdeal.Services
             }
         }
 
+        public async Task<GenericResultModel<dynamic>> LoadGrid()
+        {
+            var total = await Count(new ChatFilter { });
+            var dubious = await Count(new ChatFilter { Fraud = ChatFraudEnum.Dubious });
+            var ongoing = await Count(new ChatFilter { Status = ChatStatusEnum.Ongoing });
+            var agreed = await Count(new ChatFilter { Status = ChatStatusEnum.Agreed });
+
+            return GenericResultModel<dynamic>.Ok(new { total, dubious, ongoing, agreed });
+        }
+
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {
             var chats = await Load(filter);
@@ -130,7 +140,7 @@ namespace Bewegdeal.Services
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
-            var proposals = await ProposalService.Load(chat.Id, null);
+            var proposals = await ProposalService.Load(null, chat.Id, null);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]

@@ -69,8 +69,8 @@
     <script src="~/js/chat.js" asp-append-version="true"></script>
 }
 
-<div class="card bg-transparent shadow-none border-0 mb-6">
-    <div class="card-body row g-6 p-0 pb-4">
+<div class="card bg-transparent shadow-none border-0 mb-4">
+    <div class="card-body row g-6 p-0">
         <div class="col-12 col-md-8 card-separator">
             <h5 class="mb-2 text-center">
                 <small>
@@ -187,21 +187,11 @@
                 </div>
             </div> *@
         </div>
-        <div class="col-12 col-md-4">
-            <div class="d-flex">
-                Dial part coming soon
-                @* <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-warning">
-                    <li class="list-group-item flex-fill p-3">
-                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
-                        <address class="text-body mb-0">
-                            <dl class="row mb-0">
-                                <dt class="col-8 fw-normal text-heading">@(req.ASAP ? "As soon as possible" : req.Date?.ToString("MMMM d, yyyy") + (req.Time.HasValue ? " at " + req.Time.Value.ToString("HH:mm") : ""))</dt>
-                                <dd class="col-4 text-end"><strong>@req.Currency</strong> @req.Cost.ToString("0.##")</dd>
-                            </dl>
-                        </address>
-                    </li>
-                </ul> *@
-            </div>
+        <div class="col-12 col-md-4 d-flex justify-content-center align-items-start">
+            @if (vm.Proposal is not null)
+            {
+                @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.Proposal, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
+            }
         </div>
     </div>
 </div>
@@ -264,9 +254,6 @@
                     <h5 class="m-0 me-2">Details</h5>
                 </div>
                 <div class="btn-group">
-                    @* <button type="button" class="btn btn-outline-primary btn-icon rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="icon-base ri ri-more-2-line"></i>
-                    </button> *@
                     <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
                     <ul class="dropdown-menu">
                         <li>
@@ -316,14 +303,14 @@
                 <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                     <li class="list-group-item flex-fill border-0 p-0">
                         <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
-                        <address class="text-dark mb-0">@req.PickupAddress</address>
+                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.PickupZipCode) ? "" : "[" + req.PickupZipCode + "] ")@req.PickupAddress</address>
                     </li>
                 </ul>
                 <hr class="m-0" />
                 <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                     <li class="list-group-item flex-fill border-0 p-0">
                         <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
-                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
+                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryZipCode) ? "" : "[" + req.DeliveryZipCode + "] ")@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
                     </li>
                 </ul>
                 <hr class="m-0" />
@@ -382,25 +369,13 @@
 </div>
 @if (!string.IsNullOrWhiteSpace(req.Description))
 {
-    @* <div class="row g-5">
-        <div class="col-lg-12">
-            <div class="card h-100 bg-transparent shadow-none border-0">
-                <div class="alert alert-outline-danger mt-4" role="alert">
-                    <h6 class="alert-heading d-flex align-items-center mb-2">
-                        <i class="icon-base ri ri-information-line me-2"></i>Description
-                    </h6>
-                    <p class="mb-0" style="white-space: pre-wrap;">@req.Description</p>
-                </div>
-            </div>
-        </div>
-    </div> *@
     <div class="row g-5 mt-1">
         <div class="col-lg-12">
-            <div class="card bg-label-danger h-100">
+            <div class="card bg-label-info h-100">
                 <div class="card-body d-flex flex-wrap-reverse">
                     <div class="mb-0 w-100">
                         <div class="card-title">
-                            <h5 class="text-danger mb-2"><i class="icon-base ri ri-information-line me-2"></i>Description</h5>
+                            <h5 class="text-info mb-2"><i class="icon-base ri ri-information-line me-2"></i>Description</h5>
                             <p class="text-heading" style="white-space: pre-wrap;">@req.Description</p>
                         </div>
                     </div>

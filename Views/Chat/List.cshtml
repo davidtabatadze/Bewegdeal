@@ -25,6 +25,69 @@
     <script src="~/js/app-chat-list.js" asp-append-version="true"></script>
 }
 
+<div class="card mb-6">
+    <div class="card-widget-separator-wrapper">
+        <div class="card-body card-widget-separator pt-3 pb-3">
+            <div class="row gy-4 gy-sm-1">
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-primary">@ViewBag.Total</h4>
+                            <p class="mb-0 fw-bold">Total</p>
+                        </div>
+                        <div class="avatar me-lg-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-primary">
+                                <i class="icon-base ri ri-wechat-2-line icon-28px"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="d-none d-sm-block d-lg-none me-6" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-danger">@ViewBag.Dubious</h4>
+                            <p class="mb-0 fw-bold">Dubious</p>
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-danger">
+                                <i class="icon-base ri ri-alarm-warning-line icon-28px"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="d-none d-sm-block d-lg-none" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-3 border-bottom-0 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-info">@ViewBag.Ongoing</h4>
+                            <p class="mb-0 fw-bold">Ongoing</p>
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-info">
+                                <i class="icon-base ri ri-wechat-line icon-28px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="mb-0 text-success">@ViewBag.Agreed</h4>
+                            <p class="mb-0 fw-bold">Agreed</p>
+                        </div>
+                        <div class="avatar mt-2">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="icon-base ri ri-shake-hands-line icon-28px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Chats Table -->
 <div class="card">
     <div class="card-header border-bottom">
@@ -41,18 +104,18 @@
                         <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                             <option value="">All Statuses</option>
                             <option data-divider="true"></option>
-                            <option value="@ChatStatusEnum.Ongoing">Ongoing</option>
-                            <option value="@ChatStatusEnum.Agreed">Agreed</option>
-                            <option value="@ChatStatusEnum.Cancelled">Cancelled</option>
+                            <option data-icon="icon-base ri ri-wechat-line icon-sm text-info" value="@ChatStatusEnum.Ongoing">Ongoing</option>
+                            <option data-icon="icon-base ri ri-shake-hands-line icon-sm text-success" value="@ChatStatusEnum.Agreed">Agreed</option>
+                            <option data-icon="icon-base ri ri-hand icon-sm text-danger" value="@ChatStatusEnum.Cancelled">Cancelled</option>
                         </select>
                     </div>
                     <div class="col-6">
                         <select id="filterFraud" class="selectpicker w-100" data-style="btn-default" data-width="100%">
-                            <option value="">All Fraud States</option>
+                            <option value="">All Frauds</option>
                             <option data-divider="true"></option>
-                            <option value="@ChatFraudEnum.Safe">Safe</option>
-                            <option value="@ChatFraudEnum.Dubious">Dubious</option>
-                            <option value="@ChatFraudEnum.Resolved">Resolved</option>
+                            <option data-icon="icon-base ri ri-check-double-line icon-sm text-success" value="@ChatFraudEnum.Safe">Safe</option>
+                            <option data-icon="icon-base ri ri-alarm-warning-line text-danger" value="@ChatFraudEnum.Dubious">Dubious</option>
+                            <option data-icon="icon-base ri ri-verified-badge-line text-info" value="@ChatFraudEnum.Resolved">Resolved</option>
                         </select>
                     </div>
                 </div>
@@ -70,6 +133,7 @@
                     <th>Date</th>
                     <th>Request</th>
                     <th>Chat</th>
+                    <th class="text-primary">Actions</th>
                 </tr>
             </thead>
         </table>

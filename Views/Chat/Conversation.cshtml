@@ -70,29 +70,6 @@ else
             @* Header *@
             @if (!isAdminView)
             {
-                @* <div class="chat-history-header border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex overflow-hidden align-items-center">
-                            <div class="flex-shrink-0 avatar avatar-online">
-                                @if (Model.OtherPartyPictureUrl is not null)
-                                {
-                                    <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
-                                         style="object-fit:cover;width:100%;height:100%;"
-                                         alt="@Model.OtherPartyName" />
-                                }
-                                else
-                                {
-                                    <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
-                                          style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
-                                }
-                            </div>
-                            <div class="chat-contact-info flex-grow-1 ms-4">
-                                <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
-                                <small class="user-status text-body">NextJS developer</small>
-                            </div>
-                        </div>
-                    </div>
-                </div> *@
                 <div class="alert alert-danger alert-dismissible m-2" role="alert">
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="d-flex align-items-center mb-2">
@@ -103,6 +80,34 @@ else
                         <li>Make sure you follow the rules of <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">T&amp;M</strong>.</li>
                         <li>Have in mind, the chat can and may be monitored by the system administration.</li>
                     </ul>
+                </div>
+                <div class="chat-history-header border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar">
+                                @if (Model.OtherPartyPictureUrl is not null)
+                                {
+                                    <img src="@Model.OtherPartyPictureUrl" class="rounded-circle"
+                                         style="object-fit:cover;width:100%;height:100%;" />
+                                }
+                                else
+                                {
+                                    <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                          style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;">@Model.OtherPartyInitials</span>
+                                }
+                                @if (Model.OtherPartyRating > 0)
+                                {
+                                    <span class="position-absolute top-10 start-100 translate-middle badge badge-center border rounded-pill bg-primary fw-bold">@Model.OtherPartyRating</span>
+                                }
+                            </div>
+                            <div class="chat-contact-info flex-grow-1 ms-4">
+                                <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
+                                <small class="user-status text-body">
+                                    @(User.IsInRole(UserRoleEnum.Customer) ? "Company" : "Customer")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             }
             @* Message list *@
@@ -271,7 +276,7 @@ else
                             {
                                 <span id="chatProposalBtn" class="btn btn-text-warning btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
-                                    <i class="icon-base ri ri-shake-hands-line icon-md text-warning"></i>
+                                    <i class="icon-base ri ri-money-euro-circle-line icon-md text-warning"></i>
                                 </span>
                             }
                             @if (Model.ChatStatus == ChatStatusEnum.Ongoing)

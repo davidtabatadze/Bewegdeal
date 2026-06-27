@@ -1,6 +1,6 @@
 @{
     Layout = "_HomeLayout";
-    ViewData["Title"] = "How It Works";
+    ViewData["Title"] = "So funktioniert es";
     var showBar = (bool)ViewBag.ShowBar;
 }
 
@@ -14,7 +14,7 @@
                     <form asp-controller="User" asp-action="AcceptHIW" method="post">
                         <button type="submit" class="btn btn-primary">
                             <i class="icon-base ri ri-checkbox-circle-line me-1_5"></i>
-                            I understand, don't show again
+                            Ich habe verstanden, nicht mehr anzeigen
                         </button>
                     </form>
                 </div>
@@ -23,8 +23,8 @@
             <div class="card-body p-6">
 
                 <div class="text-center mb-8">
-                    <h3 class="mb-2">Get your job done in 4 simple steps</h3>
-                    <p class="text-muted mb-0">Post what you need — let the right company come to you.</p>
+                    <h3 class="mb-2">Erledige deinen Auftrag in 4 einfachen Schritten</h3>
+                    <p class="text-muted mb-0">Beschreibe, was du brauchst — lass das passende Unternehmen zu dir kommen.</p>
                 </div>
 
                 <div class="row g-5 mb-8">
@@ -37,11 +37,11 @@
                                 </span>
                             </div>
                             <div>
-                                <h5 class="mb-1">1. Post your request</h5>
+                                <h5 class="mb-1">1. Anfrage erstellen</h5>
                                 <p class="text-muted mb-0">
-                                    Describe the job — moving, junk removal, store pickup, or vehicle transport.
-                                    Add photos or videos, set your pickup and delivery address, name your price, and choose when you need it done.
-                                    The more detail you provide, the better offers you'll get.
+                                    Beschreibe den Auftrag — Umzug, Entrümpelung, Abholung oder Fahrzeugtransport.
+                                    Füge Fotos oder Videos hinzu, gib Abhol- und Lieferadresse an, nenne deinen Preis und wähle den gewünschten Termin.
+                                    Je mehr Details du angibst, desto besser sind die Angebote, die du erhältst.
                                 </p>
                             </div>
                         </div>
@@ -55,11 +55,11 @@
                                 </span>
                             </div>
                             <div>
-                                <h5 class="mb-1">2. Companies find you</h5>
+                                <h5 class="mb-1">2. Unternehmen finden dich</h5>
                                 <p class="text-muted mb-0">
-                                    Your request goes live on the marketplace immediately.
-                                    Qualified companies browsing for work in their area will see it and reach out.
-                                    You don't have to search — they come to you.
+                                    Deine Anfrage ist sofort auf dem Marktplatz sichtbar.
+                                    Qualifizierte Unternehmen, die nach Aufträgen in ihrer Region suchen, werden sie sehen und sich melden.
+                                    Du musst nicht suchen — sie kommen zu dir.
                                 </p>
                             </div>
                         </div>
@@ -73,10 +73,11 @@
                                 </span>
                             </div>
                             <div>
-                                <h5 class="mb-1">3. Negotiate the deal</h5>
+                                <h5 class="mb-1">3. Chatten und Angebote erhalten</h5>
                                 <p class="text-muted mb-0">
-                                    Chat directly with interested companies, compare offers, and agree on the final price,
-                                    date, and time that works for you. You stay in full control — no hidden fees, no surprises.
+                                    Wenn ein Unternehmen Interesse hat, öffnet es einen Chat zu deiner Anfrage. Auf der Anfrageseite erscheint dann ein Chat-Symbol — klicke darauf, um direkt zu kommunizieren.
+                                    Sobald ihr euch über die Grundlagen einig seid, sendet das Unternehmen ein formelles <strong>Angebot</strong> mit Preis, geplantem Datum, Uhrzeit und Servicebedingungen.
+                                    Prüfe es und akzeptiere oder lehne es direkt im Chat ab.
                                 </p>
                             </div>
                         </div>
@@ -90,10 +91,10 @@
                                 </span>
                             </div>
                             <div>
-                                <h5 class="mb-1">4. Job done</h5>
+                                <h5 class="mb-1">4. Auftrag erledigt</h5>
                                 <p class="text-muted mb-0">
-                                    The company shows up and gets the work done. Once you're satisfied, mark the request
-                                    as resolved. That's it — no paperwork, no phone tag, no stress.
+                                    Das Unternehmen kommt und erledigt die Arbeit. Sobald du zufrieden bist, markiere die Anfrage
+                                    als abgeschlossen. Das war's — kein Papierkram, kein Telefonmarathon, kein Stress.
                                 </p>
                             </div>
                         </div>
@@ -105,7 +106,89 @@
 
                 <div class="row g-4 mb-8">
                     <div class="col-12">
-                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">What do request statuses mean?</h6>
+                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">So funktionieren Chat &amp; Angebot</h6>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-info p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-wechat-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Das Unternehmen startet den Chat</strong>
+                                <p class="text-muted mb-0 small">Nur Unternehmen können ein Gespräch eröffnen. Sobald sie es tun, erscheint ein Chat-Button auf deiner Anfrage. Von dort aus kannst du frei Nachrichten austauschen.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-warning p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-shake-hands-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Angebot prüfen</strong>
+                                <p class="text-muted mb-0 small">Wenn das Unternehmen bereit ist, sendet es ein formelles Angebot: Preis, Datum, Uhrzeit und Servicebedingungen. Es erscheint als Karte im Chat. Es kann immer nur ein Angebot aktiv sein.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-success p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-thumb-up-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Akzeptieren oder ablehnen</strong>
+                                <p class="text-muted mb-0 small">Akzeptiere, um den Deal zu besiegeln — die Anfrage wechselt in den Status Vereinbart und eine Rechnung wird automatisch erstellt. Lehne ab (optional mit Begründung), um weiter zu verhandeln.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-6" />
+
+                <div class="row g-4 mb-8">
+                    <div class="col-12">
+                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">Was passiert nach der Annahme eines Angebots?</h6>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-success p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-shake-hands-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Anfrage wird „Vereinbart"</strong>
+                                <p class="text-muted mb-0 small">Der Status der Anfrage wechselt zu Vereinbart und wird dem gewählten Unternehmen zugewiesen. Kein anderes Unternehmen kann sie mehr übernehmen.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-primary p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-bill-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Rechnung wird erstellt</strong>
+                                <p class="text-muted mb-0 small">Eine Rechnung wird automatisch aus dem vereinbarten Angebot generiert. Du findest sie unter <strong>Rechnungen</strong> im Menü — mit Servicekosten, Plattformgebühr und Gesamtbetrag.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge rounded-pill bg-label-info p-2 flex-shrink-0 mt-1">
+                                <i class="icon-base ri ri-check-double-line icon-20px"></i>
+                            </span>
+                            <div>
+                                <strong>Auftrag fertig → Abgeschlossen</strong>
+                                <p class="text-muted mb-0 small">Sobald das Unternehmen die Arbeit erledigt hat, markiere die Anfrage als Abgeschlossen. Damit wird sie geschlossen und in deinem Verlauf archiviert.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-6" />
+
+                <div class="row g-4 mb-8">
+                    <div class="col-12">
+                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">Was bedeuten die Anfrage-Status?</h6>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
                         <div class="d-flex gap-3 align-items-start">
@@ -113,8 +196,8 @@
                                 <i class="icon-base ri ri-timer-flash-line icon-20px"></i>
                             </span>
                             <div>
-                                <strong>Pending</strong>
-                                <p class="text-muted mb-0 small">Your request is live and visible to companies. Waiting for someone to reach out.</p>
+                                <strong>Ausstehend</strong>
+                                <p class="text-muted mb-0 small">Deine Anfrage ist live und für Unternehmen sichtbar. Es wird auf eine Kontaktaufnahme gewartet.</p>
                             </div>
                         </div>
                     </div>
@@ -124,8 +207,8 @@
                                 <i class="icon-base ri ri-wechat-line icon-20px"></i>
                             </span>
                             <div>
-                                <strong>Negotiation</strong>
-                                <p class="text-muted mb-0 small">A company is in talks with you. Price, date, and time are being agreed upon.</p>
+                                <strong>Verhandlung</strong>
+                                <p class="text-muted mb-0 small">Ein Unternehmen hat einen Chat eröffnet. Es laufen aktive Gespräche — möglicherweise ist ein Angebot ausstehend.</p>
                             </div>
                         </div>
                     </div>
@@ -135,8 +218,8 @@
                                 <i class="icon-base ri ri-shake-hands-line icon-20px"></i>
                             </span>
                             <div>
-                                <strong>Agreed</strong>
-                                <p class="text-muted mb-0 small">A deal has been reached. The company is scheduled to do the job.</p>
+                                <strong>Vereinbart</strong>
+                                <p class="text-muted mb-0 small">Ein Angebot wurde angenommen. Das Unternehmen ist bestätigt und eine Rechnung wurde erstellt.</p>
                             </div>
                         </div>
                     </div>
@@ -146,8 +229,8 @@
                                 <i class="icon-base ri ri-check-double-line icon-20px"></i>
                             </span>
                             <div>
-                                <strong>Resolved</strong>
-                                <p class="text-muted mb-0 small">Job complete. The request is closed and archived in your history.</p>
+                                <strong>Abgeschlossen</strong>
+                                <p class="text-muted mb-0 small">Auftrag erledigt. Die Anfrage ist geschlossen und in deinem Verlauf archiviert.</p>
                             </div>
                         </div>
                     </div>
@@ -157,34 +240,34 @@
 
                 <div class="row g-4">
                     <div class="col-12">
-                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">What can you request?</h6>
+                        <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:.05em;">Was kannst du anfragen?</h6>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card border text-center p-4 h-100">
                             <i class="icon-base ri ri-truck-line icon-36px text-success mb-2"></i>
                             <strong>@AnnotationEnum.General.Service.Moving</strong>
-                            <small class="text-muted d-block mt-1">Relocate belongings from A to B</small>
+                            <small class="text-muted d-block mt-1">Gegenstände von A nach B transportieren</small>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card border text-center p-4 h-100">
                             <i class="icon-base ri ri-recycle-line icon-36px text-danger mb-2"></i>
                             <strong>@AnnotationEnum.General.Service.Removal</strong>
-                            <small class="text-muted d-block mt-1">Clear out what you no longer need</small>
+                            <small class="text-muted d-block mt-1">Alles loswerden, was du nicht mehr brauchst</small>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card border text-center p-4 h-100">
                             <i class="icon-base ri ri-shopping-bag-4-line icon-36px text-warning mb-2"></i>
                             <strong>@AnnotationEnum.General.Service.Pickup</strong>
-                            <small class="text-muted d-block mt-1">Pick up your purchase and deliver it</small>
+                            <small class="text-muted d-block mt-1">Einkauf abholen und liefern lassen</small>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="card border text-center p-4 h-100">
                             <i class="icon-base ri ri-car-line icon-36px text-info mb-2"></i>
                             <strong>@AnnotationEnum.General.Service.Transport</strong>
-                            <small class="text-muted d-block mt-1">Move your vehicle to a new location</small>
+                            <small class="text-muted d-block mt-1">Fahrzeug an einen neuen Ort transportieren</small>
                         </div>
                     </div>
                 </div>

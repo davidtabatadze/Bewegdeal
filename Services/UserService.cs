@@ -16,6 +16,9 @@ namespace Bewegdeal.Services
         public async Task<UserEntity> Create(UserEntity user)
             => await UserRepository.Create(user);
 
+        public async Task Delete(long id)
+            => await UserRepository.Delete<UserEntity>(id);
+
         public async Task Update(UserUpdateAreaEnum area, UserEntity update)
             => await UserRepository.Update(area, update);
 
@@ -180,6 +183,7 @@ namespace Bewegdeal.Services
             {
                 avatar.Url = FileService.GetUrl(user.Avatar);
                 avatar.Name = user.Name;
+                avatar.Rating = user.Rating;
                 avatar.Initials = string.Concat(
                     user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                                 .Take(2).Select(p => char.ToUpper(p[0]))
@@ -187,6 +191,16 @@ namespace Bewegdeal.Services
             }
 
             return avatar;
+        }
+
+        public async Task<GenericResultModel<dynamic>> LoadGrid()
+        {
+            var total = await Count(new UserFilter { Status = UserStatusEnum.Active });
+            var customer = await Count(new UserFilter { Status = UserStatusEnum.Active, Role = UserRoleEnum.Customer });
+            var company = await Count(new UserFilter { Status = UserStatusEnum.Active, Role = UserRoleEnum.Company });
+            var pending = await Count(new UserFilter { Status = UserStatusEnum.Pending });
+
+            return GenericResultModel<dynamic>.Ok(new { total, customer, company, pending });
         }
 
         public async Task<GridResultModel<object>> LoadGrid(UserFilter filter, int draw)

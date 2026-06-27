@@ -170,17 +170,37 @@
                                 <h5 class="mb-4">4. Address Mapping</h5>
                                 <div class="row g-6">
                                     <div class="col-12">
-                                        <div class="form-floating form-floating-outline">
-                                            <input type="text" id="pickupAddress" name="pickupAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.PickupAddress : "")" />
-                                            <label for="pickupAddress">Pickup Address</label>
-                                            <div class="invalid-feedback">Source address is required.</div>
+                                        <div class="row g-3">
+                                            <div class="col-12 col-sm-9">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="pickupAddress" name="pickupAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.PickupAddress : "")" />
+                                                    <label for="pickupAddress">Pickup Address</label>
+                                                    <div class="invalid-feedback">Source address is required.</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-3">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="pickupZipCode" name="pickupZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.PickupZipCode : "")" />
+                                                    <label for="pickupZipCode">Pickup Zip</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="form-floating form-floating-outline">
-                                            <input type="text" id="deliveryAddress" name="deliveryAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.DeliveryAddress : "")" />
-                                            <label for="deliveryAddress">Destination Address</label>
-                                            <div class="invalid-feedback">Destination address is required.</div>
+                                        <div class="row g-3">
+                                            <div class="col-12 col-sm-9">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="deliveryAddress" name="deliveryAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.DeliveryAddress : "")" />
+                                                    <label for="deliveryAddress">Destination Address</label>
+                                                    <div class="invalid-feedback">Destination address is required.</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-3">
+                                                <div class="form-floating form-floating-outline">
+                                                    <input type="text" id="deliveryZipCode" name="deliveryZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.DeliveryZipCode : "")" />
+                                                    <label for="deliveryZipCode">Destination Zip</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

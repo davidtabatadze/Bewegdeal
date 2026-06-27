@@ -1,6 +1,7 @@
 ﻿using Bewegdeal.Data.Entities;
 using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
+using Bewegdeal.Models;
 using Bewegdeal.Services;
 using Bewegdeal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -18,10 +19,12 @@ namespace Bewegdeal.Controllers
         [Authorize(Roles = UserRoleEnum.Administrator)]
         public async Task<IActionResult> List()
         {
-            ViewBag.TotalCount = 0;
-            ViewBag.CustomerCount = 0;
-            ViewBag.CompanyCount = 0;
-            ViewBag.PendingCount = 0;
+            var data = await UserService.LoadGrid();
+            ViewBag.Total = data.Result?.total ?? 0;
+            ViewBag.Customer = data.Result?.customer ?? 0;
+            ViewBag.Company = data.Result?.company ?? 0;
+            ViewBag.Pending = data.Result?.pending ?? 0;
+
             return View();
         }
 
@@ -58,6 +61,21 @@ namespace Bewegdeal.Controllers
             });
 
             return Json(new { status = newStatus });
+        }
+
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(long id)
+        {
+            var user = await UserService.Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Status)]);
+
+            if (user?.Status != UserStatusEnum.Pending && user?.Status != UserStatusEnum.Unverified)
+            {
+                return BadRequest();
+            }
+
+            await UserService.Delete(id);
+            return Json(GenericResultModel.Ok());
         }
 
         #endregion

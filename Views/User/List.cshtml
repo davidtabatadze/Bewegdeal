@@ -24,82 +24,61 @@
     <script src="~/js/app-user-list.js" asp-append-version="true"></script>
 }
 
-<!-- Stat Cards -->
-<div class="row g-6 mb-6">
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Total Users</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">@ViewBag.TotalCount</h4>
+<div class="card mb-6">
+    <div class="card-widget-separator-wrapper">
+        <div class="card-body card-widget-separator pt-3 pb-3">
+            <div class="row gy-4 gy-sm-1">
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-primary">@ViewBag.Total</h4>
+                            <p class="mb-0 fw-bold">Active total</p>
                         </div>
-                        <small class="mb-0">All registered accounts</small>
+                        <div class="avatar me-lg-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-primary">
+                                <i class="icon-base ri ri-group-line icon-28px"></i>
+                            </span>
+                        </div>
                     </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-primary rounded">
-                            <div class="icon-base ri ri-group-line icon-26px"></div>
+                    <hr class="d-none d-sm-block d-lg-none me-6" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-success">@ViewBag.Customer</h4>
+                            <p class="mb-0 fw-bold">Customer active</p>
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="icon-base ri ri-user-2-line icon-28px"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="d-none d-sm-block d-lg-none" />
+                </div>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start card-widget-3 border-bottom-0 border-end pb-4 pb-sm-0">
+                        <div>
+                            <h4 class="mb-0 text-info">@ViewBag.Company</h4>
+                            <p class="mb-0 fw-bold">Company active</p>
+                        </div>
+                        <div class="avatar me-sm-6 mt-2">
+                            <span class="avatar-initial rounded bg-label-info">
+                                <i class="icon-base ri ri-building-line icon-28px"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Customers</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">@ViewBag.CustomerCount</h4>
+                <div class="col-6 col-sm-6 col-lg-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="mb-0 text-warning">@ViewBag.Pending</h4>
+                            <p class="mb-0 fw-bold">Pending users</p>
                         </div>
-                        <small class="mb-0">Registered customers</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-success rounded">
-                            <div class="icon-base ri ri-user-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Companies</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">@ViewBag.CompanyCount</h4>
-                        </div>
-                        <small class="mb-0">Registered service providers</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-info rounded">
-                            <div class="icon-base ri ri-building-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Pending Approval</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">@ViewBag.PendingCount</h4>
-                        </div>
-                        <small class="mb-0">Companies awaiting review</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-warning rounded">
-                            <div class="icon-base ri ri-time-line icon-26px"></div>
+                        <div class="avatar mt-2">
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="icon-base ri ri-user-forbid-line icon-28px"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -124,19 +103,19 @@
                         <select id="filterRole" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                             <option value="">All Roles</option>
                             <option data-divider="true"></option>
-                            <option value="@UserRoleEnum.Customer">Customer</option>
-                            <option value="@UserRoleEnum.Company">Company</option>
-                            <option value="@UserRoleEnum.Administrator">Administrator</option>
+                            <option data-icon="icon-base ri ri-user-2-line icon-sm text-success" value="@UserRoleEnum.Customer">Customer</option>
+                            <option data-icon="icon-base ri ri-building-line icon-sm text-info" value="@UserRoleEnum.Company">Company</option>
+                            <option data-icon="icon-base ri ri-computer-line icon-sm text-danger" value="@UserRoleEnum.Administrator">Administrator</option>
                         </select>
                     </div>
                     <div class="col-6">
                         <select id="filterStatus" class="selectpicker w-100" data-style="btn-default" data-width="100%">
                             <option value="">All Statuses</option>
                             <option data-divider="true"></option>
-                            <option value="@UserStatusEnum.Active">Active</option>
-                            <option value="@UserStatusEnum.Pending">Pending</option>
-                            <option value="@UserStatusEnum.Blocked">Blocked</option>
-                            <option value="@UserStatusEnum.Unverified">Unverified</option>
+                            <option data-icon="icon-base ri ri-user-follow-line icon-sm text-success" value="@UserStatusEnum.Active">Active</option>
+                            <option data-icon="icon-base ri ri-user-forbid-line icon-sm text-warning" value="@UserStatusEnum.Pending">Pending</option>
+                            <option data-icon="icon-base ri ri-admin-line icon-sm text-danger" value="@UserStatusEnum.Blocked">Blocked</option>
+                            <option data-icon="icon-base ri ri-user-settings-line icon-sm text-secondary" value="@UserStatusEnum.Unverified">Unverified</option>
                         </select>
                     </div>
                 </div>
@@ -153,6 +132,7 @@
                     <th>Contact</th>
                     <th>Date</th>
                     <th>Interests</th>
+                    <th class="text-primary">Actions</th>
                 </tr>
             </thead>
         </table>

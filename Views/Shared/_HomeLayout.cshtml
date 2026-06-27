@@ -132,6 +132,7 @@
     @{
         ViewData.Remove("AcceptMode"); ViewData.Remove("LockedMode");
     }
+    @await Html.PartialAsync("~/Views/Shared/_Partials/_AboutUsModal.cshtml")
 
     @if (_showTcModal)
     {

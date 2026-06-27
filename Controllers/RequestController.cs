@@ -20,10 +20,11 @@ public class RequestController(RequestService RequestService, RequestChatService
         ViewBag.ViewerRole = data.Result!.viewerRole;
         ViewBag.ViewerInterests = data.Result!.viewerInterests;
         ViewBag.CustomerHasRequests = data.Result!.customerHasRequests;
-        ViewBag.TotalCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, ViewerInterests = user?.Interests ?? [] });
-        ViewBag.PendingCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Pending });
-        ViewBag.NegotiationCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Negotiation });
-        ViewBag.ResolvedCount = 0; // await requestRepository.Count(new RequestFilter { ViewerId = viewerId, ViewerRole = viewerRole, Status = RequestStatusEnum.Resolved });
+        ViewBag.Total = data.Result?.total ?? 0;
+        ViewBag.Pending = data.Result?.pending ?? 0;
+        ViewBag.Agreed = data.Result?.agreed ?? 0;
+        ViewBag.Resolved = data.Result?.resolved ?? 0;
+
         return View();
     }
 

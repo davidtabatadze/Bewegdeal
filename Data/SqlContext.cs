@@ -178,7 +178,9 @@ namespace Bewegdeal.Data
                 e.Property(r => r.Title).IsRequired().HasMaxLength(64);
                 e.Property(r => r.Description).IsRequired().HasMaxLength(2048);
                 e.Property(r => r.PickupAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.PickupZipCode).IsRequired(false).HasMaxLength(8);
                 e.Property(r => r.DeliveryAddress).IsRequired().HasMaxLength(512);
+                e.Property(r => r.DeliveryZipCode).IsRequired(false).HasMaxLength(8);
                 e.Property(r => r.RequesterId).IsRequired();
                 e.Property(r => r.ExecutorId).IsRequired(false);
                 e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);
@@ -363,13 +365,19 @@ namespace Bewegdeal.Data
                 e.HasKey(s => s.Id);
                 e.Property(s => s.Id).ValueGeneratedNever();
 
-                e.Property(s => s.TermsAndConditionsContent).IsRequired();
-                e.Property(s => s.TermsAndConditionsContentDate).IsRequired();
+                e.Property(s => s.AboutUs).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentCustomer).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentCompany).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDateCustomer).IsRequired();
+                e.Property(s => s.TermsAndConditionsContentDateCompany).IsRequired();
                 e.Property(s => s.RequestNegotiationMinutes).IsRequired();
                 e.Property(s => s.RequestImageMaxCount).IsRequired();
                 e.Property(s => s.RequestImageMaxSize).IsRequired();
                 e.Property(s => s.RequestVideoMaxCount).IsRequired();
                 e.Property(s => s.RequestVideoMaxSize).IsRequired();
+                e.Property(s => s.InvoiceCommissionPersent).IsRequired();
+                e.Property(s => s.InvoiceTaxPersent).IsRequired();
+                e.Property(s => s.MobilePrefix).IsRequired();
             });
         }
     }

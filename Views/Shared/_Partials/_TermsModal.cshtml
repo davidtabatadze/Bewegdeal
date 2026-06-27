@@ -1,12 +1,21 @@
-@inject Bewegdeal.Data.Repositories.Abstractions.ISettingsRepository _termsRepo
+@inject Bewegdeal.Services.SettingService _settingsService
 @{
-    var _termsContent = (await _termsRepo.Get()).TermsAndConditionsContent;
+    var _settings = await _settingsService.GetCached();
+    var _registrationMode = ViewData["RegistrationMode"] as bool? == true;
     var _acceptMode = ViewData["AcceptMode"] as bool? == true;
     var _lockedMode = ViewData["LockedMode"] as bool? == true;
+
+    var _termsContent = _registrationMode
+        ? _settings.TermsAndConditionsContentCustomer + _settings.TermsAndConditionsContentCompany
+        : User.IsInRole(UserRoleEnum.Customer) ? _settings.TermsAndConditionsContentCustomer
+        : User.IsInRole(UserRoleEnum.Company)  ? _settings.TermsAndConditionsContentCompany
+        : "No contant for display";
 }
 
 @if (!string.IsNullOrWhiteSpace(_termsContent))
 {
+    <link rel="stylesheet" href="~/vendor/libs/quill/editor.css" />
+    <link rel="stylesheet" href="~/vendor/libs/quill/typography.css" />
     <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true"
          @(_lockedMode ? Html.Raw("data-bs-backdrop=\"static\" data-bs-keyboard=\"false\"") : Html.Raw(""))>
         <div class="modal-dialog modal-fullscreen" role="document">
@@ -18,8 +27,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     }
                 </div>
-                <div class="modal-body" id="termsModalBody">
-                    @Html.Raw(_termsContent)
+                <div class="modal-body ql-snow" id="termsModalBody">
+                    <div class="ql-editor" id="termsModalContent">
+                        @if (!_registrationMode)
+                        {
+                            @Html.Raw(_termsContent)
+                        }
+                    </div>
                 </div>
                 @if (_acceptMode)
                 {
@@ -58,6 +72,24 @@
                 var acceptBtn  = document.getElementById('termsAcceptBtn');
                 var body       = document.getElementById('termsModalBody');
                 var scrollHint = document.getElementById('termsScrollHint');
+                var content    = document.getElementById('termsModalContent');
+
+                @if (_registrationMode)
+                {
+                    <text>
+                var tcContents = {
+                    '@UserRoleEnum.Customer': @Html.Raw(Json.Serialize(_settings.TermsAndConditionsContentCustomer)),
+                    '@UserRoleEnum.Company':  @Html.Raw(Json.Serialize(_settings.TermsAndConditionsContentCompany))
+                };
+                modalEl.addEventListener('show.bs.modal', function () {
+                    var role = (document.querySelector('[name="role"]:checked') || {}).value || '@UserRoleEnum.Customer';
+                    content.innerHTML = tcContents[role] || '';
+                    acceptBtn.disabled = true;
+                    scrollHint.style.display = '';
+                    body.scrollTop = 0;
+                });
+                    </text>
+                }
 
                 // Unlock immediately if content fits without scrolling
                 modalEl.addEventListener('shown.bs.modal', function () {

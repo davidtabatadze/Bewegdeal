@@ -55,6 +55,7 @@ Admin pages:
 - `/User/List` → Users list
 - `/Request/List` → Requests list (admin only)
 - `/Request/View?number=` → Request detail view
+- `/Invoice/List` → Invoices list (all roles, filtered by role)
 - `/HowItWorks/Customer` → How It Works for customers
 - `/HowItWorks/Company` → How It Works for companies
 
@@ -76,12 +77,15 @@ Views/
 │   ├── _HomeLayout.cshtml
 │   ├── _BlankLayout.cshtml
 │   ├── _Partials/
-│   │   └── _TermsModal.cshtml           # Shared T&C fullscreen modal; injects ISettingsRepository;
-│   │                                    #   AcceptMode (ViewData) = shows accept footer;
-│   │                                    #   LockedMode (ViewData) = no close button, backdrop=static
+│   │   ├── _TermsModal.cshtml           # Shared T&C fullscreen modal; injects SettingService (GetCached);
+│   │   │                                #   AcceptMode (ViewData) = shows accept footer;
+│   │   │                                #   LockedMode (ViewData) = no close button, backdrop=static;
+│   │   │                                #   renders role-specific content (Customer vs Company) based on User.IsInRole()
+│   │   └── _AboutUsModal.cshtml         # Fullscreen modal; injects SettingService (GetCached);
+│   │                                    #   renders nothing if AboutUs is empty; loads quill CSS inline
 │   └── Sections/
 │       ├── Menu/
-│       │   └── _VerticalMenu.cshtml     # Dashboard; Admin: Users+Requests; Customer: New Request+HowItWorks; Company: HowItWorks
+│       │   └── _VerticalMenu.cshtml     # Dashboard; Admin: Users+Requests+Invoices; Customer: New Request+Invoices+HowItWorks; Company: Invoices+HowItWorks
 │       │                                #   reads Name/Initials/PictureUrl from claims; role checks via User.IsInRole()
 │       ├── Navbar/
 │       │   ├── _NavbarLanding.cshtml    # Public landing navbar
@@ -100,11 +104,12 @@ Views/
 - `HowItWorksController` — `[Authorize]`; `Customer()` `[Authorize(Roles=Customer)]`; `Company()` `[Authorize(Roles=Company)]`
 - `UserController` — `[Authorize(Roles=Administrator)]` on List/LoadUsers/UpdateUserStatus; `[Authorize]` on all Profile actions; actions: `UpdateAvatar`, `UpdateTheme`, `UpdateProfile`, `UpdatePassword`, `AcceptHIW`, `AcceptTerms`
 - `AccountController` — public; Login (issues cookie via `SignInAsync`), Logout (`SignOutAsync`), Register, ForgotPassword, ResetPassword, VerifyAccount, VerifyResend
-- `SettingsController` — `[Authorize(Roles=Administrator)]`; Index, SaveTermAndConditionSettings (Quill HTML content), SaveRequestSettings
+- `SettingsController` — `[Authorize(Roles=Administrator)]`; Index, SaveAboutUs, SaveTermsAndConditionsCustomer, SaveTermsAndConditionsCompany, SaveMobile, SaveInvoice, SaveRequest
 - `FileController` — public; `GET /File/Download?key=`
-- `RequestController` — `[Authorize]`; Create, Edit, View, List; Create/Edit gate on `GetClaim<string>(Role) == Customer`
+- `RequestController` — `[Authorize]`; Create, Edit, View, List, Cancel; Create/Edit gate on `[Authorize(Roles=Customer)]`
+- `RequestChatController` — `[Authorize]`; Visibility, Conversation (by requestNumber), Cancel; Initiate `[Authorize(Roles=Company)]`; Propose `[Authorize(Roles=Company)]`; ProposalReact `[Authorize(Roles=Customer)]`; ProposalCard
 - `ChatController` — `[Authorize(Roles=Administrator)]`; List, LoadChats, Conversation (by key), UpdateChatFraud
-- `RequestChatController` — `[Authorize]`; Visibility, Conversation (by requestNumber), Cancel; Initiate `[Authorize(Roles=Company)]`
+- `InvoiceController` — `[Authorize]`; List, LoadInvoices; UpdateInvoiceStatus `[Authorize(Roles=Administrator)]`
 - `FraudWordController` — `[Authorize(Roles=Administrator)]`; Index, Create, Delete
 
 ## Account Views
@@ -115,7 +120,8 @@ They share the same visual shell: `authentication-wrapper authentication-basic`,
 - `Login.cshtml` — email/password form; on success redirects to HowItWorks if `!AcquaintedHIW && Role != Administrator`, otherwise to Home
 - `Register.cshtml` — 3-step bs-stepper (max-width: 740px); steps: **Role → General → Account**
   - Step 2 (General): **Customer** sees only Name + Phone; **Company** sees Name + Phone + UID (disabled) + Address
-  - Step 3: `agreeTerms` checkbox intercepts clicks — opens `_TermsModal` in AcceptMode; user must scroll to bottom to unlock "I Accept"; accepting checks the checkbox; closing without accepting leaves it unchecked; if no T&C content configured, checkbox works normally
+  - Phone input uses `settings.MobilePrefix` as a prepended input-group-text (e.g. "+43"); loaded from `SettingService.GetCached()`
+  - Step 3: `agreeTerms` checkbox intercepts clicks — opens `_TermsModal` in AcceptMode (role-specific content); user must scroll to bottom to unlock "I Accept"; accepting checks the checkbox; closing without accepting leaves it unchecked; if no T&C content configured, checkbox works normally
   - Services/interests posted as `string[]? Interests` (checkbox `name="Interests"`)
 - `ForgotPassword.cshtml` — single email field; always shows success — never reveals whether email exists
 - `ResetPassword.cshtml` — token-validated password reset form; token passed via query string
@@ -123,16 +129,29 @@ They share the same visual shell: `authentication-wrapper authentication-basic`,
 
 ## Settings Page
 
-`Views/Settings/Index.cshtml` — two independent cards, each with its own `<form>` and Save button. Admin only.
+`Views/Settings/Index.cshtml` — multiple independent cards, each with its own `<form>` and Save button. Admin only.
 
-**Terms & Conditions card** (`POST SaveTermAndConditionSettings`):
-- Full Quill editor (full toolbar from template's `forms-editors.js`) with KaTeX support
-- Hidden input `#termsContent` receives `quill.root.innerHTML` on submit
-- Saving updates `TermsAndConditionsContent` + sets `TermsAndConditionsContentDate = DateTime.Now`
-- Changing content forces all non-admin users to re-accept on their next visit
+**About Us card** (`POST SaveAboutUs`):
+- Full Quill editor for About Us HTML content
+- Saved content displayed in `_AboutUsModal.cshtml` (fullscreen modal, launched from footer/landing)
 
-**Request card** (`POST SaveRequestSettings`):
-- Three visual groups: Negotiation Minutes / Image settings / Video settings
+**Terms & Conditions — Customer card** (`POST SaveTermsAndConditionsCustomer`):
+- Full Quill editor; saving updates `TermsAndConditionsContentCustomer` + `TermsAndConditionsContentDateCustomer = DateTime.Now`
+- Changing content forces Customer users to re-accept on next visit
+
+**Terms & Conditions — Company card** (`POST SaveTermsAndConditionsCompany`):
+- Full Quill editor; saving updates `TermsAndConditionsContentCompany` + `TermsAndConditionsContentDateCompany = DateTime.Now`
+- Changing content forces Company users to re-accept on next visit
+
+**Mobile card** (`POST SaveMobile`):
+- Single `mobilePrefix` text input (e.g. "+43"); shown as input-group prefix on phone fields in Register
+
+**Invoice card** (`POST SaveInvoice`):
+- Two `type="number"` inputs: `commissionPersent`, `taxPersent`
+- Controller rejects any value `<= 0`
+
+**Request card** (`POST SaveRequest`):
+- Two visual groups: Image settings / Video settings (negotiation minutes removed)
 - All inputs are `type="number"`, `col-auto` with fixed `width: 200px`, centered via `justify-content-center`
 - Controller rejects any value `<= 0`
 
@@ -227,10 +246,14 @@ Controllers/
 ├── AccountController.cs         # public; Login/Logout/Register/ForgotPassword/ResetPassword/VerifyAccount/VerifyResend
 ├── UserController.cs            # [Authorize(Roles=Admin)] on List/LoadUsers/UpdateUserStatus;
 │                                #   [Authorize] on UpdateAvatar/UpdateTheme/UpdateProfile/UpdatePassword/AcceptHIW/AcceptTerms
-├── SettingsController.cs        # [Authorize(Roles=Admin)]; Index, SaveTermAndConditionSettings, SaveRequestSettings
-├── RequestController.cs         # [Authorize]; Create, Edit, View, List
-├── RequestChatController.cs     # [Authorize]; Visibility, Conversation, Cancel; Initiate [Authorize(Roles=Company)]
+├── SettingsController.cs        # [Authorize(Roles=Admin)]; Index, SaveAboutUs, SaveTermsAndConditionsCustomer,
+│                                #   SaveTermsAndConditionsCompany, SaveMobile, SaveInvoice, SaveRequest
+├── RequestController.cs         # [Authorize]; Create/Edit [Authorize(Roles=Customer)]; View, List, Cancel
+├── RequestChatController.cs     # [Authorize]; Visibility, Conversation, Cancel, ProposalCard;
+│                                #   Initiate/Propose [Authorize(Roles=Company)];
+│                                #   ProposalReact [Authorize(Roles=Customer)]
 ├── ChatController.cs            # [Authorize(Roles=Admin)]; List, LoadChats, Conversation (by key), UpdateChatFraud
+├── InvoiceController.cs         # [Authorize]; List, LoadInvoices; UpdateInvoiceStatus [Authorize(Roles=Admin)]
 ├── FraudWordController.cs       # [Authorize(Roles=Admin)]; Index, Create, Delete
 └── FileController.cs            # public; Download
 Data/
@@ -242,11 +265,17 @@ Data/
 │   └── BaseRepository.cs        # Shared EF Core query helpers
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
+│   ├── UserRatingEntity.cs      # UserRatings table: UserId, EvaluatorId, Value, CreateDate
 │   ├── FileEntity.cs            # Files table (metadata only)
 │   ├── SettingsEntity.cs        # Settings table (single row, Id = 1)
 │   ├── RequestEntity.cs         # Requests table
 │   ├── RequestFileEntity.cs     # RequestFiles table
 │   ├── RequestAgreementEntity.cs
+│   ├── RequestProposalEntity.cs # RequestProposals table: ChatId, RequestId, CompanyId, Cost, Currency,
+│   │                            #   Date, Time, ServiceTerms, Status, ReactionDate, ReactionReason
+│   ├── InvoiceEntity.cs         # Invoices table: Number, Status, RequestNumber, RequestId, ProposalId,
+│   │                            #   CompanyId, CustomerId, Currency, ServiceCost, SubtotalCost, TotalCost,
+│   │                            #   NotificationSent, CreateDate, PaymentDate
 │   ├── ChatEntity.cs            # Chats table: Key, RequestId, CustomerId, CompanyId, Fraud, Status
 │   ├── ChatMessageEntity.cs     # ChatMessages table: ChatId, SenderId, Content, SentDate, IsRead, IsFraud
 │   └── FraudWordEntity.cs       # FraudWords table: Word
@@ -254,7 +283,8 @@ Data/
 │   ├── UserFilter.cs            # Extends BaseFilter<long?>, adds Email, Search, Role, Status
 │   ├── FileFilter.cs            # Extends BaseFilter<long?>, adds Key
 │   ├── RequestFilter.cs         # Extends BaseFilter<long?>, adds Search, Status, Service, Viewer*
-│   └── ChatFilter.cs
+│   ├── ChatFilter.cs
+│   └── InvoiceFilter.cs
 ├── Repositories/
 │   ├── Abstractions/
 │   │   ├── IUserRepository.cs
@@ -262,13 +292,17 @@ Data/
 │   │   ├── ISettingsRepository.cs
 │   │   ├── IRequestRepository.cs
 │   │   ├── IRequestFileRepository.cs
+│   │   ├── IRequestProposalRepository.cs
 │   │   ├── IChatRepository.cs
+│   │   ├── IInvoiceRepository.cs
 │   │   └── IFraudWordRepository.cs
 │   ├── UserRepository.cs        # EF Core + IRepositorySeedable; Update() switches on UserUpdateAreaEnum
 │   ├── FileRepository.cs        # EF Core
 │   ├── SettingsRepository.cs    # EF Core + IRepositorySeedable
 │   ├── RequestRepository.cs     # EF Core; private ApplyFilters
 │   ├── RequestFileRepository.cs # EF Core
+│   ├── RequestProposalRepository.cs # EF Core; Update(Status), Load(requestIds, chatId, status)
+│   ├── InvoiceRepository.cs     # EF Core
 │   ├── ChatRepository.cs        # EF Core; ChatEntity + ChatMessageEntity
 │   └── FraudWordRepository.cs   # EF Core
 └── SqlContext.cs                # DbContext; DateOnly↔DateTime and TimeOnly↔TimeSpan converters
@@ -291,14 +325,19 @@ Enums/
 ├── RequestUpdateAreaEnum.cs     # C# enum: Full=1, ChatActivate, ChatDeactivate
 ├── RequestAgreementStatusEnum.cs
 ├── RequestViewerFocusEnum.cs
+├── RequestProposalStatusEnum.cs # "pending", "accepted", "rejected"
+├── RequestProposalUpdateAreaEnum.cs # C# enum: Status=1
+├── InvoiceStatusEnum.cs         # "cancelled", "pending", "paid"
+├── InvoiceUpdateAreaEnum.cs     # C# enum: Status=1
 ├── VehicleTypeEnum.cs
 ├── VehicleConditionEnum.cs
 ├── FraudWordStatusEnum.cs
 ├── EmailEnum.cs
 ├── BrevoStatusEnum.cs
-├── ConstantEnum.cs              # UserCacheTimeout=60, ResetPasswordTimeout=10, VerificationTimeout=10
-├── CacheKeyEnum.cs              # IMemoryCache key constants: EmailVerification, SmsVerification,
-│                                #   PasswordReset, FraudeWords, FraudeWordsCompiled
+├── ConstantEnum.cs              # UserCacheTimeout=60, ResetPasswordTimeout=10, VerificationTimeout=10,
+│                                #   ProposalPrefix="#bewegdeal-proposal-" (prefix for proposal messages in chat)
+├── CacheKeyEnum.cs              # IMemoryCache key constants: User, EmailVerification, SmsVerification,
+│                                #   PasswordReset, FraudeWords, FraudeWordsCompiled, Settings
 └── AnnotationEnum.cs            # Nested string classes for user-facing messages
 Models/
 ├── GenericResultModel.cs        # GenericResultModel (bool Success, string? Message) +
@@ -307,21 +346,33 @@ Models/
 ├── RequestModel.cs              # Create + Edit request form model
 ├── RequestFileModel.cs
 ├── ChatHistoryModel.cs          # @model for Conversation.cshtml: Mode, ChatKey, ChatStatus, RequestStatus,
-│                                #   ViewerId/Initials/PictureUrl, OtherParty Name/Initials/PictureUrl,
+│                                #   ViewerId/Initials/PictureUrl, OtherParty Name/Initials/PictureUrl/Rating,
 │                                #   Messages, Proposals (Dictionary<long, RequestProposalEntity>), ProposalPending
 ├── ChatUnreadSummary.cs         # SenderName, Preview, RequestNumber, Date — returned by ChatService.GetMessageUnread()
 ├── UserProfileModel.cs          # Profile page model: UserEntity User, Avatar, ServiceTermsFileName/Url
 └── UserAvatarModel.cs           # Url, Initials, Name
+ViewModels/
+├── RequestViewModel.cs          # Create/Edit form: Service, Title, Description, PickupAddress, PickupZipCode,
+│                                #   DeliveryAddress, DeliveryZipCode, Cost, IsASAP, Date, Time, VehicleType,
+│                                #   VehicleCondition, PresentElevator, PresentParking; IValidatableObject
+├── RequestProposalViewModel.cs  # Proposal form: ChatId, RequestId, RequestNumber, Cost, Currency, Date, Time
+│                                #   IValidatableObject; validates Cost(1-10000), Date, Time
+├── ProfileViewModel.cs
+└── RegisterViewModel.cs
 Services/
 ├── FileService.cs               # Scoped — validate, upload, persist; GetUrl(fileId)
 ├── FileService2.cs
-├── SettingService.cs            # Scoped — Get() only; wraps ISettingsRepository
+├── SettingService.cs            # Scoped — Get(), GetCached() (IMemoryCache, key=CacheKeyEnum.Settings);
+│                                #   SaveAboutUs, SaveTermsAndConditionsCustomer, SaveTermsAndConditionsCompany,
+│                                #   SaveMobile, SaveInvoice, SaveRequest; all clear cache after save
 ├── UserService.cs               # Scoped — CRUD + GetAvatar + GetProfile + UpdateProfile + UpdateAvatar + LoadGrid
 ├── AccountService.cs
 ├── BrevoService.cs
 ├── RequestService.cs
+├── ProposalService.cs           # Scoped — Create, Get, GetActual(chatId), Load, Update(id, status, reason)
+├── InvoiceService.cs            # Scoped — Create, Get, Update, LoadGrid(userId, userRole), LoadGrid(filter, draw, ...)
 ├── ChatService.cs               # Scoped — chat CRUD, AddMessage, ReadMessages, LoadGrid, GetAdminConversation
-├── RequestChatService.cs        # Scoped — GetMode, Initiate, Conversation, Cancel (user-facing chat flow)
+├── RequestChatService.cs        # Scoped — GetMode, Initiate, Conversation, Cancel, Propose, ProposalReact, GetProposal
 ├── ChatHubService.cs            # Scoped — Join, Send, MarkRead, NotifyProposal; called by ChatTool hub
 │                                #   Notify(userId, connectionId) — adds to "user-{userId}" personal group + sends catchup
 │                                #   Notify(userId) — sends NewMessageNotification to "user-{userId}" group
@@ -336,8 +387,8 @@ Tools/
 ├── UserIdentityTool.cs          # Static; BuildPrincipal(UserEntity, avatarUrl?) → ClaimsPrincipal
 │                                #   Claims use IdentityFieldEnum keys
 ├── UserRefreshTool.cs           # Middleware; runs after UseAuthentication;
-│                                #   on cache miss: fetches user status + settings;
-│                                #   sets HttpContext.Items["ShowTCModal"] if TermsAcceptDate < ContentDate
+│                                #   on cache miss: fetches user status + settings (via CacheKeyEnum.Settings);
+│                                #   sets HttpContext.Items["ShowTCModal"] if role-specific TermsAcceptDate < ContentDate
 │                                #   (non-admin only); signs out blocked/missing users; TTL = UserCacheTimeout
 └── ChatTool.cs                  # SignalR Hub (in Tools/, not Hubs/); delegates to ChatHubService
                                  #   Methods: Join(chatKey), Send(chatKey, content), MarkRead(chatKey), Notify()
@@ -353,32 +404,45 @@ Views/
 │   ├── Customer.cshtml          # Sticky header with AcceptHIW button when !AcquaintedHIW; POST /User/AcceptHIW
 │   └── Company.cshtml
 ├── Settings/
-│   └── Index.cshtml             # T&C: full Quill editor; Request: number inputs
+│   └── Index.cshtml             # AboutUs, T&C Customer, T&C Company, Mobile, Invoice, Request cards
 ├── User/
 │   ├── List.cshtml              # DataTable with real user avatars (URL or initials from server)
 │   └── Profile.cshtml           # Picture/Theme/Personal/Password cards; uses ViewBag.Profile (UserProfileModel)
 │                                #   Company: Name+Mobile(disabled)+UID(disabled)+Address+Interests+ServiceTerms
 │                                #   Customer: Name+Mobile(disabled) only
 ├── Request/
-│   ├── Form.cshtml              # Create + Edit (isEdit = ViewBag.Request is not null)
+│   ├── Form.cshtml              # Create + Edit (isEdit = req is not null); loads settings for file limits
 │   ├── View.cshtml              # Swiper gallery; floating chat offcanvas; requester avatar
 │   └── List.cshtml              # DataTable; empty state for customers
+├── Proposal/
+│   ├── _ProposalCard.cshtml     # Partial; @model RequestProposalEntity; colored border by status;
+│   │                            #   RequestMode ViewData=true → inline (narrow) card style
+│   ├── _ProposalModal.cshtml    # Modal for Company to submit a proposal
+│   └── _ProposalReactModal.cshtml # Modal for Customer to accept/reject a proposal
+├── Invoice/
+│   └── List.cshtml              # DataTable; stat cards (Total, Paid, Pending, Users); role-aware
 ├── Chat/
 │   ├── List.cshtml              # Admin chat list DataTable
 │   └── Conversation.cshtml      # Partial; @model ChatHistoryModel; mode-aware (initiate vs ongoing);
 │                                #   admin view: read-only, fraud border highlights;
-│                                #   non-admin view: danger alert + message input + cancel btn
+│                                #   non-admin view: danger alert + message input + cancel btn;
+│                                #   proposal cards rendered inline in message thread
 └── FraudWord/
     └── Index.cshtml             # Admin fraud word management
 Views/Shared/_Partials/
 ├── _Macros.cshtml               # Materio SVG logo
-└── _TermsModal.cshtml           # Fullscreen Bootstrap modal; injects ISettingsRepository;
-                                 #   ViewData["AcceptMode"]=true → accept footer with scroll-unlock;
-                                 #   ViewData["LockedMode"]=true → no close button, backdrop=static;
-                                 #   renders nothing if TermsAndConditionsContent is empty
+├── _TermsModal.cshtml           # Fullscreen Bootstrap modal; injects SettingService (GetCached);
+│                                #   shows Customer or Company content based on User.IsInRole();
+│                                #   ViewData["AcceptMode"]=true → accept footer with scroll-unlock;
+│                                #   ViewData["LockedMode"]=true → no close button, backdrop=static;
+│                                #   renders nothing if role-specific content is empty
+└── _AboutUsModal.cshtml         # Fullscreen Bootstrap modal; injects SettingService (GetCached);
+                                 #   renders nothing if AboutUs is empty; loads quill CSS inline
 wwwroot/js/
 ├── app-company-dashboard.js
 ├── app-user-list.js             # User DataTable; shows real avatars (img or initials from full['avatar'])
+├── app-chat-list.js             # Admin chat list DataTable
+├── app-invoice-list.js          # Invoice DataTable; UpdateInvoiceStatus for admin
 ├── pages-auth-two-steps.js      # Two independent OTP wrappers (#emailOtpWrapper / #mobileOtpWrapper)
 ├── pages-auth-multisteps.js     # Register stepper; Step 2 fields toggled by role; Interests via name="Interests"
 ├── request-form.js
@@ -432,13 +496,56 @@ wwwroot/js/
 | Field | Type | Notes |
 |-------|------|-------|
 | Id | long | PK, `ValueGeneratedNever()` — always 1 |
-| TermsAndConditionsContent | string | HTML content edited via Quill; empty string = no T&C configured |
-| TermsAndConditionsContentDate | DateTime | updated to `DateTime.Now` whenever content is saved |
-| RequestNegotiationMinutes | short | SMALLINT |
+| AboutUs | string | HTML content for About Us modal; empty = modal not shown |
+| TermsAndConditionsContentCustomer | string | HTML T&C for Customer role; empty = no T&C configured |
+| TermsAndConditionsContentDateCustomer | DateTime | updated when Customer T&C is saved |
+| TermsAndConditionsContentCompany | string | HTML T&C for Company role; empty = no T&C configured |
+| TermsAndConditionsContentDateCompany | DateTime | updated when Company T&C is saved |
+| MobilePrefix | string | phone number prefix shown in registration (e.g. "+43") |
+| InvoiceCommissionPersent | short | SMALLINT, platform commission % |
+| InvoiceTaxPersent | short | SMALLINT, tax % |
 | RequestImageMaxCount | short | SMALLINT |
 | RequestImageMaxSize | short | SMALLINT, in MB |
 | RequestVideoMaxCount | short | SMALLINT |
 | RequestVideoMaxSize | short | SMALLINT, in MB |
+
+**RequestProposalEntity** (`RequestProposals` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK |
+| ChatId | long? | FK to Chats |
+| RequestId | long | FK to Requests |
+| CompanyId | long | FK to Users |
+| CreateDate | DateTime | UTC |
+| Cost | decimal | proposed cost |
+| Currency | string | default "EUR" |
+| Date | DateOnly? | proposed date |
+| Time | TimeOnly? | proposed time |
+| ServiceTerms | string? | company-provided service terms text |
+| Status | string | `RequestProposalStatusEnum` value |
+| ReactionDate | DateTime? | when customer accepted/rejected |
+| ReactionReason | string? | rejection reason |
+
+**InvoiceEntity** (`Invoices` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK |
+| Number | string | unique invoice number |
+| Status | string | `InvoiceStatusEnum` value |
+| RequestNumber | string | denormalized request number |
+| RequestId | long | FK to Requests |
+| ProposalId | long | FK to RequestProposals |
+| CompanyId | long | FK to Users |
+| CustomerId | long | FK to Users |
+| Currency | string | default "EUR" |
+| ServiceCost | decimal | base cost from proposal |
+| SubtotalCost | decimal | after commission |
+| TotalCost | decimal | after tax |
+| NotificationSent | bool | whether email notification was sent |
+| CreateDate | DateTime | UTC |
+| PaymentDate | DateTime? | when marked paid |
+
+**UserRatingEntity** (`UserRatings` table): `Id` (long PK), `UserId`, `EvaluatorId` (both FK to Users), `Value` (decimal), `CreateDate` (DateTime).
 
 **ChatEntity** (`Chats` table):
 | Field | Type | Notes |
@@ -465,7 +572,9 @@ wwwroot/js/
 
 **FraudWordEntity** (`FraudWords` table): `Id` (long PK), `Word` (string) — supports `*` prefix/suffix wildcards.
 
-**RequestEntity**, **RequestFileEntity**, **RequestAgreementEntity** — see source.
+**RequestEntity** (`Requests` table) — key fields: `Number`, `Status`, `Service`, `Title`, `Description`, `PickupAddress`, `PickupZipCode`, `DeliveryAddress`, `DeliveryZipCode`, `RequesterId`, `ExecutorId?`, `Cost`, `Currency`, `ASAP`, `Date?`, `Time?`, `AgreementId?`, `VehicleType?`, `VehicleCondition?`, `PresentElevator`, `PresentParking`.
+
+**RequestFileEntity**, **RequestAgreementEntity** — see source.
 
 ### Filters
 
@@ -506,8 +615,27 @@ string? url = await fileService.GetUrl(fileId); // null if fileId is null or fil
 
 **SettingService** (scoped):
 ```csharp
-SettingsEntity settings = await settingService.Get();
+SettingsEntity settings = await settingService.Get();                 // always hits DB
+SettingsEntity settings = await settingService.GetCached();           // IMemoryCache; key = CacheKeyEnum.Settings
+// Save methods each call Get() + Update() + ClearCache():
+await settingService.SaveAboutUs(content);
+await settingService.SaveTermsAndConditionsCustomer(content);
+await settingService.SaveTermsAndConditionsCompany(content);
+await settingService.SaveMobile(mobilePrefix);
+await settingService.SaveInvoice(commissionPersent, taxPersent);
+await settingService.SaveRequest(imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize);
 ```
+
+**ProposalService** (scoped):
+```csharp
+RequestProposalEntity proposal = await proposalService.Create(new RequestProposalEntity { ... });
+RequestProposalEntity? pending = await proposalService.GetActual(chatId);  // first Pending proposal in chat
+RequestProposalEntity? p = await proposalService.Get(id, properties);
+List<RequestProposalEntity> list = await proposalService.Load(requestIds, chatId, status);
+await proposalService.Update(id, status, reason);  // sets Status + ReactionDate + ReactionReason
+```
+
+**InvoiceService** (scoped): Create, Get, Update, LoadGrid — standard pattern.
 
 **UserService** (scoped):
 ```csharp
@@ -539,26 +667,29 @@ Users (7 rows, all Status=Active):
 
 ## T&C Feature
 
+T&C is split by role: Customer and Company each have their own content and acceptance date in `SettingsEntity`.
+
 ### Admin side (Settings page)
-- Admin edits T&C HTML content via full Quill editor
-- On save: `TermsAndConditionsContent` updated, `TermsAndConditionsContentDate = DateTime.Now`
+- Admin edits Customer T&C via `POST SaveTermsAndConditionsCustomer` → updates `TermsAndConditionsContentCustomer` + `TermsAndConditionsContentDateCustomer = DateTime.Now`
+- Admin edits Company T&C via `POST SaveTermsAndConditionsCompany` → updates `TermsAndConditionsContentCompany` + `TermsAndConditionsContentDateCompany = DateTime.Now`
+- Changing role-specific content forces only that role's users to re-accept
 
 ### Re-acceptance enforcement
-- `UserRefreshTool` middleware compares `TermsAcceptDate` claim with `TermsAndConditionsContentDate` from DB (cached 60 min)
-- If `TermsAcceptDate < TermsAndConditionsContentDate` (and role ≠ Administrator): sets `HttpContext.Items["ShowTCModal"] = true`
+- `UserRefreshTool` middleware compares `TermsAcceptDate` claim with the role-specific `ContentDate` from cached settings
+- If `TermsAcceptDate < ContentDate` (and role ≠ Administrator): sets `HttpContext.Items["ShowTCModal"] = true`
 - `_HomeLayout` renders `_TermsModal` in locked mode (`backdrop=static`, no close button) and auto-opens it via JS
 - User cannot dismiss — must click "I Accept"
 - `POST /User/AcceptTerms` → `UserUpdateAreaEnum.AcceptTerms` → `RefreshClaim(IdentityFieldEnum.TermsAcceptDate, ...)` + `RefreshClaim(IdentityFieldEnum.TermsAccepted, true)` → redirect to Home
 
 ### Registration T&C flow
-- `agreeTerms` checkbox click intercept: opens `_TermsModal` in AcceptMode (with close button)
+- `agreeTerms` checkbox click intercept: opens `_TermsModal` in AcceptMode (with close button; shows role-specific content)
 - User must scroll to bottom to unlock "I Accept"
 - Accepting: closes modal, checks the checkbox
 - Closing without accepting: checkbox stays unchecked
-- If no T&C content configured: checkbox works normally, no modal
+- If no T&C content configured for the role: checkbox works normally, no modal
 
 ### _TermsModal.cshtml usage
-The partial owns all scroll-unlock JS when `AcceptMode=true` — no page needs to duplicate it.
+The partial injects `SettingService` directly and reads the current user's role to show the right content. No page needs to pass the content — just render it.
 
 ```razor
 // Accept mode with close button (Register.cshtml — rendered inside @section PageScripts, after Bootstrap)
@@ -605,6 +736,55 @@ First-time onboarding for Customer/Company roles. Administrators are exempt.
 - `ViewBag.Files` = ordered anonymous list (images first, main image first within images)
 
 ### Create/Edit flows — unchanged from original implementation
+
+### Zip codes
+`RequestEntity` has `PickupZipCode` and `DeliveryZipCode` (string, max 8) in addition to addresses. Both rendered in `Form.cshtml`.
+
+---
+
+## Proposal Feature
+
+Proposals allow a Company to offer terms (cost, date, time, service terms) to a Customer within a chat.
+
+### Flow
+1. Company submits `POST /RequestChat/Propose` (model: `RequestProposalViewModel`) — only one pending proposal per chat allowed; creating a new one rejects any existing pending one
+2. Proposal appears as a special card (`_ProposalCard.cshtml`) in the chat message thread
+3. Customer reacts via `POST /RequestChat/ProposalReact?id=&accepted=&reason=`
+4. Accepting a proposal: updates status → `Accepted`, triggers `ProposalUpdated` SignalR event, progresses request and chat to agreed state, creates an `InvoiceEntity`
+5. `GET /RequestChat/ProposalCard?proposalId=` returns `_ProposalCard.cshtml` partial (used for live refresh)
+
+### Proposal messages in chat
+- Proposals are stored as `ChatMessageEntity` with `Content` prefixed by `ConstantEnum.ProposalPrefix` (`"#bewegdeal-proposal-"`) followed by the proposal ID
+- `ChatService.GetMessageUnread()` strips the prefix before generating notification preview text
+
+### _ProposalCard.cshtml
+- `@model RequestProposalEntity`; colored border (success/danger/warning) by status
+- `ViewData["RequestMode"] = true` → narrow inline style (used inside message thread)
+
+---
+
+## Invoice Feature
+
+Invoices are auto-created when a proposal is accepted. Admin can update status to Paid or Cancelled.
+
+### Entity
+`InvoiceEntity` stores: request/proposal references, company/customer IDs, `ServiceCost` (from proposal), `SubtotalCost` (after commission), `TotalCost` (after tax), `NotificationSent`, `PaymentDate`.
+
+### Access
+- `GET /Invoice/List` — all authenticated roles; DataTable filtered server-side by userId + userRole
+- `POST /Invoice/UpdateInvoiceStatus` — admin only; validates target status is Paid or Cancelled; sets `PaymentDate` when marking Paid
+
+### Rates
+Commission and tax percentages come from `SettingsEntity.InvoiceCommissionPersent` / `InvoiceTaxPersent`.
+
+---
+
+## About Us Feature
+
+- Admin sets HTML content via `POST /Settings/SaveAboutUs`
+- Content stored in `SettingsEntity.AboutUs`
+- `_AboutUsModal.cshtml` injects `SettingService.GetCached()` — renders a fullscreen Quill-styled modal when content is non-empty; renders nothing otherwise
+- Modal triggered by footer or landing page link (`#aboutUsModal`)
 
 ---
 
@@ -659,11 +839,17 @@ All tables use `serverSide: true`. Key conventions:
 
 ### SignalR (`ChatTool` hub at `/hubs/chat`)
 - `Join(chatKey)`, `Send(chatKey, content)`, `MarkRead(chatKey)`, `Notify()`
-- Chat client events: `ReceiveMessage`, `ChatCancelled`, `MessagesRead`, `ProposalUpdated`
+- Chat client events: `ReceiveMessage`, `ChatCancelled`, `MessagesRead`, `ProposalUpdated` (proposalId + status)
 - Notification client event: `NewMessageNotification` — `{ senderName, preview, requestNumber, date }`
+- `ProposalUpdated` fires via `ChatHubService.NotifyProposal(chatKey, proposalId, status)` after a ProposalReact
 - Chat group: `"bewegdeal-chat-{chatKey}"`
 - Personal group: `"user-{userId}"` — joined via `Notify()`; receives `NewMessageNotification`
 - Client lib: `wwwroot/vendor/libs/signalr/signalr.min.js`
+
+### ChatHistoryModel
+- `OtherPartyRating` (decimal) — loaded from `UserRatingEntity` aggregation; shown in conversation header
+- `Proposals` (Dictionary&lt;long, RequestProposalEntity&gt;) — all proposals for the chat, keyed by id
+- `ProposalPending` (bool) — true if any proposal has Status=Pending
 
 ### Fraud Word Management
 - Admin manages fraud words at `GET /FraudWord/Index`
