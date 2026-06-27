@@ -14,7 +14,12 @@
 
     if (new URLSearchParams(window.location.search).get('chat') === 'open') {
         var _oc = document.getElementById('requestChatOffcanvas');
-        if (_oc) { bootstrap.Offcanvas.getOrCreateInstance(_oc).show(); }
+        if (_oc) {
+            bootstrap.Offcanvas.getOrCreateInstance(_oc).show();
+            var _url = new URL(window.location.href);
+            _url.searchParams.delete('chat');
+            history.replaceState(null, '', _url.pathname + (_url.search || ''));
+        }
     }
 
     var floatingBtn = document.getElementById('chatFloatingBtn');
@@ -54,6 +59,7 @@ var lastMessageDate = '';
             connection.stop();
             connection = null;
         }
+        window.location.reload();
     });
 
     // ── Proposal flow ─────────────────────────────────────────────────────────

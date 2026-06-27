@@ -26,7 +26,7 @@
             <span class="fw-bold">No proposal exists yet.</span>
         </div>
     }
-    else if (User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
+    else if (ViewData["RequestMode"] is true && User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-danger">
             <span class="fw-bold text-danger h4">Classified</span>
