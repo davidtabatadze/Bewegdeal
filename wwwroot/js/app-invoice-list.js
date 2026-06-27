@@ -118,8 +118,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['id'];
+                    const number = full['number'];
                     return (
-                        '<a style="max-width:100px" class="text-primary" target="_blank" href=\'/Invoice/Print?id=' + id + '\'>' +
+                        '<a style="max-width:100px" class="text-primary" target="_blank" href=\'/Invoice/Print?number=' + number + '\'>' +
                         '<strong class="text-decoration-underline">#' + id + '</strong>' +
                         '</a>'
                     );

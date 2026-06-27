@@ -11,6 +11,12 @@
     <script src="~/js/app-invoice-print.js" asp-append-version="true"></script>
 }
 
+@{
+    var invoice = (Bewegdeal.Models.InvoicePrintModel)ViewBag.Invoice;
+    var data = invoice.Data!;
+    var company = invoice.Company!;
+}
+
 @* ************** Content ************** *@
 <div class="invoice-print p-6">
     <div class="d-flex justify-content-between flex-row">
@@ -24,14 +30,14 @@
             <p class="mb-0">+44 (666) 543 2198</p>
         </div>
         <div class="text-end">
-            <h4 class="mb-6">RECHNUNG #86423</h4>
+            <h4 class="mb-6">RECHNUNG #@data.Id</h4>
             <div class="mb-1">
-                <span>Date Issues:</span>
-                <span>April 25, 2021</span>
+                <span>Ausgabedatum:</span>
+                <span>@data.CreateDate.ToString("MMMM d, yyyy")</span>
             </div>
             <div>
-                <span>Date Due:</span>
-                <span>May 25, 2021</span>
+                <span>Verfallsdatum:</span>
+                <span>@data.DueDate.ToString("MMMM d, yyyy")</span>
             </div>
         </div>
     </div>
@@ -40,15 +46,15 @@
 
     <div class="d-flex justify-content-between mb-6">
         <div class="my-2">
-            <h6>Invoice To:</h6>
-            <p class="mb-1">Thomas shelby</p>
-            <p class="mb-1">Shelby Company Limited</p>
-            <p class="mb-1">aod adn kawjnd a akdak da wk a dakdj  sakwjda sk ak dkawj  ad akd wka d asd</p>
-            <p class="mb-1">718-986-6062</p>
-            <p class="mb-0">peakyFBlinders&#64;gmail.com</p>
+            <h6 class="fw-bold">Rechnungsempfänger:</h6>
+            <p class="mb-1">@company.Name</p>
+            <p class="mb-1">@company.Number</p>
+            <p class="mb-1">@company.Address</p>
+            <p class="mb-1">@company.Mobile</p>
+            <p class="mb-0">@company.Email</p>
         </div>
         <div class="my-2">
-            <h6>Bill To:</h6>
+            <h6 class="fw-bold">Bankverbindung:</h6>
             <table>
                 <tbody>
                     <tr>
@@ -56,19 +62,19 @@
                         <td>Giorgi Chochishvili</td>
                     </tr>
                     <tr>
-                        <td class="pe-2">Bank name:</td>
-                        <td>TBC Bank</td>
+                        <td class="pe-2">Land:</td>
+                        <td>Österreich</td>
                     </tr>
                     <tr>
-                        <td class="pe-2">Country:</td>
-                        <td>Georgia</td>
+                        <td class="pe-2">Bank:</td>
+                        <td>TBC Bank</td>
                     </tr>
                     <tr>
                         <td class="pe-2">IBAN:</td>
                         <td>ETD95476213874685</td>
                     </tr>
                     <tr>
-                        <td class="pe-2">SWIFT code:</td>
+                        <td class="pe-2">SWIFT:</td>
                         <td>BR91905</td>
                     </tr>
                 </tbody>
@@ -88,10 +94,10 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Vuexy Admin Template</td>
-                    <td>HTML Admin Template</td>
-                    <td>€32</td>
-                    <td>€32.00</td>
+                    <td>@data.Service</td>
+                    <td>#@data.RequestId</td>
+                    <td>€@data.ServiceCost</td>
+                    <td>€@data.CommissionCost</td>
                 </tr>
             </tbody>
         </table>
@@ -108,16 +114,16 @@
                         <span></span>
                     </td>
                     <td class="px-0 py-12 w-px-100 text-end">
-                        <p class="mb-2">Zwischensumme&nbsp<span style="font-size: 0.6rem">(10%)</span>:</p>
-                        <p class="mb-2">USt&nbsp<span style="font-size: 0.6rem">(20%)</span>:</p>
+                        <p class="mb-2">Zwischensumme&nbsp<span style="font-size: 0.6rem">(@data.CommissionPersent%)</span>:</p>
+                        <p class="mb-2">USt&nbsp<span style="font-size: 0.6rem">(@data.TaxPersent%)</span>:</p>
                         <p class="mb-2 border-bottom pb-2">Rabatt:</p>
                         <p class="mb-0 pt-2">Gesamtsumme:</p>
                     </td>
                     <td class="px-0 py-6 w-px-100 text-end">
-                        <p class="fw-medium mb-2">€154.25</p>
-                        <p class="fw-medium mb-2">€00.00</p>
-                        <p class="fw-medium mb-2 border-bottom pb-2">€50.00</p>
-                        <p class="fw-medium mb-0 pt-2">€204.25</p>
+                        <p class="fw-medium mb-2">€@data.CommissionCost</p>
+                        <p class="fw-medium mb-2">€@data.TaxCost</p>
+                        <p class="fw-medium mb-2 border-bottom pb-2">€00.00</p>
+                        <p class="fw-medium mb-0 pt-2">€@data.TotalCost</p>
                     </td>
                 </tr>
             </tbody>
@@ -127,8 +133,10 @@
     <hr class="mt-0 mb-6" />
     <div class="row">
         <div class="col-12">
-            @* <span class="fw-medium">Note:</span> *@
-            <span>It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance projects. Thank You!</span>
+            <span class="fw-medium">Danke schön!</span>
+        </div>
+        <div class="col-12">
+            <span>Es war mir eine Freude, mit Ihnen zusammenzuarbeiten. Wir hoffen, dass Sie uns bei zukünftigen Projekten in Erinnerung behalten.</span>
         </div>
     </div>
 </div>

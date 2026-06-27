@@ -31,8 +31,16 @@ namespace Bewegdeal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Print(long id)
+        public async Task<IActionResult> Print(string number)
         {
+            var result = await InvoiceService.Get(number, UserId, UserRole);
+
+            if (!result.Success || result.Result is null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.Invoice = result.Result;
             return View();
         }
 

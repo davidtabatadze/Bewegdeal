@@ -43,14 +43,39 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Update(area, update);
         public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
-        public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
-            => await InvoiceRepository.Get(filter, properties);
         private async Task<decimal> Sum(InvoiceFilter filter, string property)
             => await InvoiceRepository.Sum(filter, property);
         private async Task<int> Count(InvoiceFilter filter)
             => await InvoiceRepository.Count(filter);
         private async Task<int> CountDistinct(InvoiceFilter filter, string property)
             => await InvoiceRepository.CountDistinct(filter, property);
+
+        public async Task<GenericResultModel<InvoicePrintModel>> Get(string number, long userId, string userRole)
+        {
+            var invoice = await InvoiceRepository.Get(new InvoiceFilter
+            {
+                Number = number,
+                ViewerId = userId,
+                ViewerRole = userRole
+            });
+
+            var company = await UserService.Get(
+                invoice?.CompanyId ?? 0,
+                [nameof(UserEntity.Number), nameof(UserEntity.Name), nameof(UserEntity.Address),
+                    nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
+            );
+
+            if (invoice is null || company is null)
+            {
+                return GenericResultModel<InvoicePrintModel>.Fail();
+            }
+
+            return GenericResultModel<InvoicePrintModel>.Ok(new InvoicePrintModel
+            {
+                Data = invoice,
+                Company = company
+            });
+        }
 
         public async Task<GenericResultModel<dynamic>> LoadGrid(long userId, string userRole)
         {
