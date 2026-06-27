@@ -69,8 +69,8 @@
     <script src="~/js/chat.js" asp-append-version="true"></script>
 }
 
-<div class="card bg-transparent shadow-none border-0 mb-6">
-    <div class="card-body row g-6 p-0 pb-4">
+<div class="card bg-transparent shadow-none border-0 mb-4">
+    <div class="card-body row g-6 p-0">
         <div class="col-12 col-md-8 card-separator">
             <h5 class="mb-2 text-center">
                 <small>
@@ -187,21 +187,11 @@
                 </div>
             </div> *@
         </div>
-        <div class="col-12 col-md-4">
-            <div class="d-flex">
-                Dial part coming soon
-                @* <ul class="list-group list-group-horizontal-md mt-1 mb-3 border border-warning">
-                    <li class="list-group-item flex-fill p-3">
-                        <h6 class="d-flex align-items-center gap-2 mb-3"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Proposition</h6>
-                        <address class="text-body mb-0">
-                            <dl class="row mb-0">
-                                <dt class="col-8 fw-normal text-heading">@(req.ASAP ? "As soon as possible" : req.Date?.ToString("MMMM d, yyyy") + (req.Time.HasValue ? " at " + req.Time.Value.ToString("HH:mm") : ""))</dt>
-                                <dd class="col-4 text-end"><strong>@req.Currency</strong> @req.Cost.ToString("0.##")</dd>
-                            </dl>
-                        </address>
-                    </li>
-                </ul> *@
-            </div>
+        <div class="col-12 col-md-4 d-flex justify-content-center align-items-start">
+            @if (vm.Proposal is not null)
+            {
+                @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.Proposal, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
+            }
         </div>
     </div>
 </div>

@@ -7,6 +7,8 @@ namespace Bewegdeal.Models
         public RequestEntity? Data { get; set; }
         public UserAvatarModel? Requester { get; set; }
         public SettingsEntity? Settings { get; set; }
+        public RequestProposalEntity? Proposal { get; set; }
+        public UserAvatarModel? ProposalCompany { get; set; }
         public List<RequestFileModel> Files { get; set; } = [];
     }
 }

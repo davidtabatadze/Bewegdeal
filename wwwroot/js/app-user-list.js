@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status → icon + color + label
     const statusMap = {
-        active:     { title: 'Active',     icon: 'ri-user-follow-line',   color: 'success' },
-        pending:    { title: 'Pending',    icon: 'ri-user-forbid-line',   color: 'warning' },
-        blocked:    { title: 'Blocked',    icon: 'ri-admin-line',         color: 'danger' },
+        active: { title: 'Active', icon: 'ri-user-follow-line', color: 'success' },
+        pending: { title: 'Pending', icon: 'ri-user-forbid-line', color: 'warning' },
+        blocked: { title: 'Blocked', icon: 'ri-admin-line', color: 'danger' },
         unverified: { title: 'Unverified', icon: 'ri-user-settings-line', color: 'secondary' }
     };
 
@@ -83,11 +83,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     const avatarInner = avatar.url
                         ? '<img src="' + avatar.url + '"class="rounded-circle" style="width:100%;height:100%;object-fit:cover;" />'
                         : '<span class="avatar-initial rounded-circle bg-label-primary">' + (avatar.initials || '') + '</span>';
+                    const avatarRating = avatar.rating && avatar.rating > 0 ?
+                        '<span class="position-absolute top-10 start-100 translate-middle badge badge-center border rounded-pill bg-primary fw-bold">' + avatar.rating + '</span>' :
+                        '';
 
                     return (
                         '<div class="d-flex justify-content-start align-items-center user-name">' +
                         '<div class="avatar-wrapper">' +
-                        '<div class="avatar avatar-m me-2">' + avatarInner + '</div>' +
+                        '<div class="avatar avatar-m me-2">' + avatarInner + avatarRating + '</div>' +
                         '</div>' +
                         '<div class="d-flex flex-column">' +
                         '<span class="text-heading fw-medium text-truncate">' + name + '</span>' +
@@ -165,11 +168,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     const status = full['status'];
                     const id = full['id'];
                     const actionsConfig = {
-                        active:     [{ action: 'block',    icon: 'ri-admin-line',         color: 'danger',  title: 'Block' }],
-                        pending:    [{ action: 'activate', icon: 'ri-user-follow-line',   color: 'success', title: 'Activate' },
-                                     { action: 'delete',   icon: 'ri-user-unfollow-line', color: 'danger',  title: 'Delete' }],
-                        blocked:    [{ action: 'activate', icon: 'ri-user-follow-line',   color: 'success', title: 'Activate' }],
-                        unverified: [{ action: 'delete',   icon: 'ri-user-unfollow-line', color: 'danger',  title: 'Delete' }]
+                        active: [{ action: 'block', icon: 'ri-admin-line', color: 'danger', title: 'Block' }],
+                        pending: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Activate' },
+                        { action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Delete' }],
+                        blocked: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Activate' }],
+                        unverified: [{ action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Delete' }]
                     };
                     const actions = actionsConfig[status] || [];
                     return actions.map(function (a) {
@@ -273,9 +276,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Action button — delegated click on the table wrapper
     const confirmTextMap = {
-        block:    'Sure you want to <span class="text-danger fw-bold">Block</span> the user?',
+        block: 'Sure you want to <span class="text-danger fw-bold">Block</span> the user?',
         activate: 'Sure you want to <span class="text-success fw-bold">Activate</span> the user?',
-        delete:   'Sure you want to <span class="text-danger fw-bold">Delete</span> the user?'
+        delete: 'Sure you want to <span class="text-danger fw-bold">Delete</span> the user?'
     };
 
     dt_user_table.addEventListener('click', function (e) {

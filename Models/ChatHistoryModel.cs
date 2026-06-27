@@ -11,6 +11,7 @@ namespace Bewegdeal.Models
         public string OtherPartyName { get; set; } = string.Empty;
         public string OtherPartyInitials { get; set; } = string.Empty;
         public string? OtherPartyPictureUrl { get; set; }
+        public decimal OtherPartyRating { get; set; }
         public long ViewerId { get; set; }
         public string ViewerInitials { get; set; } = string.Empty;
         public string? ViewerPictureUrl { get; set; }

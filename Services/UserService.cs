@@ -183,6 +183,7 @@ namespace Bewegdeal.Services
             {
                 avatar.Url = FileService.GetUrl(user.Avatar);
                 avatar.Name = user.Name;
+                avatar.Rating = user.Rating;
                 avatar.Initials = string.Concat(
                     user.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                                 .Take(2).Select(p => char.ToUpper(p[0]))

@@ -63,6 +63,9 @@ namespace Bewegdeal.Services
         public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
             => await RequestRepository.Update(area, update);
 
+        private async Task<int> Count(RequestFilter filter)
+            => await RequestRepository.Count(filter);
+
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.GetCached() };
 
@@ -74,9 +77,6 @@ namespace Bewegdeal.Services
 
         public async Task<GenericResultModel<RequestModel>> Get(string number, long userId)
             => await Get(userId, await Get(number), false);
-
-        private async Task<int> Count(RequestFilter filter)
-            => await RequestRepository.Count(filter);
 
         public async Task<GenericResultModel> Cancel(string number, long userId)
         {
@@ -328,11 +328,22 @@ namespace Bewegdeal.Services
             var files = await RequestFileRepository.Load(request.Id);
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
+            var proposals = edit == true ? [] : await ProposalService.Load([request.Id], null, null);
+            var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() ??
+                           new RequestProposalEntity { Status = string.Empty };
+            proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
+            var proposalCompany = await UserService.Get(
+                proposal?.CompanyId ?? 0,
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
+            );
+
             return GenericResultModel<RequestModel>.Ok(new RequestModel
             {
                 Data = request,
                 Settings = settings,
                 Requester = UserService.GetAvatar(requester),
+                Proposal = proposal,
+                ProposalCompany = proposalCompany is null ? null : UserService.GetAvatar(proposalCompany),
                 Files = [.. files.Select(i => new RequestFileModel
                 {
                     Id = i.Id,

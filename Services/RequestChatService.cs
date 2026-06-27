@@ -106,7 +106,7 @@ namespace Bewegdeal.Services
             var proposals = await ProposalService.Load(null, data.chat?.Id ?? 0, null);
             var users = await UserService.Load(
                 [data.chat?.CustomerId ?? 0, data.chat?.CompanyId ?? 0],
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
             );
 
             foreach (var proposal in proposals)
@@ -129,6 +129,7 @@ namespace Bewegdeal.Services
                 OtherPartyName = otherPartyAvatar.Name,
                 OtherPartyInitials = otherPartyAvatar.Initials,
                 OtherPartyPictureUrl = otherPartyAvatar.Url,
+                OtherPartyRating = otherPartyAvatar.Rating,
                 Messages = messages,
                 Proposals = proposals.ToDictionary(p => p.Id),
                 ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
