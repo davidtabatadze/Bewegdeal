@@ -140,7 +140,7 @@ namespace Bewegdeal.Services
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
-            var proposals = await ProposalService.Load(null, chat.Id, null);
+            var proposals = await ProposalService.Load(chat.Id);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]

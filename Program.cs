@@ -2,6 +2,7 @@ using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Jobs;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -92,6 +93,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<RequestChatService>();
             builder.Services.AddScoped<InvoiceService>();
+            builder.Services.AddHostedService<InvoiceGenerationJob>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.

@@ -14,7 +14,7 @@ namespace Bewegdeal.Data.Repositories
             {
 
                 case InvoiceUpdateAreaEnum.Status:
-                    await Context.Invoices.Where(r => r.Id == update.Id || r.RequestId == update.RequestId)
+                    await Context.Invoices.Where(r => r.Status == InvoiceStatusEnum.Pending && (r.Id == update.Id || r.RequestId == update.RequestId))
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, update.Status)
                                                .SetProperty(p => p.PaymentDate, update.PaymentDate)

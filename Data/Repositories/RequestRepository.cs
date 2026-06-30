@@ -73,6 +73,12 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.Id == filter.Id.Value);
             }
 
+            if (filter.Ids is not null)
+            {
+                filter.Ids.Add(0);
+                query = query.Where(r => filter.Ids.Contains(r.Id));
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Number))
             {
                 query = query.Where(r => r.Number == filter.Number);

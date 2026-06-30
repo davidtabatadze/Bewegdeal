@@ -10,14 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status → icon HTML + label
     const statusMap = {
-        pending: { icon: '<i class="icon-base ri ri-timer-flash-line  icon-22px text-warning"></i>', label: 'Pending' },
-        cancelled: { icon: '<i class="icon-base ri ri-hand              icon-22px text-danger"></i>', label: 'Cancelled' },
-        negotiation: { icon: '<i class="icon-base ri ri-wechat-line       icon-22px text-info"></i>', label: 'Negotiation' },
-        agreed: { icon: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success"></i>', label: 'Agreed' },
-        resolved: { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success"></i>', label: 'Resolved' },
-        declined: { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark"></i>', label: 'Declined' },
-    };
-    const statusMap2 = {
         pending: { icon: 'ri-timer-flash-line', color: 'warning', label: 'Pending' },
         cancelled: { icon: 'ri-hand', color: 'danger', label: 'Cancelled' },
         negotiation: { icon: 'ri-wechat-line', color: 'info', label: 'Negotiation' },
@@ -134,9 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 1,
                 width: '60px',
                 render: function (data, type, full) {
-                    //const s = statusMap[full['status']] || { icon: '', label: full['status'] };
-                    //return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + s.label + "'>" + s.icon + '</span>';
-                    const map = statusMap2[full['status']];
+                    const map = statusMap[full['status']];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
                         '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +

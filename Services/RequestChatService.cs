@@ -103,7 +103,7 @@ namespace Bewegdeal.Services
             }
 
             var messages = await ChatService.LoadMessages(data.chat?.Id ?? 0);
-            var proposals = await ProposalService.Load(null, data.chat?.Id ?? 0, null);
+            var proposals = await ProposalService.Load(data.chat?.Id ?? 0);
             var users = await UserService.Load(
                 [data.chat?.CustomerId ?? 0, data.chat?.CompanyId ?? 0],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
@@ -175,6 +175,7 @@ namespace Bewegdeal.Services
                 var proposal = await ProposalService.Create(new RequestProposalEntity
                 {
                     CompanyId = userId,
+                    CustomerId = chat?.CustomerId ?? 0,
                     ChatId = model.ChatId,
                     RequestId = model.RequestId,
                     CreateDate = DateTime.Now,
@@ -183,7 +184,8 @@ namespace Bewegdeal.Services
                     Date = DateOnly.Parse(model.Date!),
                     Time = TimeOnly.Parse(model.Time!),
                     Status = RequestProposalStatusEnum.Pending,
-                    ServiceTerms = company?.ServiceTerms
+                    ServiceTerms = company?.ServiceTerms,
+                    InvoiceId = 0
                 });
 
                 await ChatHubService.Send(userId, chat, "Kindly, consider my proposal.");

@@ -9,6 +9,8 @@ namespace Bewegdeal.Data.Entities
         public long? ChatId { get; set; }
         public long RequestId { get; set; }
         public long CompanyId { get; set; }
+        public long CustomerId { get; set; }
+        public long InvoiceId { get; set; }
         public DateTime CreateDate { get; set; }
         public decimal Cost { get; set; }
         public string Currency { get; set; } = "EUR";

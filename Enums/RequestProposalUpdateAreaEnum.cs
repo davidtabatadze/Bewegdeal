@@ -2,6 +2,7 @@
 {
     public enum RequestProposalUpdateAreaEnum
     {
-        Status = 1
+        Status = 1,
+        Invoice
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,14 @@ namespace Bewegdeal.Data.Repositories
                                                        .SetProperty(p => p.Status, update.Status)
                                                        .SetProperty(p => p.ReactionDate, DateTime.Now)
                                                        .SetProperty(p => p.ReactionReason, update.ReactionReason)
+                                                       .SetProperty(p => p.InvoiceId, 0)
+                                                  );
+                    break;
+
+                case RequestProposalUpdateAreaEnum.Invoice:
+                    await Context.RequestProposals.Where(p => p.Id == update.Id)
+                                                  .ExecuteUpdateAsync(p => p
+                                                       .SetProperty(p => p.InvoiceId, update.InvoiceId)
                                                   );
                     break;
 
@@ -27,24 +36,34 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        public async Task<List<RequestProposalEntity>> Load(List<long>? requestIds, long? chatId, string? status)
+        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter)
         {
             var query = Context.RequestProposals.AsQueryable();
 
-            if (requestIds is not null)
+            if (filter.ChatId.HasValue)
             {
-                requestIds.Add(0);
-                query = query.Where(i => requestIds.Contains(i.RequestId));
+                query = query.Where(i => i.ChatId == filter.ChatId);
             }
 
-            if (chatId is not null)
+            if (filter.InvoiceId.HasValue)
             {
-                query = query.Where(i => i.ChatId == chatId);
+                query = query.Where(i => i.InvoiceId == filter.InvoiceId);
             }
 
-            if (!string.IsNullOrWhiteSpace(status))
+            if (filter.DateTo.HasValue)
             {
-                query = query.Where(i => i.Status == status);
+                query = query.Where(i => i.Date <= filter.DateTo);
+            }
+
+            if (filter.RequestIds is not null)
+            {
+                filter.RequestIds.Add(0);
+                query = query.Where(i => filter.RequestIds.Contains(i.RequestId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Status))
+            {
+                query = query.Where(i => i.Status == filter.Status);
             }
 
             return await query.ToListAsync();

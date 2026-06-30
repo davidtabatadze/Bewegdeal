@@ -66,6 +66,9 @@ namespace Bewegdeal.Services
         private async Task<int> Count(RequestFilter filter)
             => await RequestRepository.Count(filter);
 
+        public async Task<List<RequestEntity>> Load(RequestFilter filter)
+            => await RequestRepository.Load(filter);
+
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.GetCached() };
 
@@ -118,12 +121,13 @@ namespace Bewegdeal.Services
                     new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
                 );
 
-                await InvoiceService.Create(request, proposal);
+                var invoice = await InvoiceService.Create(request, proposal);
 
                 await Update(
                     RequestUpdateAreaEnum.Status,
                     new() { Id = request.Id, Status = RequestStatusEnum.Resolved }
                 );
+                await ProposalService.Update(proposal.Id, invoice.Id);
 
                 await UserService.Rate(proposal.CompanyId, userId, rating ?? 0);
             }
@@ -178,7 +182,7 @@ namespace Bewegdeal.Services
 
             var viewerIsCompany = filter.ViewerRole == UserRoleEnum.Company;
 
-            var requests = await RequestRepository.Load(filter);
+            var requests = await Load(filter);
             var filtered = await Count(filter);
             var total = await Count(new RequestFilter
             {
@@ -193,7 +197,7 @@ namespace Bewegdeal.Services
                 true
             );
             var proposals = await ProposalService.Load(
-                requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)], null, null
+                requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
             );
 
             var requesters = requests.Select(r => r.RequesterId);
@@ -309,7 +313,7 @@ namespace Bewegdeal.Services
             var files = await RequestFileRepository.Load(request.Id);
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
-            var proposals = edit == true ? [] : await ProposalService.Load([request.Id], null, null);
+            var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
             var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() ??
                            new RequestProposalEntity { Status = string.Empty };
             proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
