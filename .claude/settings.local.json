@@ -58,7 +58,11 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Middleware\\\\RememberMeMiddleware.cs\" -Force)",
       "Bash(Write-Host \"Deleted.\")",
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Chat\")",
-      "Bash(Write-Output \"done\")"
+      "Bash(Write-Output \"done\")",
+      "Skill(run)",
+      "Skill(run:*)",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__tabs_context_mcp"
     ]
   }
 }

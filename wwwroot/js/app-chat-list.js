@@ -119,7 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 4,
                 width: '135px',
                 createdCell: function (td) { td.style.minWidth = '135px'; },
-                render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
+                render: function (data) {
+                    if (!data) { return '—'; }
+                    return new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
             },
             {
                 // Request

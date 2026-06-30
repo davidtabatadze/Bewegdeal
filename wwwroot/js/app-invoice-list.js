@@ -1,6 +1,6 @@
 /**
  * Invoices List — Bewegdeal
- * v1.0.4
+ * v1.0.8
  */
 
 'use strict';
@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Column index → sort field name
-    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: requestId, 5: id
-    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'requestId', 5: 'id' };
+    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: createDate, 5: paymentDate, 6: requestId, 7: id
+    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'createDate', 5: 'paymentDate', 6: 'requestId', 7: 'id' };
 
     if (!dt_invoice_table) { return; }
 
-    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 7;
+    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 9;
 
     const dt_invoice = new DataTable(dt_invoice_table, {
         serverSide: true,
@@ -50,9 +50,11 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'user' },         // 1 — user (not sortable)
             { data: 'serviceCost' },  // 2 — cost (sortable)
             { data: 'totalCost' },    // 3 — fee (sortable)
-            { data: 'requestId' },    // 4 — request (sortable)
-            { data: 'id' },           // 5 — invoice (sortable)
-            ...(isAdmin ? [{ data: 'status' }] : [])  // 6 — actions (admin only)
+            { data: 'createDate' },   // 4 — date (sortable)
+            { data: 'paymentDate' },  // 5 — payment (sortable)
+            { data: 'requestId' },    // 6 — request (sortable)
+            { data: 'id' },           // 7 — invoice (sortable)
+            ...(isAdmin ? [{ data: 'status' }] : [])  // 8 — actions (admin only)
         ],
         columnDefs: [
             {
@@ -99,8 +101,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
-                // Request
+                // Date — invoice create date
                 targets: 4,
+                width: '135px',
+                createdCell: function (td) { td.style.minWidth = '135px'; },
+                render: function (data, type, full) {
+                    const create = !data ? '-' :
+                        new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const due = !full['dueDate'] ? '-' :
+                        new Date(full['dueDate']).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    return (
+                        '<div class="d-flex flex-column">' +
+                        '<span class="fw-medium">' + create + '</span>' +
+                        '<small class="text-danger">' + due + '</small>' +
+                        '</div>'
+                    );
+                }
+            },
+            {
+                // Payment — invoice payment date
+                targets: 5,
+                width: '135px',
+                createdCell: function (td) { td.style.minWidth = '135px'; },
+                render: function (data) {
+                    if (!data) { return '—'; }
+                    return new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+            },
+            {
+                // Request
+                targets: 6,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['requestId'];
@@ -114,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Invoice
-                targets: 5,
+                targets: 7,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['id'];
@@ -128,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             ...(isAdmin ? [{
                 // Actions
-                targets: 6,
+                targets: 8,
                 width: '90px',
                 orderable: false,
                 searchable: false,
@@ -153,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }] : [])
         ],
         pageLength: 10,
-        order: [[0, 'desc']],
+        order: [[4, 'desc']],
         drawCallback: function () {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                 if (!bootstrap.Tooltip.getInstance(el)) {
