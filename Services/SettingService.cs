@@ -38,6 +38,14 @@ namespace Bewegdeal.Services
             ClearCache();
         }
 
+        public async Task SavePrivacyPolicy(string? content)
+        {
+            var settings = await Get();
+            settings.PrivacyPolicy = content ?? string.Empty;
+            await Update(settings);
+            ClearCache();
+        }
+
         public async Task SaveTermsAndConditionsCustomer(string? content)
         {
             var settings = await Get();
@@ -56,12 +64,13 @@ namespace Bewegdeal.Services
             ClearCache();
         }
 
-        public async Task SaveInvoice(short commissionPersent, short taxPersent)
+        public async Task SaveInvoice(short commissionPersent, short taxPersent, short dueDays)
         {
             var settings = await Get();
 
             settings.InvoiceCommissionPersent = commissionPersent;
             settings.InvoiceTaxPersent = taxPersent;
+            settings.InvoiceDueDays = dueDays;
 
             await Update(settings);
             ClearCache();

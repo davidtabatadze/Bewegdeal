@@ -6,6 +6,7 @@ namespace Bewegdeal.Data.Entities
     {
         public long Id { get; set; }
         public string AboutUs { get; set; } = string.Empty;
+        public string PrivacyPolicy { get; set; } = string.Empty;
         public string TermsAndConditionsContentCustomer { get; set; } = string.Empty;
         public string TermsAndConditionsContentCompany { get; set; } = string.Empty;
         public DateTime TermsAndConditionsContentDateCustomer { get; set; }
