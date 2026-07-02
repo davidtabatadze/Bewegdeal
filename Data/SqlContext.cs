@@ -214,6 +214,7 @@ namespace Bewegdeal.Data
                 e.Property(p => p.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(p => p.Status);
+                e.HasIndex(p => p.Service);
                 e.HasIndex(p => p.ChatId);
                 e.HasIndex(p => p.RequestId);
                 e.HasIndex(p => p.CompanyId);
@@ -230,6 +231,7 @@ namespace Bewegdeal.Data
                 e.Property(p => p.Currency).IsRequired().HasMaxLength(4);
                 e.Property(p => p.ServiceTerms).HasMaxLength(256).IsRequired(false);
                 e.Property(p => p.Status).IsRequired().HasMaxLength(16);
+                e.Property(p => p.Service).IsRequired().HasMaxLength(16);
                 e.Property(p => p.ReactionDate).IsRequired(false);
                 e.Property(p => p.ReactionReason).IsRequired(false).HasMaxLength(1024);
                 e.Property(p => p.Date).IsRequired(true)

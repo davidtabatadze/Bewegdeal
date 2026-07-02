@@ -18,6 +18,7 @@ namespace Bewegdeal.Data.Entities
         public TimeOnly? Time { get; set; }
         public string? ServiceTerms { get; set; }
         public string Status { get; set; } = RequestProposalStatusEnum.Pending;
+        public string Service { get; set; } = "";
         public DateTime? ReactionDate { get; set; }
         public string? ReactionReason { get; set; }
     }

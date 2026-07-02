@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace Bewegdeal.Services
 {
-    public class DashboardService(InvoiceService InvoiceService)
+    public class DashboardService(InvoiceService InvoiceService, ProposalService ProposalService)
     {
 
         public async Task<GenericResultModel<object>> GetDataForCompany(long userId, short year = 0)
@@ -26,11 +26,11 @@ namespace Bewegdeal.Services
                 DateTo = endDate
             });
 
-            var feesSums = new List<decimal>();
-            var movingSums = new List<decimal>();
-            var pickupSums = new List<decimal>();
-            var removalSums = new List<decimal>();
-            var transportSums = new List<decimal>();
+            var feesSum = new List<decimal>();
+            var movingSum = new List<decimal>();
+            var pickupSum = new List<decimal>();
+            var removalSum = new List<decimal>();
+            var transportSum = new List<decimal>();
 
             for (int month = 1; month <= 12; month++)
             {
@@ -40,11 +40,11 @@ namespace Bewegdeal.Services
                 }
 
                 var monthInvoices = invoices.Where(i => i.CreateDate.Month == month).ToList();
-                feesSums.Add(monthInvoices.Sum(i => i.TotalCost));
-                movingSums.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Moving).Sum(i => i.ServiceCost - i.TotalCost));
-                pickupSums.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Pickup).Sum(i => i.ServiceCost - i.TotalCost));
-                removalSums.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Removal).Sum(i => i.ServiceCost - i.TotalCost));
-                transportSums.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Transport).Sum(i => i.ServiceCost - i.TotalCost));
+                feesSum.Add(monthInvoices.Sum(i => i.TotalCost));
+                movingSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Moving).Sum(i => i.ServiceCost - i.TotalCost));
+                pickupSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Pickup).Sum(i => i.ServiceCost - i.TotalCost));
+                removalSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Removal).Sum(i => i.ServiceCost - i.TotalCost));
+                transportSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Transport).Sum(i => i.ServiceCost - i.TotalCost));
             }
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -65,11 +65,75 @@ namespace Bewegdeal.Services
                     xaxisValues = DateTimeFormatInfo.CurrentInfo.AbbreviatedMonthNames.Where(m => !string.IsNullOrEmpty(m)),
                     series = new List<object>
                     {
-                        movingSums.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Moving, data = movingSums },
-                        removalSums.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Removal, data = removalSums },
-                        pickupSums.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Pickup, data = pickupSums },
-                        transportSums.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Transport, data = transportSums },
-                        new { name = "Plattformgebühren", data = feesSums }
+                        movingSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Moving, data = movingSum },
+                        removalSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Removal, data = removalSum },
+                        pickupSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Pickup, data = pickupSum },
+                        transportSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Transport, data = transportSum },
+                        new { name = "Plattformgebühren", data = feesSum }
+                    }.Where(s => s is not null)
+                }
+            });
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        public async Task<GenericResultModel<object>> GetDataForCompany2(long userId, short year = 0)
+        {
+            short minYear = 2025;
+            short maxYear = (short)DateTime.Now.Year;
+            year = year < minYear || year > maxYear ? maxYear : year;
+
+            var startDate = new DateTime(year, 1, 1);
+            var endDate = new DateTime(year, 12, 31);
+
+            var proposals = await ProposalService.Load(new RequestProposalFilter
+            {
+                CompanyId = userId,
+                Status = RequestProposalStatusEnum.Accepted,
+                DateTo = DateOnly.FromDateTime(DateTime.Now)
+            });
+
+            var movingCount = new List<decimal>();
+            var pickupCount = new List<decimal>();
+            var removalCount = new List<decimal>();
+            var transportCount = new List<decimal>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                if (new DateTime(year, month, 1) > DateTime.Now)
+                {
+                    break;
+                }
+
+                var monthProposals = proposals.Where(i => i.Date is not null)
+                                              .Where(i => i.Date!.Value.Month == month)
+                                              .ToList();
+                movingCount.Add(monthProposals.Count(i => i.Service == ServiceEnum.Moving));
+                pickupCount.Add(monthProposals.Count(i => i.Service == ServiceEnum.Pickup));
+                removalCount.Add(monthProposals.Count(i => i.Service == ServiceEnum.Removal));
+                transportCount.Add(monthProposals.Count(i => i.Service == ServiceEnum.Transport));
+            }
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            return GenericResultModel<object>.Ok(new
+            {
+                year,
+                years = Enumerable.Range(minYear, maxYear - minYear + 1).ToArray(),
+                serviceChart = new
+                {
+                    groupNames = new
+                    {
+                        moving = AnnotationEnum.General.Service.Moving,
+                        pickup = AnnotationEnum.General.Service.Pickup,
+                        removal = AnnotationEnum.General.Service.Removal,
+                        transport = AnnotationEnum.General.Service.Transport
+                    },
+                    xaxisValues = DateTimeFormatInfo.CurrentInfo.AbbreviatedMonthNames.Where(m => !string.IsNullOrEmpty(m)),
+                    series = new List<object>
+                    {
+                        movingCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Moving, data = movingCount },
+                        removalCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Removal, data = removalCount },
+                        pickupCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Pickup, data = pickupCount },
+                        transportCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Transport, data = transportCount },
                     }.Where(s => s is not null)
                 }
             });

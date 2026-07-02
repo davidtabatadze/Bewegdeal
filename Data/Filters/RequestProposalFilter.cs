@@ -8,6 +8,7 @@ namespace Bewegdeal.Data.Filters
         public string? Status { get; set; }
         public long? ChatId { get; set; }
         public long? InvoiceId { get; set; }
+        public long? CompanyId { get; set; }
         public List<long>? RequestIds { get; set; }
     }
 }

@@ -162,7 +162,7 @@ namespace Bewegdeal.Services
         {
             var request = await RequestService.Get(
                 model.RequestNumber ?? "-",
-                [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Status), nameof(RequestEntity.Service)]
             );
             var chat = await ChatService.GetActual(model.RequestNumber ?? "-");
             var existing = await ProposalService.GetActual(chat?.Id ?? 0);
@@ -184,6 +184,7 @@ namespace Bewegdeal.Services
                     Date = DateOnly.Parse(model.Date!),
                     Time = TimeOnly.Parse(model.Time!),
                     Status = RequestProposalStatusEnum.Pending,
+                    Service = request?.Service ?? "-",
                     ServiceTerms = company?.ServiceTerms,
                     InvoiceId = 0
                 });
