@@ -7,6 +7,7 @@ using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Bewegdeal
 {
@@ -14,6 +15,11 @@ namespace Bewegdeal
     {
         public static async Task Main(string[] args)
         {
+            // ── Set Culture ─────────────────────────────────────────────────────────────
+            var culture = new CultureInfo("de-DE"); // de-DE en-US
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             var builder = WebApplication.CreateBuilder(args);
 
             // ── MVC ──────────────────────────────────────────────────────────────
@@ -93,6 +99,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<RequestChatService>();
             builder.Services.AddScoped<InvoiceService>();
+            builder.Services.AddScoped<DashboardService>();
             builder.Services.AddHostedService<InvoiceGenerationJob>();
 
             // ── Email ─────────────────────────────────────────────────────────────

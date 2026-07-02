@@ -91,8 +91,8 @@ namespace Bewegdeal.Services
             )
             {
                 await InvoiceService.Update(
-                    InvoiceUpdateAreaEnum.Status,
-                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                    InvoiceUpdateAreaEnum.Cancel,
+                    new() { RequestId = request.Id }
                 );
 
                 await Update(
@@ -117,8 +117,8 @@ namespace Bewegdeal.Services
                 }
 
                 await InvoiceService.Update(
-                    InvoiceUpdateAreaEnum.Status,
-                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                    InvoiceUpdateAreaEnum.Cancel,
+                    new() { RequestId = request.Id }
                 );
 
                 var invoice = await InvoiceService.Create(request, proposal);

@@ -6,10 +6,10 @@
         {
             public class Service
             {
-                public const string Moving = "Moving Service";
-                public const string Removal = "Junk Removal";
-                public const string Pickup = "Store Pickup";
-                public const string Transport = "Vehicle Transport";
+                public const string Moving = "Moving Service"; // "Umzug"; //
+                public const string Removal = "Junk Removal"; // "Entrümpelung"; //
+                public const string Pickup = "Store Pickup"; // "Einkaufsabholung"; //
+                public const string Transport = "Vehicle Transport"; // "Fahrzeugtransport"; //
             }
         }
         public class Account

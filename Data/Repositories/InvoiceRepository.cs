@@ -14,10 +14,18 @@ namespace Bewegdeal.Data.Repositories
             {
 
                 case InvoiceUpdateAreaEnum.Status:
-                    await Context.Invoices.Where(r => r.Status == InvoiceStatusEnum.Pending && (r.Id == update.Id || r.RequestId == update.RequestId))
+                    await Context.Invoices.Where(r => r.Id == update.Id)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, update.Status)
                                                .SetProperty(p => p.PaymentDate, update.PaymentDate)
+                                          );
+                    break;
+
+                case InvoiceUpdateAreaEnum.Cancel:
+                    await Context.Invoices.Where(r => r.Status == InvoiceStatusEnum.Pending && r.RequestId == update.RequestId)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, InvoiceStatusEnum.Cancelled)
+                                               .SetProperty(p => p.PaymentDate, (DateTime?)null)
                                           );
                     break;
 
@@ -68,6 +76,18 @@ namespace Bewegdeal.Data.Repositories
             if (filter.RequestId.HasValue)
             {
                 query = query.Where(r => r.RequestId == filter.RequestId.Value);
+            }
+
+            if (filter.DateFrom.HasValue)
+            {
+                filter.DateFrom = filter.DateFrom.Value.Date;
+                query = query.Where(r => r.CreateDate >= filter.DateFrom);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                filter.DateTo = filter.DateTo.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(r => r.CreateDate <= filter.DateTo.Value);
             }
 
             if (filter.AmountFrom.HasValue)

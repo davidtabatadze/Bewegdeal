@@ -43,6 +43,8 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Update(area, update);
         public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
+        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
+            => await InvoiceRepository.Load(filter);
         private async Task<decimal> Sum(InvoiceFilter filter, string property)
             => await InvoiceRepository.Sum(filter, property);
         private async Task<int> Count(InvoiceFilter filter)
@@ -100,7 +102,7 @@ namespace Bewegdeal.Services
             filter.ViewerId = userId;
             filter.ViewerRole = userRole;
 
-            var invoices = await InvoiceRepository.Load(filter);
+            var invoices = await Load(filter);
             var filtered = await Count(filter);
             var total = await Count(new InvoiceFilter
             {
