@@ -232,6 +232,19 @@
     }, 150);
   });
 
+  const ratingEl = document.querySelector('#companyRating');
+  if (ratingEl) {
+    new Raty(ratingEl, {
+      starType: 'i',
+      starOn:   'icon-base ri ri-star-fill text-warning',
+      starHalf: 'icon-base ri ri-star-half-line text-warning',
+      starOff:  'icon-base ri ri-star-line text-muted',
+      score: parseFloat(ratingEl.dataset.score) || 0,
+      half: true,
+      readOnly: true
+    }).init();
+  }
+
   loadStats(0);
   loadStats2(0);
 

@@ -17,6 +17,11 @@ namespace Bewegdeal
         {
             // ── Set Culture ─────────────────────────────────────────────────────────────
             var culture = new CultureInfo("de-DE"); // de-DE en-US
+            var usCulture = new CultureInfo("en-US");
+            culture.NumberFormat.NumberDecimalSeparator = usCulture.NumberFormat.NumberDecimalSeparator;
+            culture.NumberFormat.NumberGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
+            culture.NumberFormat.CurrencyDecimalSeparator = usCulture.NumberFormat.NumberDecimalSeparator;
+            culture.NumberFormat.CurrencyGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
 

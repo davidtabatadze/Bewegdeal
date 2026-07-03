@@ -12,7 +12,7 @@
 <div class="card bg-transparent shadow-none border-0 mb-3">
     <div class="card-body row g-6 p-0 pb-4">
         <div class="col-12 col-lg-8">
-            <h5 class="mb-2">Willkommen,<span class="h4 fw-semibold"> @company 👋🏻</span></h5>
+            <h5 class="mb-2">Willkommen,<span class="h4 fw-semibold"> @company 👋🏻</span><span class="float-end" id="companyRating" data-score="@general.rating"></span></h5>
             <div class="col-12 col-lg-7">
                 <p>Machen wir so weiter!</p>
             </div>
@@ -59,6 +59,10 @@
                     <p class="mb-2">Du machst Fortschritte. 🚀</p>
                     <h4 class="text-success mb-0">€@FormatAmount((decimal)general.profit)<span class="text-secondary" style="font-size: 14px;"> profitieren</span></h4>
                     <p class="mb-2"><span class="text-success fw-bold">@general.servedCustomers</span> Bediente Kunden <i class="icon-base ri ri-user-2-line text-success"></i></p>
+                    @* <div class="d-flex align-items-center gap-2 mt-1">
+                        <span class="fw-medium">@general.rating</span>
+                        <div id="companyRating" data-score="@general.rating"></div>
+                    </div> *@
                 </div>
                 <img src="~/img/illustrations/trophy.png" class="position-absolute bottom-0 end-0 me-3 mb-5" width="83" />
             </div>
@@ -106,7 +110,12 @@
 
 </div>
 
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/raty-js/raty-js.css" asp-append-version="true" />
+}
+
 @section PageScripts {
+    <script src="~/vendor/libs/raty-js/raty-js.js" asp-append-version="true"></script>
     <script src="~/vendor/libs/apex-charts/apexcharts.js" asp-append-version="true"></script>
     <script src="~/js/app-company-dashboard.js" asp-append-version="true"></script>
 }
