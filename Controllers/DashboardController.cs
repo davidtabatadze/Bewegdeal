@@ -29,7 +29,7 @@ namespace Bewegdeal.Controllers
 
         [HttpGet]
         [Authorize(Roles = UserRoleEnum.Company)]
-        public async Task<IActionResult> CompanyStats(short year = 0)
+        public async Task<IActionResult> GetCompanyBoardIncome(short year = 0)
         {
             var result = await DashboardService.GetCompanyBoardIncome(UserId, year);
             return Json(result);
@@ -37,7 +37,7 @@ namespace Bewegdeal.Controllers
 
         [HttpGet]
         [Authorize(Roles = UserRoleEnum.Company)]
-        public async Task<IActionResult> CompanyStats2(short year = 0)
+        public async Task<IActionResult> GetCompanyBoardDeal(short year = 0)
         {
             var result = await DashboardService.GetCompanyBoardDeal(UserId, year);
             return Json(result);

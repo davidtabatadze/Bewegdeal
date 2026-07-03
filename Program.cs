@@ -22,6 +22,8 @@ namespace Bewegdeal
             culture.NumberFormat.NumberGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
             culture.NumberFormat.CurrencyDecimalSeparator = usCulture.NumberFormat.NumberDecimalSeparator;
             culture.NumberFormat.CurrencyGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
+            //culture.DateTimeFormat.DateSeparator = usCulture.DateTimeFormat.DateSeparator;
+            //culture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
 
