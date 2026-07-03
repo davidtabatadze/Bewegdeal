@@ -3,6 +3,10 @@
     ViewData["Title"] = "Dashboard";
 
     var company = User.FindFirstValue(IdentityFieldEnum.Name) ?? "?";
+    dynamic general = ViewBag.General;
+
+    string FormatAmount(decimal value)
+        => value < 1000 ? value.ToString("0.##") : (value / 1000m).ToString("0.##") + "K";
 }
 
 <div class="card bg-transparent shadow-none border-0 mb-3">
@@ -21,7 +25,7 @@
                     </div>
                     <div class="content-right">
                         <p class="mb-1 fw-medium">mögliche Anfragen</p>
-                        <span class="text-info mb-0 h5">34h</span>
+                        <span class="text-info mb-0 h5">@general.potentialRequests</span>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-4">
@@ -32,18 +36,18 @@
                     </div>
                     <div class="content-right">
                         <p class="mb-1 fw-medium">zu bezahlende Rechnungen</p>
-                        <span class="text-warning mb-0 h5">€82%</span>
+                        <span class="text-warning mb-0 h5">€@FormatAmount((decimal)general.paymentAmount)</span>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-4">
                     <div class="avatar avatar-lg">
                         <div class="avatar-initial bg-label-success rounded">
-                            <i class="icon-base ri ri-user-2-line text-success icon-36px"></i>
+                            <i class="icon-base ri ri-shake-hands-line text-success icon-36px"></i>
                         </div>
                     </div>
                     <div class="content-right">
-                        <p class="mb-1 fw-medium">Bediente Kunden</p>
-                        <span class="text-success mb-0 h5">14</span>
+                        <p class="mb-1 fw-medium">Anfragen bearbeitet</p>
+                        <span class="text-success mb-0 h5">@general.servedRequests</span>
                     </div>
                 </div>
             </div>
@@ -53,8 +57,8 @@
                 <div class="card-body text-nowrap">
                     <h5 class="card-title mb-0 flex-wrap text-nowrap">Glückwunsch! 🎉</h5>
                     <p class="mb-2">Du machst Fortschritte. 🚀</p>
-                    <h4 class="text-success mb-0">€42.8k <span class="text-secondary" style="font-size: 14px;">profitieren</span></h4>
-                    <p class="mb-2"><span class="text-success fw-bold">999</span> Anfragen bearbeitet <i class="icon-base ri ri-shake-hands-line text-success"></i></p>
+                    <h4 class="text-success mb-0">€@FormatAmount((decimal)general.profit)<span class="text-secondary" style="font-size: 14px;"> profitieren</span></h4>
+                    <p class="mb-2"><span class="text-success fw-bold">@general.servedCustomers</span> Bediente Kunden <i class="icon-base ri ri-user-2-line text-success"></i></p>
                 </div>
                 <img src="~/img/illustrations/trophy.png" class="position-absolute bottom-0 end-0 me-3 mb-5" width="83" />
             </div>
@@ -67,17 +71,17 @@
     <div class="col-12 col-lg-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Einnahmen nach Service</h5>
+                <h5 class="mb-0">Einkommen</h5>
                 <div class="dropdown">
                     <button class="btn text-body-secondary p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span id="selectedYear"></span>
+                        <span id="selectedIncomesYear"></span>
                         <i class="icon-base ri ri-arrow-down-s-line"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" id="yearDropdownMenu"></ul>
+                    <ul class="dropdown-menu dropdown-menu-end" id="incomesYearDropdown"></ul>
                 </div>
             </div>
             <div class="card-body">
-                <div id="totalProfitChart"></div>
+                <div id="incomesChart"></div>
             </div>
         </div>
     </div>
@@ -85,17 +89,17 @@
     <div class="col-12 col-lg-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Angenommene Angebote</h5>
+                <h5 class="mb-0">Verträge</h5>
                 <div class="dropdown">
                     <button class="btn text-body-secondary p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span id="selectedYear2"></span>
+                        <span id="selectedDealsYear"></span>
                         <i class="icon-base ri ri-arrow-down-s-line"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" id="yearDropdownMenu2"></ul>
+                    <ul class="dropdown-menu dropdown-menu-end" id="dealsYearDropdown"></ul>
                 </div>
             </div>
             <div class="card-body">
-                <div id="lineAreaChart"></div>
+                <div id="dealsChart"></div>
             </div>
         </div>
     </div>

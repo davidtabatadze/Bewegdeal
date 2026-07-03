@@ -37,9 +37,13 @@ namespace Bewegdeal.Data.Repositories
         }
 
         public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter)
-        {
-            var query = Context.RequestProposals.AsQueryable();
+            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).ToListAsync();
 
+        public async Task<int> Count(RequestProposalFilter filter)
+            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).CountAsync();
+
+        private IQueryable<RequestProposalEntity> ApplyFilters(IQueryable<RequestProposalEntity> query, RequestProposalFilter filter)
+        {
             if (filter.ChatId.HasValue)
             {
                 query = query.Where(i => i.ChatId == filter.ChatId);
@@ -76,7 +80,10 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(i => i.Status == filter.Status);
             }
 
-            return await query.ToListAsync();
+            query = ApplySorting(query, filter);
+            query = ApplyPaging(query, filter);
+
+            return query;
         }
 
     }

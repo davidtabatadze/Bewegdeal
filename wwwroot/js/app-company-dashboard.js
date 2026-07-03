@@ -27,7 +27,7 @@
     const nameToColor = Object.fromEntries(
       Object.keys(colorByKey).map(k => [data.groupNames[k], colorByKey[k]])
     );
-    const el = document.querySelector('#totalProfitChart');
+    const el = document.querySelector('#incomesChart');
     if (!el) { return; }
 
     if (profitChart) { profitChart.destroy(); }
@@ -111,7 +111,7 @@
     const nameToColor = Object.fromEntries(
       Object.keys(colorByKey).map(k => [data.groupNames[k], colorByKey[k]])
     );
-    const el = document.querySelector('#lineAreaChart');
+    const el = document.querySelector('#dealsChart');
     if (!el) { return; }
 
     if (serviceChart) { serviceChart.destroy(); }
@@ -163,8 +163,8 @@
   }
 
   function buildYearDropdown(years, selectedYear) {
-    const menu = document.querySelector('#yearDropdownMenu');
-    const label = document.querySelector('#selectedYear');
+    const menu = document.querySelector('#incomesYearDropdown');
+    const label = document.querySelector('#selectedIncomesYear');
     if (!menu || !label) { return; }
 
     label.textContent = selectedYear;
@@ -183,8 +183,8 @@
   }
 
   function buildYearDropdown2(years, selectedYear) {
-    const menu = document.querySelector('#yearDropdownMenu2');
-    const label = document.querySelector('#selectedYear2');
+    const menu = document.querySelector('#dealsYearDropdown');
+    const label = document.querySelector('#selectedDealsYear');
     if (!menu || !label) { return; }
 
     label.textContent = selectedYear;
@@ -203,7 +203,7 @@
   }
 
   function loadStats2(year) {
-    $.get('/Dashboard/CompanyStats2', { year: year }, function (res) {
+    $.get('/Dashboard/GetCompanyBoardDeal', { year: year }, function (res) {
       if (!res || !res.result) { return; }
       const data = res.result;
       buildYearDropdown2(data.years, data.year);
@@ -212,7 +212,7 @@
   }
 
   function loadStats(year) {
-    $.get('/Dashboard/CompanyStats', { year: year }, function (res) {
+    $.get('/Dashboard/GetCompanyBoardIncome', { year: year }, function (res) {
       if (!res || !res.result) { return; }
       const data = res.result;
       buildYearDropdown(data.years, data.year);

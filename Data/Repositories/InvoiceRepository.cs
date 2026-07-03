@@ -106,6 +106,11 @@ namespace Bewegdeal.Data.Repositories
                );
             }
 
+            if (filter.Active.HasValue && filter.Active == true)
+            {
+                query = query.Where(r => r.Status != InvoiceStatusEnum.Cancelled);
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Number))
             {
                 query = query.Where(r => r.Number == filter.Number);

@@ -45,11 +45,11 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
         public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
             => await InvoiceRepository.Load(filter);
-        private async Task<decimal> Sum(InvoiceFilter filter, string property)
+        public async Task<decimal> Sum(InvoiceFilter filter, string property)
             => await InvoiceRepository.Sum(filter, property);
-        private async Task<int> Count(InvoiceFilter filter)
+        public async Task<int> Count(InvoiceFilter filter)
             => await InvoiceRepository.Count(filter);
-        private async Task<int> CountDistinct(InvoiceFilter filter, string property)
+        public async Task<int> CountDistinct(InvoiceFilter filter, string property)
             => await InvoiceRepository.CountDistinct(filter, property);
 
         public async Task<GenericResultModel<InvoicePrintModel>> Get(string number, long userId, string userRole)

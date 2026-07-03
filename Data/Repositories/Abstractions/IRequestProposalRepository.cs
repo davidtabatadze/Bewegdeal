@@ -9,5 +9,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
     {
         Task Update(RequestProposalUpdateAreaEnum area, RequestProposalEntity update);
         Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter);
+        Task<int> Count(RequestProposalFilter filter);
     }
 }

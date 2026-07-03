@@ -8,7 +8,7 @@ namespace Bewegdeal.Controllers
     [Authorize]
     public class DashboardController(DashboardService DashboardService) : XBaseController
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (User.IsInRole(UserRoleEnum.Administrator))
             {
@@ -16,6 +16,8 @@ namespace Bewegdeal.Controllers
             }
             if (User.IsInRole(UserRoleEnum.Company))
             {
+                var general = await DashboardService.GetCompanyBoardGeneral(UserId);
+                ViewBag.General = general.Result;
                 return View("Company");
             }
             if (User.IsInRole(UserRoleEnum.Customer))
@@ -29,7 +31,7 @@ namespace Bewegdeal.Controllers
         [Authorize(Roles = UserRoleEnum.Company)]
         public async Task<IActionResult> CompanyStats(short year = 0)
         {
-            var result = await DashboardService.GetDataForCompany(UserId, year);
+            var result = await DashboardService.GetCompanyBoardIncome(UserId, year);
             return Json(result);
         }
 
@@ -37,7 +39,7 @@ namespace Bewegdeal.Controllers
         [Authorize(Roles = UserRoleEnum.Company)]
         public async Task<IActionResult> CompanyStats2(short year = 0)
         {
-            var result = await DashboardService.GetDataForCompany2(UserId, year);
+            var result = await DashboardService.GetCompanyBoardDeal(UserId, year);
             return Json(result);
         }
     }

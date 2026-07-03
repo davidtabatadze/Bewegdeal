@@ -1,14 +1,73 @@
-﻿using Bewegdeal.Data.Filters;
+﻿using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
 using Bewegdeal.Models;
 using System.Globalization;
 
 namespace Bewegdeal.Services
 {
-    public class DashboardService(InvoiceService InvoiceService, ProposalService ProposalService)
+    public class DashboardService(UserService UserService, RequestService RequestService, InvoiceService InvoiceService, ProposalService ProposalService)
     {
 
-        public async Task<GenericResultModel<object>> GetDataForCompany(long userId, short year = 0)
+        public async Task<GenericResultModel<object>> GetCompanyBoardGeneral(long userId)
+        {
+            var company = await UserService.Get(userId, [nameof(UserEntity.Interests), nameof(UserEntity.Rating)]);
+
+            var potentialRequests = await RequestService.Count(new RequestFilter
+            {
+                ViewerId = userId,
+                ViewerRole = UserRoleEnum.Company,
+                ViewerFocus = RequestViewerFocusEnum.Potential,
+                ViewerInterests = company?.Interests ?? []
+            });
+
+            var servedCustomers = await InvoiceService.CountDistinct(new InvoiceFilter
+            {
+                Active = true,
+                ViewerId = userId,
+                ViewerRole = UserRoleEnum.Company
+            }, nameof(InvoiceEntity.CustomerId));
+
+            var paymentAmount = await InvoiceService.Sum(new InvoiceFilter
+            {
+                ViewerId = userId,
+                ViewerRole = UserRoleEnum.Company,
+                Status = InvoiceStatusEnum.Pending
+            }, nameof(InvoiceEntity.TotalCost));
+
+            var totalGains = await InvoiceService.Sum(new InvoiceFilter
+            {
+                Active = true,
+                ViewerId = userId,
+                ViewerRole = UserRoleEnum.Company
+            }, nameof(InvoiceEntity.ServiceCost));
+
+            var totalFees = await InvoiceService.Sum(new InvoiceFilter
+            {
+                Active = true,
+                ViewerId = userId,
+                ViewerRole = UserRoleEnum.Company
+            }, nameof(InvoiceEntity.TotalCost));
+
+            var servedRequests = await ProposalService.Count(new RequestProposalFilter
+            {
+                CompanyId = userId,
+                Status = RequestProposalStatusEnum.Accepted,
+                DateTo = DateOnly.FromDateTime(DateTime.Now)
+            });
+
+            return GenericResultModel<object>.Ok(new
+            {
+                rating = company?.Rating ?? 0,
+                potentialRequests,
+                paymentAmount,
+                servedRequests,
+                servedCustomers,
+                profit = (long)(totalGains - totalFees)
+            });
+        }
+
+        public async Task<GenericResultModel<object>> GetCompanyBoardIncome(long userId, short year = 0)
         {
             short minYear = 2025;
             short maxYear = (short)DateTime.Now.Year;
@@ -21,7 +80,7 @@ namespace Bewegdeal.Services
             {
                 ViewerId = userId,
                 ViewerRole = UserRoleEnum.Company,
-                Status = InvoiceStatusEnum.Paid,
+                Active = true,
                 DateFrom = startDate,
                 DateTo = endDate
             });
@@ -69,14 +128,14 @@ namespace Bewegdeal.Services
                         removalSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Removal, data = removalSum },
                         pickupSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Pickup, data = pickupSum },
                         transportSum.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Service.Transport, data = transportSum },
-                        new { name = "Plattformgebühren", data = feesSum }
+                        // new { name = "Plattformgebühren", data = feesSum }
                     }.Where(s => s is not null)
                 }
             });
 #pragma warning restore CS8604 // Possible null reference argument.
         }
 
-        public async Task<GenericResultModel<object>> GetDataForCompany2(long userId, short year = 0)
+        public async Task<GenericResultModel<object>> GetCompanyBoardDeal(long userId, short year = 0)
         {
             short minYear = 2025;
             short maxYear = (short)DateTime.Now.Year;

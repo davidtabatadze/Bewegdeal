@@ -63,7 +63,7 @@ namespace Bewegdeal.Services
         public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
             => await RequestRepository.Update(area, update);
 
-        private async Task<int> Count(RequestFilter filter)
+        public async Task<int> Count(RequestFilter filter)
             => await RequestRepository.Count(filter);
 
         public async Task<List<RequestEntity>> Load(RequestFilter filter)
