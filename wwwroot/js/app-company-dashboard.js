@@ -15,6 +15,7 @@
   };
 
   let profitChart = null;
+  let serviceChart = null;
 
   function getColumnWidth() {
     const w = window.innerWidth;
@@ -34,7 +35,7 @@
     profitChart = new ApexCharts(el, {
       chart: {
         type: 'bar',
-        height: 260,
+        height: 300,
         parentHeightOffset: 0,
         stacked: true,
         toolbar: { show: false },
@@ -106,6 +107,61 @@
     profitChart.render();
   }
 
+  function initServiceChart(data) {
+    const nameToColor = Object.fromEntries(
+      Object.keys(colorByKey).map(k => [data.groupNames[k], colorByKey[k]])
+    );
+    const el = document.querySelector('#lineAreaChart');
+    if (!el) { return; }
+
+    if (serviceChart) { serviceChart.destroy(); }
+
+    const seriesLength = data.series.length > 0 ? data.series[0].data.length : 12;
+    const categories = Array.from(data.xaxisValues).slice(0, seriesLength);
+
+    serviceChart = new ApexCharts(el, {
+      chart: {
+        height: 300,
+        type: 'line',
+        parentHeightOffset: 0,
+        toolbar: { show: false },
+        zoom: { enabled: false }
+      },
+      series: data.series,
+      dataLabels: { enabled: false },
+      stroke: { show: true, curve: 'smooth', width: 4 },
+      legend: {
+        show: true,
+        position: 'bottom',
+        markers: { size: 6, strokeWidth: 0 },
+        labels: { colors: labelColor, useSeriesColors: false }
+      },
+      colors: data.series.map(s => nameToColor[s.name]),
+      grid: {
+        borderColor: borderColor,
+        xaxis: { lines: { show: true } }
+      },
+      xaxis: {
+        categories: categories,
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        labels: {
+          style: { colors: labelColor, fontSize: '13px', fontFamily: fontFamily }
+        }
+      },
+      yaxis: {
+        tickAmount: 4,
+        labels: {
+          formatter: val => parseInt(val),
+          style: { colors: labelColor, fontSize: '13px', fontFamily: fontFamily }
+        }
+      },
+      tooltip: { shared: false }
+    });
+
+    serviceChart.render();
+  }
+
   function buildYearDropdown(years, selectedYear) {
     const menu = document.querySelector('#yearDropdownMenu');
     const label = document.querySelector('#selectedYear');
@@ -123,6 +179,35 @@
       a.textContent = y;
       li.appendChild(a);
       menu.appendChild(li);
+    });
+  }
+
+  function buildYearDropdown2(years, selectedYear) {
+    const menu = document.querySelector('#yearDropdownMenu2');
+    const label = document.querySelector('#selectedYear2');
+    if (!menu || !label) { return; }
+
+    label.textContent = selectedYear;
+    menu.innerHTML = '';
+
+    years.forEach(function (y) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'dropdown-item year-filter-item2' + (y === selectedYear ? ' active' : '');
+      a.href = 'javascript:void(0);';
+      a.dataset.year = y;
+      a.textContent = y;
+      li.appendChild(a);
+      menu.appendChild(li);
+    });
+  }
+
+  function loadStats2(year) {
+    $.get('/Dashboard/CompanyStats2', { year: year }, function (res) {
+      if (!res || !res.result) { return; }
+      const data = res.result;
+      buildYearDropdown2(data.years, data.year);
+      initServiceChart(data.serviceChart);
     });
   }
 
@@ -148,9 +233,15 @@
   });
 
   loadStats(0);
+  loadStats2(0);
 
   $(document).on('click', '.year-filter-item', function () {
     const year = parseInt($(this).data('year'));
     loadStats(year);
+  });
+
+  $(document).on('click', '.year-filter-item2', function () {
+    const year = parseInt($(this).data('year'));
+    loadStats2(year);
   });
 })();

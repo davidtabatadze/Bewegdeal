@@ -55,6 +55,11 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(i => i.CompanyId == filter.CompanyId);
             }
 
+            if (filter.DateFrom.HasValue)
+            {
+                query = query.Where(i => i.Date >= filter.DateFrom);
+            }
+
             if (filter.DateTo.HasValue)
             {
                 query = query.Where(i => i.Date <= filter.DateTo);

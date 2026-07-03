@@ -82,14 +82,20 @@ namespace Bewegdeal.Services
             short maxYear = (short)DateTime.Now.Year;
             year = year < minYear || year > maxYear ? maxYear : year;
 
-            var startDate = new DateTime(year, 1, 1);
-            var endDate = new DateTime(year, 12, 31);
+            var startDate = DateOnly.FromDateTime(new DateTime(year, 1, 1));
+            var endDate = DateOnly.FromDateTime(new DateTime(year, 12, 31));
+
+            if (endDate > DateOnly.FromDateTime(DateTime.Now))
+            {
+                endDate = DateOnly.FromDateTime(DateTime.Now);
+            }
 
             var proposals = await ProposalService.Load(new RequestProposalFilter
             {
                 CompanyId = userId,
                 Status = RequestProposalStatusEnum.Accepted,
-                DateTo = DateOnly.FromDateTime(DateTime.Now)
+                DateFrom = startDate,
+                DateTo = endDate
             });
 
             var movingCount = new List<decimal>();
