@@ -31,7 +31,7 @@
     var chatKey = '';
     var viewerId = 0;
     var connection = null;
-var lastMessageDate = '';
+    var lastMessageDate = '';
     var waitingForEcho = false;
     var echoTimer = null;
     var savedFooterHtml = '';
@@ -76,7 +76,7 @@ var lastMessageDate = '';
         var rejectBtn = e.target.closest('.proposal-reject-btn');
         if (!acceptBtn && !rejectBtn) { return; }
 
-        var accepted   = !!acceptBtn;
+        var accepted = !!acceptBtn;
         var proposalId = (acceptBtn || rejectBtn).dataset.proposalId;
 
         if (!window.ChatProposalReact) { return; }
@@ -261,13 +261,21 @@ var lastMessageDate = '';
             if (proposalPattern.exec(msg.content)) {
                 var footer = body.querySelector('.chat-history-footer');
                 if (footer) {
+                    var cancelBtn = (msg.senderId === viewerId)
+                        ? '<a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" style="cursor:pointer;"' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Proposal">' +
+                            '<i class="icon-base ri ri-hand icon-md text-danger"></i></a>'
+                        : '';
                     footer.outerHTML =
                         '<div class="chat-history-footer shadow-xs mt-0 p-0">' +
                         '<div class="alert alert-warning m-0" role="alert">' +
                         '<div class="d-flex align-items-center">' +
                         '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
                         '<strong class="pe-1">Pending proposal reaction</strong>' +
+                        cancelBtn +
                         '</div></div></div>';
+                    var cancelEl = body.querySelector('#chatCancelProposalBtn');
+                    if (cancelEl) { new bootstrap.Tooltip(cancelEl); }
                 }
             }
             if (msg.senderId !== viewerId) {
@@ -279,8 +287,8 @@ var lastMessageDate = '';
             var card = document.querySelector('[data-proposal-card-id="' + data.proposalId + '"]');
             if (!card) { return; }
             var color = data.proposalStatus === 'accepted' ? 'success'
-                      : data.proposalStatus === 'rejected' ? 'danger'
-                      : 'warning';
+                : data.proposalStatus === 'rejected' ? 'danger'
+                    : 'warning';
             card.classList.remove('border-warning', 'border-success', 'border-danger');
             card.classList.add('border-' + color);
             var icon = card.querySelector('.ri-shake-hands-line');
