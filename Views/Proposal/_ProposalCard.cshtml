@@ -27,6 +27,13 @@
             <span class="fw-bold">No proposal exists yet.</span>
         </div>
     }
+    else if (Model.Status == RequestProposalStatusEnum.Canceled)
+    {
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
+            <i class="icon-base ri ri-prohibited-line icon-18px"></i>
+            <span class="fst-italic">Die Nachricht wurde gelöscht.</span>
+        </div>
+    }
     else if (ViewData["RequestMode"] is true && User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-danger">
