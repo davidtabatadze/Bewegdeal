@@ -58,7 +58,9 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Middleware\\\\RememberMeMiddleware.cs\" -Force)",
       "Bash(Write-Host \"Deleted.\")",
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\Views\\\\Chat\")",
-      "Bash(Write-Output \"done\")"
+      "Bash(Write-Output \"done\")",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; foreach \\($f in @\\('wwwroot\\\\img\\\\pages\\\\bewegdeal-logo_profile.png','wwwroot\\\\img\\\\pages\\\\bewegdeal-logo_profile_dark.png'\\)\\) { $b = New-Object System.Drawing.Bitmap\\(\\(Resolve-Path $f\\).Path\\); $c = $b.GetPixel\\(2,2\\); $m = $b.GetPixel\\([int]\\($b.Width/2\\), 5\\); \"$f : size=$\\($b.Width\\)x$\\($b.Height\\) pixelFormat=$\\($b.PixelFormat\\) corner\\(A=$\\($c.A\\) R=$\\($c.R\\) G=$\\($c.G\\) B=$\\($c.B\\)\\) topmid\\(A=$\\($m.A\\) R=$\\($m.R\\) G=$\\($m.G\\) B=$\\($m.B\\)\\)\"; $b.Dispose\\(\\) })",
+      "PowerShell($t = [System.IO.File]::ReadAllText\\('D:\\\\VSProjects\\\\Bewegdeal\\\\wwwroot\\\\vendor\\\\js\\\\helpers.js'\\); $i = $t.IndexOf\\('switchImage: function'\\); $t.Substring\\($i, 1100\\))"
     ]
   }
 }

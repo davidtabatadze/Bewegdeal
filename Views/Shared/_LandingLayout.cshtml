@@ -86,6 +86,7 @@
       }
 
       updateIcon(document.documentElement.getAttribute('data-bs-theme') || 'light');
+      window.Helpers.switchImage(document.documentElement.getAttribute('data-bs-theme') || 'light');
 
       document.getElementById('themeToggleBtn').addEventListener('click', function () {
         var current = document.documentElement.getAttribute('data-bs-theme') || 'light';
@@ -94,6 +95,7 @@
         window.Helpers.setStoredTheme('vertical-menu-template', next);
         window.Helpers.setTheme(next);
         updateIcon(next);
+        window.Helpers.switchImage(next);
       });
     })();
   </script>

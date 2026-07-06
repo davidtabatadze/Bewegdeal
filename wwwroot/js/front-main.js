@@ -90,12 +90,14 @@ window.isDarkStyle = window.Helpers.isDarkStyle();
     (window.templateCustomizer?.settings?.defaultStyle ?? document.documentElement.getAttribute('data-bs-theme')); //!if there is no Customizer then use default style as light
 
   let styleSwitcher = document.querySelector('.dropdown-style-switcher');
-  const styleSwitcherIcon = styleSwitcher.querySelector('i');
+  const styleSwitcherIcon = styleSwitcher ? styleSwitcher.querySelector('i') : null;
 
-  new bootstrap.Tooltip(styleSwitcherIcon, {
-    title: storedStyle.charAt(0).toUpperCase() + storedStyle.slice(1) + ' Mode',
-    fallbackPlacements: ['bottom']
-  });
+  if (styleSwitcherIcon) {
+    new bootstrap.Tooltip(styleSwitcherIcon, {
+      title: storedStyle.charAt(0).toUpperCase() + storedStyle.slice(1) + ' Mode',
+      fallbackPlacements: ['bottom']
+    });
+  }
 
   // Run switchImage function based on the stored style
   window.Helpers.switchImage(storedStyle);
@@ -131,10 +133,12 @@ window.isDarkStyle = window.Helpers.isDarkStyle();
         if (theme === 'system') {
           currTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
-        new bootstrap.Tooltip(styleSwitcherIcon, {
-          title: theme.charAt(0).toUpperCase() + theme.slice(1) + ' Mode',
-          fallbackPlacements: ['bottom']
-        });
+        if (styleSwitcherIcon) {
+          new bootstrap.Tooltip(styleSwitcherIcon, {
+            title: theme.charAt(0).toUpperCase() + theme.slice(1) + ' Mode',
+            fallbackPlacements: ['bottom']
+          });
+        }
         window.Helpers.switchImage(currTheme);
       });
     });
