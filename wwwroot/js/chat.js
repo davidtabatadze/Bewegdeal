@@ -83,6 +83,43 @@ var lastMessageDate = '';
         window.ChatProposalReact.open(proposalId, accepted);
     });
 
+    // ── Cancel Proposal flow ──────────────────────────────────────────────────
+
+    body.addEventListener('click', function (e) {
+        var btn = e.target.closest('#chatCancelProposalBtn');
+        if (!btn) { return; }
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Withdraw proposal?',
+            text: 'Are you sure you want to cancel your proposal?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, withdraw it',
+            cancelButtonText: 'No',
+            customClass: {
+                confirmButton: 'btn btn-danger me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            Block.pulse('#chatCard');
+            fetch('/RequestChat/ProposalCancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'requestNumber=' + encodeURIComponent(requestNumber)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.success) { Block.remove('#chatCard'); }
+                    // ProposalUpdated SignalR event handles the UI update
+                })
+                .catch(function () { Block.remove('#chatCard'); });
+        });
+    });
+
     // ── Cancel flow ──────────────────────────────────────────────────────────
 
     body.addEventListener('click', function (e) {
@@ -229,7 +266,7 @@ var lastMessageDate = '';
                         '<div class="alert alert-warning m-0" role="alert">' +
                         '<div class="d-flex align-items-center">' +
                         '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
-                        '<strong>Pending proposal reaction</strong>' +
+                        '<strong class="pe-1">Pending proposal reaction</strong>' +
                         '</div></div></div>';
                 }
             }
@@ -257,7 +294,7 @@ var lastMessageDate = '';
             }
             var actions = card.querySelector('.proposal-actions');
             if (actions) { actions.remove(); }
-            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected') {
+            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled') {
                 if (savedFooterHtml) {
                     var footer = body.querySelector('.chat-history-footer');
                     if (footer) { footer.outerHTML = savedFooterHtml; }

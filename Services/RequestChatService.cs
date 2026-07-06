@@ -158,6 +158,18 @@ namespace Bewegdeal.Services
             }
         }
 
+        public async Task ProposalCancel(long userId, string requestNumber)
+        {
+            var chat = await ChatService.GetActual(requestNumber);
+            var proposal = await ProposalService.GetActual(chat?.Id ?? 0);
+
+            if (proposal?.Status == RequestProposalStatusEnum.Pending && proposal?.CompanyId == userId)
+            {
+                await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Canceled);
+                await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposal.Id, RequestProposalStatusEnum.Rejected);
+            }
+        }
+
         public async Task Propose(long userId, RequestProposalViewModel model)
         {
             var request = await RequestService.Get(
