@@ -62,7 +62,12 @@
       "Skill(run)",
       "Skill(run:*)",
       "mcp__Claude_in_Chrome__navigate",
-      "mcp__Claude_in_Chrome__tabs_context_mcp"
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type f)",
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type f -printf \"%P\\\\n\")",
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\vendor\" -name \"*.css\" -type f)",
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\" -name \"manifest.json\" -o -name \"manifest.webmanifest\")",
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type d)"
     ]
   }
 }
