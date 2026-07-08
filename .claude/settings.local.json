@@ -67,7 +67,11 @@
       "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type f -printf \"%P\\\\n\")",
       "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\vendor\" -name \"*.css\" -type f)",
       "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\" -name \"manifest.json\" -o -name \"manifest.webmanifest\")",
-      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type d)"
+      "Bash(Find \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\img\" -type d)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\svg\" -Recurse -File | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\svg\\\\\"\\), \"\" } | Sort-Object)",
+      "Bash(awk -F'vendor' '{print $2}')",
+      "Bash(awk -F'vendor' '{print substr\\($2,2\\)}')",
+      "Bash(Get-Content \"C:\\\\Users\\\\DAVID~1.TAB\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-tabatadze-Sources-Bewegdeal\\\\28b89ba7-4ade-446c-b44b-d664a7d2fcba\\\\tasks\\\\bd8lv1kdi.output\")"
     ]
   }
 }
