@@ -142,8 +142,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Request cell — thumbnail + title + service label
                 targets: 0,
                 orderable: false,
-                createdCell: function (td) {
+                createdCell: function (td, cellData, rowData) {
                     td.style.minWidth = '300px';
+                    td.style.cursor = 'pointer';
+                    td.dataset.number = rowData['number'];
                 },
                 render: function (data, type, full) {
                     const title = full['title'];
@@ -311,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // View request — delegated click on the table wrapper
     dt_table.addEventListener('click', function (e) {
-        const btn = e.target.closest('.view-request-btn');
+        const btn = e.target.closest('.view-request-btn') || e.target.closest('td[data-number]');
         if (!btn) { return; }
         sessionStorage.setItem(RETURN_KEY, '1');
         window.location.href = '/Request/View?number=' + btn.dataset.number;
@@ -320,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Middle-click — open in new tab
     dt_table.addEventListener('auxclick', function (e) {
         if (e.button !== 1) { return; }
-        const btn = e.target.closest('.view-request-btn');
+        const btn = e.target.closest('.view-request-btn') || e.target.closest('td[data-number]');
         if (!btn) { return; }
         e.preventDefault();
         window.open('/Request/View?number=' + btn.dataset.number, '_blank');
