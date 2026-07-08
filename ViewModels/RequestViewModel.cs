@@ -132,6 +132,8 @@ namespace Bewegdeal.ViewModels
             PickupZipCode = PickupZipCode?.Trim();
             DeliveryAddress = DeliveryAddress?.Trim();
             DeliveryZipCode = DeliveryZipCode?.Trim();
+            VehicleType = VehicleType?.Trim();
+            VehicleCondition = VehicleCondition?.Trim();
         }
     }
 }

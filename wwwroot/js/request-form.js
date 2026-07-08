@@ -204,7 +204,7 @@ Dropzone.autoDiscover = false;
     }
 
     // ── Inline validation clearing ────────────────────────────────────────────
-    ['title', 'pickupAddress', 'deliveryAddress'].forEach(function (id) {
+    ['title', 'pickupAddress', 'deliveryAddress', 'vehicleType'].forEach(function (id) {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('input', function () {
@@ -241,7 +241,7 @@ Dropzone.autoDiscover = false;
 
     // ── Bootstrap-select (selectpicker) init ──────────────────────────────────
     if (typeof $ !== 'undefined' && typeof $.fn.selectpicker !== 'undefined') {
-        $('#vehicleType, #vehicleCondition').selectpicker();
+        $('#vehicleCondition').selectpicker();
         if (typeof handleBootstrapSelectEvents === 'function') {
             handleBootstrapSelectEvents();
         }
@@ -407,7 +407,7 @@ Dropzone.autoDiscover = false;
 
             if (selectedService === 'transport') {
                 const vType = document.getElementById('vehicleType').value;
-                if (!vType) {
+                if (!vType.trim()) {
                     document.getElementById('vehicleTypeError').classList.remove('d-none');
                     hasErrors = true;
                 }

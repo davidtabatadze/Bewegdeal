@@ -46,16 +46,16 @@
         @if (isEdit)
         {
             <text>const existingFiles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                        existingFilesList.Select(f => new
-                                        {
-                                            fileId = f.Id,
-                                            fileName = f.Name,
-                                            size = f.Size,
-                                            type = f.Type,
-                                            isMain = f.IsMain,
-                                            url = f.Url
-                                        })
-                                    ));</text>
+                                                    existingFilesList.Select(f => new
+                                                    {
+                                                        fileId = f.Id,
+                                                        fileName = f.Name,
+                                                        size = f.Size,
+                                                        type = f.Type,
+                                                        isMain = f.IsMain,
+                                                        url = f.Url
+                                                    })
+                                                ));</text>
             }
         </script>
         <script src="~/js/request-form.js" asp-append-version="true"></script>
@@ -216,22 +216,19 @@
 
                                 <div id="transportFields" class="d-none">
                                     <div class="row g-6">
-                                        <div class="col-12 col-sm-6">
+                                        <div class="col-12 col-sm-8">
                                             <div class="form-floating form-floating-outline">
-                                                <select id="vehicleType" name="vehicleType" class="selectpicker w-100" data-style="btn-default" title="@(!isEdit ? "..." : null)">
-                                                    <option value="@VehicleTypeEnum.TypeA" selected="@(isEdit && req!.VehicleType == VehicleTypeEnum.TypeA ? "selected" : null)">Type A</option>
-                                                    <option value="@VehicleTypeEnum.TypeB" selected="@(isEdit && req!.VehicleType == VehicleTypeEnum.TypeB ? "selected" : null)">Type B</option>
-                                                </select>
+                                                <input type="text" id="vehicleType" name="vehicleType" class="form-control" placeholder="" maxlength="128" value="@(isEdit ? req!.VehicleType ?? "" : "")" />
                                                 <label for="vehicleType">Vehicle Type</label>
                                             </div>
                                             <div id="vehicleTypeError" class="text-danger small d-none mt-1">Vehicle type is required.</div>
                                         </div>
-                                        <div class="col-12 col-sm-6">
+                                        <div class="col-12 col-sm-4">
                                             <div class="form-floating form-floating-outline">
                                                 <select id="vehicleCondition" name="vehicleCondition" class="selectpicker w-100" data-style="btn-default" title="@(!isEdit ? "..." : null)">
-                                                    <option value="@VehicleConditionEnum.WorksProperly" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.WorksProperly ? "selected" : null)">Works Properly</option>
-                                                    <option value="@VehicleConditionEnum.CanRun" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.CanRun ? "selected" : null)">Can Run</option>
-                                                    <option value="@VehicleConditionEnum.Damaged" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.Damaged ? "selected" : null)">Damaged</option>
+                                                    <option value="@VehicleConditionEnum.WorksProperly" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.WorksProperly ? "selected" : null)">Fahrbereit@* Works Properly *@</option>
+                                                    <option value="@VehicleConditionEnum.CanRun" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.CanRun ? "selected" : null)">Springt an@* Can Run *@</option>
+                                                    <option value="@VehicleConditionEnum.Damaged" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.Damaged ? "selected" : null)">Nicht fahrbereit@* Damaged *@</option>
                                                 </select>
                                                 <label for="vehicleCondition">Vehicle Condition</label>
                                             </div>
@@ -334,7 +331,9 @@
                         @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
                         {
                             <button id="btnResolve" type="button" class="btn btn-info me-4"
-                                    onclick="ResolveModal.open('@req.Number')">Resolve</button>
+                                    onclick="ResolveModal.open('@req.Number')">
+                                Resolve
+                            </button>
                         }
                     </div>
                 </div>
@@ -343,7 +342,7 @@
         </div>
     </div>
 
-@if (isEdit && req!.Status == RequestStatusEnum.Agreed)
-{
-    @await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
-}
+    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+    {
+        @await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
+    }
