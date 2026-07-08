@@ -18,13 +18,13 @@
      style="@(ViewData["RequestMode"] is true ? "width:80%;" : "min-width:220px;")">
     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
-        <span class="fw-bolder">Proposal</span>
+        <span class="fw-bolder">Vorschlag@* Proposal *@</span>
     </div>
     <hr class="border border-@color mt-1 mb-3" />
-    @if (Model.Id == 0)
+    @if (Model.Id == 0 || (Model.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
-            <span class="fw-bold">No proposal exists yet.</span>
+            <span class="fw-bold">Es liegt noch kein Vorschlag vor.</span>
         </div>
     }
     else if (Model.Status == RequestProposalStatusEnum.Canceled)
@@ -37,7 +37,7 @@
     else if (ViewData["RequestMode"] is true && User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-danger">
-            <span class="fw-bold text-danger h4">Classified</span>
+            <span class="fw-bold text-danger h4">Geheim</span>
         </div>
     }
     else
