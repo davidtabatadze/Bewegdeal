@@ -90,6 +90,11 @@
                 <a asp-controller="Invoice" asp-action="List" class="menu-link">
                     <i class="menu-icon icon-base ri ri-pages-line"></i>
                     <div data-i18n="Invoices">Invoices</div>
+                    @if ((int)(ViewBag.PendingInvoiceCount ?? 0) > 0)
+                    {
+                        <div class="badge text-bg-warning rounded-pill ms-auto">@ViewBag.PendingInvoiceCount</div>
+                    }
+                    @* <div class="badge text-bg-primary rounded-pill badge-center ms-auto"><i class="icon-base ri ri-star-line"></i></div> *@
                 </a>
             </li>
         }
@@ -120,6 +125,10 @@
                 <a asp-controller="User" asp-action="List" class="menu-link">
                     <i class="menu-icon icon-base ri ri-group-line"></i>
                     <div data-i18n="Users">Users</div>
+                    @if ((int)(ViewBag.PendingUserCount ?? 0) > 0)
+                    {
+                        <div class="badge text-bg-warning rounded-pill ms-auto">@ViewBag.PendingUserCount</div>
+                    }
                 </a>
             </li>
 
@@ -128,6 +137,10 @@
                 <a asp-controller="Chat" asp-action="List" class="menu-link">
                     <i class="menu-icon icon-base ri ri-wechat-2-line"></i>
                     <div data-i18n="Chats">Chats</div>
+                    @if ((int)(ViewBag.DubiousChatCount ?? 0) > 0)
+                    {
+                        <div class="badge text-bg-danger rounded-pill ms-auto">@ViewBag.DubiousChatCount</div>
+                    }
                 </a>
             </li>
 
