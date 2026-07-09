@@ -2,295 +2,76 @@
     Layout = "_HomeLayout";
     ViewData["Title"] = "Dashboard";
 }
+<div class="row g-6">
 
-<!-- Row 1: User Stats -->
-<div class="row g-6 mb-6">
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-12 col-lg-6">
         <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Total Clients</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">1 284</h4>
-                        </div>
-                        <small class="mb-0">All registered clients</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-primary rounded">
-                            <div class="icon-base ri ri-group-line icon-26px"></div>
-                        </div>
-                    </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Einkommen</h5>
+                <div class="dropdown">
+                    <button class="btn text-body-secondary p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="selectedIncomesYear"></span>
+                        <i class="icon-base ri ri-arrow-down-s-line"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="incomesYearDropdown"></ul>
                 </div>
+            </div>
+            <div class="card-body">
+                <div id="incomesChart"></div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+
+    <div class="col-12 col-lg-6">
         <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Total Company</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">347</h4>
-                        </div>
-                        <small class="mb-0">Registered service providers</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-info rounded">
-                            <div class="icon-base ri ri-building-line icon-26px"></div>
-                        </div>
-                    </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Verträge</h5>
+                <div class="dropdown">
+                    <button class="btn text-body-secondary p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="selectedDealsYear"></span>
+                        <i class="icon-base ri ri-arrow-down-s-line"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="dealsYearDropdown"></ul>
                 </div>
+            </div>
+            <div class="card-body">
+                <div id="dealsChart"></div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+
+    <div class="col-12 col-lg-6">
         <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Pending Company</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">42</h4>
-                        </div>
-                        <small class="mb-0">Companies awaiting review</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-warning rounded">
-                            <div class="icon-base ri ri-time-line icon-26px"></div>
-                        </div>
-                    </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Anmeldungen</h5>
+                <div class="dropdown">
+                    <button class="btn text-body-secondary p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="selectedRegistrationYear"></span>
+                        <i class="icon-base ri ri-arrow-down-s-line"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="registrationYearDropdown"></ul>
                 </div>
+            </div>
+            <div class="card-body">
+                <div id="registrationChart"></div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+
+    <div class="col-12 col-lg-6">
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Anfragestatus</h5>
+            </div>
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Fraud Messages</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">17</h4>
-                        </div>
-                        <small class="mb-0">Flagged for review</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-danger rounded">
-                            <div class="icon-base ri ri-spam-2-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
+                <div id="rstatusChart"></div>
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- Total Revenue -->
-<div class="row g-6 mb-6">
-    <div class="col-xl-6 col-lg-8 col-md-10">
-        <div class="card">
-            <div class="card-body p-4">
-                <p class="text-heading mb-1 fw-semibold">Total Revenue</p>
-                <h4 class="mb-0">€ 43,740</h4>
-                <p class="text-muted mb-4">Across all services</p>
-                <ul class="p-0 m-0 list-unstyled">
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-danger rounded">
-                                <div class="icon-base ri ri-delete-bin-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">@AnnotationEnum.General.Service.Removal</span>
-                        <span class="fw-semibold me-3">€ 7,230</span>
-                        <div class="progress bg-label-danger mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-danger" style="width: 17%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-warning rounded">
-                                <div class="icon-base ri ri-map-pin-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">Pickup</span>
-                        <span class="fw-semibold me-3">€ 5,890</span>
-                        <div class="progress bg-label-warning mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-warning" style="width: 13%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-primary rounded">
-                                <div class="icon-base ri ri-truck-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">Moving</span>
-                        <span class="fw-semibold me-3">€ 18,450</span>
-                        <div class="progress bg-label-primary mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-primary" style="width: 42%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-info rounded">
-                                <div class="icon-base ri ri-car-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">@AnnotationEnum.General.Service.Transport</span>
-                        <span class="fw-semibold me-3">€ 12,170</span>
-                        <div class="progress bg-label-info mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-info" style="width: 28%" role="progressbar"></div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Requests -->
-    <div class="col-xl-6 col-lg-8 col-md-10">
-        <div class="card">
-            <div class="card-body p-4">
-                <p class="text-heading mb-1 fw-semibold">Total Requests</p>
-                <h4 class="mb-0">1,279</h4>
-                <p class="text-muted mb-4">Across all services</p>
-                <ul class="p-0 m-0 list-unstyled">
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-danger rounded">
-                                <div class="icon-base ri ri-delete-bin-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">@AnnotationEnum.General.Service.Removal</span>
-                        <span class="fw-semibold me-3">89</span>
-                        <div class="progress bg-label-danger mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-danger" style="width: 7%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-warning rounded">
-                                <div class="icon-base ri ri-map-pin-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">Pickup</span>
-                        <span class="fw-semibold me-3">156</span>
-                        <div class="progress bg-label-warning mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-warning" style="width: 13%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-primary rounded">
-                                <div class="icon-base ri ri-truck-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">Moving</span>
-                        <span class="fw-semibold me-3">203</span>
-                        <div class="progress bg-label-primary mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-primary" style="width: 16%" role="progressbar"></div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center">
-                        <div class="avatar avatar-sm flex-shrink-0 me-3">
-                            <div class="avatar-initial bg-label-info rounded">
-                                <div class="icon-base ri ri-car-line icon-20px"></div>
-                            </div>
-                        </div>
-                        <span class="flex-grow-1">@AnnotationEnum.General.Service.Transport</span>
-                        <span class="fw-semibold me-3">831</span>
-                        <div class="progress bg-label-info mb-0" style="height: 4px; width: 80px;">
-                            <div class="progress-bar bg-info" style="width: 28%" role="progressbar"></div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Row 2: Request Statuses -->
-<div class="row g-6 mb-6">
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Active</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">203</h4>
-                        </div>
-                        <small class="mb-0">Currently active requests</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-success rounded">
-                            <div class="icon-base ri ri-play-circle-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">In Chat</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">89</h4>
-                        </div>
-                        <small class="mb-0">Requests in negotiation</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-info rounded">
-                            <div class="icon-base ri ri-chat-1-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Deal</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">156</h4>
-                        </div>
-                        <small class="mb-0">Deals in progress</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-primary rounded">
-                            <div class="icon-base ri ri-handshake-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="me-1">
-                        <p class="text-heading mb-1">Resolved</p>
-                        <div class="d-flex align-items-center">
-                            <h4 class="mb-1 me-2">831</h4>
-                        </div>
-                        <small class="mb-0">Successfully completed</small>
-                    </div>
-                    <div class="avatar">
-                        <div class="avatar-initial bg-label-secondary rounded">
-                            <div class="icon-base ri ri-check-double-line icon-26px"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@section PageScripts {
+    <script src="~/vendor/libs/apex-charts/apexcharts.js" asp-append-version="true"></script>
+    <script src="~/js/app-admin-dashboard.js" asp-append-version="true"></script>
+}
