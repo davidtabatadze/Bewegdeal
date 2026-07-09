@@ -12,6 +12,8 @@ namespace Bewegdeal.Controllers
         {
             if (User.IsInRole(UserRoleEnum.Administrator))
             {
+                var general = await DashboardService.GetAdminBoardGeneral();
+                ViewBag.General = general.Result;
                 return View("Admin");
             }
             if (User.IsInRole(UserRoleEnum.Company))

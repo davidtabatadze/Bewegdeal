@@ -6,8 +6,47 @@ using System.Globalization;
 
 namespace Bewegdeal.Services
 {
-    public class DashboardService(UserService UserService, RequestService RequestService, InvoiceService InvoiceService, ProposalService ProposalService)
+    public class DashboardService(
+        UserService UserService,
+        RequestService RequestService,
+        InvoiceService InvoiceService,
+        ProposalService ProposalService,
+        ChatService ChatService
+    )
     {
+
+        public async Task<GenericResultModel<object>> GetAdminBoardGeneral()
+        {
+            var pendingUsers = await UserService.Count(new UserFilter
+            {
+                Status = UserStatusEnum.Pending
+            });
+            var pendingInvoices = await InvoiceService.Count(new InvoiceFilter
+            {
+                Status = InvoiceStatusEnum.Pending
+            });
+            var pendingChats = await ChatService.Count(new ChatFilter
+            {
+                Fraud = ChatFraudEnum.Dubious
+            });
+            var servedCustomers = await InvoiceService.CountDistinct(new InvoiceFilter
+            {
+                Active = true
+            }, nameof(InvoiceEntity.CustomerId));
+            var profit = await InvoiceService.Sum(new InvoiceFilter
+            {
+                Active = true
+            }, nameof(InvoiceEntity.TotalCost));
+
+            return GenericResultModel<object>.Ok(new
+            {
+                pendingUsers,
+                pendingInvoices,
+                pendingChats,
+                servedCustomers,
+                profit
+            });
+        }
 
         public async Task<GenericResultModel<object>> GetCompanyBoardGeneral(long userId)
         {
@@ -285,7 +324,7 @@ namespace Bewegdeal.Services
                         resolved > 0 ? AnnotationEnum.General.RequestStatus.Resolved : null
                     }.Where(s => s is not null),
                     series = new int?[] {
-                        pending > 0 ? pending : null, 
+                        pending > 0 ? pending : null,
                         negotiation > 0 ? negotiation : null,
                         agreed > 0 ? agreed : null,
                         resolved > 0 ? resolved : null

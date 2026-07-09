@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!dt_invoice_table) { return; }
 
-    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 9;
+    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 8;
 
     const dt_invoice = new DataTable(dt_invoice_table, {
         serverSide: true,
@@ -120,8 +120,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
-                // Payment — invoice payment date
+                // Payment — invoice payment date (hidden, re-enable when ready)
                 targets: 5,
+                visible: false,
                 width: '135px',
                 createdCell: function (td) { td.style.minWidth = '135px'; },
                 render: function (data) {

@@ -1,7 +1,71 @@
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Dashboard";
+
+    var admin = User.FindFirstValue(IdentityFieldEnum.Name) ?? "?";
+    dynamic general = ViewBag.General;
+
+    string FormatAmount(decimal value)
+        => value < 1000 ? value.ToString("0.##") : (value / 1000m).ToString("0.##") + "K";
 }
+
+<div class="card bg-transparent shadow-none border-0 mb-3">
+    <div class="card-body row g-6 p-0 pb-4">
+        <div class="col-12 col-lg-8">
+            <h5 class="mb-2">Willkommen,<span class="h4 fw-semibold"> @admin 👋🏻</span></h5>
+            <div class="col-12 col-lg-7">
+                <p>Wichtige Hinweise</p>
+            </div>
+            <div class="d-flex justify-content-between flex-wrap gap-4 me-12">
+                <div class="d-flex align-items-center gap-4 me-6 me-sm-0">
+                    <div class="avatar avatar-lg">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <i class="icon-base ri ri-user-forbid-line text-warning icon-36px"></i>
+                        </div>
+                    </div>
+                    <div class="content-right">
+                        <p class="mb-1 fw-medium">Ausstehende Benutzer</p>
+                        <span class="text-warning mb-0 h5">@general.pendingUsers</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="avatar avatar-lg">
+                        <div class="avatar-initial bg-label-warning rounded">
+                            <i class="icon-base ri ri-timer-flash-line text-warning icon-36px"></i>
+                        </div>
+                    </div>
+                    <div class="content-right">
+                        <p class="mb-1 fw-medium">Ausstehende Rechnungen</p>
+                        <span class="text-warning mb-0 h5">@general.pendingInvoices</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="avatar avatar-lg">
+                        <div class="avatar-initial bg-label-danger rounded">
+                            <i class="icon-base ri ri-alarm-warning-line text-danger icon-36px"></i>
+                        </div>
+                    </div>
+                    <div class="content-right">
+                        <p class="mb-1 fw-medium">Betrugs-Chats</p>
+                        <span class="text-danger mb-0 h5">@general.pendingChats</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-body text-nowrap">
+                    <h5 class="card-title mb-0 flex-wrap text-nowrap">Glückwunsch! 🎉</h5>
+                    <p class="mb-2">Wir machen Fortschritte. 🚀</p>
+                    <h4 class="text-success mb-0">€@FormatAmount((decimal)general.profit)<span class="text-secondary" style="font-size: 14px;"> profitieren</span></h4>
+                    <p class="mb-2"><span class="text-success fw-bold">@general.servedCustomers</span> Bediente Kunden <i class="icon-base ri ri-user-2-line text-success"></i></p>
+                </div>
+                <img src="~/img/illustrations/trophy.png" class="position-absolute bottom-0 end-0 me-3 mb-5" width="83" />
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-6">
 
     <div class="col-12 col-lg-6">
@@ -60,8 +124,9 @@
 
     <div class="col-12 col-lg-6">
         <div class="card" id="rstatusCard">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Anfragestatus</h5>
+                <span class="text-secondary">Gesamt</span>
             </div>
             <div class="card-body">
                 <div style="position: relative; height: 300px;">
