@@ -208,20 +208,24 @@
     }
 
     function loadDeals(year) {
+        Block.pulse('#dealsCard');
         $.get('/Dashboard/GetCompanyBoardDeal', { year: year }, function (res) {
+            Block.remove('#dealsCard');
             if (!res || !res.result) { return; }
             const data = res.result;
             buildYearDropdown2(data.years, data.year);
-            initServiceChart(data.serviceChart);
+            initServiceChart(data.chart);
         });
     }
 
     function loadIncomes(year) {
+        Block.pulse('#incomesCard');
         $.get('/Dashboard/GetCompanyBoardIncome', { year: year }, function (res) {
+            Block.remove('#incomesCard');
             if (!res || !res.result) { return; }
             const data = res.result;
             buildYearDropdown(data.years, data.year);
-            initInvoiceChart(data.invoiceChart);
+            initInvoiceChart(data.chart);
         });
     }
 

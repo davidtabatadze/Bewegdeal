@@ -24,12 +24,6 @@
         customer: config.colors.success
     };
 
-    const colorByStatus = [
-        config.colors.warning,
-        config.colors.info,
-        config.colors.success,
-        config.colors.secondary
-    ];
 
     let profitChart = null;
     let serviceChart = null;
@@ -257,71 +251,64 @@
     }
 
     function initRstatusChart(data) {
-        const el = document.querySelector('#rstatusChart');
+        const el = document.getElementById('rstatusChart');
         if (!el) { return; }
 
         if (rstatusChart) { rstatusChart.destroy(); }
 
-        const total = data.series.reduce((a, b) => a + b, 0);
+        const tooltipBg = window.Helpers.getCssVar('paper-bg', true);
+        const headingColor = window.Helpers.getCssVar('heading-color', true);
+        const legendColor = window.Helpers.getCssVar('body-color', true);
+        const tooltipBorder = window.Helpers.getCssVar('border-color', true);
+        const tickColor = window.Helpers.getCssVar('secondary-color', true);
+        const statusColors = [];
+        if (data.groupNames.pending == true) statusColors.push(window.Helpers.getCssVar('warning', true));
+        if (data.groupNames.negotiation == true) statusColors.push(window.Helpers.getCssVar('info', true));
+        if (data.groupNames.agreed == true) statusColors.push(window.Helpers.getCssVar('success', true));
+        if (data.groupNames.resolved == true) statusColors.push(window.Helpers.getCssVar('primary', true));
 
-        rstatusChart = new ApexCharts(el, {
-            chart: {
-                height: 350,
-                type: 'donut',
-                parentHeightOffset: 0
+        rstatusChart = new Chart(el, {
+            type: 'polarArea',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.series,
+                    backgroundColor: statusColors,
+                    borderWidth: 0
+                }]
             },
-            labels: data.labels,
-            series: data.series,
-            colors: colorByStatus,
-            stroke: { show: false },
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return parseInt(val, 10) + '%';
-                }
-            },
-            legend: {
-                show: true,
-                position: 'bottom',
-                markers: { size: 6, strokeWidth: 0 },
-                itemMargin: { vertical: 3, horizontal: 10 },
-                labels: { colors: labelColor, useSeriesColors: false }
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 500 },
+                scales: {
+                    r: {
+                        ticks: { display: false, color: tickColor },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        backgroundColor: tooltipBg,
+                        titleColor: headingColor,
+                        bodyColor: legendColor,
+                        borderWidth: 1,
+                        borderColor: tooltipBorder
+                    },
+                    legend: {
+                        position: 'right',
                         labels: {
-                            show: true,
-                            name: {
-                                fontSize: '1.25rem',
-                                fontFamily: fontFamily
-                            },
-                            value: {
-                                fontSize: '1.25rem',
-                                color: labelColor,
-                                fontFamily: fontFamily,
-                                formatter: val => parseInt(val, 10)
-                            },
-                            total: {
-                                show: true,
-                                fontSize: '1.25rem',
-                                color: labelColor,
-                                label: 'Total',
-                                formatter: () => total
-                            }
+                            usePointStyle: true,
+                            padding: 25,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            color: legendColor,
+                            font: { family: fontFamily, size: '13px' }
                         }
                     }
                 }
-            },
-            responsive: [
-                {
-                    breakpoint: 576,
-                    options: { chart: { height: 280 }, legend: { show: false } }
-                }
-            ]
+            }
         });
-
-        rstatusChart.render();
     }
 
     function buildYearDropdown2(years, selectedYear) {
@@ -345,20 +332,24 @@
     }
 
     function loadIncomes(year) {
+        Block.pulse('#incomesCard');
         $.get('/Dashboard/GetAdminBoardIncome', { year: year }, function (res) {
+            Block.remove('#incomesCard');
             if (!res || !res.result) { return; }
             const data = res.result;
             buildYearDropdown(data.years, data.year);
-            initInvoiceChart(data.invoiceChart);
+            initInvoiceChart(data.chart);
         });
     }
 
     function loadDeals(year) {
+        Block.pulse('#dealsCard');
         $.get('/Dashboard/GetAdminBoardDeal', { year: year }, function (res) {
+            Block.remove('#dealsCard');
             if (!res || !res.result) { return; }
             const data = res.result;
             buildYearDropdown2(data.years, data.year);
-            initServiceChart(data.serviceChart);
+            initServiceChart(data.chart);
         });
     }
 
@@ -383,16 +374,20 @@
     }
 
     function loadRegistrations(year) {
+        Block.pulse('#registrationCard');
         $.get('/Dashboard/GetAdminBoardUser', { year: year }, function (res) {
+            Block.remove('#registrationCard');
             if (!res || !res.result) { return; }
             const data = res.result;
             buildYearDropdown3(data.years, data.year);
-            initRegistrationChart(data.serviceChart);
+            initRegistrationChart(data.chart);
         });
     }
 
     function loadRstatus() {
+        Block.pulse('#rstatusCard');
         $.get('/Dashboard/GetAdminBoardRequest', function (res) {
+            Block.remove('#rstatusCard');
             if (!res || !res.result) { return; }
             initRstatusChart(res.result.chart);
         });

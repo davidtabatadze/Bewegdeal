@@ -115,7 +115,7 @@ namespace Bewegdeal.Services
             {
                 dateFilter.year,
                 dateFilter.years,
-                invoiceChart = new
+                chart = new
                 {
                     groupNames = new
                     {
@@ -179,7 +179,7 @@ namespace Bewegdeal.Services
             {
                 dateFilter.year,
                 dateFilter.years,
-                serviceChart = new
+                chart = new
                 {
                     groupNames = new
                     {
@@ -233,7 +233,7 @@ namespace Bewegdeal.Services
             {
                 dateFilter.year,
                 dateFilter.years,
-                serviceChart = new
+                chart = new
                 {
                     groupNames = new
                     {
@@ -273,18 +273,23 @@ namespace Bewegdeal.Services
                 {
                     groupNames = new
                     {
-                        pending = AnnotationEnum.General.RequestStatus.Pending,
-                        negotiation = AnnotationEnum.General.RequestStatus.Negotiation,
-                        agreed = AnnotationEnum.General.RequestStatus.Agreed,
-                        resolved = AnnotationEnum.General.RequestStatus.Resolved
+                        pending = pending > 0,
+                        negotiation = negotiation > 0,
+                        agreed = agreed > 0,
+                        resolved = resolved > 0
                     },
-                    labels = new string[] {
-                        AnnotationEnum.General.RequestStatus.Pending,
-                        AnnotationEnum.General.RequestStatus.Negotiation,
-                        AnnotationEnum.General.RequestStatus.Agreed,
-                        AnnotationEnum.General.RequestStatus.Resolved
-                    },
-                    series = new int[] { pending, negotiation, agreed, resolved }
+                    labels = new string?[] {
+                        pending > 0 ? AnnotationEnum.General.RequestStatus.Pending : null,
+                        negotiation > 0 ? AnnotationEnum.General.RequestStatus.Negotiation : null,
+                        agreed > 0 ? AnnotationEnum.General.RequestStatus.Agreed : null,
+                        resolved > 0 ? AnnotationEnum.General.RequestStatus.Resolved : null
+                    }.Where(s => s is not null),
+                    series = new int?[] {
+                        pending > 0 ? pending : null, 
+                        negotiation > 0 ? negotiation : null,
+                        agreed > 0 ? agreed : null,
+                        resolved > 0 ? resolved : null
+                    }.Where(s => s is not null)
                 }
             });
 #pragma warning restore CS8604 // Possible null reference argument.
