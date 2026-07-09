@@ -88,7 +88,7 @@ namespace Bewegdeal.Services
 
             for (int month = 1; month <= 12; month++)
             {
-                if (new DateTime(year, month, 1) > DateTime.Now)
+                if (new DateTime(dateFilter.year, month, 1) > DateTime.Now)
                 {
                     break;
                 }
@@ -113,7 +113,7 @@ namespace Bewegdeal.Services
 #pragma warning disable CS8604 // Possible null reference argument.
             return GenericResultModel<object>.Ok(new
             {
-                year,
+                dateFilter.year,
                 dateFilter.years,
                 invoiceChart = new
                 {
@@ -160,7 +160,7 @@ namespace Bewegdeal.Services
 
             for (int month = 1; month <= 12; month++)
             {
-                if (new DateTime(year, month, 1) > DateTime.Now)
+                if (new DateTime(dateFilter.year, month, 1) > DateTime.Now)
                 {
                     break;
                 }
@@ -177,7 +177,7 @@ namespace Bewegdeal.Services
 #pragma warning disable CS8604 // Possible null reference argument.
             return GenericResultModel<object>.Ok(new
             {
-                year,
+                dateFilter.year,
                 dateFilter.years,
                 serviceChart = new
                 {
@@ -217,7 +217,7 @@ namespace Bewegdeal.Services
 
             for (int month = 1; month <= 12; month++)
             {
-                if (new DateTime(year, month, 1) > DateTime.Now)
+                if (new DateTime(dateFilter.year, month, 1) > DateTime.Now)
                 {
                     break;
                 }
@@ -231,7 +231,7 @@ namespace Bewegdeal.Services
 #pragma warning disable CS8604 // Possible null reference argument.
             return GenericResultModel<object>.Ok(new
             {
-                year,
+                dateFilter.year,
                 dateFilter.years,
                 serviceChart = new
                 {
@@ -253,21 +253,17 @@ namespace Bewegdeal.Services
 
         public async Task<GenericResultModel<object>> GetBoardRequest()
         {
-            var pending = await RequestService.CountDistinct(
-                new RequestFilter { Status = RequestStatusEnum.Pending },
-                nameof(RequestEntity.Status)
+            var pending = await RequestService.Count(
+                new RequestFilter { Status = RequestStatusEnum.Pending }
             );
-            var negotiation = await RequestService.CountDistinct(
-                new RequestFilter { Status = RequestStatusEnum.Negotiation },
-                nameof(RequestEntity.Status)
+            var negotiation = await RequestService.Count(
+                new RequestFilter { Status = RequestStatusEnum.Negotiation }
             );
-            var agreed = await RequestService.CountDistinct(
-                new RequestFilter { Status = RequestStatusEnum.Agreed },
-                nameof(RequestEntity.Status)
+            var agreed = await RequestService.Count(
+                new RequestFilter { Status = RequestStatusEnum.Agreed }
             );
-            var resolved = await RequestService.CountDistinct(
-                new RequestFilter { Status = RequestStatusEnum.Resolved },
-                nameof(RequestEntity.Status)
+            var resolved = await RequestService.Count(
+                new RequestFilter { Status = RequestStatusEnum.Resolved }
             );
 
 #pragma warning disable CS8604 // Possible null reference argument.

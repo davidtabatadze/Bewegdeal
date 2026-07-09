@@ -66,9 +66,6 @@ namespace Bewegdeal.Services
         public async Task<int> Count(RequestFilter filter)
             => await RequestRepository.Count(filter);
 
-        public async Task<int> CountDistinct(RequestFilter filter, string property)
-            => await RequestRepository.CountDistinct(filter, property);
-
         public async Task<List<RequestEntity>> Load(RequestFilter filter)
             => await RequestRepository.Load(filter);
 
