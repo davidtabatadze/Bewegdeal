@@ -28,10 +28,42 @@ namespace Bewegdeal.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        public async Task<IActionResult> GetAdminBoardIncome(short year = 0)
+        {
+            var result = await DashboardService.GetBoardIncome(0, year);
+            return Json(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        public async Task<IActionResult> GetAdminBoardDeal(short year = 0)
+        {
+            var result = await DashboardService.GetBoardDeal(0, year);
+            return Json(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        public async Task<IActionResult> GetAdminBoardUser(short year = 0)
+        {
+            var result = await DashboardService.GetBoardUser(year);
+            return Json(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = UserRoleEnum.Administrator)]
+        public async Task<IActionResult> GetAdminBoardRequest()
+        {
+            var result = await DashboardService.GetBoardRequest();
+            return Json(result);
+        }
+
+        [HttpGet]
         [Authorize(Roles = UserRoleEnum.Company)]
         public async Task<IActionResult> GetCompanyBoardIncome(short year = 0)
         {
-            var result = await DashboardService.GetCompanyBoardIncome(UserId, year);
+            var result = await DashboardService.GetBoardIncome(UserId, year);
             return Json(result);
         }
 
@@ -39,7 +71,7 @@ namespace Bewegdeal.Controllers
         [Authorize(Roles = UserRoleEnum.Company)]
         public async Task<IActionResult> GetCompanyBoardDeal(short year = 0)
         {
-            var result = await DashboardService.GetCompanyBoardDeal(UserId, year);
+            var result = await DashboardService.GetBoardDeal(UserId, year);
             return Json(result);
         }
     }

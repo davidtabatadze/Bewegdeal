@@ -17,8 +17,8 @@ namespace Bewegdeal.Services
             => await Load(new RequestProposalFilter { ChatId = chatId });
         public async Task<List<RequestProposalEntity>> Load(List<long> requestIds)
             => await Load(new RequestProposalFilter { RequestIds = requestIds });
-        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter)
-            => await ProposalRepository.Load(filter);
+        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter, string[]? properties = null)
+            => await ProposalRepository.Load(filter, properties);
         public async Task<int> Count(RequestProposalFilter filter)
             => await ProposalRepository.Count(filter);
         public async Task Update(long id, long invoiceId)

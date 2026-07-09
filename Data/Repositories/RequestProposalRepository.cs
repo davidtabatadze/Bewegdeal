@@ -36,8 +36,8 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter)
-            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).ToListAsync();
+        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).Select(BuildSelect<RequestProposalEntity>(properties)).ToListAsync();
 
         public async Task<int> Count(RequestProposalFilter filter)
             => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).CountAsync();

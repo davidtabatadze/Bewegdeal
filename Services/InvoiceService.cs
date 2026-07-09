@@ -43,8 +43,8 @@ namespace Bewegdeal.Services
             => await InvoiceRepository.Update(area, update);
         public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
-        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
-            => await InvoiceRepository.Load(filter);
+        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter, string[]? properties = null)
+            => await InvoiceRepository.Load(filter, properties);
         public async Task<decimal> Sum(InvoiceFilter filter, string property)
             => await InvoiceRepository.Sum(filter, property);
         public async Task<int> Count(InvoiceFilter filter)

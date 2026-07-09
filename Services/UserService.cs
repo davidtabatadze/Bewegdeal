@@ -34,8 +34,8 @@ namespace Bewegdeal.Services
         public async Task<int> Count(UserFilter filter)
             => await UserRepository.Count(filter);
 
-        public async Task<List<UserEntity>> Load(UserFilter filter)
-            => await UserRepository.Load(filter);
+        public async Task<List<UserEntity>> Load(UserFilter filter, string[]? properties = null)
+            => await UserRepository.Load(filter, properties);
 
         public async Task<List<UserEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
             => await UserRepository.Load<UserEntity>(ids, properties);

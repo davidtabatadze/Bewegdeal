@@ -10,6 +10,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task Update(RequestUpdateAreaEnum area, RequestEntity update);
         Task<RequestEntity?> Get(RequestFilter filter, string[]? properties = null);
         Task<int> Count(RequestFilter filter);
+        Task<int> CountDistinct(RequestFilter filter, string property)
         Task<List<RequestEntity>> Load(RequestFilter filter);
     }
 }

@@ -11,6 +11,21 @@
                 public const string Pickup = "Store Pickup"; // "Einkaufsabholung"; //
                 public const string Transport = "Vehicle Transport"; // "Fahrzeugtransport"; //
             }
+            public class Role
+            {
+                public const string Administrator = "Administrator"; // "Admin"; //
+                public const string Customer = "Customer"; // "Kunde"; //
+                public const string Company = "Company"; // "Unternehmen"; //
+            }
+            public class RequestStatus
+            {
+                public const string Pending = "Pending"; // "Ausstehend"; //
+                public const string Negotiation = "Negotiation"; // "Verhandlung"; //
+                public const string Agreed = "Agreed"; // "Vereinbart"; //
+                public const string Resolved = "Resolved"; // "Gelöst"; //
+                public const string Cancelled = "Cancelled"; // "Abgesagt"; //
+                public const string Declined = "Declined"; // "Abgelehnt"; //
+            }
         }
         public class Account
         {

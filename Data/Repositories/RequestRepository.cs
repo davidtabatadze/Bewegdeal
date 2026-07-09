@@ -66,6 +66,16 @@ namespace Bewegdeal.Data.Repositories
         public async Task<int> Count(RequestFilter filter)
             => await ApplyFilters(Context.Requests.AsQueryable(), filter).CountAsync();
 
+        public async Task<int> CountDistinct(RequestFilter filter, string property)
+        {
+            var query = ApplyFilters(Context.Requests.AsQueryable(), filter);
+            return property switch
+            {
+                nameof(RequestEntity.Status) => await query.Select(r => r.Status).Distinct().CountAsync(),
+                _ => throw new ArgumentException("Invalid distinct property", nameof(property))
+            };
+        }
+
         private IQueryable<RequestEntity> ApplyFilters(IQueryable<RequestEntity> query, RequestFilter filter)
         {
             if (filter.Id.HasValue)

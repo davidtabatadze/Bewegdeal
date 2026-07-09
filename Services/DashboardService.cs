@@ -67,23 +67,18 @@ namespace Bewegdeal.Services
             });
         }
 
-        public async Task<GenericResultModel<object>> GetCompanyBoardIncome(long userId, short year = 0)
+        public async Task<GenericResultModel<object>> GetBoardIncome(long userId, short year = 0)
         {
-            short minYear = 2025;
-            short maxYear = (short)DateTime.Now.Year;
-            year = year < minYear || year > maxYear ? maxYear : year;
-
-            var startDate = new DateTime(year, 1, 1);
-            var endDate = new DateTime(year, 12, 31);
+            var dateFilter = GetDateFilter(year);
 
             var invoices = await InvoiceService.Load(new InvoiceFilter
             {
-                ViewerId = userId,
-                ViewerRole = UserRoleEnum.Company,
+                ViewerId = userId == 0 ? null : userId,
+                ViewerRole = userId == 0 ? UserRoleEnum.Administrator : UserRoleEnum.Company,
                 Active = true,
-                DateFrom = startDate,
-                DateTo = endDate
-            });
+                DateFrom = dateFilter.startDate,
+                DateTo = dateFilter.endDate
+            }, [nameof(InvoiceEntity.Service), nameof(InvoiceEntity.TotalCost), nameof(InvoiceEntity.ServiceCost)]);
 
             var feesSum = new List<decimal>();
             var movingSum = new List<decimal>();
@@ -99,18 +94,27 @@ namespace Bewegdeal.Services
                 }
 
                 var monthInvoices = invoices.Where(i => i.CreateDate.Month == month).ToList();
+
                 feesSum.Add(monthInvoices.Sum(i => i.TotalCost));
-                movingSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Moving).Sum(i => i.ServiceCost - i.TotalCost));
-                pickupSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Pickup).Sum(i => i.ServiceCost - i.TotalCost));
-                removalSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Removal).Sum(i => i.ServiceCost - i.TotalCost));
-                transportSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Transport).Sum(i => i.ServiceCost - i.TotalCost));
+                movingSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Moving).Sum(i =>
+                    userId == 0 ? i.TotalCost : i.ServiceCost - i.TotalCost
+                ));
+                pickupSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Pickup).Sum(i =>
+                    userId == 0 ? i.TotalCost : i.ServiceCost - i.TotalCost
+                ));
+                removalSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Removal).Sum(i =>
+                    userId == 0 ? i.TotalCost : i.ServiceCost - i.TotalCost
+                ));
+                transportSum.Add(monthInvoices.Where(i => i.Service == ServiceEnum.Transport).Sum(i =>
+                    userId == 0 ? i.TotalCost : i.ServiceCost - i.TotalCost
+                ));
             }
 
 #pragma warning disable CS8604 // Possible null reference argument.
             return GenericResultModel<object>.Ok(new
             {
                 year,
-                years = Enumerable.Range(minYear, maxYear - minYear + 1).ToArray(),
+                dateFilter.years,
                 invoiceChart = new
                 {
                     groupNames = new
@@ -135,27 +139,19 @@ namespace Bewegdeal.Services
 #pragma warning restore CS8604 // Possible null reference argument.
         }
 
-        public async Task<GenericResultModel<object>> GetCompanyBoardDeal(long userId, short year = 0)
+        public async Task<GenericResultModel<object>> GetBoardDeal(long userId, short year = 0)
         {
-            short minYear = 2025;
-            short maxYear = (short)DateTime.Now.Year;
-            year = year < minYear || year > maxYear ? maxYear : year;
-
-            var startDate = DateOnly.FromDateTime(new DateTime(year, 1, 1));
-            var endDate = DateOnly.FromDateTime(new DateTime(year, 12, 31));
-
-            if (endDate > DateOnly.FromDateTime(DateTime.Now))
-            {
-                endDate = DateOnly.FromDateTime(DateTime.Now);
-            }
+            var dateFilter = GetDateFilter(year);
+            var startDate = DateOnly.FromDateTime(dateFilter.startDate);
+            var endDate = DateOnly.FromDateTime(dateFilter.endDate > DateTime.Now ? DateTime.Now : dateFilter.endDate);
 
             var proposals = await ProposalService.Load(new RequestProposalFilter
             {
-                CompanyId = userId,
+                CompanyId = userId == 0 ? null : userId,
                 Status = RequestProposalStatusEnum.Accepted,
                 DateFrom = startDate,
                 DateTo = endDate
-            });
+            }, [nameof(RequestProposalEntity.Date), nameof(RequestProposalEntity.Service)]);
 
             var movingCount = new List<decimal>();
             var pickupCount = new List<decimal>();
@@ -182,7 +178,7 @@ namespace Bewegdeal.Services
             return GenericResultModel<object>.Ok(new
             {
                 year,
-                years = Enumerable.Range(minYear, maxYear - minYear + 1).ToArray(),
+                dateFilter.years,
                 serviceChart = new
                 {
                     groupNames = new
@@ -203,6 +199,111 @@ namespace Bewegdeal.Services
                 }
             });
 #pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        public async Task<GenericResultModel<object>> GetBoardUser(short year = 0)
+        {
+            var dateFilter = GetDateFilter(year);
+
+            var users = await UserService.Load(new UserFilter
+            {
+                ExcludeRole = UserRoleEnum.Administrator,
+                DateFrom = dateFilter.startDate,
+                DateTo = dateFilter.endDate
+            }, [nameof(UserEntity.Role), nameof(UserEntity.CreateDate)]);
+
+            var companyCount = new List<decimal>();
+            var customerCount = new List<decimal>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                if (new DateTime(year, month, 1) > DateTime.Now)
+                {
+                    break;
+                }
+
+                var monthUsers = users.Where(i => i.CreateDate.Month == month)
+                                      .ToList();
+                companyCount.Add(monthUsers.Count(i => i.Role == UserRoleEnum.Company));
+                customerCount.Add(monthUsers.Count(i => i.Role == UserRoleEnum.Customer));
+            }
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            return GenericResultModel<object>.Ok(new
+            {
+                year,
+                dateFilter.years,
+                serviceChart = new
+                {
+                    groupNames = new
+                    {
+                        company = AnnotationEnum.General.Role.Company,
+                        customer = AnnotationEnum.General.Role.Customer
+                    },
+                    xaxisValues = DateTimeFormatInfo.CurrentInfo.AbbreviatedMonthNames.Where(m => !string.IsNullOrEmpty(m)),
+                    series = new List<object>
+                    {
+                        companyCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Role.Company, data = companyCount },
+                        customerCount.All(v => v == 0) ? null : new { name = AnnotationEnum.General.Role.Customer, data = customerCount },
+                    }.Where(s => s is not null)
+                }
+            });
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        public async Task<GenericResultModel<object>> GetBoardRequest()
+        {
+            var pending = await RequestService.CountDistinct(
+                new RequestFilter { Status = RequestStatusEnum.Pending },
+                nameof(RequestEntity.Status)
+            );
+            var negotiation = await RequestService.CountDistinct(
+                new RequestFilter { Status = RequestStatusEnum.Negotiation },
+                nameof(RequestEntity.Status)
+            );
+            var agreed = await RequestService.CountDistinct(
+                new RequestFilter { Status = RequestStatusEnum.Agreed },
+                nameof(RequestEntity.Status)
+            );
+            var resolved = await RequestService.CountDistinct(
+                new RequestFilter { Status = RequestStatusEnum.Resolved },
+                nameof(RequestEntity.Status)
+            );
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            return GenericResultModel<object>.Ok(new
+            {
+                chart = new
+                {
+                    groupNames = new
+                    {
+                        pending = AnnotationEnum.General.RequestStatus.Pending,
+                        negotiation = AnnotationEnum.General.RequestStatus.Negotiation,
+                        agreed = AnnotationEnum.General.RequestStatus.Agreed,
+                        resolved = AnnotationEnum.General.RequestStatus.Resolved
+                    },
+                    labels = new string[] {
+                        AnnotationEnum.General.RequestStatus.Pending,
+                        AnnotationEnum.General.RequestStatus.Negotiation,
+                        AnnotationEnum.General.RequestStatus.Agreed,
+                        AnnotationEnum.General.RequestStatus.Resolved
+                    },
+                    series = new int[] { pending, negotiation, agreed, resolved }
+                }
+            });
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        private (int year, int[] years, DateTime startDate, DateTime endDate) GetDateFilter(short year = 0)
+        {
+            short minYear = 2025;
+            short maxYear = (short)DateTime.Now.Year;
+            year = year < minYear || year > maxYear ? maxYear : year;
+
+            var startDate = new DateTime(year, 1, 1);
+            var endDate = new DateTime(year, 12, 31);
+
+            return (year, Enumerable.Range(minYear, maxYear - minYear + 1).ToArray(), startDate, endDate);
         }
 
     }

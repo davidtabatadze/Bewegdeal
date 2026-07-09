@@ -8,7 +8,7 @@ namespace Bewegdeal.Data.Repositories.Abstractions
     public interface IRequestProposalRepository : IRepository
     {
         Task Update(RequestProposalUpdateAreaEnum area, RequestProposalEntity update);
-        Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter);
+        Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter, string[]? properties = null);
         Task<int> Count(RequestProposalFilter filter);
     }
 }

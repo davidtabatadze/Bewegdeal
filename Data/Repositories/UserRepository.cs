@@ -156,8 +156,8 @@ namespace Bewegdeal.Data.Repositories
         public async Task<UserEntity?> Get(UserFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Users.AsQueryable(), filter).Select(BuildSelect<UserEntity>(properties)).FirstOrDefaultAsync();
 
-        public async Task<List<UserEntity>> Load(UserFilter filter)
-            => await ApplyFilters(Context.Users.AsQueryable(), filter).ToListAsync();
+        public async Task<List<UserEntity>> Load(UserFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Users.AsQueryable(), filter).Select(BuildSelect<UserEntity>(properties)).ToListAsync();
 
         public async Task<int> Count(UserFilter filter)
             => await ApplyFilters(Context.Users.AsQueryable(), filter).CountAsync();
@@ -167,6 +167,16 @@ namespace Bewegdeal.Data.Repositories
             if (filter.Id.HasValue)
             {
                 query = query.Where(u => u.Id == filter.Id.Value);
+            }
+
+            if (filter.DateFrom.HasValue)
+            {
+                query = query.Where(u => u.CreateDate >= filter.DateFrom.Value);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                query = query.Where(u => u.CreateDate <= filter.DateTo.Value);
             }
 
             if (filter.Ids != null && filter.Ids.Count != 0)
@@ -179,14 +189,19 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u => u.Email.ToLower() == filter.Email.ToLower());
             }
 
+            if (!string.IsNullOrWhiteSpace(filter.Status))
+            {
+                query = query.Where(u => u.Status == filter.Status);
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.Role))
             {
                 query = query.Where(u => u.Role == filter.Role);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.Status))
+            if (!string.IsNullOrWhiteSpace(filter.ExcludeRole))
             {
-                query = query.Where(u => u.Status == filter.Status);
+                query = query.Where(u => u.Role != filter.ExcludeRole);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Search))

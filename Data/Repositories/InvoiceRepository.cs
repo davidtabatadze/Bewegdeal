@@ -37,8 +37,8 @@ namespace Bewegdeal.Data.Repositories
         public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Invoices.AsQueryable(), filter).Select(BuildSelect<InvoiceEntity>(properties)).FirstOrDefaultAsync();
 
-        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
-            => await ApplyFilters(Context.Invoices.AsQueryable(), filter).ToListAsync();
+        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Invoices.AsQueryable(), filter).Select(BuildSelect<InvoiceEntity>(properties)).ToListAsync();
 
         public async Task<decimal> Sum(InvoiceFilter filter, string property)
         {
