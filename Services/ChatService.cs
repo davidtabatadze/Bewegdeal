@@ -91,6 +91,10 @@ namespace Bewegdeal.Services
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {
             var chats = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new ChatFilter());
 

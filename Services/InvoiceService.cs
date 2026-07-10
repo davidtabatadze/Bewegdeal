@@ -103,6 +103,10 @@ namespace Bewegdeal.Services
             filter.ViewerRole = userRole;
 
             var invoices = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new InvoiceFilter
             {

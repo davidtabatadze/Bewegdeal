@@ -206,6 +206,10 @@ namespace Bewegdeal.Services
         public async Task<GridResultModel<object>> LoadGrid(UserFilter filter, int draw)
         {
             var users = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
             var avatars = users.Select(u => GetAvatar(u)).ToList();

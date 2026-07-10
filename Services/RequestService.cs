@@ -205,6 +205,10 @@ namespace Bewegdeal.Services
             var viewerIsCompany = filter.ViewerRole == UserRoleEnum.Company;
 
             var requests = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new RequestFilter
             {
