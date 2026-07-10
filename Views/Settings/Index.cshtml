@@ -120,7 +120,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseMobile"
                     aria-expanded="@(openSection == "mobile" ? "true" : "false")"
                     aria-controls="collapseMobile">
-                Mobile
+                Mobilnummer
             </button>
         </h2>
         <div id="collapseMobile" class="accordion-collapse collapse @Show("mobile")"
@@ -133,13 +133,13 @@
                                 <input type="text" class="form-control" id="mobilePrefix"
                                        name="mobilePrefix" value="@Model.MobilePrefix"
                                        placeholder="" />
-                                <label for="mobilePrefix">Mobile Prefix</label>
+                                <label for="mobilePrefix">Vorwahl</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -152,7 +152,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseInvoice"
                     aria-expanded="@(openSection == "invoice" ? "true" : "false")"
                     aria-controls="collapseInvoice">
-                Invoice
+                Rechnung
             </button>
         </h2>
         <div id="collapseInvoice" class="accordion-collapse collapse @Show("invoice")"
@@ -165,7 +165,7 @@
                                 <input type="number" class="form-control" id="commissionPersent"
                                        name="commissionPersent" value="@Model.InvoiceCommissionPersent"
                                        min="1" placeholder="" />
-                                <label for="commissionPersent">Commission %</label>
+                                <label for="commissionPersent">Provision %</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -173,7 +173,7 @@
                                 <input type="number" class="form-control" id="taxPersent"
                                        name="taxPersent" value="@Model.InvoiceTaxPersent"
                                        min="1" placeholder="" />
-                                <label for="taxPersent">Tax %</label>
+                                <label for="taxPersent">Steuer %</label>
                             </div>
                         </div>
                     </div>
@@ -183,13 +183,13 @@
                                 <input type="number" class="form-control" id="invoiceDueDays"
                                        name="dueDays" value="@Model.InvoiceDueDays"
                                        min="1" placeholder="" />
-                                <label for="invoiceDueDays">Due Days</label>
+                                <label for="invoiceDueDays">Zahlungsfrist (Tage)</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -202,7 +202,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseRequest"
                     aria-expanded="@(openSection == "request" ? "true" : "false")"
                     aria-controls="collapseRequest">
-                Request
+                Auftrag
             </button>
         </h2>
         <div id="collapseRequest" class="accordion-collapse collapse @Show("request")"
@@ -216,7 +216,7 @@
                                 <input type="number" class="form-control" id="requestImageMaxCount"
                                        name="imageMaxCount" value="@Model.RequestImageMaxCount"
                                        min="1" placeholder="" />
-                                <label for="requestImageMaxCount">Image Max Count</label>
+                                <label for="requestImageMaxCount">Max. Bilder</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -224,7 +224,7 @@
                                 <input type="number" class="form-control" id="requestImageMaxSize"
                                        name="imageMaxSize" value="@Model.RequestImageMaxSize"
                                        min="1" placeholder="" />
-                                <label for="requestImageMaxSize">Image Max Size (MB)</label>
+                                <label for="requestImageMaxSize">Max. Bildgröße (MB)</label>
                             </div>
                         </div>
                     </div>
@@ -235,7 +235,7 @@
                                 <input type="number" class="form-control" id="requestVideoMaxCount"
                                        name="videoMaxCount" value="@Model.RequestVideoMaxCount"
                                        min="1" placeholder="" />
-                                <label for="requestVideoMaxCount">Video Max Count</label>
+                                <label for="requestVideoMaxCount">Max. Videos</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -243,13 +243,13 @@
                                 <input type="number" class="form-control" id="requestVideoMaxSize"
                                        name="videoMaxSize" value="@Model.RequestVideoMaxSize"
                                        min="1" placeholder="" />
-                                <label for="requestVideoMaxSize">Video Max Size (MB)</label>
+                                <label for="requestVideoMaxSize">Max. Videogröße (MB)</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -262,7 +262,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseAboutUs"
                     aria-expanded="@(openSection == "aboutUs" ? "true" : "false")"
                     aria-controls="collapseAboutUs">
-                About Us
+                Impressum
             </button>
         </h2>
         <div id="collapseAboutUs" class="accordion-collapse collapse @Show("aboutUs")"
@@ -273,7 +273,7 @@
                     <div id="aboutUsEditor"></div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -286,7 +286,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapsePrivacyPolicy"
                     aria-expanded="@(openSection == "privacyPolicy" ? "true" : "false")"
                     aria-controls="collapsePrivacyPolicy">
-                Privacy Policy
+                Datenschutzerklärung
             </button>
         </h2>
         <div id="collapsePrivacyPolicy" class="accordion-collapse collapse @Show("privacyPolicy")"
@@ -297,7 +297,7 @@
                     <div id="privacyPolicyEditor"></div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -310,7 +310,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseTcCustomer"
                     aria-expanded="@(openSection == "tcCustomer" ? "true" : "false")"
                     aria-controls="collapseTcCustomer">
-                T&amp;C for the <strong class="ms-1">Customer</strong>
+                AGB für <strong class="ms-1">Kunden</strong>
             </button>
         </h2>
         <div id="collapseTcCustomer" class="accordion-collapse collapse @Show("tcCustomer")"
@@ -321,16 +321,16 @@
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Handle with care</strong>
+                            <strong>Mit Vorsicht verwenden</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing customers to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Das Speichern von Änderungen erfordert, dass bestehende Kunden den AGB erneut zustimmen.</li>
                         </ul>
                     </div>
                     <div id="tcEditorCustomer"></div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
@@ -343,7 +343,7 @@
                     data-bs-toggle="collapse" data-bs-target="#collapseTcCompany"
                     aria-expanded="@(openSection == "tcCompany" ? "true" : "false")"
                     aria-controls="collapseTcCompany">
-                T&amp;C for the <strong class="ms-1">Company</strong>
+                AGB für <strong class="ms-1">Unternehmen</strong>
             </button>
         </h2>
         <div id="collapseTcCompany" class="accordion-collapse collapse @Show("tcCompany")"
@@ -354,16 +354,16 @@
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Handle with care</strong>
+                            <strong>Mit Vorsicht verwenden</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing companies to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Das Speichern von Änderungen erfordert, dass bestehende Unternehmen den AGB erneut zustimmen.</li>
                         </ul>
                     </div>
                     <div id="tcEditorCompany"></div>
                 </div>
                 <div class="accordion-body pt-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
             </form>
         </div>
