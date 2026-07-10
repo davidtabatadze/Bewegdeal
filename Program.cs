@@ -108,6 +108,7 @@ namespace Bewegdeal
             builder.Services.AddScoped<InvoiceService>();
             builder.Services.AddScoped<DashboardService>();
             builder.Services.AddHostedService<InvoiceGenerationJob>();
+            builder.Services.AddScoped<DataGeneratorTool>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
@@ -127,6 +128,7 @@ namespace Bewegdeal
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IFraudWordRepository>()).Seed();
+                await scope.ServiceProvider.GetRequiredService<DataGeneratorTool>().Generate();
             }
 
             // ── Middleware pipeline ───────────────────────────────────────────────

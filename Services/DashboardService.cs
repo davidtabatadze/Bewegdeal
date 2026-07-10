@@ -117,7 +117,7 @@ namespace Bewegdeal.Services
                 Active = true,
                 DateFrom = dateFilter.startDate,
                 DateTo = dateFilter.endDate
-            }, [nameof(InvoiceEntity.Service), nameof(InvoiceEntity.TotalCost), nameof(InvoiceEntity.ServiceCost)]);
+            }, [nameof(InvoiceEntity.Service), nameof(InvoiceEntity.TotalCost), nameof(InvoiceEntity.ServiceCost), nameof(InvoiceEntity.CreateDate)]);
 
             var feesSum = new List<decimal>();
             var movingSum = new List<decimal>();
