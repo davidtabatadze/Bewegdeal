@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/vendor/libs/bootstrap-select/bootstrap-select.css" />
     <link rel="stylesheet" href="~/vendor/libs/notyf/notyf.css" />
     <link rel="stylesheet" href="~/vendor/libs/notiflix/notiflix.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
     <link rel="stylesheet" href="~/vendor/libs/spinkit/spinkit.css" />
     @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
     {
@@ -31,6 +32,7 @@
     <script src="~/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
     <script src="~/vendor/libs/notyf/notyf.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
     @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
     {
         <script src="~/vendor/libs/raty-js/raty-js.js"></script>
@@ -39,23 +41,25 @@
 
 @section PageScripts {
     <script>
-        const imageMaxCount  = @settings.RequestImageMaxCount;
-        const imageMaxSize   = @settings.RequestImageMaxSize;
-        const videoMaxCount  = @settings.RequestVideoMaxCount;
-        const videoMaxSize   = @settings.RequestVideoMaxSize;
+        const imageMaxCount   = @settings.RequestImageMaxCount;
+        const imageMaxSize    = @settings.RequestImageMaxSize;
+        const videoMaxCount   = @settings.RequestVideoMaxCount;
+        const videoMaxSize    = @settings.RequestVideoMaxSize;
+        const isEditMode      = @(isEdit ? "true" : "false");
+        const requestNumber   = '@(isEdit ? req!.Number : "")';
         @if (isEdit)
         {
             <text>const existingFiles = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                                    existingFilesList.Select(f => new
-                                                    {
-                                                        fileId = f.Id,
-                                                        fileName = f.Name,
-                                                        size = f.Size,
-                                                        type = f.Type,
-                                                        isMain = f.IsMain,
-                                                        url = f.Url
-                                                    })
-                                                ));</text>
+                                                                            existingFilesList.Select(f => new
+                                                                            {
+                                                                                fileId = f.Id,
+                                                                                fileName = f.Name,
+                                                                                size = f.Size,
+                                                                                type = f.Type,
+                                                                                isMain = f.IsMain,
+                                                                                url = f.Url
+                                                                            })
+                                                                        ));</text>
             }
         </script>
         <script src="~/js/request-form.js" asp-append-version="true"></script>
@@ -319,21 +323,21 @@
                                     </div>
                                 </div>
 
+                                <hr class="my-6" />
                             </div>
                         </div>
                     </form>
                 </div>
 
-                <div class="card-footer sticky-element d-flex justify-content-center align-items-center" style="bottom: 0;">
+                <div class="card-footer d-flex align-items-center justify-content-end justify-content-sm-end justify-content-md-center">
                     <div class="action-btns">
-                        <button id="btnCancel" type="button" class="btn btn-danger me-4">Cancel</button>
-                        <button id="btnSubmitRequest" type="button" class="btn btn-primary me-4">@(isEdit ? "Save Changes" : "Place Request")</button>
-                        @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
+                        @if (!isEdit || req?.Status == RequestStatusEnum.Pending || req?.Status == RequestStatusEnum.Negotiation)
                         {
-                            <button id="btnResolve" type="button" class="btn btn-info me-4"
-                                    onclick="ResolveModal.open('@req.Number')">
-                                Resolve
-                            </button>
+                            <button id="btnCancel" type="button" class="btn btn-danger me-2" style="width: 120px;">Cancel</button>
+                        }
+                        @if (!isEdit || req?.Status == RequestStatusEnum.Pending)
+                        {
+                            <button id="btnSubmitRequest" type="button" class="btn btn-primary me-2" style="width: 120px;">Save</button>
                         }
                     </div>
                 </div>
@@ -342,7 +346,3 @@
         </div>
     </div>
 
-    @if (isEdit && req!.Status == RequestStatusEnum.Agreed)
-    {
-        @await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
-    }

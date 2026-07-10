@@ -222,7 +222,14 @@ namespace Bewegdeal.Services
                 true
             );
             var proposals = await ProposalService.Load(
-                requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)]
+                new RequestProposalFilter
+                {
+                    RequestIds = requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
+                    Active = true
+                },
+                [nameof(RequestProposalEntity.CompanyId), nameof(RequestProposalEntity.RequestId),
+                nameof(RequestProposalEntity.Cost), nameof(RequestProposalEntity.Status),
+                nameof(RequestProposalEntity.Date), nameof(RequestProposalEntity.Time)]
             );
 
             var requesters = requests.Select(r => r.RequesterId);
@@ -240,7 +247,6 @@ namespace Bewegdeal.Services
                 Data = requests.Select(r =>
                 {
                     var proposal = proposals.Where(p => !viewerIsCompany || p.CompanyId == filter.ViewerId)
-                                            .Where(p => p.Status != RequestProposalStatusEnum.Rejected)
                                             .Where(p => p.RequestId == r.Id)
                                             .OrderBy(p => p.Status).FirstOrDefault();
 
@@ -362,7 +368,11 @@ namespace Bewegdeal.Services
                     IsMain = i.IsMain,
                     Url = FileService.GetUrl(i.File) ?? "undefined",
                     Name = FileService.GetName(i.File) ?? "undefined"
-                }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)]
+                }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)],
+                AllowResolve = edit != true &&
+                               request.RequesterId == userId &&
+                               proposal?.Status == RequestProposalStatusEnum.Accepted &&
+                               proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
             });
         }
 

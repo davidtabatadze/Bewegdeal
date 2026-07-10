@@ -69,15 +69,20 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(i => i.Date <= filter.DateTo);
             }
 
-            if (filter.RequestIds is not null)
+            if (filter.Active.HasValue && filter.Active == true)
             {
-                filter.RequestIds.Add(0);
-                query = query.Where(i => filter.RequestIds.Contains(i.RequestId));
+                query = query.Where(i => i.Status == RequestProposalStatusEnum.Pending || i.Status == RequestProposalStatusEnum.Accepted);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Status))
             {
                 query = query.Where(i => i.Status == filter.Status);
+            }
+
+            if (filter.RequestIds is not null)
+            {
+                filter.RequestIds.Add(0);
+                query = query.Where(i => filter.RequestIds.Contains(i.RequestId));
             }
 
             query = ApplySorting(query, filter);

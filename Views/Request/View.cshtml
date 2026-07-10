@@ -253,7 +253,37 @@
                 <div class="card-title m-0">
                     <h5 class="m-0 me-2">Details</h5>
                 </div>
-                <div class="btn-group">
+                @if (req.RequesterId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
+                {
+                    <div>
+                        @if (req.Status == RequestStatusEnum.Pending)
+                        {
+                            <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
+                                    onclick="window.location.href='/Request/Edit?id=@req.Id'">
+                                <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
+                            </button>
+                        }
+                        @if (req.Status == RequestStatusEnum.Pending || req.Status == RequestStatusEnum.Negotiation)
+                        {
+                            <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
+                                <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                            </button>
+                        }
+                        @if (vm.AllowResolve == true)
+                        {
+                            <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
+                                <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
+                            </button>
+                        }
+                    </div>
+                }
+                @* <div class="btn-group">
                     <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
                     <ul class="dropdown-menu">
                         <li>
@@ -272,7 +302,7 @@
                             </a>
                         </li>
                     </ul>
-                </div>
+                </div> *@
             </div>
             <div class="card-body p-5 pt-0">
                 <hr class="m-0" />
