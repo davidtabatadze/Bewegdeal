@@ -117,8 +117,8 @@ else
                         string GetDateLabel(DateTime d)
                         {
                             var today = DateTime.Now.Date;
-                            if (d.Date == today) { return "Today"; }
-                            if (d.Date == today.AddDays(-1)) { return "Yesterday"; }
+                            if (d.Date == today) { return "Heute"; }
+                            if (d.Date == today.AddDays(-1)) { return "Gestern"; }
                             return d.ToString("MMMM d, yyyy");
                         }
                         string? lastDay = null;
