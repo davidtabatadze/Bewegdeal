@@ -166,7 +166,7 @@ namespace Bewegdeal.Services
             if (proposal?.Status == RequestProposalStatusEnum.Pending && proposal?.CompanyId == userId)
             {
                 await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Canceled);
-                await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposal.Id, RequestProposalStatusEnum.Rejected);
+                await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposal.Id, RequestProposalStatusEnum.Canceled);
             }
         }
 

@@ -286,23 +286,42 @@
         connection.on('ProposalUpdated', function (data) {
             var card = document.querySelector('[data-proposal-card-id="' + data.proposalId + '"]');
             if (!card) { return; }
-            var color = data.proposalStatus === 'accepted' ? 'success'
-                : data.proposalStatus === 'rejected' ? 'danger'
-                    : 'warning';
-            card.classList.remove('border-warning', 'border-success', 'border-danger');
-            card.classList.add('border-' + color);
-            var icon = card.querySelector('.ri-shake-hands-line');
-            if (icon) {
-                icon.classList.remove('text-warning', 'text-success', 'text-danger');
-                icon.classList.add('text-' + color);
+
+            if (data.proposalStatus === 'canceled') {
+                card.classList.remove('border-warning');
+                card.classList.add('border-secondary');
+                var icon = card.querySelector('.ri-shake-hands-line');
+                if (icon) {
+                    icon.classList.remove('text-warning');
+                    icon.classList.add('text-secondary');
+                }
+                var hr = card.querySelector('hr');
+                if (hr) {
+                    hr.className = 'border border-secondary mt-1 mb-3';
+                    while (hr.nextSibling) { card.removeChild(hr.nextSibling); }
+                    var deleted = document.createElement('div');
+                    deleted.className = 'd-flex align-items-center justify-content-center gap-1 mb-1 text-secondary';
+                    deleted.innerHTML = '<i class="icon-base ri ri-prohibited-line icon-18px"></i>' +
+                        '<span class="fst-italic">Die Nachricht wurde gelöscht.</span>';
+                    card.appendChild(deleted);
+                }
+            } else {
+                var color = data.proposalStatus === 'accepted' ? 'success' : 'danger';
+                card.classList.remove('border-warning', 'border-success', 'border-danger');
+                card.classList.add('border-' + color);
+                var icon = card.querySelector('.ri-shake-hands-line');
+                if (icon) {
+                    icon.classList.remove('text-warning', 'text-success', 'text-danger');
+                    icon.classList.add('text-' + color);
+                }
+                var hr = card.querySelector('hr');
+                if (hr) { hr.className = 'border border-' + color + ' mt-1 mb-3'; }
+                var actions = card.querySelector('.proposal-actions');
+                if (actions) { actions.remove(); }
             }
-            var hr = card.querySelector('hr');
-            if (hr) {
-                hr.className = 'border border-' + color + ' mt-1 mb-3';
-            }
-            var actions = card.querySelector('.proposal-actions');
-            if (actions) { actions.remove(); }
+
             if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled') {
+                Block.remove('#chatCard');
                 if (savedFooterHtml) {
                     var footer = body.querySelector('.chat-history-footer');
                     if (footer) { footer.outerHTML = savedFooterHtml; }

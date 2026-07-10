@@ -23,7 +23,7 @@
     <hr class="border border-@color mt-1 mb-3" />
     @if (Model.Id == 0 || (Model.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
     {
-        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
             <span class="fw-bold">Es liegt noch kein Vorschlag vor.</span>
         </div>
     }

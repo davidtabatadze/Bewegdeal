@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Column index → sort field name
-    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: createDate, 5: paymentDate, 6: requestId, 7: id
-    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'createDate', 5: 'paymentDate', 6: 'requestId', 7: 'id' };
+    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: createDate, 5: requestId, 6: id
+    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'createDate', 5: 'requestId', 6: 'id' };
 
     if (!dt_invoice_table) { return; }
 
@@ -51,10 +51,9 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'serviceCost' },  // 2 — cost (sortable)
             { data: 'totalCost' },    // 3 — fee (sortable)
             { data: 'createDate' },   // 4 — date (sortable)
-            { data: 'paymentDate' },  // 5 — payment (sortable)
-            { data: 'requestId' },    // 6 — request (sortable)
-            { data: 'id' },           // 7 — invoice (sortable)
-            ...(isAdmin ? [{ data: 'status' }] : [])  // 8 — actions (admin only)
+            { data: 'requestId' },    // 5 — request (sortable)
+            { data: 'id' },           // 6 — invoice (sortable)
+            ...(isAdmin ? [{ data: 'status' }] : [])  // 7 — actions (admin only)
         ],
         columnDefs: [
             {
@@ -120,19 +119,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
-                // Payment — invoice payment date (hidden, re-enable when ready)
-                targets: 5,
-                visible: false,
-                width: '135px',
-                createdCell: function (td) { td.style.minWidth = '135px'; },
-                render: function (data) {
-                    if (!data) { return '—'; }
-                    return new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                }
-            },
-            {
                 // Request
-                targets: 6,
+                targets: 5,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['requestId'];
@@ -146,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Invoice
-                targets: 7,
+                targets: 6,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['id'];
@@ -160,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             ...(isAdmin ? [{
                 // Actions
-                targets: 8,
+                targets: 7,
                 width: '90px',
                 orderable: false,
                 searchable: false,

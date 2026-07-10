@@ -17,7 +17,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Invoices.Where(r => r.Id == update.Id)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, update.Status)
-                                               .SetProperty(p => p.PaymentDate, update.PaymentDate)
+                                               //.SetProperty(p => p.PaymentDate, update.PaymentDate)
                                           );
                     break;
 
@@ -25,7 +25,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Invoices.Where(r => r.Status == InvoiceStatusEnum.Pending && r.RequestId == update.RequestId)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, InvoiceStatusEnum.Cancelled)
-                                               .SetProperty(p => p.PaymentDate, (DateTime?)null)
+                                               //.SetProperty(p => p.PaymentDate, (DateTime?)null)
                                           );
                     break;
 
