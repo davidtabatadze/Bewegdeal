@@ -39,7 +39,7 @@ namespace Bewegdeal.Services
         {
             // existings
             var request = await RequestRepository.Get<RequestEntity>(model.Id);
-            var requestFiles = await RequestFileRepository.Load(model.Id);
+            var requestFiles = await LoadFiles(model.Id);
 
             // ...
             if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
@@ -68,6 +68,28 @@ namespace Bewegdeal.Services
 
         public async Task<List<RequestEntity>> Load(RequestFilter filter)
             => await RequestRepository.Load(filter);
+
+        private async Task<List<RequestFileEntity>> LoadFiles(long? requestId, List<long>? requestIds = null, bool? isMain = null)
+            => await RequestFileRepository.Load(requestId, requestIds, isMain);
+
+        private async Task<List<RequestFileEntity>> LoadFilesOrDefault(List<long> requestIds, bool? isMain = null)
+        {
+            var files = await LoadFiles(null, requestIds, isMain);
+
+            files.AddRange(
+                requestIds.Where(i => !files.Any(f => f.RequestId == i))
+                          .Select(i => new RequestFileEntity
+                          {
+                              Id = 0,
+                              RequestId = i,
+                              Size = 0,
+                              IsMain = true,
+                              File = "0-image.png=ni.png",
+                              Type = RequestFileTypeEnum.Image
+                          })
+            );
+            return files;
+        }
 
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.GetCached() };
@@ -191,8 +213,7 @@ namespace Bewegdeal.Services
                 ViewerInterests = user?.Interests ?? []
             });
 
-            var files = await RequestFileRepository.Load(
-                null,
+            var files = await LoadFilesOrDefault(
                 requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
                 true
             );
@@ -252,7 +273,7 @@ namespace Bewegdeal.Services
         {
             // load data
             var settings = await SettingService.GetCached();
-            var requestFiles = await RequestFileRepository.Load(model.Id);
+            var requestFiles = await LoadFiles(model.Id);
 
             // prepare ...
             model.SetValidationExternals(
@@ -310,7 +331,7 @@ namespace Bewegdeal.Services
             }
 
             var settings = await SettingService.GetCached();
-            var files = await RequestFileRepository.Load(request.Id);
+            var files = edit == true ? await LoadFiles(request.Id) : await LoadFilesOrDefault([request.Id]);
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
             var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
