@@ -136,7 +136,7 @@ namespace Bewegdeal.Services
             };
         }
 
-        public async Task Cancel(string requestNumber, long userId)
+        public async Task Cancel(string requestNumber, long userId, bool notify)
         {
             var request = await RequestService.Get(
                 requestNumber,
@@ -151,7 +151,10 @@ namespace Bewegdeal.Services
                 {
                     await ProposalReact(userId, proposal.Id, false, null);
                 }
-                await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
+                if (notify == true)
+                {
+                    await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
+                }
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
                 await ChatHubService.Leave(chat.Key);

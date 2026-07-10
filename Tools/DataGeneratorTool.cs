@@ -92,9 +92,9 @@ namespace Bewegdeal.Tools
             if (customers.Count == 0 || companies.Count == 0) { return; }
 
             var settings = await context.Settings.FirstOrDefaultAsync();
-            var commissionPct = settings?.InvoiceCommissionPersent ?? (short)10;
-            var taxPct = settings?.InvoiceTaxPersent ?? (short)20;
-            var dueDays = settings?.InvoiceDueDays ?? (short)30;
+            var commissionPct = settings?.InvoiceCommissionPersent ?? 10;
+            var taxPct = settings?.InvoiceTaxPersent ?? 20;
+            var dueDays = settings?.InvoiceDueDays ?? 30;
 
             var now = DateTime.Now;
             var from = now.AddDays(-dayRange);

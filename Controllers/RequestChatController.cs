@@ -36,7 +36,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [HttpPost]
     public async Task<IActionResult> Cancel(string requestNumber)
     {
-        await RequestChatService.Cancel(requestNumber, UserId);
+        await RequestChatService.Cancel(requestNumber, UserId, true);
         return Json(GenericResultModel.Ok());
     }
 
