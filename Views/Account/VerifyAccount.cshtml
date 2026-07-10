@@ -51,17 +51,17 @@
                 <!-- /Logo -->
 
                 <div class="card-body mt-1">
-                    <h4 class="mb-1">Two Step Verification 💬</h4>
+                    <h4 class="mb-1">Zwei-Schritt-Verifizierung 💬</h4>
                     <p class="text-start mb-1">
-                        We have sent verification codes to your devices.
+                        Wir haben Verifizierungscodes an Ihre Geräte gesendet.
                     </p>
-                    <p class="mb-5 text-muted small">Please, enter recieved codes below.</p>
+                    <p class="mb-5 text-muted small">Bitte geben Sie die erhaltenen Codes unten ein.</p>
 
                     <form id="twoStepsForm" method="post" asp-controller="Account" asp-action="VerifyAccount">
                         <input type="hidden" name="email" value="@ViewBag.Email" />
                         <input type="hidden" name="mobile" value="@ViewBag.Mobile" />
 
-                        <p class="mb-1 small fw-bold">Email code</p>
+                        <p class="mb-1 small fw-bold">E-Mail-Code</p>
                         <div class="mb-4 form-control-validation">
                             <div id="emailOtpWrapper" class="auth-input-wrapper d-flex align-items-center justify-content-between">
                                 <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" autofocus />
@@ -74,7 +74,7 @@
                             <input type="hidden" name="emailOtp" />
                         </div>
 
-                        <p class="mb-1 small fw-bold">Mobile code</p>
+                        <p class="mb-1 small fw-bold">Mobilnummer-Code</p>
                         <div class="mb-5 form-control-validation">
                             <div id="mobileOtpWrapper" class="auth-input-wrapper d-flex align-items-center justify-content-between">
                                 <input type="tel" class="form-control auth-input text-center numeral-mask h-px-50 mx-sm-1 my-2" maxlength="1" />
@@ -87,7 +87,7 @@
                             <input type="hidden" name="mobileOtp" />
                         </div>
 
-                        <button class="btn btn-primary d-grid w-100 mb-5">Verify my account</button>
+                        <button class="btn btn-primary d-grid w-100 mb-5">Konto verifizieren</button>
                     </form>
 
                     <form id="resendForm" method="post" asp-controller="Account" asp-action="VerifyResend">
@@ -96,8 +96,8 @@
                     </form>
 
                     <div class="text-center">
-                        Didn't get the codes?
-                        <a href="javascript:void(0);" onclick="document.getElementById('resendForm').submit()"> Resend </a>
+                        Keine Codes erhalten?
+                        <a href="javascript:void(0);" onclick="document.getElementById('resendForm').submit()"> Erneut senden </a>
                     </div>
                 </div>
             </div>

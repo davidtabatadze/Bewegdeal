@@ -99,8 +99,8 @@
                                     <span class="bs-stepper-label">
                                         <span class="bs-stepper-number">01</span>
                                         <span class="d-flex flex-column ms-1">
-                                            <span class="bs-stepper-title">Role</span>
-                                            <span class="bs-stepper-subtitle">Positioning</span>
+                                            <span class="bs-stepper-title">Rolle</span>
+                                            <span class="bs-stepper-subtitle">Auswahl</span>
                                         </span>
                                     </span>
                                 </button>
@@ -112,8 +112,8 @@
                                     <span class="bs-stepper-label">
                                         <span class="bs-stepper-number">02</span>
                                         <span class="d-flex flex-column ms-1">
-                                            <span class="bs-stepper-title">General</span>
-                                            <span class="bs-stepper-subtitle">Identification</span>
+                                            <span class="bs-stepper-title">Allgemein</span>
+                                            <span class="bs-stepper-subtitle">Angaben</span>
                                         </span>
                                     </span>
                                 </button>
@@ -125,8 +125,8 @@
                                     <span class="bs-stepper-label">
                                         <span class="bs-stepper-number">03</span>
                                         <span class="d-flex flex-column ms-1">
-                                            <span class="bs-stepper-title">Account</span>
-                                            <span class="bs-stepper-subtitle">Finalize</span>
+                                            <span class="bs-stepper-title">Konto</span>
+                                            <span class="bs-stepper-subtitle">Abschließen</span>
                                         </span>
                                     </span>
                                 </button>
@@ -139,29 +139,29 @@
                                 <!-- Step 1: Role -->
                                 <div id="roleSelectionValidation" class="content">
                                     <div class="content-header mb-5">
-                                        <h4 class="mb-0">Position Yourself</h4>
-                                        <span>How you will use Bewegdeal?</span>
+                                        <h4 class="mb-0">Ihre Rolle wählen</h4>
+                                        <span>Wie möchten Sie Bewegdeal nutzen?</span>
                                     </div>
                                     <div class="row gap-md-0 gap-4 gx-5 form-control-validation">
                                         <div class="col-md">
-                                            <div class="form-check custom-option custom-option-icon">
-                                                <label class="form-check-label custom-option-content" for="roleCustomer">
+                                            <div class="form-check custom-option custom-option-icon h-100">
+                                                <label class="form-check-label custom-option-content h-100" for="roleCustomer">
                                                     <span class="custom-option-body">
                                                         <i class="icon-base ri ri-user-2-line icon-32px mb-2 text-success"></i>
-                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Customer</span>
-                                                        <small>I need services — moving, junk removal, store pickup, or vehicle transport</small>
+                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Kunde</span>
+                                                        <small>Ich benötige Dienstleistungen – Umzug, Entrümpelung, Einkaufsabholung oder Fahrzeugtransport</small>
                                                     </span>
                                                     <input name="role" class="form-check-input" type="radio" value="@UserRoleEnum.Customer" id="roleCustomer" checked="@(Model.Role == UserRoleEnum.Customer ? "checked" : null)" />
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-md">
-                                            <div class="form-check custom-option custom-option-icon">
-                                                <label class="form-check-label custom-option-content" for="roleCompany">
+                                            <div class="form-check custom-option custom-option-icon h-100">
+                                                <label class="form-check-label custom-option-content h-100" for="roleCompany">
                                                     <span class="custom-option-body">
                                                         <i class="icon-base ri ri-building-line icon-32px mb-2 text-info"></i>
-                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Company</span>
-                                                        <small>I provide services and want to connect with customers</small>
+                                                        <span class="fs-6 d-block fw-medium text-heading mb-2">Unternehmen</span>
+                                                        <small>Ich biete Dienstleistungen an und möchte Kunden gewinnen</small>
                                                     </span>
                                                     <input name="role" class="form-check-input" type="radio" value="@UserRoleEnum.Company" id="roleCompany" checked="@(Model.Role == UserRoleEnum.Company ? "checked" : null)" />
                                                 </label>
@@ -171,10 +171,10 @@
                                     <div class="col-12 d-flex justify-content-between mt-8">
                                         <button class="btn btn-outline-secondary btn-prev" disabled>
                                             <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                            <span class="align-middle d-sm-inline-block d-none">Zurück</span>
                                         </button>
                                         <button class="btn btn-primary btn-next">
-                                            <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
+                                            <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Weiter</span>
                                             <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
                                         </button>
                                     </div>
@@ -184,10 +184,10 @@
                                 <div id="personalInfoValidation" class="content">
                                     <div class="content-header mb-5">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <h4 class="mb-0">Briefly About Yourself</h4>
+                                            <h4 class="mb-0">Kurz zu Ihrer Person</h4>
                                             <span id="roleIndicator" class="badge d-none"></span>
                                         </div>
-                                        <span>Provide your data carefully</span>
+                                        <span>Bitte geben Sie Ihre Daten sorgfältig ein</span>
                                     </div>
                                     <div class="row gx-5">
                                         <div class="col-sm-6 mb-5 form-control-validation">
@@ -201,7 +201,7 @@
                                                 <span class="input-group-text">@_settings.MobilePrefix</span>
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
-                                                    <label for="mobile">Mobile</label>
+                                                    <label for="mobile">Mobilnummer</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -214,16 +214,16 @@
                                         <div id="addressCol" class="col-sm-6 mb-5 form-control-validation d-none">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="text" id="address" name="address" class="form-control" placeholder="" value="@Model.Address" />
-                                                <label for="address">Address</label>
+                                                <label for="address">Adresse</label>
                                             </div>
                                         </div>
                                         <div class="col-12 d-flex justify-content-between">
                                             <button class="btn btn-outline-secondary btn-prev">
                                                 <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                                <span class="align-middle d-sm-inline-block d-none">Zurück</span>
                                             </button>
                                             <button class="btn btn-primary btn-next">
-                                                <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Next</span>
+                                                <span class="align-middle d-sm-inline-block d-none me-sm-1_5 me-0">Weiter</span>
                                                 <i class="icon-base ri ri-arrow-right-line icon-16px"></i>
                                             </button>
                                         </div>
@@ -233,21 +233,21 @@
                                 <!-- Step 3: Account Details -->
                                 <div id="accountDetailsValidation" class="content">
                                     <div class="content-header mb-5">
-                                        <h4 class="mb-0">Let`s Create Your User</h4>
-                                        <span>Some final touches</span>
+                                        <h4 class="mb-0">Konto erstellen</h4>
+                                        <span>Noch ein paar letzte Angaben</span>
                                     </div>
                                     <div class="row gx-5">
                                         <div class="col-sm-6 mb-5 form-control-validation">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="email" name="email" id="email" class="form-control" placeholder="" value="@Model.Email" />
-                                                <label for="email">Email</label>
+                                                <label for="email">E-Mail</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 mb-5 form-control-validation d-flex align-items-center">
                                             <div class="form-check mb-0">
                                                 <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms" />
                                                 <label class="form-check-label" for="agreeTerms">
-                                                    I agree <span class="text-primary" style="cursor:pointer;" id="termsLink">Terms &amp; Conditions</span>
+                                                    Ich stimme den <span class="text-primary" style="cursor:pointer;" id="termsLink">AGB</span> zu
                                                 </label>
                                             </div>
                                         </div>
@@ -255,7 +255,7 @@
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="password" id="password" name="password" class="form-control" placeholder="" />
-                                                    <label for="password">Password</label>
+                                                    <label for="password">Passwort</label>
                                                 </div>
                                                 <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
                                             </div>
@@ -264,14 +264,14 @@
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="" />
-                                                    <label for="confirmPassword">Confirm Password</label>
+                                                    <label for="confirmPassword">Passwort bestätigen</label>
                                                 </div>
                                                 <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line ri-20px"></i></span>
                                             </div>
                                         </div>
                                         <!-- Services -->
                                         <div id="servicesSection" class="col-12 mb-5 d-none">
-                                            <p class="fw-medium mb-3">Your interests</p>
+                                            <p class="fw-medium mb-3">Ihre Interessen</p>
                                             <div class="row gy-3">
                                                 <div class="col-6 col-sm-6 col-md-6">
                                                     <div class="form-check custom-option custom-option-icon">
@@ -321,16 +321,16 @@
                                         </div>
                                         <!-- /Services -->
                                         <div id="companyTermsUpload" class="col-12 mb-5 d-none">
-                                            <p class="fw-medium mb-3">Your terms of service (.pdf file only)</p>
+                                            <p class="fw-medium mb-3">Ihre AGB (nur PDF-Dateien)</p>
                                             <input class="form-control form-control-sm" id="companyTermsFile" name="TermsFile" type="file" accept=".pdf" />
                                         </div>
                                         <div class="col-12 d-flex justify-content-between">
                                             <button class="btn btn-outline-secondary btn-prev">
                                                 <i class="icon-base ri ri-arrow-left-line icon-16px me-sm-1_5 me-0"></i>
-                                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                                <span class="align-middle d-sm-inline-block d-none">Zurück</span>
                                             </button>
                                             <button type="submit" class="btn btn-primary btn-next btn-submit">
-                                                Submit <i class="icon-base ri ri-check-line icon-16px ms-1_5"></i>
+                                                Absenden <i class="icon-base ri ri-check-line icon-16px ms-1_5"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -340,8 +340,8 @@
                     </div>
 
                     <p class="text-center mt-5 mb-0">
-                        <span>Already have an account?</span>
-                        <a href="/Account/Login"><span>Sign in instead</span></a>
+                        <span>Bereits ein Konto?</span>
+                        <a href="/Account/Login"><span>Jetzt anmelden</span></a>
                     </p>
                 </div>
             </div>

@@ -49,20 +49,20 @@
                 <!-- /Logo -->
 
                 <div class="card-body mt-1">
-                    <h4 class="mb-1">Welcome to Bewegdeal! 👋🏻</h4>
-                    <p class="mb-5">Sign-in and start the adventure</p>
+                    <h4 class="mb-1">Willkommen bei Bewegdeal! 👋🏻</h4>
+                    <p class="mb-5">Melden Sie sich an und legen Sie los</p>
 
                     <form id="formAuthentication" class="mb-5" asp-controller="Account" asp-action="Login" method="POST">
                         <div class="form-floating form-floating-outline mb-5 form-control-validation">
                             <input type="text" class="form-control" id="email" name="email" placeholder="" autofocus />
-                            <label for="email">Email</label>
+                            <label for="email">E-Mail</label>
                         </div>
                         <div class="mb-5">
                             <div class="form-password-toggle form-control-validation">
                                 <div class="input-group input-group-merge">
                                     <div class="form-floating form-floating-outline">
                                         <input type="password" id="password" class="form-control" name="password" placeholder="" aria-describedby="password" />
-                                        <label for="password">Password</label>
+                                        <label for="password">Passwort</label>
                                     </div>
                                     <span class="input-group-text cursor-pointer"><i class="icon-base ri ri-eye-off-line icon-20px"></i></span>
                                 </div>
@@ -71,21 +71,21 @@
                         <div class="mb-5 pb-2 d-flex justify-content-between pt-2 align-items-center">
                             <div class="form-check mb-0">
                                 <input class="form-check-input" type="checkbox" id="remember-me" name="rememberMe" value="true" />
-                                <label class="form-check-label" for="remember-me"> Remember Me </label>
+                                <label class="form-check-label" for="remember-me"> Angemeldet bleiben </label>
                             </div>
                             <a href="/Account/ForgotPassword" class="float-end mb-1">
-                                <span>Forgot Password?</span>
+                                <span>Passwort vergessen?</span>
                             </a>
                         </div>
                         <div class="mb-5">
-                            <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
+                            <button class="btn btn-primary d-grid w-100" type="submit">Anmelden</button>
                         </div>
                     </form>
 
                     <p class="text-center mb-5">
-                        <span>New on our platform?</span>
+                        <span>Noch kein Konto?</span>
                         <a href="/Account/Register">
-                            <span>Create an account</span>
+                            <span>Jetzt registrieren</span>
                         </a>
                     </p>
                 </div>

@@ -8,7 +8,7 @@
             {
                 public const string Moving = "Moving Service"; // "Umzug"; //
                 public const string Removal = "Junk Removal"; // "Entrümpelung"; //
-                public const string Pickup = "Store Pickup"; // "Einkaufsabholung"; //
+                public const string Pickup = "Store Pickup"; // "Einkaufsabholung"; //  Abholung?
                 public const string Transport = "Vehicle Transport"; // "Fahrzeugtransport"; //
             }
             public class Role
