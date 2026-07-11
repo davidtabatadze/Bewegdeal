@@ -70,64 +70,65 @@
     <script src="~/js/chat.js" asp-append-version="true"></script>
 }
 
-<div class="card bg-transparent shadow-none border-0 mb-4">
-    <div class="card-body row g-6 p-0">
-        <div class="col-12 col-md-8 card-separator">
-            <h5 class="mb-2 text-center">
-                <small>
-                    <span class="badge rounded-pill bg-label-@statusStyle">
-                        <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@req.Status.ToUpper()
-                    </span>
-                </small>
-                <span class="h4 fw-semibold"> @req.Title</span>
-            </h5>
-            <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-text-secondary" onclick="window.location.href='/Request/List'">
-                        <span class="icon-base ri ri-arrow-left-s-line me-1_5"></span>
-                        <span class="d-none d-sm-inline">Back to requests</span>
-                        @* <span class="d-sm-none">Back</span> *@
-                    </button>
-                </div>
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-text-secondary">
-                        #@req.Id
-                        <span class="icon-base ri ri-eye-fill ms-4"></span>
-                        100
-                        <span class="ri ri-circle-fill ms-2 me-2" style="font-size: 3px;"></span>
-                        @TimeAgo(req.CreateDate)
-                    </button>
-                </div>
-            </div>
-            <hr class="m-0" />
-            <div class="d-flex justify-content-between flex-wrap gap-4 me-0 mt-4">
-                <div class="d-flex align-items-center gap-1 ms-5 ms-sm-0">
-                    <span class="badge rounded-pill @badge fun-facts-icon p-2">
-                        <i class="icon-base ri @icon icon-42px"></i>
-                    </span>
-                    <div class="content-right">
-                        <span class="text-@color mb-0 h5">@label</span>
+<div id="request-view">
+    <div class="card bg-transparent shadow-none border-0 mb-4">
+        <div class="card-body row g-6 p-0">
+            <div class="col-12 col-md-8 card-separator">
+                <h5 class="mb-2 text-center">
+                    <small>
+                        <span class="badge rounded-pill bg-label-@statusStyle">
+                            <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@req.Status.ToUpper()
+                        </span>
+                    </small>
+                    <span class="h4 fw-semibold"> @req.Title</span>
+                </h5>
+                <div class="d-flex justify-content-between flex-wrap gap-4 me-0">
+                    <div class="d-flex align-items-center gap-1">
+                        <button type="button" class="btn btn-text-secondary" onclick="window.location.href='/Request/List'">
+                            <span class="icon-base ri ri-arrow-left-s-line me-1_5"></span>
+                            <span class="d-none d-sm-inline">Back to requests</span>
+                            @* <span class="d-sm-none">Back</span> *@
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button type="button" class="btn btn-text-secondary">
+                            #@req.Id
+                            <span class="icon-base ri ri-eye-fill ms-4"></span>
+                            100
+                            <span class="ri ri-circle-fill ms-2 me-2" style="font-size: 3px;"></span>
+                            @TimeAgo(req.CreateDate)
+                        </button>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-1 me-5 me-sm-0">
-                    <div class="d-none d-sm-block content-right">
-                        <span class="text-dark mb-0 h5">@vm.Requester?.Name</span>
+                <hr class="m-0" />
+                <div class="d-flex justify-content-between flex-wrap gap-4 me-0 mt-4">
+                    <div class="d-flex align-items-center gap-1 ms-5 ms-sm-0">
+                        <span class="badge rounded-pill @badge fun-facts-icon p-2">
+                            <i class="icon-base ri @icon icon-42px"></i>
+                        </span>
+                        <div class="content-right">
+                            <span class="text-@color mb-0 h5">@label</span>
+                        </div>
                     </div>
-                    <div class="avatar avatar-lg">
-                        @if (vm.Requester?.Url is not null)
-                        {
-                            <img src="@vm.Requester.Url" alt="@vm.Requester.Name" class="rounded-circle" style="object-fit:cover;" />
-                        }
-                        else
-                        {
-                            <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
-                                  style="display:flex;align-items:center;justify-content:center;">@vm.Requester?.Initials</span>
-                        }
+                    <div class="d-flex align-items-center gap-1 me-5 me-sm-0">
+                        <div class="d-none d-sm-block content-right">
+                            <span class="text-dark mb-0 h5">@vm.Requester?.Name</span>
+                        </div>
+                        <div class="avatar avatar-lg">
+                            @if (vm.Requester?.Url is not null)
+                            {
+                                <img src="@vm.Requester.Url" alt="@vm.Requester.Name" class="rounded-circle" style="object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <span class="avatar-initial rounded-circle bg-label-primary w-100 h-100"
+                                      style="display:flex;align-items:center;justify-content:center;">@vm.Requester?.Initials</span>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- new -->
-            @* <div class="card bg-transparent shadow-none border-0 p-0 mb-6">
+                <!-- new -->
+                @* <div class="card bg-transparent shadow-none border-0 p-0 mb-6">
                 <div class="card-widget-separator-wrapper">
                     <div class="card-body card-widget-separator p-0">
                         <div class="row gy-2 gy-sm-1">
@@ -187,104 +188,104 @@
                     </div>
                 </div>
             </div> *@
-        </div>
-        <div class="col-12 col-md-4 d-flex justify-content-center align-items-start">
-            @if (vm.Proposal is not null)
-            {
-                @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.Proposal, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
-            }
+            </div>
+            <div class="col-12 col-md-4 d-flex justify-content-center align-items-start">
+                @if (vm.Proposal is not null)
+                {
+                    @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.Proposal, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
+                }
+            </div>
         </div>
     </div>
-</div>
-<div class="row g-5">
-    <div class="col-12 col-md-8">
-        <div class="card h-100 bg-transparent border-0">
-            <div id="swiper-gallery">
-                <div class="swiper gallery-top" style="@(allMedia.Count == 1 ? "block-size:100%;" : "")">
-                    <div class="swiper-wrapper">
-                        @foreach (var f in allMedia)
-                        {
-                            if (f.Type == RequestFileTypeEnum.Image)
-                            {
-                                <div class="swiper-slide" style="position:relative; overflow:hidden;">
-                                    <div style="position:absolute; inset:0; background-image:url('@f.Url'); background-size:cover; background-position:center; filter:blur(18px); transform:scale(1.1); opacity:0.75;"></div>
-                                    <img src="@f.Url" alt="@f.Name" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;" />
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#000;">
-                                    <video controls style="max-height:100%; max-width:100%; object-fit:contain;">
-                                        <source src="@f.Url" />
-                                    </video>
-                                </div>
-                            }
-                        }
-                    </div>
-                    <div class="swiper-button-next swiper-button-white"></div>
-                    <div class="swiper-button-prev swiper-button-white"></div>
-                </div>
-
-                @if (allMedia.Count > 1)
-                {
-                    <div class="swiper gallery-thumbs">
+    <div class="row g-5">
+        <div class="col-12 col-md-8">
+            <div class="card h-100 bg-transparent border-0">
+                <div id="swiper-gallery">
+                    <div class="swiper gallery-top" style="@(allMedia.Count == 1 ? "block-size:100%;" : "")">
                         <div class="swiper-wrapper">
                             @foreach (var f in allMedia)
                             {
                                 if (f.Type == RequestFileTypeEnum.Image)
                                 {
-                                    <div class="swiper-slide" style="background-image:url(@f.Url)"></div>
+                                    <div class="swiper-slide" style="position:relative; overflow:hidden;">
+                                        <div style="position:absolute; inset:0; background-image:url('@f.Url'); background-size:cover; background-position:center; filter:blur(18px); transform:scale(1.1); opacity:0.75;"></div>
+                                        <img src="@f.Url" alt="@f.Name" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;" />
+                                    </div>
                                 }
                                 else
                                 {
-                                    <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#111;">
-                                        <i class="icon-base ri ri-play-circle-line text-white" style="font-size:1.75rem;"></i>
+                                    <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#000;">
+                                        <video controls style="max-height:100%; max-width:100%; object-fit:contain;">
+                                            <source src="@f.Url" />
+                                        </video>
                                     </div>
                                 }
                             }
                         </div>
+                        <div class="swiper-button-next swiper-button-white"></div>
+                        <div class="swiper-button-prev swiper-button-white"></div>
                     </div>
-                }
+
+                    @if (allMedia.Count > 1)
+                    {
+                        <div class="swiper gallery-thumbs">
+                            <div class="swiper-wrapper">
+                                @foreach (var f in allMedia)
+                                {
+                                    if (f.Type == RequestFileTypeEnum.Image)
+                                    {
+                                        <div class="swiper-slide" style="background-image:url(@f.Url)"></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="swiper-slide d-flex align-items-center justify-content-center" style="background:#111;">
+                                            <i class="icon-base ri ri-play-circle-line text-white" style="font-size:1.75rem;"></i>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-12 col-md-4">
-        <div class="card h-100">
-            <div class="card-header d-flex align-items-center justify-content-between gap-2 flex-wrap p-3">
-                <div class="card-title m-0">
-                    <h5 class="m-0 me-2">Details</h5>
-                </div>
-                @if (req.RequesterId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
-                {
-                    <div>
-                        @if (req.Status == RequestStatusEnum.Pending)
-                        {
-                            <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"
-                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
-                                    onclick="window.location.href='/Request/Edit?id=@req.Id'">
-                                <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
-                            </button>
-                        }
-                        @if (req.Status == RequestStatusEnum.Pending || req.Status == RequestStatusEnum.Negotiation)
-                        {
-                            <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel"
-                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
-                                <i class="icon-base ri ri-hand icon-md text-danger"></i>
-                            </button>
-                        }
-                        @if (vm.AllowResolve == true)
-                        {
-                            <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve"
-                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
-                                <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
-                            </button>
-                        }
+        <div class="col-12 col-md-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between gap-2 flex-wrap p-3">
+                    <div class="card-title m-0">
+                        <h5 class="m-0 me-2">Details</h5>
                     </div>
-                }
-                @* <div class="btn-group">
+                    @if (req.RequesterId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
+                    {
+                        <div>
+                            @if (req.Status == RequestStatusEnum.Pending)
+                            {
+                                <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"
+                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
+                                        onclick="window.location.href='/Request/Edit?id=@req.Id'">
+                                    <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
+                                </button>
+                            }
+                            @if (req.Status == RequestStatusEnum.Pending || req.Status == RequestStatusEnum.Negotiation)
+                            {
+                                <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel"
+                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
+                                    <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                                </button>
+                            }
+                            @if (vm.AllowResolve == true)
+                            {
+                                <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve"
+                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
+                                    <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
+                                </button>
+                            }
+                        </div>
+                    }
+                    @* <div class="btn-group">
                     <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
                     <ul class="dropdown-menu">
                         <li>
@@ -304,101 +305,103 @@
                         </li>
                     </ul>
                 </div> *@
-            </div>
-            <div class="card-body p-5 pt-0">
-                <hr class="m-0" />
-                <ul class="list-group list-group-horizontal-md mt-2 mb-2">
-                    <li class="list-group-item flex-fill border-0 p-0">
-                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Terms</h6>
-                        <address class="text-dark mb-0">
-                            <dl class="row mb-0">
-                                @if (req.ASAP)
+                </div>
+                <div class="card-body p-5 pt-0">
+                    <hr class="m-0" />
+                    <ul class="list-group list-group-horizontal-md mt-2 mb-2">
+                        <li class="list-group-item flex-fill border-0 p-0">
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Terms</h6>
+                            <address class="text-dark mb-0">
+                                <dl class="row mb-0">
+                                    @if (req.ASAP)
+                                    {
+                                        <dt class="col-8 fw-semibold">As soon as possible</dt>
+                                    }
+                                    else
+                                    {
+                                        <dt class="col-8 fw-normal">
+                                            <i class="icon-base ri ri-calendar-line icon-18px"></i>
+                                            <span class="fw-semibold">@req.Date?.ToString("dd MMM yyyy")</span>
+                                            <i class="icon-base ri ri-time-line icon-18px"></i>
+                                            <span class="fw-semibold">@req.Time?.ToString("HH:mm")</span>
+                                        </dt>
+                                    }
+                                    <dd class="col-4 text-end h4 mt-n4 m-0">€<strong>@req.Cost.ToString("0.##")</strong></dd>
+                                </dl>
+                            </address>
+                        </li>
+                    </ul>
+                    <hr class="m-0" />
+                    <ul class="list-group list-group-horizontal-md mt-2 mb-2">
+                        <li class="list-group-item flex-fill border-0 p-0">
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
+                            <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.PickupZipCode) ? "" : "[" + req.PickupZipCode + "] ")@req.PickupAddress</address>
+                        </li>
+                    </ul>
+                    <hr class="m-0" />
+                    <ul class="list-group list-group-horizontal-md mt-2 mb-2">
+                        <li class="list-group-item flex-fill border-0 p-0">
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
+                            <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryZipCode) ? "" : "[" + req.DeliveryZipCode + "] ")@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
+                        </li>
+                    </ul>
+                    <hr class="m-0" />
+                    <ul class="list-group list-group-horizontal-md mt-2 mb-2">
+                        <li class="list-group-item flex-fill border-0 p-0">
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-pencil-ruler-2-line icon-28px text-secondary"></i>Other details</h6>
+                            <address class="text-dark mb-0">
+                                @if (req.Service == ServiceEnum.Transport)
                                 {
-                                    <dt class="col-8 fw-semibold">As soon as possible</dt>
+                                    <dl class="row mb-0">
+                                        <dt class="col-6 fw-normal">Vehicle type</dt>
+                                        <dd class="col-6 text-end mb-0"><strong>@req.VehicleType</strong></dd>
+                                    </dl>
+                                    <dl class="row mb-0">
+                                        <dt class="col-6 fw-normal">Vehicle condition</dt>
+                                        <dd class="col-6 text-end mb-0"><strong>@req.VehicleCondition</strong></dd>
+                                    </dl>
                                 }
                                 else
                                 {
-                                    <dt class="col-8 fw-normal">
-                                        <i class="icon-base ri ri-calendar-line icon-18px"></i>
-                                        <span class="fw-semibold">@req.Date?.ToString("dd MMM yyyy")</span>
-                                        <i class="icon-base ri ri-time-line icon-18px"></i>
-                                        <span class="fw-semibold">@req.Time?.ToString("HH:mm")</span>
-                                    </dt>
+                                    <dl class="row mb-0">
+                                        <dt class="col-10 fw-normal">There is an elevator</dt>
+                                        <dd class="col-2 text-end mb-0">
+                                            <i class="icon-base ri ri-@(req.PresentElevator ? "check-line" : "close-line") icon-md text-@(req.PresentElevator ? "success" : "danger")"></i>
+                                        </dd>
+                                    </dl>
+                                    <dl class="row mb-0">
+                                        <dt class="col-10 fw-normal">There is a parking</dt>
+                                        <dd class="col-2 text-end mb-0">
+                                            <i class="icon-base ri ri-@(req.PresentParking ? "check-line" : "close-line") icon-md text-@(req.PresentParking ? "success" : "danger")"></i>
+                                        </dd>
+                                    </dl>
                                 }
-                                <dd class="col-4 text-end h4 mt-n4 m-0">€<strong>@req.Cost.ToString("0.##")</strong></dd>
-                            </dl>
-                        </address>
-                    </li>
-                </ul>
-                <hr class="m-0" />
-                <ul class="list-group list-group-horizontal-md mt-2 mb-2">
-                    <li class="list-group-item flex-fill border-0 p-0">
-                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
-                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.PickupZipCode) ? "" : "[" + req.PickupZipCode + "] ")@req.PickupAddress</address>
-                    </li>
-                </ul>
-                <hr class="m-0" />
-                <ul class="list-group list-group-horizontal-md mt-2 mb-2">
-                    <li class="list-group-item flex-fill border-0 p-0">
-                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
-                        <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryZipCode) ? "" : "[" + req.DeliveryZipCode + "] ")@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
-                    </li>
-                </ul>
-                <hr class="m-0" />
-                <ul class="list-group list-group-horizontal-md mt-2 mb-2">
-                    <li class="list-group-item flex-fill border-0 p-0">
-                        <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-pencil-ruler-2-line icon-28px text-secondary"></i>Other details</h6>
-                        <address class="text-dark mb-0">
-                            @if (req.Service == ServiceEnum.Transport)
-                            {
-                                <dl class="row mb-0">
-                                    <dt class="col-6 fw-normal">Vehicle type</dt>
-                                    <dd class="col-6 text-end mb-0"><strong>@req.VehicleType</strong></dd>
-                                </dl>
-                                <dl class="row mb-0">
-                                    <dt class="col-6 fw-normal">Vehicle condition</dt>
-                                    <dd class="col-6 text-end mb-0"><strong>@req.VehicleCondition</strong></dd>
-                                </dl>
-                            }
-                            else
-                            {
-                                <dl class="row mb-0">
-                                    <dt class="col-10 fw-normal">There is an elevator</dt>
-                                    <dd class="col-2 text-end mb-0">
-                                        <i class="icon-base ri ri-@(req.PresentElevator ? "check-line" : "close-line") icon-md text-@(req.PresentElevator ? "success" : "danger")"></i>
-                                    </dd>
-                                </dl>
-                                <dl class="row mb-0">
-                                    <dt class="col-10 fw-normal">There is a parking</dt>
-                                    <dd class="col-2 text-end mb-0">
-                                        <i class="icon-base ri ri-@(req.PresentParking ? "check-line" : "close-line") icon-md text-@(req.PresentParking ? "success" : "danger")"></i>
-                                    </dd>
-                                </dl>
-                            }
-                        </address>
-                    </li>
-                </ul>
+                            </address>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
-@if (!string.IsNullOrWhiteSpace(req.Description))
-{
-    <div class="row g-5 mt-1">
-        <div class="col-lg-12">
-            <div class="card bg-label-info h-100">
-                <div class="card-body d-flex flex-wrap-reverse">
-                    <div class="mb-0 w-100">
-                        <div class="card-title">
-                            <h5 class="text-info mb-2"><i class="icon-base ri ri-information-line me-2"></i>Description</h5>
-                            <p class="text-heading" style="white-space: pre-wrap;">@req.Description</p>
+    @if (!string.IsNullOrWhiteSpace(req.Description))
+    {
+        <div class="row g-5 mt-1">
+            <div class="col-lg-12">
+                <div class="card bg-label-info h-100">
+                    <div class="card-body d-flex flex-wrap-reverse">
+                        <div class="mb-0 w-100">
+                            <div class="card-title">
+                                <h5 class="text-info mb-2"><i class="icon-base ri ri-information-line me-2"></i>Description</h5>
+                                <p class="text-heading" style="white-space: pre-wrap;">@req.Description</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
+
+</div>
 
 @await Html.PartialAsync("~/Views/Proposal/_ProposalModal.cshtml")
 @await Html.PartialAsync("~/Views/Proposal/_ProposalReactModal.cshtml")

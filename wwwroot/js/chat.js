@@ -59,6 +59,7 @@
             connection.stop();
             connection = null;
         }
+        Block.pulse('#request-view');
         window.location.reload();
     });
 
