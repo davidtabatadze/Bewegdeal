@@ -15,7 +15,8 @@ namespace Bewegdeal.Services
             if (allowedTypes.Length > 0 && !allowedTypes.Contains(fileContentType))
             {
                 return GenericResultModel<string>.Fail(
-                     $"Invalid file type uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
+                     // $"Invalid file type uploaded. Accepted type(s): {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
+                     $"Ungültiger Dateityp. Akzeptierte Typen: {string.Join(", ", allowedTypes.Select(m => m.Split('/').Last().ToUpper()))}."
                 );
             }
 
@@ -23,7 +24,8 @@ namespace Bewegdeal.Services
             if (maxSize.HasValue && (maxSize.Value * 1024 * 1024) < fileLength)
             {
                 return GenericResultModel<string>.Fail(
-                     $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
+                     // $"Invalid file size uploaded. Accepted size: {maxSize.Value} MB."
+                     $"Ungültige Dateigröße. Maximale Größe: {maxSize.Value} MB."
                 );
             }
 
@@ -31,7 +33,8 @@ namespace Bewegdeal.Services
             if (fileName is null || fileName.Length > 128)
             {
                 return GenericResultModel<string>.Fail(
-                     $"Invalid file name uploaded. Accepted name length: 128 characters."
+                     // $"Invalid file name uploaded. Accepted name length: 128 characters."
+                     $"Ungültiger Dateiname. Maximale Länge: 128 Zeichen."
                 );
             }
 

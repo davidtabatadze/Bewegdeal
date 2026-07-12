@@ -50,7 +50,7 @@ namespace Bewegdeal.Services
             {
                 Preview = message.Content.Length > 80 ? message.Content[..80] + "…" : message.Content,
                 RequestNumber = chat?.RequestNumber ?? "-",
-                SenderName = sender?.Name ?? "unknown",
+                SenderName = sender?.Name ?? "unbekannt",
                 Date = message.SentDate
             };
         }

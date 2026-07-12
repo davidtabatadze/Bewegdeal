@@ -153,7 +153,8 @@ namespace Bewegdeal.Services
                 }
                 if (notify == true)
                 {
-                    await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
+                    // await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
+                    await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss unsere Verhandlung beenden, da wir keine Einigung erzielen konnten. Ich wünsche Ihnen viel Erfolg.");
                 }
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
@@ -204,7 +205,8 @@ namespace Bewegdeal.Services
                     InvoiceId = 0
                 });
 
-                await ChatHubService.Send(userId, chat, "Kindly, consider my proposal.");
+                // await ChatHubService.Send(userId, chat, "Kindly, consider my proposal.");
+                await ChatHubService.Send(userId, chat, "Bitte berücksichtigen Sie mein Angebot.");
                 await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id);
             }
         }
@@ -238,11 +240,13 @@ namespace Bewegdeal.Services
 
                 if (accepted)
                 {
-                    await ChatHubService.Send(userId, chat, "Deal, i accept!");
+                    // await ChatHubService.Send(userId, chat, "Deal, i accept!");
+                    await ChatHubService.Send(userId, chat, "Einverstanden, ich nehme an!");
                 }
                 else
                 {
-                    await ChatHubService.Send(userId, chat, "Sorry, i have to reject");
+                    // await ChatHubService.Send(userId, chat, "Sorry, i have to reject");
+                    await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss ablehnen.");
                     await ChatHubService.Send(userId, chat, reason ?? "");
                 }
             }

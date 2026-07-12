@@ -133,11 +133,13 @@ namespace Bewegdeal.Services
         {
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                return GenericResultModel.Fail("All password fields are required.");
+                // return GenericResultModel.Fail("All password fields are required.");
+                return GenericResultModel.Fail("Alle Passwortfelder sind erforderlich.");
             }
             if (newPassword != confirmPassword)
             {
-                return GenericResultModel.Fail("New passwords do not match.");
+                // return GenericResultModel.Fail("New passwords do not match.");
+                return GenericResultModel.Fail("Die neuen Passwörter stimmen nicht überein.");
             }
 
             // update password

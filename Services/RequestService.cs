@@ -44,7 +44,8 @@ namespace Bewegdeal.Services
             // ...
             if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
             {
-                return GenericResultModel<RequestEntity>.Fail("The request cannot be updated, try again later.");
+                // return GenericResultModel<RequestEntity>.Fail("The request cannot be updated, try again later.");
+                return GenericResultModel<RequestEntity>.Fail("Die Anfrage kann nicht aktualisiert werden, bitte versuchen Sie es später erneut.");
             }
 
             // do update
@@ -135,7 +136,8 @@ namespace Bewegdeal.Services
                 var proposal = await ProposalService.Get(request.AgreementId ?? 0);
                 if (proposal is null || proposal.CompanyId != request.ExecutorId || proposal.Status != RequestProposalStatusEnum.Accepted)
                 {
-                    return GenericResultModel.Fail("Something went wrong: no proposal found.");
+                    // return GenericResultModel.Fail("Something went wrong: no proposal found.");
+                    return GenericResultModel.Fail("Ein Fehler ist aufgetreten: Kein Angebot gefunden.");
                 }
 
                 await InvoiceService.Update(
