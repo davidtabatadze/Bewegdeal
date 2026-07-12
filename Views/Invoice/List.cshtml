@@ -24,6 +24,13 @@
 }
 
 @section PageScripts {
+    <script>
+        window.invoiceStatusLabels = {
+        pending:   '@AnnotationEnum.General.InvoiceStatus.Pending',
+        paid:      '@AnnotationEnum.General.InvoiceStatus.Paid',
+        cancelled: '@AnnotationEnum.General.InvoiceStatus.Cancelled'
+        };
+    </script>
     <script src="~/js/app-invoice-list.js" asp-append-version="true"></script>
 }
 

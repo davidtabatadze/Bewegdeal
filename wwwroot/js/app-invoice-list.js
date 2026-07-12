@@ -9,10 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_invoice_table = document.querySelector('.datatables-invoices');
 
     // Status → icon HTML
+    const isl = window.invoiceStatusLabels || {};
     const statusMap = {
-        pending: { icon: 'ri-timer-flash-line', color: 'warning' },
-        paid: { icon: 'ri-wallet-line', color: 'success' },
-        cancelled: { icon: 'ri-hand', color: 'danger' }
+        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: isl.pending },
+        paid: { icon: 'ri-wallet-line', color: 'success', label: isl.paid },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: isl.cancelled }
     };
 
     // Column index → sort field name
@@ -62,11 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '60px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
                     const map = statusMap[status];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
-                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
                         '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
                         '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                         '</div>' +
@@ -192,6 +192,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         language: {
             search: '',
+            // german
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
+            infoEmpty: 'Keine Einträge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
+            zeroRecords: 'Keine passenden Einträge gefunden',
+            emptyTable: 'Keine Daten vorhanden',
+            loadingRecords: 'Wird geladen...',
+            processing: 'Bitte warten...',
+            // german
             paginate: {
                 next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',

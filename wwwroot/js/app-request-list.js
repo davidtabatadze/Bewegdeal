@@ -270,6 +270,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         language: {
             search: '',
+            // german
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
+            infoEmpty: 'Keine Einträge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
+            zeroRecords: 'Keine passenden Einträge gefunden',
+            emptyTable: 'Keine Daten vorhanden',
+            loadingRecords: 'Wird geladen...',
+            processing: 'Bitte warten...',
+            // german
             paginate: {
                 next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',

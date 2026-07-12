@@ -22,6 +22,18 @@
 }
 
 @section PageScripts {
+    <script>
+        window.chatStatusLabels = {
+        ongoing:   '@AnnotationEnum.General.ChatStatus.Ongoing',
+        agreed:    '@AnnotationEnum.General.ChatStatus.Agreed',
+        cancelled: '@AnnotationEnum.General.ChatStatus.Cancelled'
+        };
+        window.chatFraudLabels = {
+        safe:     '@AnnotationEnum.General.ChatFraud.Safe',
+        dubious:  '@AnnotationEnum.General.ChatFraud.Dubious',
+        resolved: '@AnnotationEnum.General.ChatFraud.Resolved'
+        };
+    </script>
     <script src="~/js/app-chat-list.js" asp-append-version="true"></script>
 }
 
