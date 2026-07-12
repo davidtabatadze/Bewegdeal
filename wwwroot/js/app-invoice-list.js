@@ -1,6 +1,6 @@
 /**
  * Invoices List — Bewegdeal
- * v1.0.8
+ * v1.1.0
  */
 
 'use strict';

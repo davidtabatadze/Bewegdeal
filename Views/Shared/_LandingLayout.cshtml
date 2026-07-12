@@ -4,107 +4,109 @@
       data-skin="default" data-bs-theme="light"
       data-assets-path="/" data-template="front-page">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>@ViewData["Title"]</title>
 
-  <!-- Sync theme from home/account pages — must run before stylesheets to prevent flash -->
-  <script>
-    (function () {
-      var stored = localStorage.getItem('templateCustomizer-vertical-menu-template--Theme');
-      if (!stored) { return; }
-      localStorage.setItem('templateCustomizer-front-page--Theme', stored);
-      document.documentElement.setAttribute('data-bs-theme', stored);
-    })();
-  </script>
+    <!-- Sync theme from home/account pages — must run before stylesheets to prevent flash -->
+    <script>
+            (function () {
+              var stored = localStorage.getItem('templateCustomizer-vertical-menu-template--Theme');
+              if (!stored) { return; }
+              localStorage.setItem('templateCustomizer-front-page--Theme', stored);
+              document.documentElement.setAttribute('data-bs-theme', stored);
+            })();
+    </script>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" asp-append-version="true" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#696cff" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Bewegdeal" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/img/branding/icon-192.png" />
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#696cff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Bewegdeal" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/branding/icon-192.png" asp-append-version="true" />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Core CSS -->
-  <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
-  <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
-  <link rel="stylesheet" href="~/vendor/css/core.css" />
-  <link rel="stylesheet" href="~/css/demo.css" asp-append-version="true" />
-  <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
-  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="~/vendor/fonts/iconify-icons.css" />
+    <link rel="stylesheet" href="~/vendor/libs/node-waves/node-waves.css" />
+    <link rel="stylesheet" href="~/vendor/css/core.css" />
+    <link rel="stylesheet" href="~/css/demo.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/vendor/libs/pickr/pickr-themes.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-  @RenderSection("VendorStyles", required: false)
-  @RenderSection("PageStyles", required: false)
+    @RenderSection("VendorStyles", required: false)
+    @RenderSection("PageStyles", required: false)
 
-  <!-- front-page.css last so first-section-pt always wins over any section-py redefinitions in page-specific sheets -->
-  <link rel="stylesheet" href="~/vendor/css/pages/front-page.css" />
+    <!-- front-page.css last so first-section-pt always wins over any section-py redefinitions in page-specific sheets -->
+    <link rel="stylesheet" href="~/vendor/css/pages/front-page.css" />
 
-  <!-- Template helpers & config (must be in <head>) -->
-  <script src="~/vendor/js/helpers.js"></script>
-  <script src="~/vendor/js/template-customizer.js"></script>
-  <script src="~/js/front-config.js" asp-append-version="true"></script>
-  <script src="~/vendor/js/dropdown-hover.js"></script>
-  <script src="~/vendor/js/mega-dropdown.js"></script>
+    <!-- Template helpers & config (must be in <head>) -->
+    <script src="~/vendor/js/helpers.js"></script>
+    <script src="~/vendor/js/template-customizer.js"></script>
+    <script src="~/js/front-config.js" asp-append-version="true"></script>
+    <script src="~/vendor/js/dropdown-hover.js"></script>
+    <script src="~/vendor/js/mega-dropdown.js"></script>
 </head>
 <body>
 
-  <!-- Navbar -->
-  @await Html.PartialAsync("Sections/Navbar/_NavbarLanding")
-  <!-- / Navbar -->
+    <!-- Navbar -->
+    @await Html.PartialAsync("Sections/Navbar/_NavbarLanding")
+    <!-- / Navbar -->
+    @RenderBody()
 
-  @RenderBody()
+    <!-- Core Scripts -->
+    <script src="~/vendor/libs/popper/popper.js"></script>
+    <script src="~/vendor/js/bootstrap.js"></script>
+    <script src="~/vendor/libs/node-waves/node-waves.js"></script>
+    <script src="~/vendor/libs/pickr/pickr.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-  <!-- Core Scripts -->
-  <script src="~/vendor/libs/popper/popper.js"></script>
-  <script src="~/vendor/js/bootstrap.js"></script>
-  <script src="~/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="~/vendor/libs/pickr/pickr.js"></script>
-  <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("VendorScripts", required: false)
 
-  @RenderSection("VendorScripts", required: false)
+    <script src="~/js/front-main.js" asp-append-version="true"></script>
 
-  <script src="~/js/front-main.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+        var icon = document.getElementById('themeToggleIcon');
 
-  <script>
-    (function () {
-      var icon = document.getElementById('themeToggleIcon');
-
-      function updateIcon(theme) {
+        function updateIcon(theme) {
         icon.className = theme === 'dark'
-          ? 'icon-base ri ri-sun-line icon-24px'
-          : 'icon-base ri ri-moon-clear-line icon-24px';
-      }
+        ? 'icon-base ri ri-sun-line icon-24px'
+        : 'icon-base ri ri-moon-clear-line icon-24px';
+        }
 
-      updateIcon(document.documentElement.getAttribute('data-bs-theme') || 'light');
+        updateIcon(document.documentElement.getAttribute('data-bs-theme') || 'light');
 
-      document.getElementById('themeToggleBtn').addEventListener('click', function () {
+        document.getElementById('themeToggleBtn').addEventListener('click', function () {
         var current = document.documentElement.getAttribute('data-bs-theme') || 'light';
         var next = current === 'dark' ? 'light' : 'dark';
         window.Helpers.setStoredTheme(window.templateName, next);
         window.Helpers.setStoredTheme('vertical-menu-template', next);
         window.Helpers.setTheme(next);
         updateIcon(next);
-      });
-    })();
-  </script>
+        });
+        })();
+    </script>
 
-  @RenderSection("PageScripts", required: false)
+    @RenderSection("PageScripts", required: false)
 
-  @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js" asp-append-version="true"></script> }
+    @if (Configuration.GetValue<bool>("Pwa:Enabled"))
+    {
+        <script src="~/js/pwa.js" asp-append-version="true"></script>
+    }
 
-  <!-- Footer -->
-  @await Html.PartialAsync("Sections/Footer/_FooterLanding")
-  <!-- / Footer -->
+    <!-- Footer -->
+    @await Html.PartialAsync("Sections/Footer/_FooterLanding")
+    <!-- / Footer -->
 
 </body>
 </html>

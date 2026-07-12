@@ -1,6 +1,6 @@
 /**
  * Admin Dashboard — Bewegdeal
- * v1.0.0
+ * v1.1.0
  */
 
 'use strict';

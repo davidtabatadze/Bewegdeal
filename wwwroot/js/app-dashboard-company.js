@@ -1,6 +1,6 @@
 /**
  * Company Dashboard — Bewegdeal
- * v1.0.3
+ * v1.1.0
  */
 
 'use strict';
