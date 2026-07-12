@@ -26,6 +26,18 @@
                 public const string Cancelled = "Cancelled"; // "Abgesagt"; //
                 public const string Declined = "Declined"; // "Abgelehnt"; //
             }
+            public class ChatStatus
+            {
+                public const string Agreed = "Agreed"; // "Vereinbart"; //
+                public const string Ongoing = "Ongoing"; // "Laufend"; //
+                public const string Cancelled = "Cancelled"; // "Abgesagt"; //
+            }
+            public class ChatFraud
+            {
+                public const string Safe = "Safe"; // "Sicher"; //
+                public const string Dubious = "Dubious"; // "Zweifelhaft"; //
+                public const string Resolved = "Resolved"; // "Gelöst"; //
+            }
         }
         public class Account
         {

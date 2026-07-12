@@ -31,10 +31,10 @@
     var icon = Model.Mode == ChatModeEnum.None ? "ri-error-warning-line" : "ri-wechat-line";
     var text = Model.Mode switch
     {
-        ChatModeEnum.Queued => "You are already negotiating another request. Try again when it's done.",
-        ChatModeEnum.Initiate => "Start a negotiation about this request?",
-        ChatModeEnum.Reserved => "The request is already being negotiated with another party. Try again later.",
-        _ => "This request is no longer available."
+        ChatModeEnum.Queued => "Sie verhandeln bereits eine andere Anfrage. Versuchen Sie es erneut, wenn diese abgeschlossen ist.",
+        ChatModeEnum.Initiate => "Möchten Sie über diese Anfrage verhandeln?",
+        ChatModeEnum.Reserved => "Diese Anfrage wird bereits mit einem anderen Unternehmen verhandelt. Versuchen Sie es später erneut.",
+        _ => "Diese Anfrage ist nicht mehr verfügbar."
     };
 
     <div id="chatConversation"
@@ -48,7 +48,7 @@
         @if (Model.Mode == ChatModeEnum.Initiate)
         {
             <button id="chatInitiateBtn" class="btn btn-primary">
-                <i class="icon-base ri ri-wechat-line me-1"></i>Start Conversation
+                <i class="icon-base ri ri-wechat-line me-1"></i>Gespräch starten
             </button>
         }
     </div>
@@ -74,11 +74,11 @@ else
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="d-flex align-items-center mb-2">
                         <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                        <strong>Handle with care</strong>
+                        <strong>Bitte beachten</strong>
                     </div>
                     <ul class="mb-0">
-                        <li>Make sure you follow the rules of <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">T&amp;M</strong>.</li>
-                        <li>Have in mind, the chat can and may be monitored by the system administration.</li>
+                        <li>Bitte halten Sie sich an die Regeln der <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">AGB</strong>.</li>
+                        <li>Der Chat kann von der Systemverwaltung überwacht werden.</li>
                     </ul>
                 </div>
                 <div class="chat-history-header border-bottom">
@@ -103,7 +103,7 @@ else
                             <div class="chat-contact-info flex-grow-1 ms-4">
                                 <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
                                 <small class="user-status text-body">
-                                    @(User.IsInRole(UserRoleEnum.Customer) ? "Company" : "Customer")
+                                    @(User.IsInRole(UserRoleEnum.Customer) ? "Unternehmen" : "Kunde")
                                 </small>
                             </div>
                         </div>
@@ -119,7 +119,7 @@ else
                             var today = DateTime.Now.Date;
                             if (d.Date == today) { return "Heute"; }
                             if (d.Date == today.AddDays(-1)) { return "Gestern"; }
-                            return d.ToString("MMMM d, yyyy");
+                            return d.ToString("d. MMMM yyyy");
                         }
                         string? lastDay = null;
                     }
@@ -225,7 +225,7 @@ else
                     <div class="alert alert-info m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Administrator readonly view</strong>
+                            <strong>Administrator – Nur-Lese-Ansicht</strong>
                         </div>
                     </div>
                 </div>
@@ -236,7 +236,7 @@ else
                     <div class="alert alert-danger m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>The chat is cancelled</strong>
+                            <strong>Der Chat wurde abgebrochen</strong>
                         </div>
                     </div>
                 </div>
@@ -247,7 +247,7 @@ else
                     <div class="alert alert-danger m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Current request status is not negotiable</strong>
+                            <strong>Der aktuelle Anfragestatus erlaubt keine Verhandlung</strong>
                         </div>
                     </div>
                 </div>
@@ -258,10 +258,10 @@ else
                     <div class="alert alert-warning m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong class="pe-1">Pending proposal reaction</strong>
+                            <strong class="pe-1">Ausstehendes Angebot</strong>
                             @if (User.IsInRole(UserRoleEnum.Company))
                             {
-                                <a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Proposal">
+                                <a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot zurückziehen">
                                     <i class="icon-base ri ri-hand icon-md text-danger"></i>
                                 </a>
                             }
@@ -280,14 +280,14 @@ else
                             @if (User.IsInRole(UserRoleEnum.Company) && Model.ChatStatus != ChatStatusEnum.Agreed)
                             {
                                 <span id="chatProposalBtn" class="btn btn-text-warning btn-icon rounded-pill cursor-pointer"
-                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Send Proposal">
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot senden">
                                     <i class="icon-base ri ri-money-euro-circle-line icon-md text-warning"></i>
                                 </span>
                             }
                             @if (Model.ChatStatus == ChatStatusEnum.Ongoing)
                             {
                                 <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
-                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Chat">
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Chat abbrechen">
                                     <i class="icon-base ri ri-hand icon-md text-danger"></i>
                                 </span>
                             }
