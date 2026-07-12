@@ -9,19 +9,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_user_table = document.querySelector('.datatables-users');
 
     // Status → icon + color + label
+    const us = window.userStatusLabels || {};
     const statusMap = {
-        active: { title: 'Active', icon: 'ri-user-follow-line', color: 'success' },
-        pending: { title: 'Pending', icon: 'ri-user-forbid-line', color: 'warning' },
-        blocked: { title: 'Blocked', icon: 'ri-admin-line', color: 'danger' },
-        unverified: { title: 'Unverified', icon: 'ri-user-settings-line', color: 'secondary' }
+        active: { title: us.active, icon: 'ri-user-follow-line', color: 'success' },
+        pending: { title: us.pending, icon: 'ri-user-forbid-line', color: 'warning' },
+        blocked: { title: us.blocked, icon: 'ri-admin-line', color: 'danger' },
+        unverified: { title: us.unverified, icon: 'ri-user-settings-line', color: 'secondary' }
     };
 
     // Interest → icon + color + label
+    const ui = window.userInterestLabels || {};
     const interestMap = {
-        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: 'Moving Service' },
-        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: 'Junk Removal' },
-        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: 'Store Pickup' },
-        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: 'Vehicle Transport' }
+        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: ui.moving },
+        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: ui.removal },
+        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: ui.pickup },
+        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: ui.transport }
     };
 
     // Role → icon HTML
@@ -168,11 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     const status = full['status'];
                     const id = full['id'];
                     const actionsConfig = {
-                        active: [{ action: 'block', icon: 'ri-admin-line', color: 'danger', title: 'Block' }],
-                        pending: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Activate' },
-                        { action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Delete' }],
-                        blocked: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Activate' }],
-                        unverified: [{ action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Delete' }]
+                        active: [{ action: 'block', icon: 'ri-admin-line', color: 'danger', title: 'Sperren' }],
+                        pending: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Aktivieren' },
+                        { action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Löschen' }],
+                        blocked: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Aktivieren' }],
+                        unverified: [{ action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Löschen' }]
                     };
                     const actions = actionsConfig[status] || [];
                     return actions.map(function (a) {
@@ -276,9 +278,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Action button — delegated click on the table wrapper
     const confirmTextMap = {
-        block: 'Sure you want to <span class="text-danger fw-bold">Block</span> the user?',
-        activate: 'Sure you want to <span class="text-success fw-bold">Activate</span> the user?',
-        delete: 'Sure you want to <span class="text-danger fw-bold">Delete</span> the user?'
+        block: 'Möchten Sie den Benutzer wirklich <span class="text-danger fw-bold">Sperren</span>?',
+        activate: 'Möchten Sie den Benutzer wirklich <span class="text-success fw-bold">Aktivieren</span>?',
+        delete: 'Möchten Sie den Benutzer wirklich <span class="text-danger fw-bold">Löschen</span>?'
     };
 
     dt_user_table.addEventListener('click', function (e) {
@@ -294,12 +296,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!confirmHtml) { return; }
 
         Swal.fire({
-            title: 'Confirm Action',
+            title: 'Aktion bestätigen',
             html: confirmHtml,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, confirm',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Ja, bestätigen',
+            cancelButtonText: 'Abbrechen',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
@@ -317,16 +319,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (res.ok) {
                         dtRow.remove().draw(false);
                         Swal.fire({
-                            title: 'Done!',
-                            text: 'User has been deleted.',
+                            title: 'Erledigt!',
+                            text: 'Benutzer wurde gelöscht.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false
                         });
                     } else if (res.status === 400) {
-                        Swal.fire({ title: 'Not allowed', text: 'You cannot delete this user.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({ title: 'Nicht erlaubt', text: 'Dieser Benutzer kann nicht gelöscht werden.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                     } else {
-                        Swal.fire({ title: 'Error', text: 'Failed to delete user.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({ title: 'Fehler', text: 'Benutzer konnte nicht gelöscht werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                     }
                 });
                 return;
@@ -344,16 +346,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         dtRow.data(rowData).draw(false);
                     });
                     Swal.fire({
-                        title: 'Done!',
-                        text: 'User status has been updated.',
+                        title: 'Erledigt!',
+                        text: 'Benutzerstatus wurde aktualisiert.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
                         buttonsStyling: false
                     });
                 } else if (res.status === 400) {
-                    Swal.fire({ title: 'Not allowed', text: 'You cannot change your own status.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({ title: 'Nicht erlaubt', text: 'Sie können Ihren eigenen Status nicht ändern.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 } else {
-                    Swal.fire({ title: 'Error', text: 'Failed to update status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({ title: 'Fehler', text: 'Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 }
             });
         });

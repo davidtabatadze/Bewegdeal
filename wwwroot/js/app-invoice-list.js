@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 createdCell: function (td) { td.style.minWidth = '135px'; },
                 render: function (data, type, full) {
                     const create = !data ? '-' :
-                        new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        new Date(data).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
                     const due = !full['dueDate'] ? '-' :
                         new Date(full['dueDate']).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -157,14 +157,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     const paid = data === 'paid' ? '' : (
                         '<button type="button" class="btn btn-icon btn-label-success invoice-status-btn me-1"' +
                         ' data-invoice-id="' + id + '" data-new-status="paid"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Paid">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Bezahlt">' +
                         '<span class="icon-base ri ri-wallet-line icon-22px text-success"></span>' +
                         '</button>'
                     );
                     const cancelled = data === 'cancelled' ? '' : (
                         '<button type="button" class="btn btn-icon btn-label-danger invoice-status-btn"' +
                         ' data-invoice-id="' + id + '" data-new-status="cancelled"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Stornieren">' +
                         '<span class="icon-base ri ri-hand icon-22px text-danger"></span>' +
                         '</button>'
                     );
@@ -233,8 +233,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Status change — confirm → POST → row update (admin only)
     if (isAdmin) {
         const confirmTextMap = {
-            paid: 'Sure you want to mark the invoice as <span class="text-success fw-bold">Paid</span>?',
-            cancelled: 'Sure you want to <span class="text-danger fw-bold">Cancel</span> the invoice?'
+            paid: 'Möchten Sie die Rechnung wirklich als <span class="text-success fw-bold">Bezahlt</span> markieren?',
+            cancelled: 'Möchten Sie die Rechnung wirklich <span class="text-danger fw-bold">Stornieren</span>?'
         };
 
         dt_invoice_table.addEventListener('click', function (e) {
@@ -249,12 +249,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!confirmHtml) { return; }
 
             Swal.fire({
-                title: 'Confirm Action',
+                title: 'Aktion bestätigen',
                 html: confirmHtml,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, confirm',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Ja, bestätigen',
+                cancelButtonText: 'Abbrechen',
                 customClass: {
                     confirmButton: 'btn btn-primary me-3',
                     cancelButton: 'btn btn-label-secondary'
@@ -277,15 +277,15 @@ document.addEventListener('DOMContentLoaded', function () {
                             dtRow.data(rowData).draw(false);
                         });
                         Swal.fire({
-                            title: 'Done!',
-                            text: 'Invoice status has been updated.',
+                            title: 'Erledigt!',
+                            text: 'Rechnungsstatus wurde aktualisiert.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false
                         });
                     } else {
                         Block.remove('.card-datatable');
-                        Swal.fire({ title: 'Error', text: 'Failed to update invoice status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({ title: 'Fehler', text: 'Rechnungsstatus konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                     }
                 });
             });

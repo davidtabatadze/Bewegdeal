@@ -21,6 +21,20 @@
 }
 
 @section PageScripts {
+    <script>
+        window.userStatusLabels = {
+        active:      '@AnnotationEnum.General.UserStatus.Active',
+        pending:     '@AnnotationEnum.General.UserStatus.Pending',
+        blocked:     '@AnnotationEnum.General.UserStatus.Blocked',
+        unverified:  '@AnnotationEnum.General.UserStatus.Unverified'
+        };
+        window.userInterestLabels = {
+        moving:    '@AnnotationEnum.General.Service.Moving',
+        removal:   '@AnnotationEnum.General.Service.Removal',
+        pickup:    '@AnnotationEnum.General.Service.Pickup',
+        transport: '@AnnotationEnum.General.Service.Transport'
+        };
+    </script>
     <script src="~/js/app-user-list.js" asp-append-version="true"></script>
 }
 

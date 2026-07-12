@@ -34,6 +34,22 @@
 }
 
 @section PageScripts {
+    <script>
+        window.requestServiceLabels = {
+        moving:    '@AnnotationEnum.General.Service.Moving',
+        removal:   '@AnnotationEnum.General.Service.Removal',
+        pickup:    '@AnnotationEnum.General.Service.Pickup',
+        transport: '@AnnotationEnum.General.Service.Transport'
+        };
+        window.requestStatusLabels = {
+        pending:     '@AnnotationEnum.General.RequestStatus.Pending',
+        cancelled:   '@AnnotationEnum.General.RequestStatus.Cancelled',
+        negotiation: '@AnnotationEnum.General.RequestStatus.Negotiation',
+        agreed:      '@AnnotationEnum.General.RequestStatus.Agreed',
+        resolved:    '@AnnotationEnum.General.RequestStatus.Resolved',
+        declined:    '@AnnotationEnum.General.RequestStatus.Declined'
+        };
+    </script>
     <script src="~/js/app-request-list.js" asp-append-version="true"></script>
 }
 

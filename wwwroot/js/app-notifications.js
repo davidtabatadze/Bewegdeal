@@ -68,7 +68,7 @@
 
     function showBrowserNotification(senderName, preview, requestNumber) {
         if (!('Notification' in window) || Notification.permission !== 'granted') { return; }
-        var n = new Notification('New message from ' + senderName, {
+        var n = new Notification('Neue Nachricht von ' + senderName, {
             body: preview,
             icon: '/img/favicon/favicon.ico'
         });
@@ -85,15 +85,15 @@
         if (!dateStr) { return ''; }
         var d = new Date(dateStr);
         var now = new Date();
-        if (now - d < 2 * 60 * 1000) { return 'Just now'; }
+        if (now - d < 2 * 60 * 1000) { return 'Gerade eben'; }
         var toStr = function (dt) { return dt.toISOString().slice(0, 10); };
         var todayStr = toStr(now);
         var yesterday = new Date(now);
         yesterday.setDate(now.getDate() - 1);
         var dStr = toStr(d);
-        if (dStr === todayStr) { return 'Today'; }
-        if (dStr === toStr(yesterday)) { return 'Yesterday'; }
-        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        if (dStr === todayStr) { return 'Heute'; }
+        if (dStr === toStr(yesterday)) { return 'Gestern'; }
+        return d.toLocaleDateString('de-DE', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
     function esc(str) {

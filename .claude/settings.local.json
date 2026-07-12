@@ -73,7 +73,13 @@
       "Bash(awk -F'vendor' '{print substr\\($2,2\\)}')",
       "Bash(Get-Content \"C:\\\\Users\\\\DAVID~1.TAB\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-tabatadze-Sources-Bewegdeal\\\\28b89ba7-4ade-446c-b44b-d664a7d2fcba\\\\tasks\\\\bd8lv1kdi.output\")",
       "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\app-company-dashboard.js\" \"app-dashboard-company.js\")",
-      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\chat.js\" \"app-chat.js\")"
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\chat.js\" \"app-chat.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\notifications.js\" \"app-notifications.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\pages-auth.js\" \"app-auth.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\pages-auth-multisteps.js\" \"app-auth-multisteps.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\pages-auth-two-steps.js\" \"app-auth-two-steps.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\request-view.js\" \"app-request-view.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\request-form.js\" \"app-request-form.js\")"
     ]
   }
 }

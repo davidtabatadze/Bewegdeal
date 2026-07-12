@@ -29,7 +29,7 @@
 }
 
 @section PageScripts {
-    <script src="~/js/pages-auth-multisteps.js" asp-append-version="true"></script>
+    <script src="~/js/app-auth-multisteps.js" asp-append-version="true"></script>
     @{ ViewData["AcceptMode"] = true; ViewData["RegistrationMode"] = true; }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_TermsModal.cshtml")
     @{ ViewData.Remove("AcceptMode"); ViewData.Remove("RegistrationMode"); }

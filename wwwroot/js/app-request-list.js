@@ -9,27 +9,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_table = document.querySelector('.datatables-requests');
 
     // Status → icon HTML + label
+    const sl = window.requestStatusLabels || {};
     const statusMap = {
-        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: 'Pending' },
-        cancelled: { icon: 'ri-hand', color: 'danger', label: 'Cancelled' },
-        negotiation: { icon: 'ri-wechat-line', color: 'info', label: 'Negotiation' },
-        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: 'Agreed' },
-        resolved: { icon: 'ri-check-double-line', color: 'success', label: 'Resolved' },
-        declined: { icon: 'ri-rest-time-line', color: 'dark', label: 'Declined' },
+        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: sl.pending },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: sl.cancelled },
+        negotiation: { icon: 'ri-wechat-line', color: 'info', label: sl.negotiation },
+        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: sl.agreed },
+        resolved: { icon: 'ri-check-double-line', color: 'success', label: sl.resolved },
+        declined: { icon: 'ri-rest-time-line', color: 'dark', label: sl.declined },
     };
 
     // Service → icon HTML + label + text color
+    const sv = window.requestServiceLabels || {};
     const serviceMap2 = {
-        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: 'Moving Service' },
-        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: 'Junk Removal' },
-        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: 'Store Pickup' },
-        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: 'Vehicle Transport' }
+        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: sv.moving },
+        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: sv.removal },
+        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: sv.pickup },
+        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: sv.transport }
     };
     const serviceMap = {
-        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success"></i>', label: 'Moving Service', color: 'text-success' },
-        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger"></i>', label: 'Junk Removal', color: 'text-danger' },
-        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning"></i>', label: 'Store Pickup', color: 'text-warning' },
-        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info"></i>', label: 'Vehicle Transport', color: 'text-info' }
+        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success"></i>', label: sv.moving, color: 'text-success' },
+        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger"></i>', label: sv.removal, color: 'text-danger' },
+        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning"></i>', label: sv.pickup, color: 'text-warning' },
+        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info"></i>', label: sv.transport, color: 'text-info' }
     };
 
     // Column index → sort field sent to the server (only sortable columns listed)
@@ -224,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     let timing;
                     if (asap) {
-                        timing = 'As soon as possible';
+                        timing = 'So schnell wie möglich';
                     } else {
                         timing = date || '';
                         if (time) { timing += ' - ' + time; }

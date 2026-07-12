@@ -25,7 +25,7 @@ Dropzone.autoDiscover = false;
   <div class="dz-details">
     <div class="dz-thumbnail">
       <img data-dz-thumbnail>
-      <span class="dz-nopreview">No preview</span>
+      <span class="dz-nopreview">Keine Vorschau</span>
       <div class="dz-success-mark"></div>
       <div class="dz-error-mark"></div>
       <div class="dz-error-message"><span data-dz-errormessage></span></div>
@@ -54,9 +54,9 @@ Dropzone.autoDiscover = false;
             maxFilesize: Math.max(imageMaxSize, videoMaxSize),
             acceptedFiles: '.png,.jpg,.jpeg,.mp4,.mov',
             previewTemplate: previewTemplate,
-            dictInvalidFileType: 'Only PNG, JPG, MP4 and MOV files are accepted.',
-            dictFileTooBig: 'File is too large.',
-            dictRemoveFile: '<i class="icon-base ri ri-delete-bin-line text-danger me-1 icon-14px"></i>Remove file'
+            dictInvalidFileType: 'Nur PNG, JPG, MP4 und MOV-Dateien sind erlaubt.',
+            dictFileTooBig: 'Datei ist zu groß.',
+            dictRemoveFile: '<i class="icon-base ri ri-delete-bin-line text-danger me-1 icon-14px"></i>Datei entfernen'
         });
 
         mediaDropzone.on('addedfile', function (file) {
@@ -152,11 +152,11 @@ Dropzone.autoDiscover = false;
             const badge = f.previewElement?.querySelector('.dz-main-badge');
             if (!badge) { return; }
             if (f === mainImageFile) {
-                badge.textContent = '★ Main';
+                badge.textContent = '★ Hauptbild';
                 badge.classList.remove('bg-secondary');
                 badge.classList.add('bg-primary');
             } else {
-                badge.textContent = 'Set Main';
+                badge.textContent = 'Als Hauptbild';
                 badge.classList.remove('bg-primary');
                 badge.classList.add('bg-secondary');
             }
@@ -336,12 +336,12 @@ Dropzone.autoDiscover = false;
             }
 
             const confirmed = await Swal.fire({
-                title: 'Confirm Action',
-                html: 'Sure you want to <span class="text-danger fw-bold">Cancel</span> the request?',
+                title: 'Aktion bestätigen',
+                html: 'Möchten Sie die Anfrage wirklich <span class="text-danger fw-bold">Stornieren</span>?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, cancel it',
-                cancelButtonText: 'No, keep it',
+                confirmButtonText: 'Ja, stornieren',
+                cancelButtonText: 'Nein, behalten',
                 customClass: {
                     confirmButton: 'btn btn-danger me-3',
                     cancelButton: 'btn btn-label-secondary'
@@ -352,7 +352,7 @@ Dropzone.autoDiscover = false;
             if (!confirmed.isConfirmed) { return; }
 
             cancelBtn.disabled = true;
-            setLoadingMessage('Cancelling...');
+            setLoadingMessage('Wird storniert...');
 
             try {
                 const fd = new FormData();
@@ -373,19 +373,19 @@ Dropzone.autoDiscover = false;
                     });
                     const successEl = document.querySelector('.notiflix-loading');
                     if (successEl) {
-                        successEl.innerHTML = `<div class="px-12 py-3 bg-success text-white">Success</div>`;
+                        successEl.innerHTML = `<div class="px-12 py-3 bg-success text-white">Erfolgreich</div>`;
                     }
                     setTimeout(function () {
                         window.location.href = '/Request/List';
                     }, 2000);
                 } else {
                     Loading.remove();
-                    notyf.error(result.error ?? 'Something went wrong. Please try again.');
+                    notyf.error(result.error ?? 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
                     cancelBtn.disabled = false;
                 }
             } catch {
                 Loading.remove();
-                notyf.error('Something went wrong. Please try again.');
+                notyf.error('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
                 cancelBtn.disabled = false;
             }
         });
@@ -447,18 +447,18 @@ Dropzone.autoDiscover = false;
             }
 
             if (totalImages === 0) {
-                mediaErrorEl.textContent = 'At least one image is required.';
+                mediaErrorEl.textContent = 'Mindestens ein Bild ist erforderlich.';
                 mediaErrorEl.classList.remove('d-none');
                 hasErrors = true;
             } else if (totalImages > imageMaxCount) {
-                mediaErrorEl.textContent = `Maximum ${imageMaxCount} images allowed.`;
+                mediaErrorEl.textContent = `Maximal ${imageMaxCount} Bilder erlaubt.`;
                 mediaErrorEl.classList.remove('d-none');
                 hasErrors = true;
             } else {
                 const imageMaxBytes = imageMaxSize * 1024 * 1024;
                 for (const img of imageFiles) {
                     if (img.size > imageMaxBytes) {
-                        mediaErrorEl.textContent = `Each image must be under ${imageMaxSize} MB.`;
+                        mediaErrorEl.textContent = `Jedes Bild muss kleiner als ${imageMaxSize} MB sein.`;
                         mediaErrorEl.classList.remove('d-none');
                         hasErrors = true;
                         break;
@@ -468,14 +468,14 @@ Dropzone.autoDiscover = false;
 
             if (mediaErrorEl.classList.contains('d-none')) {
                 if (totalVideos > videoMaxCount) {
-                    mediaErrorEl.textContent = `Maximum ${videoMaxCount} videos allowed.`;
+                    mediaErrorEl.textContent = `Maximal ${videoMaxCount} Videos erlaubt.`;
                     mediaErrorEl.classList.remove('d-none');
                     hasErrors = true;
                 } else {
                     const videoMaxBytes = videoMaxSize * 1024 * 1024;
                     for (const vid of videoFiles) {
                         if (vid.size > videoMaxBytes) {
-                            mediaErrorEl.textContent = `Each video must be under ${videoMaxSize} MB.`;
+                            mediaErrorEl.textContent = `Jedes Video muss kleiner als ${videoMaxSize} MB sein.`;
                             mediaErrorEl.classList.remove('d-none');
                             hasErrors = true;
                             break;
@@ -510,7 +510,7 @@ Dropzone.autoDiscover = false;
             }
 
             if (hasErrors) {
-                notyf.error('Please, fill all required fields.');
+                notyf.error('Bitte alle Pflichtfelder ausfüllen.');
                 return;
             }
 
@@ -539,7 +539,7 @@ Dropzone.autoDiscover = false;
             // ── Submit ──────────────────────────────────────────────────────────
             submitBtn.disabled = true;
 
-            const loadingMessages = ['Please wait...', 'Uploading files...', 'Almost done...'];
+            const loadingMessages = ['Bitte warten...', 'Dateien werden hochgeladen...', 'Fast fertig...'];
             let loadingMsgIndex = 0;
 
             setLoadingMessage(loadingMessages[0]);
@@ -566,20 +566,20 @@ Dropzone.autoDiscover = false;
                     });
                     const successEl = document.querySelector('.notiflix-loading');
                     if (successEl) {
-                        successEl.innerHTML = `<div class="px-12 py-3 bg-success text-white">Success</div>`;
+                        successEl.innerHTML = `<div class="px-12 py-3 bg-success text-white">Erfolgreich</div>`;
                     }
                     setTimeout(function () {
                         window.location.href = result.redirect;
                     }, 2000);
                 } else {
                     Loading.remove();
-                    notyf.error(result.error ?? 'Something went wrong. Please try again.');
+                    notyf.error(result.error ?? 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
                     submitBtn.disabled = false;
                 }
             } catch {
                 clearInterval(loadingInterval);
                 Loading.remove();
-                notyf.error('Something went wrong. Please try again.');
+                notyf.error('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
                 submitBtn.disabled = false;
             }
         });
