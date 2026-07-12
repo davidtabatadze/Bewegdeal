@@ -92,12 +92,12 @@
         e.preventDefault();
 
         Swal.fire({
-            title: 'Withdraw proposal?',
-            text: 'Are you sure you want to cancel your proposal?',
+            title: 'Angebot zurückziehen?',
+            text: 'Sind Sie sicher, dass Sie Ihr Angebot zurückziehen möchten?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, withdraw it',
-            cancelButtonText: 'No',
+            confirmButtonText: 'Ja, zurückziehen',
+            cancelButtonText: 'Nein',
             customClass: {
                 confirmButton: 'btn btn-danger me-3',
                 cancelButton: 'btn btn-label-secondary'
@@ -127,12 +127,12 @@
         if (!e.target.closest('#chatCancelBtn')) { return; }
 
         Swal.fire({
-            title: 'End negotiation?',
-            text: 'Sure you want to cancel the negotiation?',
+            title: 'Verhandlung beenden?',
+            text: 'Möchten Sie die Verhandlung wirklich abbrechen?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, end it',
-            cancelButtonText: 'No',
+            confirmButtonText: 'Ja, beenden',
+            cancelButtonText: 'Nein',
             customClass: {
                 confirmButton: 'btn btn-danger me-3',
                 cancelButton: 'btn btn-label-secondary'
@@ -264,7 +264,7 @@
                 if (footer) {
                     var cancelBtn = (msg.senderId === viewerId)
                         ? '<a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" style="cursor:pointer;"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel Proposal">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot stornieren">' +
                             '<i class="icon-base ri ri-hand icon-md text-danger"></i></a>'
                         : '';
                     footer.outerHTML =
@@ -272,7 +272,7 @@
                         '<div class="alert alert-warning m-0" role="alert">' +
                         '<div class="d-flex align-items-center">' +
                         '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
-                        '<strong class="pe-1">Pending proposal reaction</strong>' +
+                        '<strong class="pe-1">Ausstehende Antwort auf Angebot</strong>' +
                         cancelBtn +
                         '</div></div></div>';
                     var cancelEl = body.querySelector('#chatCancelProposalBtn');
@@ -486,10 +486,10 @@
         yesterday.setDate(today.getDate() - 1);
         var todayStr = today.toISOString().slice(0, 10);
         var yesterdayStr = yesterday.toISOString().slice(0, 10);
-        if (dateStr === todayStr) { return 'Today'; }
-        if (dateStr === yesterdayStr) { return 'Yesterday'; }
+        if (dateStr === todayStr) { return 'Heute'; }
+        if (dateStr === yesterdayStr) { return 'Gestern'; }
         var d = new Date(dateStr + 'T00:00:00');
-        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        return d.toLocaleDateString('de-DE', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
     function buildAvatarHtml(pictureUrl, initials, altText) {
@@ -506,7 +506,7 @@
     function showError() {
         body.innerHTML =
             '<div class="col d-flex align-items-center justify-content-center text-muted">' +
-            '<span>Failed to load chat. Please try again.</span>' +
+            '<span>Chat konnte nicht geladen werden. Bitte versuchen Sie es erneut.</span>' +
             '</div>';
     }
 

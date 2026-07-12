@@ -71,7 +71,9 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\svg\" -Recurse -File | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\svg\\\\\"\\), \"\" } | Sort-Object)",
       "Bash(awk -F'vendor' '{print $2}')",
       "Bash(awk -F'vendor' '{print substr\\($2,2\\)}')",
-      "Bash(Get-Content \"C:\\\\Users\\\\DAVID~1.TAB\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-tabatadze-Sources-Bewegdeal\\\\28b89ba7-4ade-446c-b44b-d664a7d2fcba\\\\tasks\\\\bd8lv1kdi.output\")"
+      "Bash(Get-Content \"C:\\\\Users\\\\DAVID~1.TAB\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-tabatadze-Sources-Bewegdeal\\\\28b89ba7-4ade-446c-b44b-d664a7d2fcba\\\\tasks\\\\bd8lv1kdi.output\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\app-company-dashboard.js\" \"app-dashboard-company.js\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\david.tabatadze\\\\Sources\\\\Bewegdeal\\\\wwwroot\\\\js\\\\chat.js\" \"app-chat.js\")"
     ]
   }
 }

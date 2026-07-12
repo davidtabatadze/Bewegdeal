@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 createdCell: function (td) { td.style.minWidth = '135px'; },
                 render: function (data) {
                     if (!data) { return '—'; }
-                    return new Date(data).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return new Date(data).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
                 }
             },
             {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             '<button type="button" class="btn btn-icon btn-label-info fraud-toggle-btn"' +
                             ' data-chat-id="' + id + '"' +
                             ' data-current-fraud="' + fraud + '"' +
-                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve">' +
+                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="Auflösen">' +
                             '<span class="icon-base ri ri-verified-badge-line icon-22px text-info"></span>' +
                             '</button>' +
                             '</div>'
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status change — delegated click on the table wrapper
     const confirmTextMap = {
-        dubious: 'Sure you want to change fraud to <span class="text-info fw-bold">Resolved</span>?'
+        dubious: 'Möchten Sie den Betrugs-Status wirklich auf <span class="text-info fw-bold">Aufgelöst</span> setzen?'
     };
 
     // Fraud toggle — delegated click on the table wrapper
@@ -263,12 +263,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const dtRow = dt_chat.row(btn.closest('tr'));
 
         Swal.fire({
-            title: 'Confirm Action',
+            title: 'Aktion bestätigen',
             html: confirmHtml,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, confirm',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Ja, bestätigen',
+            cancelButtonText: 'Abbrechen',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
@@ -289,14 +289,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         dtRow.data(rowData).draw(false);
                     });
                     Swal.fire({
-                        title: 'Done!',
-                        text: 'Chat fraud status has been resolved.',
+                        title: 'Erledigt!',
+                        text: 'Der Betrugs-Status des Chats wurde aufgelöst.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
                         buttonsStyling: false
                     });
                 } else {
-                    Swal.fire({ title: 'Error', text: 'Failed to update fraud status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({ title: 'Fehler', text: 'Betrugs-Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 }
             });
         });
