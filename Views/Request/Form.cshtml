@@ -6,7 +6,7 @@
     var settings = vm.Settings!;
     var req = vm.Data;
     var isEdit = req is not null;
-    ViewData["Title"] = isEdit ? "Edit Request" : "New Request";
+    ViewData["Title"] = isEdit ? "Anfrage bearbeiten" : "Neue Anfrage";
     var existingFilesList = isEdit ? vm.Files : [];
 }
 
@@ -79,7 +79,7 @@
                             <div class="col-lg-8 mx-auto">
 
                                 <!-- 1. Service Type -->
-                                <h5 class="mb-4">1. Service Type</h5>
+                                <h5 class="mb-4">1. Dienstleistungsart</h5>
                                 <div class="row gy-3">
                                     <div class="col-6 col-lg-3 col-md-6 col-sm-6">
                                         <div class="form-check custom-option custom-option-icon">
@@ -130,24 +130,24 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div id="serviceError" class="text-danger small d-none mt-2">Service type is required.</div>
+                                <div id="serviceError" class="text-danger small d-none mt-2">Bitte wählen Sie eine Dienstleistungsart aus.</div>
 
                                 <hr class="my-6" />
 
                                 <!-- 2. General Information -->
-                                <h5 class="mb-4">2. General Information</h5>
+                                <h5 class="mb-4">2. Allgemeine Informationen</h5>
                                 <div class="row g-6">
                                     <div class="col-12">
                                         <div class="form-floating form-floating-outline">
                                             <input type="text" id="title" name="title" class="form-control" placeholder="" maxlength="128" value="@(isEdit ? req!.Title : "")" />
-                                            <label for="title">Title</label>
-                                            <div class="invalid-feedback">Title is required.</div>
+                                            <label for="title">Titel</label>
+                                            <div class="invalid-feedback">Titel ist erforderlich.</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-floating form-floating-outline">
                                             <textarea id="description" name="description" class="form-control" placeholder="" style="height: 100px;" maxlength="2048">@(isEdit ? req!.Description : "")</textarea>
-                                            <label for="description">Description <span class="text-muted">(optional)</span></label>
+                                            <label for="description">Beschreibung <span class="text-muted">(optional)</span></label>
                                         </div>
                                     </div>
                                 </div>
@@ -155,15 +155,15 @@
                                 <hr class="my-6" />
 
                                 <!-- 3. Media -->
-                                <h5 class="mb-2">3. Media Information</h5>
+                                <h5 class="mb-2">3. Medien</h5>
 
                                 <p class="text-muted mb-3 small">
-                                    <strong>Images</strong> (png, jpeg): up to @settings.RequestImageMaxCount files, max @settings.RequestImageMaxSize MB each. At least one required. You may "Set Main" image.<br />
-                                    <strong>Videos</strong> (mp4, mov): up to @settings.RequestVideoMaxCount files, max @settings.RequestVideoMaxSize MB each. Optional.
+                                    <strong>Bilder</strong> (png, jpeg): bis zu @settings.RequestImageMaxCount Dateien, max. @settings.RequestImageMaxSize MB pro Datei. Mindestens ein Bild erforderlich. Sie können ein Hauptbild festlegen.<br />
+                                    <strong>Videos</strong> (mp4, mov): bis zu @settings.RequestVideoMaxCount Dateien, max. @settings.RequestVideoMaxSize MB pro Datei. Optional.
                                 </p>
                                 <div id="dropzone-media" class="dropzone needsclick">
                                     <div class="dz-message needsclick">
-                                        Drop images or videos here, or click to upload
+                                        Bilder oder Videos hier ablegen oder zum Hochladen klicken
                                     </div>
                                 </div>
                                 <div id="mediaError" class="text-danger small d-none mt-2"></div>
@@ -171,21 +171,21 @@
                                 <hr class="my-6" />
 
                                 <!-- 4. Address Mapping -->
-                                <h5 class="mb-4">4. Address Mapping</h5>
+                                <h5 class="mb-4">4. Adressen</h5>
                                 <div class="row g-6">
                                     <div class="col-12">
                                         <div class="row g-3">
                                             <div class="col-12 col-sm-9">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="text" id="pickupAddress" name="pickupAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.PickupAddress : "")" />
-                                                    <label for="pickupAddress">Pickup Address</label>
-                                                    <div class="invalid-feedback">Source address is required.</div>
+                                                    <label for="pickupAddress">Abholadresse</label>
+                                                    <div class="invalid-feedback">Abholadresse ist erforderlich.</div>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-3">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="text" id="pickupZipCode" name="pickupZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.PickupZipCode : "")" />
-                                                    <label for="pickupZipCode">Pickup Zip</label>
+                                                    <label for="pickupZipCode">Abholpostleitzahl</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -195,14 +195,14 @@
                                             <div class="col-12 col-sm-9">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="text" id="deliveryAddress" name="deliveryAddress" class="form-control" placeholder="" maxlength="512" value="@(isEdit ? req!.DeliveryAddress : "")" />
-                                                    <label for="deliveryAddress">Destination Address</label>
-                                                    <div class="invalid-feedback">Destination address is required.</div>
+                                                    <label for="deliveryAddress">Lieferadresse</label>
+                                                    <div class="invalid-feedback">Lieferadresse ist erforderlich.</div>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-3">
                                                 <div class="form-floating form-floating-outline">
                                                     <input type="text" id="deliveryZipCode" name="deliveryZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.DeliveryZipCode : "")" />
-                                                    <label for="deliveryZipCode">Destination Zip</label>
+                                                    <label for="deliveryZipCode">Lieferpostleitzahl</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -212,10 +212,10 @@
                                 <hr class="my-6" />
 
                                 <!-- 5. Additional Details -->
-                                <h5 class="mb-4">5. Additional Details</h5>
+                                <h5 class="mb-4">5. Weitere Details</h5>
 
                                 <div id="noDetailsMsg">
-                                    <p class="text-secondary">No additional details to display.</p>
+                                    <p class="text-secondary">Keine weiteren Details.</p>
                                 </div>
 
                                 <div id="transportFields" class="d-none">
@@ -223,9 +223,9 @@
                                         <div class="col-12 col-sm-8">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="text" id="vehicleType" name="vehicleType" class="form-control" placeholder="" maxlength="128" value="@(isEdit ? req!.VehicleType ?? "" : "")" />
-                                                <label for="vehicleType">Vehicle Type</label>
+                                                <label for="vehicleType">Fahrzeugtyp</label>
                                             </div>
-                                            <div id="vehicleTypeError" class="text-danger small d-none mt-1">Vehicle type is required.</div>
+                                            <div id="vehicleTypeError" class="text-danger small d-none mt-1">Fahrzeugtyp ist erforderlich.</div>
                                         </div>
                                         <div class="col-12 col-sm-4">
                                             <div class="form-floating form-floating-outline">
@@ -234,9 +234,9 @@
                                                     <option value="@VehicleConditionEnum.CanRun" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.CanRun ? "selected" : null)">Springt an@* Can Run *@</option>
                                                     <option value="@VehicleConditionEnum.Damaged" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.Damaged ? "selected" : null)">Nicht fahrbereit@* Damaged *@</option>
                                                 </select>
-                                                <label for="vehicleCondition">Vehicle Condition</label>
+                                                <label for="vehicleCondition">Fahrzeugzustand</label>
                                             </div>
-                                            <div id="vehicleConditionError" class="text-danger small d-none mt-1">Vehicle condition is required.</div>
+                                            <div id="vehicleConditionError" class="text-danger small d-none mt-1">Fahrzeugzustand ist erforderlich.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -250,7 +250,7 @@
                                                     <span class="switch-on"><i class="icon-base ri ri-check-line"></i></span>
                                                     <span class="switch-off"><i class="icon-base ri ri-close-line"></i></span>
                                                 </span>
-                                                <span class="switch-label">There is an elevator</span>
+                                                <span class="switch-label">Es gibt einen Aufzug</span>
                                             </label>
                                         </div>
                                         <div class="col-12 col-sm-6">
@@ -260,7 +260,7 @@
                                                     <span class="switch-on"><i class="icon-base ri ri-check-line"></i></span>
                                                     <span class="switch-off"><i class="icon-base ri ri-close-line"></i></span>
                                                 </span>
-                                                <span class="switch-label">There is a parking</span>
+                                                <span class="switch-label">Es gibt einen Parkplatz</span>
                                             </label>
                                         </div>
                                     </div>
@@ -269,32 +269,32 @@
                                 <hr class="my-6" />
 
                                 <!-- 6. Estimated Cost -->
-                                <h5 class="mb-4">6. Estimated Cost</h5>
+                                <h5 class="mb-4">6. Geschätzte Kosten</h5>
                                 <div class="row g-6">
                                     <div class="col-auto" style="width: 200px;">
                                         <div class="input-group input-group-merge">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="number" id="proposedCost" name="cost" class="form-control" placeholder="" min="1" max="10000" step="1" value="@(isEdit ? req!.Cost : "")" />
-                                                <label for="proposedCost">Cost</label>
+                                                <label for="proposedCost">Kosten</label>
                                             </div>
                                             <span class="input-group-text">EUR</span>
                                         </div>
-                                        <div class="invalid-feedback">Cost is required.</div>
+                                        <div class="invalid-feedback">Kosten sind erforderlich.</div>
                                     </div>
                                 </div>
 
                                 <hr class="my-6" />
 
                                 <!-- 7. Desirable Timing -->
-                                <h5 class="mb-4">7. Desirable Timing</h5>
+                                <h5 class="mb-4">7. Gewünschter Zeitpunkt</h5>
                                 <div class="mb-4">
                                     <div class="form-check form-check-inline">
                                         <input name="isASAP" class="form-check-input" type="radio" value="true" id="timingInstant" checked="@(!isEdit || req!.ASAP ? "checked" : null)" />
-                                        <label class="form-check-label" for="timingInstant">As soon as possible</label>
+                                        <label class="form-check-label" for="timingInstant">So schnell wie möglich</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input name="isASAP" class="form-check-input" type="radio" value="false" id="timingSpecified" checked="@(isEdit && !req!.ASAP ? "checked" : null)" />
-                                        <label class="form-check-label" for="timingSpecified">Specified date and time</label>
+                                        <label class="form-check-label" for="timingSpecified">Bestimmtes Datum und Uhrzeit</label>
                                     </div>
                                 </div>
 
@@ -303,22 +303,22 @@
                                         <div class="col-auto" style="width: 200px;">
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <input type="text" id="proposedDate" name="date" class="form-control" placeholder="" value="@(isEdit ? req!.Date?.ToString("MMMM d, yyyy") : "")" />
-                                                    <label for="proposedDate">Date</label>
+                                                    <input type="text" id="proposedDate" name="date" class="form-control" placeholder="" value="@(isEdit ? req!.Date?.ToString("d. MMMM yyyy") : "")" />
+                                                    <label for="proposedDate">Datum</label>
                                                 </div>
                                                 <span class="input-group-text"><i class="icon-base ri ri-calendar-line"></i></span>
                                             </div>
-                                            <div class="invalid-feedback">Please select a date.</div>
+                                            <div class="invalid-feedback">Bitte wählen Sie ein Datum aus.</div>
                                         </div>
                                         <div class="col-auto" style="width: 200px;">
                                             <div class="input-group input-group-merge">
                                                 <div class="form-floating form-floating-outline flex-grow-1">
                                                     <input type="text" id="proposedTime" name="time" class="form-control" placeholder="" value="@(isEdit ? req!.Time?.ToString("HH:mm") : "")" />
-                                                    <label for="proposedTime">Time</label>
+                                                    <label for="proposedTime">Uhrzeit</label>
                                                 </div>
                                                 <span class="input-group-text"><i class="icon-base ri ri-time-line"></i></span>
                                             </div>
-                                            <div class="invalid-feedback">Please select a time.</div>
+                                            <div class="invalid-feedback">Bitte wählen Sie eine Uhrzeit aus.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -333,11 +333,11 @@
                     <div class="action-btns">
                         @if (!isEdit || req?.Status == RequestStatusEnum.Pending || req?.Status == RequestStatusEnum.Negotiation)
                         {
-                            <button id="btnCancel" type="button" class="btn btn-danger me-2" style="width: 120px;">Cancel</button>
+                            <button id="btnCancel" type="button" class="btn btn-danger me-2" style="width: 120px;">Abbrechen</button>
                         }
                         @if (!isEdit || req?.Status == RequestStatusEnum.Pending)
                         {
-                            <button id="btnSubmitRequest" type="button" class="btn btn-primary me-2" style="width: 120px;">Save</button>
+                            <button id="btnSubmitRequest" type="button" class="btn btn-primary me-2" style="width: 120px;">Speichern</button>
                         }
                     </div>
                 </div>
