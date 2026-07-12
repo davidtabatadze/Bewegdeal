@@ -38,6 +38,12 @@
                 public const string Dubious = "Dubious"; // "Zweifelhaft"; //
                 public const string Resolved = "Resolved"; // "Gelöst"; //
             }
+            public class InvoiceStatus
+            {
+                public const string Cancelled = "Cancelled"; // "Abgesagt"; //
+                public const string Pending = "Pending"; // "Ausstehend"; //
+                public const string Paid = "Paid"; // "Bezahlt"; //
+            }
         }
         public class Account
         {
