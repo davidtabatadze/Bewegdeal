@@ -12,26 +12,26 @@
                 <h5 class="modal-title" id="chatProposalReactTitle"></h5>
             </div>
             <div class="modal-body">
-                <div id="chatProposalReactAcceptBody" class="d-none" style="width:300px;">
+                <div id="chatProposalReactAcceptBody" class="d-none">
                     <div class="alert alert-danger mb-0" role="alert">
                         <div class="d-flex align-items-center mb-2">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>By this action, you do accept:</strong>
+                            <strong>Mit dieser Aktion akzeptieren Sie:</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Proposed cost.</li>
-                            <li>Proposed date and time.</li>
-                            <li>Proposed terms of service.</li>
+                            <li>Den vorgeschlagenen Preis.</li>
+                            <li>Das vorgeschlagene Datum und die Uhrzeit.</li>
+                            <li>Die vorgeschlagenen Dienstleistungsbedingungen.</li>
                         </ul>
                     </div>
                 </div>
-                <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline" style="width:300px;">
+                <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline">
                     <input id="proposalRejectReason" type="text" class="form-control" placeholder="" />
-                    <label for="proposalRejectReason">Reason (optional)</label>
+                    <label for="proposalRejectReason">Grund (optional)</label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Abbrechen</button>
                 <button type="button" id="chatProposalReactConfirmBtn" class="btn"></button>
             </div>
         </div>
@@ -89,7 +89,7 @@
 
                 if (titleEl) {
                     var iconColor = accepted ? 'text-success' : 'text-danger';
-                    var label     = accepted ? 'Accept proposal' : 'Reject proposal';
+                    var label     = accepted ? 'Angebot annehmen' : 'Angebot ablehnen';
                     titleEl.innerHTML = '<i class="icon-base ri ri-shake-hands-line ' + iconColor + ' me-2 icon-28px"></i>' + label;
                 }
 
@@ -98,7 +98,7 @@
                 if (reasonEl)   { reasonEl.value = ''; }
 
                 if (confirmBtn) {
-                    confirmBtn.textContent = accepted ? 'Yes, accept' : 'Yes, reject';
+                    confirmBtn.textContent = accepted ? 'Ja, annehmen' : 'Ja, ablehnen';
                     confirmBtn.className   = 'btn ' + (accepted ? 'btn-success' : 'btn-danger');
                 }
 
