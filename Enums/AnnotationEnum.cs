@@ -44,6 +44,11 @@
                 public const string Pending = "Pending"; // "Ausstehend"; //
                 public const string Paid = "Paid"; // "Bezahlt"; //
             }
+            public class RequestViewerFocus
+            {
+                public const string Mine = "Only Mine"; // "Nur Meine"; //
+                public const string Potential = "Potential"; // "Potenzielle"; //
+            }
         }
         public class Account
         {
