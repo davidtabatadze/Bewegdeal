@@ -17,6 +17,13 @@
                 public const string Customer = "Customer"; // "Kunde"; //
                 public const string Company = "Company"; // "Unternehmen"; //
             }
+            public class UserStatus
+            {
+                public const string Active = "Active"; // "Aktiv"; //
+                public const string Pending = "Pending"; // "Ausstehend"; //
+                public const string Blocked = "Blocked"; // "Gesperrt"; //
+                public const string Unverified = "Unverified"; // "Unbestätigt"; //
+            }
             public class RequestStatus
             {
                 public const string Pending = "Pending"; // "Ausstehend"; //
