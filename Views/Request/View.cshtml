@@ -11,12 +11,12 @@
     string TimeAgo(DateTime date)
     {
         var diff = DateTime.Now - date;
-        if (diff.TotalSeconds < 60) { return "just now"; }
-        if (diff.TotalMinutes < 60) { var m = (int)diff.TotalMinutes; return $"{m} minute{(m == 1 ? "" : "s")} ago"; }
-        if (diff.TotalHours < 24) { var h = (int)diff.TotalHours; return $"{h} hour{(h == 1 ? "" : "s")} ago"; }
-        if (diff.TotalDays < 30) { var d = (int)diff.TotalDays; return $"{d} day{(d == 1 ? "" : "s")} ago"; }
-        if (diff.TotalDays < 365) { var mo = (int)(diff.TotalDays / 30); return $"{mo} month{(mo == 1 ? "" : "s")} ago"; }
-        var yr = (int)(diff.TotalDays / 365); return $"{yr} year{(yr == 1 ? "" : "s")} ago";
+        if (diff.TotalSeconds < 60) { return "gerade eben"; }
+        if (diff.TotalMinutes < 60) { var m = (int)diff.TotalMinutes; return $"vor {m} Minute{(m == 1 ? "" : "n")}"; }
+        if (diff.TotalHours < 24) { var h = (int)diff.TotalHours; return $"vor {h} Stunde{(h == 1 ? "" : "n")}"; }
+        if (diff.TotalDays < 30) { var d = (int)diff.TotalDays; return $"vor {d} Tag{(d == 1 ? "" : "en")}"; }
+        if (diff.TotalDays < 365) { var mo = (int)(diff.TotalDays / 30); return $"vor {mo} Monat{(mo == 1 ? "" : "en")}"; }
+        var yr = (int)(diff.TotalDays / 365); return $"vor {yr} Jahr{(yr == 1 ? "" : "en")}";
     }
 
     var (badge, icon, color, label) = req.Service switch
@@ -87,7 +87,7 @@
                     <div class="d-flex align-items-center gap-1">
                         <button type="button" class="btn btn-text-secondary" onclick="window.location.href='/Request/List'">
                             <span class="icon-base ri ri-arrow-left-s-line me-1_5"></span>
-                            <span class="d-none d-sm-inline">Back to requests</span>
+                            <span class="d-none d-sm-inline">Zurück zu den Anfragen</span>
                             @* <span class="d-sm-none">Back</span> *@
                         </button>
                     </div>
@@ -262,7 +262,7 @@
                             @if (req.Status == RequestStatusEnum.Pending)
                             {
                                 <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Bearbeiten"
                                         style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
                                         onclick="window.location.href='/Request/Edit?id=@req.Id'">
                                     <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
@@ -271,7 +271,7 @@
                             @if (req.Status == RequestStatusEnum.Pending || req.Status == RequestStatusEnum.Negotiation)
                             {
                                 <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Abbrechen"
                                         style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
                                     <i class="icon-base ri ri-hand icon-md text-danger"></i>
                                 </button>
@@ -279,7 +279,7 @@
                             @if (vm.AllowResolve == true)
                             {
                                 <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Abschließen"
                                         style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
                                     <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
                                 </button>
@@ -311,12 +311,12 @@
                     <hr class="m-0" />
                     <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                         <li class="list-group-item flex-fill border-0 p-0">
-                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Terms</h6>
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-hand-coin-line icon-28px text-warning"></i>Konditionen</h6>
                             <address class="text-dark mb-0">
                                 <dl class="row mb-0">
                                     @if (req.ASAP)
                                     {
-                                        <dt class="col-8 fw-semibold">As soon as possible</dt>
+                                        <dt class="col-8 fw-semibold">So schnell wie möglich</dt>
                                     }
                                     else
                                     {
@@ -335,43 +335,43 @@
                     <hr class="m-0" />
                     <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                         <li class="list-group-item flex-fill border-0 p-0">
-                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Pickup address</h6>
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-time-line icon-28px text-info"></i>Abholadresse</h6>
                             <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.PickupZipCode) ? "" : "[" + req.PickupZipCode + "] ")@req.PickupAddress</address>
                         </li>
                     </ul>
                     <hr class="m-0" />
                     <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                         <li class="list-group-item flex-fill border-0 p-0">
-                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Delivery address</h6>
-                            <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryZipCode) ? "" : "[" + req.DeliveryZipCode + "] ")@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "N/A" : req.DeliveryAddress)</address>
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-map-pin-line icon-28px text-info"></i>Lieferadresse</h6>
+                            <address class="text-dark mb-0">@(string.IsNullOrWhiteSpace(req.DeliveryZipCode) ? "" : "[" + req.DeliveryZipCode + "] ")@(string.IsNullOrWhiteSpace(req.DeliveryAddress) ? "k.A." : req.DeliveryAddress)</address>
                         </li>
                     </ul>
                     <hr class="m-0" />
                     <ul class="list-group list-group-horizontal-md mt-2 mb-2">
                         <li class="list-group-item flex-fill border-0 p-0">
-                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-pencil-ruler-2-line icon-28px text-secondary"></i>Other details</h6>
+                            <h6 class="d-flex align-items-center gap-2 mb-0 text-secondary"><i class="icon-base ri ri-pencil-ruler-2-line icon-28px text-secondary"></i>Weitere Details</h6>
                             <address class="text-dark mb-0">
                                 @if (req.Service == ServiceEnum.Transport)
                                 {
                                     <dl class="row mb-0">
-                                        <dt class="col-6 fw-normal">Vehicle type</dt>
+                                        <dt class="col-6 fw-normal">Fahrzeugtyp</dt>
                                         <dd class="col-6 text-end mb-0"><strong>@req.VehicleType</strong></dd>
                                     </dl>
                                     <dl class="row mb-0">
-                                        <dt class="col-6 fw-normal">Vehicle condition</dt>
+                                        <dt class="col-6 fw-normal">Fahrzeugzustand</dt>
                                         <dd class="col-6 text-end mb-0"><strong>@req.VehicleCondition</strong></dd>
                                     </dl>
                                 }
                                 else
                                 {
                                     <dl class="row mb-0">
-                                        <dt class="col-10 fw-normal">There is an elevator</dt>
+                                        <dt class="col-10 fw-normal">Es gibt einen Aufzug</dt>
                                         <dd class="col-2 text-end mb-0">
                                             <i class="icon-base ri ri-@(req.PresentElevator ? "check-line" : "close-line") icon-md text-@(req.PresentElevator ? "success" : "danger")"></i>
                                         </dd>
                                     </dl>
                                     <dl class="row mb-0">
-                                        <dt class="col-10 fw-normal">There is a parking</dt>
+                                        <dt class="col-10 fw-normal">Es gibt einen Parkplatz</dt>
                                         <dd class="col-2 text-end mb-0">
                                             <i class="icon-base ri ri-@(req.PresentParking ? "check-line" : "close-line") icon-md text-@(req.PresentParking ? "success" : "danger")"></i>
                                         </dd>
@@ -392,7 +392,7 @@
                     <div class="card-body d-flex flex-wrap-reverse">
                         <div class="mb-0 w-100">
                             <div class="card-title">
-                                <h5 class="text-info mb-2"><i class="icon-base ri ri-information-line me-2"></i>Description</h5>
+                                <h5 class="text-info mb-2"><i class="icon-base ri ri-information-line me-2"></i>Beschreibung</h5>
                                 <p class="text-heading" style="white-space: pre-wrap;">@req.Description</p>
                             </div>
                         </div>
