@@ -48,7 +48,7 @@
         if (confirmBtn) {
             confirmBtn.addEventListener('click', function () {
                 confirmBtn.disabled = true;
-                Block.pulse('#resolveModal .modal-content');
+                Block.pulse('#resolveModal .input-group');
 
                 var score  = (window.RatyInstances && window.RatyInstances['resolveRatingStars'])
                            ? window.RatyInstances['resolveRatingStars'].score()
@@ -63,10 +63,11 @@
                 })
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
-                        Block.remove('#resolveModal .modal-content');
+                        Block.remove('#resolveModal .input-group');
                         confirmBtn.disabled = false;
                         if (data.success) {
                             if (modal) { modal.hide(); }
+                            Block.pulse('#request-view');
                             window.location.reload();
                         } else {
                             new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
@@ -74,7 +75,7 @@
                         }
                     })
                     .catch(function () {
-                        Block.remove('#resolveModal .modal-content');
+                        Block.remove('#resolveModal .input-group');
                         confirmBtn.disabled = false;
                     });
             });

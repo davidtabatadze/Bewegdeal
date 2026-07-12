@@ -371,6 +371,7 @@ namespace Bewegdeal.Services
                 }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)],
                 AllowResolve = edit != true &&
                                request.RequesterId == userId &&
+                               request.Status == RequestStatusEnum.Agreed &&
                                proposal?.Status == RequestProposalStatusEnum.Accepted &&
                                proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
             });

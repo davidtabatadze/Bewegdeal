@@ -49,13 +49,14 @@
     <link rel="stylesheet" href="~/vendor/libs/spinkit/spinkit.css" />
     <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.css" />
     <link rel="stylesheet" href="~/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
-
+    <link rel="stylesheet" href="~/vendor/libs/raty-js/raty-js.css" asp-append-version="true" />
 }
 
 @section PageScripts {
     <script>
         const mediaCount = @allMedia.Count;
     </script>
+    <script src="~/vendor/libs/raty-js/raty-js.js" asp-append-version="true"></script>
     <script src="~/vendor/libs/swiper/swiper.js"></script>
     <script src="~/vendor/libs/notiflix/notiflix.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
@@ -405,6 +406,7 @@
 
 @await Html.PartialAsync("~/Views/Proposal/_ProposalModal.cshtml")
 @await Html.PartialAsync("~/Views/Proposal/_ProposalReactModal.cshtml")
+@await Html.PartialAsync("~/Views/Request/_ResolveModal.cshtml")
 
 <!-- Floating chat tab — hidden until chat.js confirms mode != 'none' -->
 <div id="chatFloatingBtn" style="position:fixed;right:1.5rem;bottom:3rem;z-index:1040;display:none;">

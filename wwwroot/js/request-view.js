@@ -59,6 +59,14 @@
     }
   }
 
+  // ── Resolve button ────────────────────────────────────────────────────────
+  const resolveBtn = document.getElementById('btnRequestResolve');
+  if (resolveBtn) {
+    resolveBtn.addEventListener('click', function () {
+      window.ResolveModal.open(window.chatConfig.requestNumber);
+    });
+  }
+
   const cancelBtn = document.getElementById('btnRequestCancel');
   if (cancelBtn) {
     cancelBtn.addEventListener('click', async function () {
