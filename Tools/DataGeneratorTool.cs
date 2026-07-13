@@ -71,7 +71,7 @@ namespace Bewegdeal.Tools
         public async Task Generate()
         {
             var section = configuration.GetSection("DataGenerator");
-            if (!section.GetValue<bool>("Enabled")) { return; }
+            if (!section.GetValue<bool>("Enabled") && false) { return; }
 
             var dayRange = section.GetValue("DayRange", 0);
             var dataRange = section.GetValue("DataRange", 0);
@@ -81,11 +81,13 @@ namespace Bewegdeal.Tools
 
             var customers = await context.Users
                 .Where(u => u.Role == UserRoleEnum.Customer && u.Status == UserStatusEnum.Active)
+                .Where(u => u.Id >= 8)
                 .Select(u => u.Id)
                 .ToListAsync();
 
             var companies = await context.Users
                 .Where(u => u.Role == UserRoleEnum.Company && u.Status == UserStatusEnum.Active)
+                .Where(u => u.Id >= 8)
                 .Select(u => u.Id)
                 .ToListAsync();
 
@@ -228,7 +230,7 @@ namespace Bewegdeal.Tools
                     Currency = "EUR",
                     Date = DateOnly.FromDateTime(proposalDate.AddDays(Rng.Next(1, 14))),
                     Time = new TimeOnly(Rng.Next(8, 18), 0),
-                    ServiceTerms = "Standard service terms apply.",
+                    ServiceTerms = null, //"Standard service terms apply.",
                     Status = RequestProposalStatusEnum.Accepted,
                     Service = request.Service,
                     CreateDate = proposalDate,

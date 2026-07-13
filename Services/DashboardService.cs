@@ -35,7 +35,7 @@ namespace Bewegdeal.Services
             }, nameof(InvoiceEntity.CustomerId));
             var profit = await InvoiceService.Sum(new InvoiceFilter
             {
-                Active = true
+                Status = InvoiceStatusEnum.Paid
             }, nameof(InvoiceEntity.TotalCost));
 
             return GenericResultModel<object>.Ok(new
@@ -114,10 +114,11 @@ namespace Bewegdeal.Services
             {
                 ViewerId = userId == 0 ? null : userId,
                 ViewerRole = userId == 0 ? UserRoleEnum.Administrator : UserRoleEnum.Company,
-                Active = true,
+                Active = userId == 0 ? null : true,
+                Status = userId == 0 ? InvoiceStatusEnum.Paid : null,
                 DateFrom = dateFilter.startDate,
                 DateTo = dateFilter.endDate
-            }, [nameof(InvoiceEntity.Service), nameof(InvoiceEntity.TotalCost), nameof(InvoiceEntity.ServiceCost), nameof(InvoiceEntity.CreateDate)]);
+            }, [nameof(InvoiceEntity.Id), nameof(InvoiceEntity.Service), nameof(InvoiceEntity.TotalCost), nameof(InvoiceEntity.ServiceCost), nameof(InvoiceEntity.CreateDate)]);
 
             var feesSum = new List<decimal>();
             var movingSum = new List<decimal>();
@@ -336,7 +337,7 @@ namespace Bewegdeal.Services
 
         private (int year, int[] years, DateTime startDate, DateTime endDate) GetDateFilter(short year = 0)
         {
-            short minYear = 2025;
+            short minYear = 2026; //2025;
             short maxYear = (short)DateTime.Now.Year;
             year = year < minYear || year > maxYear ? maxYear : year;
 

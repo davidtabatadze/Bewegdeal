@@ -22,6 +22,13 @@ namespace Bewegdeal.Data.Repositories
                 new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Password = "asdASD123", Role = UserRoleEnum.Administrator },
                 new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Customer },
                 new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Password = "asdASD123", Role = UserRoleEnum.Company },
+
+                //new UserEntity { Id = 8, Name = "Gerhard Schröder",Email = "gerhard@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 9, Name = "Bastian Schweinsteiger",Email = "bastian@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 10, Name = "Ludwig Van Beethoven",Email = "ludwig@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000", Address="000" },
+                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111", Address="111" },
+                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222", Address="222" },
             };
 
             foreach (var row in rows)
@@ -40,8 +47,8 @@ namespace Bewegdeal.Data.Repositories
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
-                    Number = "-",
-                    Mobile = "-",
+                    Number = row.Number ?? "-",
+                    Mobile = row.Mobile ?? "-",
                     Address = row.Address,
                     Password = hash,
                     Salt = salt,
