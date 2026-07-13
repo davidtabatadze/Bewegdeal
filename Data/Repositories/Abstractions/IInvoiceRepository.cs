@@ -12,6 +12,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<decimal> Sum(InvoiceFilter filter, string property);
         Task<int> CountDistinct(InvoiceFilter filter, string property);
         Task<int> Count(InvoiceFilter filter);
-        Task<List<InvoiceEntity>> Load(InvoiceFilter filter);
+        Task<List<InvoiceEntity>> Load(InvoiceFilter filter, string[]? properties = null);
     }
 }

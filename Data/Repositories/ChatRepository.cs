@@ -55,6 +55,7 @@ namespace Bewegdeal.Data.Repositories
         public async Task<ChatMessageEntity?> GetMessageUnread(long userId, long excludeId = 0)
         {
             var chats = await Context.Chats
+                                     .Where(c => c.Status != ChatStatusEnum.Cancelled)
                                      .Where(c => c.CustomerId == userId || c.CompanyId == userId)
                                      .Select(BuildSelect<ChatEntity>([nameof(ChatEntity.Id)]))
                                      .ToListAsync();

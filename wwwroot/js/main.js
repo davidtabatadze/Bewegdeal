@@ -1,9 +1,15 @@
 /**
  * Main
- * v1.0.3
+ * v1.1.0
  */
 
 'use strict';
+
+// Disable DataTables' built-in third "unsorted" click state app-wide — every sortable
+// column should only ever toggle between ascending and descending.
+if (typeof DataTable !== 'undefined') {
+  DataTable.defaults.column.orderSequence = ['asc', 'desc'];
+}
 
 window.isRtl = window.Helpers.isRtl();
 window.isDarkStyle = window.Helpers.isDarkStyle();

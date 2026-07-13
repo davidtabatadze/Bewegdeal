@@ -2,10 +2,12 @@ using Bewegdeal.Data;
 using Bewegdeal.Data.Base;
 using Bewegdeal.Data.Repositories;
 using Bewegdeal.Data.Repositories.Abstractions;
+using Bewegdeal.Jobs;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Bewegdeal
 {
@@ -13,6 +15,18 @@ namespace Bewegdeal
     {
         public static async Task Main(string[] args)
         {
+            // ── Set Culture ─────────────────────────────────────────────────────────────
+            var culture = new CultureInfo("de-DE"); // de-DE en-US
+            var usCulture = new CultureInfo("en-US");
+            culture.NumberFormat.NumberDecimalSeparator = usCulture.NumberFormat.NumberDecimalSeparator;
+            culture.NumberFormat.NumberGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
+            culture.NumberFormat.CurrencyDecimalSeparator = usCulture.NumberFormat.NumberDecimalSeparator;
+            culture.NumberFormat.CurrencyGroupSeparator = usCulture.NumberFormat.NumberGroupSeparator;
+            //culture.DateTimeFormat.DateSeparator = usCulture.DateTimeFormat.DateSeparator;
+            //culture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             var builder = WebApplication.CreateBuilder(args);
 
             // ── MVC ──────────────────────────────────────────────────────────────
@@ -92,6 +106,9 @@ namespace Bewegdeal
             builder.Services.AddScoped<RequestService>();
             builder.Services.AddScoped<RequestChatService>();
             builder.Services.AddScoped<InvoiceService>();
+            builder.Services.AddScoped<DashboardService>();
+            builder.Services.AddHostedService<InvoiceGenerationJob>();
+            builder.Services.AddScoped<DataGeneratorTool>();
 
             // ── Email ─────────────────────────────────────────────────────────────
             // Reads Brevo:ApiKey, Brevo:FromEmail, Brevo:FromName from appsettings.json.
@@ -111,6 +128,7 @@ namespace Bewegdeal
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IUserRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<ISettingsRepository>()).Seed();
                 await ((IRepositorySeedable)scope.ServiceProvider.GetRequiredService<IFraudWordRepository>()).Seed();
+                await scope.ServiceProvider.GetRequiredService<DataGeneratorTool>().Generate();
             }
 
             // ── Middleware pipeline ───────────────────────────────────────────────

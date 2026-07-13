@@ -1,4 +1,5 @@
 ﻿using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Data.Repositories.Abstractions;
 using Bewegdeal.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,14 @@ namespace Bewegdeal.Data.Repositories
                                                        .SetProperty(p => p.Status, update.Status)
                                                        .SetProperty(p => p.ReactionDate, DateTime.Now)
                                                        .SetProperty(p => p.ReactionReason, update.ReactionReason)
+                                                       .SetProperty(p => p.InvoiceId, 0)
+                                                  );
+                    break;
+
+                case RequestProposalUpdateAreaEnum.Invoice:
+                    await Context.RequestProposals.Where(p => p.Id == update.Id)
+                                                  .ExecuteUpdateAsync(p => p
+                                                       .SetProperty(p => p.InvoiceId, update.InvoiceId)
                                                   );
                     break;
 
@@ -27,27 +36,59 @@ namespace Bewegdeal.Data.Repositories
             }
         }
 
-        public async Task<List<RequestProposalEntity>> Load(List<long>? requestIds, long? chatId, string? status)
+        public async Task<List<RequestProposalEntity>> Load(RequestProposalFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).Select(BuildSelect<RequestProposalEntity>(properties)).ToListAsync();
+
+        public async Task<int> Count(RequestProposalFilter filter)
+            => await ApplyFilters(Context.RequestProposals.AsQueryable(), filter).CountAsync();
+
+        private IQueryable<RequestProposalEntity> ApplyFilters(IQueryable<RequestProposalEntity> query, RequestProposalFilter filter)
         {
-            var query = Context.RequestProposals.AsQueryable();
-
-            if (requestIds is not null)
+            if (filter.ChatId.HasValue)
             {
-                requestIds.Add(0);
-                query = query.Where(i => requestIds.Contains(i.RequestId));
+                query = query.Where(i => i.ChatId == filter.ChatId);
             }
 
-            if (chatId is not null)
+            if (filter.InvoiceId.HasValue)
             {
-                query = query.Where(i => i.ChatId == chatId);
+                query = query.Where(i => i.InvoiceId == filter.InvoiceId);
             }
 
-            if (!string.IsNullOrWhiteSpace(status))
+            if (filter.CompanyId.HasValue)
             {
-                query = query.Where(i => i.Status == status);
+                query = query.Where(i => i.CompanyId == filter.CompanyId);
             }
 
-            return await query.ToListAsync();
+            if (filter.DateFrom.HasValue)
+            {
+                query = query.Where(i => i.Date >= filter.DateFrom);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                query = query.Where(i => i.Date <= filter.DateTo);
+            }
+
+            if (filter.Active.HasValue && filter.Active == true)
+            {
+                query = query.Where(i => i.Status == RequestProposalStatusEnum.Pending || i.Status == RequestProposalStatusEnum.Accepted);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Status))
+            {
+                query = query.Where(i => i.Status == filter.Status);
+            }
+
+            if (filter.RequestIds is not null)
+            {
+                filter.RequestIds.Add(0);
+                query = query.Where(i => filter.RequestIds.Contains(i.RequestId));
+            }
+
+            query = ApplySorting(query, filter);
+            query = ApplyPaging(query, filter);
+
+            return query;
         }
 
     }

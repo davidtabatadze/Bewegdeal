@@ -1,6 +1,6 @@
 /**
  * Chats List — Bewegdeal
- * v1.0.3
+ * v1.1.0
  */
 
 'use strict';
@@ -9,17 +9,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_chat_table = document.querySelector('.datatables-chats');
 
     // Status → icon HTML (tooltip style, like Role column in user list)
+    const csl = window.chatStatusLabels || {};
     const statusMap = {
-        ongoing: { icon: 'ri-wechat-line', color: 'info' },
-        agreed: { icon: 'ri-shake-hands-line', color: 'success' },
-        cancelled: { icon: 'ri-hand', color: 'danger' }
+        ongoing: { icon: 'ri-wechat-line', color: 'info', label: csl.ongoing },
+        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: csl.agreed },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: csl.cancelled }
     };
 
     // Fraud → badge color (like Status column in user list)
+    const cfl = window.chatFraudLabels || {};
     const fraudObj = {
-        safe: { icon: 'ri-check-double-line', color: 'success' },
-        dubious: { icon: 'ri-alarm-warning-line', color: 'danger' },
-        resolved: { icon: 'ri-verified-badge-line', color: 'info' }
+        safe: { icon: 'ri-check-double-line', color: 'success', label: cfl.safe },
+        dubious: { icon: 'ri-alarm-warning-line', color: 'danger', label: cfl.dubious },
+        resolved: { icon: 'ri-verified-badge-line', color: 'info', label: cfl.resolved }
     };
 
     // Column index → sort field name
@@ -65,12 +67,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '70px',
                 render: function (data, type, full) {
                     const fraud = full['fraud'];
-                    const label = fraud ? (fraud.charAt(0).toUpperCase() + fraud.slice(1)) : fraud;
                     const map = fraudObj[fraud];
 
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
-                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
                         '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
                         '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                         '</div>' +
@@ -85,11 +86,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '70px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
                     const map = statusMap[status];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
-                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
                         '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
                         '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                         '</div>' +
@@ -119,7 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 4,
                 width: '135px',
                 createdCell: function (td) { td.style.minWidth = '135px'; },
-                render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
+                render: function (data) {
+                    if (!data) { return '—'; }
+                    return new Date(data).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
             },
             {
                 // Request
@@ -162,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             '<button type="button" class="btn btn-icon btn-label-info fraud-toggle-btn"' +
                             ' data-chat-id="' + id + '"' +
                             ' data-current-fraud="' + fraud + '"' +
-                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="Resolve">' +
+                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="Auflösen">' +
                             '<span class="icon-base ri ri-verified-badge-line icon-22px text-info"></span>' +
                             '</button>' +
                             '</div>'
@@ -192,6 +195,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         language: {
             search: '',
+            // german
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
+            infoEmpty: 'Keine Einträge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
+            zeroRecords: 'Keine passenden Einträge gefunden',
+            emptyTable: 'Keine Daten vorhanden',
+            loadingRecords: 'Wird geladen...',
+            processing: 'Bitte warten...',
+            // german
             paginate: {
                 next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
@@ -246,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Status change — delegated click on the table wrapper
     const confirmTextMap = {
-        dubious: 'Sure you want to change fraud to <span class="text-info fw-bold">Resolved</span>?'
+        dubious: 'Möchten Sie den Betrugs-Status wirklich auf <span class="text-info fw-bold">Aufgelöst</span> setzen?'
     };
 
     // Fraud toggle — delegated click on the table wrapper
@@ -260,12 +272,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const dtRow = dt_chat.row(btn.closest('tr'));
 
         Swal.fire({
-            title: 'Confirm Action',
+            title: 'Aktion bestätigen',
             html: confirmHtml,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, confirm',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Ja, bestätigen',
+            cancelButtonText: 'Abbrechen',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
@@ -286,14 +298,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         dtRow.data(rowData).draw(false);
                     });
                     Swal.fire({
-                        title: 'Done!',
-                        text: 'Chat fraud status has been resolved.',
+                        title: 'Erledigt!',
+                        text: 'Der Betrugs-Status des Chats wurde aufgelöst.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
                         buttonsStyling: false
                     });
                 } else {
-                    Swal.fire({ title: 'Error', text: 'Failed to update fraud status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({ title: 'Fehler', text: 'Betrugs-Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                 }
             });
         });

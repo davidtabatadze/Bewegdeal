@@ -35,7 +35,7 @@
             <div class="card h-100">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Picture</h5>
+                    <h5 class="card-title m-0">Profilbild</h5>
                 </div>
 
                 <div class="card-body">
@@ -52,11 +52,11 @@
 
                         <div class="d-flex gap-3">
                             <label for="pictureInput" class="btn btn-outline-primary">
-                                <i class="icon-base ri ri-upload-2-line me-1_5"></i>Choose File
+                                <i class="icon-base ri ri-upload-2-line me-1_5"></i>Datei auswählen
                             </label>
                             <input type="file" id="pictureInput" name="avatar" class="d-none" accept=".png,.jpg,.jpeg" />
                             <button type="button" id="pictureRemoveBtn" class="btn btn-outline-danger@(hasPicture ? "" : " d-none")">
-                                <i class="icon-base ri ri-delete-bin-line me-1_5"></i>Remove
+                                <i class="icon-base ri ri-delete-bin-line me-1_5"></i>Entfernen
                             </button>
                         </div>
 
@@ -74,7 +74,7 @@
             <div class="card h-100">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Theme</h5>
+                    <h5 class="card-title m-0">Design</h5>
                 </div>
 
                 <div class="card-body">
@@ -86,7 +86,7 @@
                                 <label class="form-check-label custom-option-content" for="themeLight">
                                     <span class="custom-option-body">
                                         <i class="icon-base ri ri-sun-line text-warning"></i>
-                                        <span class="custom-option-title mb-1">Light</span>
+                                        <span class="custom-option-title mb-1">Hell</span>
                                     </span>
                                     <input name="theme" class="form-check-input" type="radio"
                                            value="@UserThemeEnum.Light" id="themeLight"
@@ -100,7 +100,7 @@
                                 <label class="form-check-label custom-option-content" for="themeDark">
                                     <span class="custom-option-body">
                                         <i class="icon-base ri ri-moon-clear-line text-dark"></i>
-                                        <span class="custom-option-title mb-1">Dark</span>
+                                        <span class="custom-option-title mb-1">Dunkel</span>
                                     </span>
                                     <input name="theme" class="form-check-input" type="radio"
                                            value="@UserThemeEnum.Dark" id="themeDark"
@@ -124,14 +124,14 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Personal <span class="text-primary">@user.Email</span></h5>
+                    <h5 class="card-title m-0">Persönlich <span class="text-primary">@user.Email</span></h5>
                 </div>
 
                 <div class="card-body">
 
                     @if (isCompany)
                     {
-                        <p class="fw-medium mb-3">Your interests</p>
+                        <p class="fw-medium mb-3">Ihre Interessen</p>
                         <div class="row gy-3 mb-6">
                             <div class="col-6 col-md-3">
                                 <div class="form-check custom-option custom-option-icon">
@@ -190,7 +190,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="interestsError" class="text-danger small d-none mt-n3 mb-3">Please select at least one interest.</div>
+                        <div id="interestsError" class="text-danger small d-none mt-n3 mb-3">Bitte wählen Sie mindestens ein Interesse aus.</div>
                     }
 
                     <div class="row g-5 mb-5">
@@ -199,7 +199,7 @@
                                 <input type="text" id="name" name="name" class="form-control"
                                        placeholder="" maxlength="32" value="@user.Name" />
                                 <label for="name">Name</label>
-                                <div class="invalid-feedback">Name is required.</div>
+                                <div class="invalid-feedback">Name ist erforderlich.</div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -208,7 +208,7 @@
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="mobile" name="mobile" class="form-control"
                                            placeholder="" maxlength="16" value="@user.Mobile" />
-                                    <label for="mobile">Mobile</label>
+                                    <label for="mobile">Mobil</label>
                                 </div>
                             </div>
                         </div>
@@ -228,8 +228,8 @@
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="address" name="address" class="form-control"
                                            placeholder="" maxlength="256" value="@user.Address" />
-                                    <label for="address">Address</label>
-                                    <div class="invalid-feedback">Address is required.</div>
+                                    <label for="address">Adresse</label>
+                                    <div class="invalid-feedback">Adresse ist erforderlich.</div>
                                 </div>
                             </div>
                         </div>
@@ -241,21 +241,21 @@
                             <div class="col-12 col-sm-6 align-self-center text-center">
                                 @if (!hasServiceTerms)
                                 {
-                                    <span class="text-muted">No service terms file uploaded.</span>
+                                    <span class="text-muted">Keine Dienstleistungsbedingungen hochgeladen.</span>
                                 }
                                 else
                                 {
                                     <a id="serviceTermsLink" href="@profile.ServiceTermsFileUrl" target="_blank">
                                         <i class="ri ri-file-pdf-line me-1"></i>@profile.ServiceTermsFileName
                                     </a>
-                                    <span id="serviceTermsRemovedLabel" class="text-muted d-none">File will be removed on save.</span>
+                                    <span id="serviceTermsRemovedLabel" class="text-muted d-none">Datei wird beim Speichern entfernt.</span>
                                     <i id="serviceTermsRemoveBtn" class="ri ri-delete-bin-line text-danger" style="cursor:pointer;"></i>
                                     <i id="serviceTermsUndoBtn" class="ri ri-arrow-go-back-line text-secondary d-none" style="cursor:pointer;"></i>
                                 }
                             </div>
                             <div class="col-12 col-sm-6 text-center">
                                 <button type="button" id="serviceTermsChooseBtn" class="btn btn-outline-primary">
-                                    <i class="icon-base ri ri-upload-2-line me-1_5"></i>Service Terms (.pdf)
+                                    <i class="icon-base ri ri-upload-2-line me-1_5"></i>Dienstleistungsbedingungen (.pdf)
                                 </button>
                                 <input type="file" id="serviceTermsInput" name="ServiceTermsFile" class="d-none" accept=".pdf" />
                                 <span id="serviceTermsSelectedName" class="text-muted"></span>
@@ -266,7 +266,7 @@
                 </div>
 
                 <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
 
             </div>
@@ -279,7 +279,7 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h5 class="card-title m-0">Change Password</h5>
+                    <h5 class="card-title m-0">Passwort ändern</h5>
                 </div>
 
                 <div class="card-body">
@@ -289,10 +289,10 @@
                         <div class="alert alert-danger mb-4" role="alert">
                             <div class="d-flex align-items-center mb-2">
                                 <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                                <strong>Handle with care</strong>
+                                <strong>Bitte beachten</strong>
                             </div>
                             <ul class="mb-0">
-                                <li>Password change requires re-authorization - you will be signed out immediately after saving.</li>
+                                <li>Passwortänderung erfordert eine erneute Anmeldung – Sie werden sofort nach dem Speichern abgemeldet.</li>
                             </ul>
                         </div>
 
@@ -300,8 +300,8 @@
                             <div class="form-floating form-floating-outline">
                                 <input type="password" id="newPassword" name="newPassword"
                                        class="form-control" placeholder="" />
-                                <label for="newPassword">New Password</label>
-                                <div class="invalid-feedback" id="newPasswordFeedback">New password is required.</div>
+                                <label for="newPassword">Neues Passwort</label>
+                                <div class="invalid-feedback" id="newPasswordFeedback">Neues Passwort ist erforderlich.</div>
                             </div>
                         </div>
 
@@ -309,8 +309,8 @@
                             <div class="form-floating form-floating-outline">
                                 <input type="password" id="confirmPassword" name="confirmPassword"
                                        class="form-control" placeholder="" />
-                                <label for="confirmPassword">Confirm New Password</label>
-                                <div class="invalid-feedback" id="confirmFeedback">Please confirm your new password.</div>
+                                <label for="confirmPassword">Passwort bestätigen</label>
+                                <div class="invalid-feedback" id="confirmFeedback">Bitte bestätigen Sie Ihr neues Passwort.</div>
                             </div>
                         </div>
 
@@ -319,7 +319,7 @@
                 </div>
 
                 <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Go</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
 
             </div>
@@ -384,11 +384,11 @@
         .then(function (res) {
         if (!res.ok) {
         return res.json().then(function (data) {
-        notyf.error(data.error ?? 'Something went wrong. Please try again.');
+        notyf.error(data.error ?? 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
         });
         }
         })
-        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+        .catch(function () { notyf.error('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'); });
         });
 
         // optimistic remove
@@ -402,7 +402,7 @@
         var fd = new FormData();
         fd.append('__RequestVerificationToken', token);
         fetch('@Url.Action("UpdateAvatar", "User")', { method: 'POST', body: fd })
-        .catch(function () { notyf.error('Something went wrong. Please try again.'); });
+        .catch(function () { notyf.error('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'); });
         });
         }
         })();
@@ -538,12 +538,12 @@
         function validateNew() {
         newPwd.classList.remove('is-invalid');
         if (!newPwd.value) {
-        newFeedback.textContent = 'New password is required.';
+        newFeedback.textContent = 'Neues Passwort ist erforderlich.';
         newPwd.classList.add('is-invalid');
         return false;
         }
         if (newPwd.value.length < 6) {
-        newFeedback.textContent = 'Password must be at least 6 characters.';
+        newFeedback.textContent = 'Das Passwort muss mindestens 6 Zeichen lang sein.';
         newPwd.classList.add('is-invalid');
         return false;
         }
@@ -553,12 +553,12 @@
         function validateConfirm() {
         confirm.classList.remove('is-invalid');
         if (!confirm.value) {
-        confFeedback.textContent = 'Please confirm your new password.';
+        confFeedback.textContent = 'Bitte bestätigen Sie Ihr neues Passwort.';
         confirm.classList.add('is-invalid');
         return false;
         }
         if (newPwd.value !== confirm.value) {
-        confFeedback.textContent = 'Passwords do not match.';
+        confFeedback.textContent = 'Passwörter stimmen nicht überein.';
         confirm.classList.add('is-invalid');
         return false;
         }

@@ -50,7 +50,7 @@ namespace Bewegdeal.Services
             {
                 Preview = message.Content.Length > 80 ? message.Content[..80] + "…" : message.Content,
                 RequestNumber = chat?.RequestNumber ?? "-",
-                SenderName = sender?.Name ?? "unknown",
+                SenderName = sender?.Name ?? "unbekannt",
                 Date = message.SentDate
             };
         }
@@ -91,6 +91,10 @@ namespace Bewegdeal.Services
         public async Task<GridResultModel<object>> LoadGrid(ChatFilter filter, int draw)
         {
             var chats = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new ChatFilter());
 
@@ -140,7 +144,7 @@ namespace Bewegdeal.Services
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
-            var proposals = await ProposalService.Load(null, chat.Id, null);
+            var proposals = await ProposalService.Load(chat.Id);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]

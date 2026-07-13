@@ -34,8 +34,8 @@ namespace Bewegdeal.Services
         public async Task<int> Count(UserFilter filter)
             => await UserRepository.Count(filter);
 
-        public async Task<List<UserEntity>> Load(UserFilter filter)
-            => await UserRepository.Load(filter);
+        public async Task<List<UserEntity>> Load(UserFilter filter, string[]? properties = null)
+            => await UserRepository.Load(filter, properties);
 
         public async Task<List<UserEntity>> Load(IEnumerable<long> ids, string[]? properties = null)
             => await UserRepository.Load<UserEntity>(ids, properties);
@@ -133,11 +133,13 @@ namespace Bewegdeal.Services
         {
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                return GenericResultModel.Fail("All password fields are required.");
+                // return GenericResultModel.Fail("All password fields are required.");
+                return GenericResultModel.Fail("Alle Passwortfelder sind erforderlich.");
             }
             if (newPassword != confirmPassword)
             {
-                return GenericResultModel.Fail("New passwords do not match.");
+                // return GenericResultModel.Fail("New passwords do not match.");
+                return GenericResultModel.Fail("Die neuen Passwörter stimmen nicht überein.");
             }
 
             // update password
@@ -206,6 +208,10 @@ namespace Bewegdeal.Services
         public async Task<GridResultModel<object>> LoadGrid(UserFilter filter, int draw)
         {
             var users = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
             var avatars = users.Select(u => GetAvatar(u)).ToList();

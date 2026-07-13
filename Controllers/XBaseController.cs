@@ -1,7 +1,10 @@
+using Bewegdeal.Data.Filters;
 using Bewegdeal.Enums;
+using Bewegdeal.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 
 namespace Bewegdeal.Controllers
@@ -11,6 +14,40 @@ namespace Bewegdeal.Controllers
         public string BaseUrl => $"{Request.Scheme}://{Request.Host}";
         public long UserId => GetClaim<long>(IdentityFieldEnum.Id);
         public string UserRole => GetClaim<string>(IdentityFieldEnum.Role) ?? "undefined";
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+
+            if (!HttpContext.Request.Headers.ContainsKey("X-Requested-With"))
+            {
+                if (User.IsInRole(UserRoleEnum.Administrator))
+                {
+                    var chatService = HttpContext.RequestServices.GetRequiredService<ChatService>();
+                    var userService = HttpContext.RequestServices.GetRequiredService<UserService>();
+
+                    var dubiousCount = await chatService.Count(new ChatFilter { Fraud = ChatFraudEnum.Dubious });
+                    var pendingCount = await userService.Count(new UserFilter { Status = UserStatusEnum.Pending });
+
+                    ViewBag.DubiousChatCount = dubiousCount;
+                    ViewBag.PendingUserCount = pendingCount;
+                }
+                if (User.IsInRole(UserRoleEnum.Administrator) || User.IsInRole(UserRoleEnum.Company))
+                {
+                    var invoiceService = HttpContext.RequestServices.GetRequiredService<InvoiceService>();
+
+                    var pendingCount = await invoiceService.Count(new InvoiceFilter
+                    {
+                        ViewerId = UserId,
+                        ViewerRole = UserRole,
+                        Status = InvoiceStatusEnum.Pending
+                    });
+
+                    ViewBag.PendingInvoiceCount = pendingCount;
+                }
+            }
+
+            await next();
+        }
 
         protected T? GetClaim<T>(string type)
         {

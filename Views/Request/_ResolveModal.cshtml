@@ -6,7 +6,7 @@
                 <div class="input-group input-group-lg mb-4">
                     @* <input type="text" class="form-control bg-white border-0" placeholder="Your email" aria-describedby="subscribe" /> *@
                     <div class="card p-2">
-                        <p class="text-secondary m-0">Rate the service (optional)</p>
+                        <p class="text-secondary m-0">Dienst bewerten (optional)</p>
                         <div class="ms-1">
                             @await Html.PartialAsync("~/Views/Shared/_Partials/_RatingStars.cshtml",
                                 new ViewDataDictionary(ViewData) {
@@ -17,7 +17,7 @@
                             })
                         </div>
                     </div>
-                    <button class="btn btn-primary" type="button" id="resolveConfirmBtn">Resolve</button>
+                    <button class="btn btn-primary" type="button" id="resolveConfirmBtn">Abschließen</button>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
         if (confirmBtn) {
             confirmBtn.addEventListener('click', function () {
                 confirmBtn.disabled = true;
-                Block.pulse('#resolveModal .modal-content');
+                Block.pulse('#resolveModal .input-group');
 
                 var score  = (window.RatyInstances && window.RatyInstances['resolveRatingStars'])
                            ? window.RatyInstances['resolveRatingStars'].score()
@@ -63,18 +63,19 @@
                 })
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
-                        Block.remove('#resolveModal .modal-content');
+                        Block.remove('#resolveModal .input-group');
                         confirmBtn.disabled = false;
                         if (data.success) {
                             if (modal) { modal.hide(); }
+                            Block.pulse('#request-view');
                             window.location.reload();
                         } else {
                             new Notyf({ duration: 6000, position: { x: 'center', y: 'top' } })
-                                .error(data.message || 'Failed to resolve request.');
+                                .error(data.message || 'Anfrage konnte nicht abgeschlossen werden.');
                         }
                     })
                     .catch(function () {
-                        Block.remove('#resolveModal .modal-content');
+                        Block.remove('#resolveModal .input-group');
                         confirmBtn.disabled = false;
                     });
             });

@@ -197,7 +197,7 @@ namespace Bewegdeal.Data
                         v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : null
                     );
                 e.Property(r => r.AgreementId).IsRequired(false);
-                e.Property(r => r.VehicleType).IsRequired(false).HasMaxLength(16);
+                e.Property(r => r.VehicleType).IsRequired(false).HasMaxLength(128);
                 e.Property(r => r.VehicleCondition).IsRequired(false).HasMaxLength(16);
                 e.Property(r => r.PresentElevator).IsRequired().HasDefaultValue(false);
                 e.Property(r => r.PresentParking).IsRequired().HasDefaultValue(false);
@@ -214,18 +214,24 @@ namespace Bewegdeal.Data
                 e.Property(p => p.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(p => p.Status);
+                e.HasIndex(p => p.Service);
                 e.HasIndex(p => p.ChatId);
                 e.HasIndex(p => p.RequestId);
                 e.HasIndex(p => p.CompanyId);
+                e.HasIndex(p => p.CustomerId);
+                e.HasIndex(p => p.InvoiceId);
 
                 e.Property(p => p.ChatId).IsRequired(false);
                 e.Property(p => p.RequestId).IsRequired();
                 e.Property(p => p.CompanyId).IsRequired();
+                e.Property(p => p.CustomerId).IsRequired();
+                e.Property(p => p.InvoiceId).IsRequired();
                 e.Property(p => p.CreateDate).IsRequired();
                 e.Property(p => p.Cost).IsRequired().HasPrecision(18, 2);
                 e.Property(p => p.Currency).IsRequired().HasMaxLength(4);
                 e.Property(p => p.ServiceTerms).HasMaxLength(256).IsRequired(false);
                 e.Property(p => p.Status).IsRequired().HasMaxLength(16);
+                e.Property(p => p.Service).IsRequired().HasMaxLength(16);
                 e.Property(p => p.ReactionDate).IsRequired(false);
                 e.Property(p => p.ReactionReason).IsRequired(false).HasMaxLength(1024);
                 e.Property(p => p.Date).IsRequired(true)
@@ -283,8 +289,9 @@ namespace Bewegdeal.Data
                 e.Property(i => i.Id).ValueGeneratedOnAdd();
 
                 e.HasIndex(i => i.Number).IsUnique();
-                e.HasIndex(i => i.RequestNumber).IsUnique();
+                e.HasIndex(i => i.RequestNumber);
                 e.HasIndex(i => i.Status);
+                e.HasIndex(i => i.Service);
                 e.HasIndex(i => i.RequestId);
                 e.HasIndex(i => i.ProposalId);
                 e.HasIndex(i => i.CustomerId);
@@ -294,17 +301,22 @@ namespace Bewegdeal.Data
                 e.Property(i => i.Number).IsRequired().HasMaxLength(36);
                 e.Property(i => i.RequestNumber).IsRequired().HasMaxLength(36);
                 e.Property(i => i.Status).IsRequired().HasMaxLength(16);
+                e.Property(i => i.Service).IsRequired().HasMaxLength(16);
                 e.Property(i => i.RequestId).IsRequired();
                 e.Property(i => i.ProposalId).IsRequired();
                 e.Property(i => i.CustomerId).IsRequired();
                 e.Property(i => i.CompanyId).IsRequired();
 
                 e.Property(i => i.Currency).IsRequired().HasMaxLength(4);
+                e.Property(i => i.TaxPersent).IsRequired();
+                e.Property(i => i.CommissionPersent).IsRequired();
                 e.Property(i => i.ServiceCost).IsRequired().HasPrecision(18, 2);
-                e.Property(i => i.SubtotalCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.TaxCost).IsRequired().HasPrecision(18, 2);
+                e.Property(i => i.CommissionCost).IsRequired().HasPrecision(18, 2);
                 e.Property(i => i.TotalCost).IsRequired().HasPrecision(18, 2);
                 e.Property(i => i.NotificationSent).IsRequired();
                 e.Property(i => i.CreateDate).IsRequired();
+                e.Property(i => i.DueDate).IsRequired();
                 e.Property(i => i.PaymentDate).IsRequired(false);
             });
         }
@@ -366,6 +378,7 @@ namespace Bewegdeal.Data
                 e.Property(s => s.Id).ValueGeneratedNever();
 
                 e.Property(s => s.AboutUs).IsRequired();
+                e.Property(s => s.PrivacyPolicy).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentCustomer).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentCompany).IsRequired();
                 e.Property(s => s.TermsAndConditionsContentDateCustomer).IsRequired();
@@ -377,6 +390,7 @@ namespace Bewegdeal.Data
                 e.Property(s => s.RequestVideoMaxSize).IsRequired();
                 e.Property(s => s.InvoiceCommissionPersent).IsRequired();
                 e.Property(s => s.InvoiceTaxPersent).IsRequired();
+                e.Property(s => s.InvoiceDueDays).IsRequired();
                 e.Property(s => s.MobilePrefix).IsRequired();
             });
         }

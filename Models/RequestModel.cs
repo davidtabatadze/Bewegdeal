@@ -10,5 +10,6 @@ namespace Bewegdeal.Models
         public RequestProposalEntity? Proposal { get; set; }
         public UserAvatarModel? ProposalCompany { get; set; }
         public List<RequestFileModel> Files { get; set; } = [];
+        public bool AllowResolve { get; set; }
     }
 }

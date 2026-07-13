@@ -19,7 +19,7 @@
     </script>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" asp-append-version="true" />
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
@@ -28,7 +28,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Bewegdeal" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/branding/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/branding/icon-192.png" asp-append-version="true" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +118,7 @@
         window.notificationConfig = { userId: '@User.FindFirstValue(IdentityFieldEnum.Id)' };
     </script>
     <script src="~/vendor/libs/signalr/signalr.min.js"></script>
-    <script src="~/js/notifications.js" asp-append-version="true"></script>
+    <script src="~/js/app-notifications.js" asp-append-version="true"></script>
 
     <!-- Notification toast container (bottom-center) -->
     <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" id="notifToastContainer" style="z-index:9999;"></div>
@@ -133,6 +133,7 @@
         ViewData.Remove("AcceptMode"); ViewData.Remove("LockedMode");
     }
     @await Html.PartialAsync("~/Views/Shared/_Partials/_AboutUsModal.cshtml")
+    @await Html.PartialAsync("~/Views/Shared/_Partials/_PrivacyPolicyModal.cshtml")
 
     @if (_showTcModal)
     {
@@ -141,7 +142,10 @@
         </script>
     }
 
-    @if (Configuration.GetValue<bool>("Pwa:Enabled")) { <script src="~/js/pwa.js" asp-append-version="true"></script> }
+    @if (Configuration.GetValue<bool>("Pwa:Enabled"))
+    {
+        <script src="~/js/pwa.js" asp-append-version="true"></script>
+    }
 
 </body>
 </html>

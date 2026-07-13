@@ -1,6 +1,6 @@
 /**
  * Invoices List — Bewegdeal
- * v1.0.3
+ * v1.1.0
  */
 
 'use strict';
@@ -9,19 +9,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_invoice_table = document.querySelector('.datatables-invoices');
 
     // Status → icon HTML
+    const isl = window.invoiceStatusLabels || {};
     const statusMap = {
-        pending: { icon: 'ri-timer-flash-line', color: 'warning' },
-        paid: { icon: 'ri-wallet-line', color: 'success' },
-        cancelled: { icon: 'ri-hand', color: 'danger' }
+        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: isl.pending },
+        paid: { icon: 'ri-wallet-line', color: 'success', label: isl.paid },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: isl.cancelled }
     };
 
     // Column index → sort field name
-    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: requestId, 5: id
-    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'requestId', 5: 'id' };
+    // 0: status, 1: user (n/a), 2: serviceCost, 3: totalCost, 4: createDate, 5: requestId, 6: id
+    const columnToField = { 0: 'status', 2: 'serviceCost', 3: 'totalCost', 4: 'createDate', 5: 'requestId', 6: 'id' };
 
     if (!dt_invoice_table) { return; }
 
-    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 7;
+    const isAdmin = dt_invoice_table.querySelectorAll('thead th').length === 8;
 
     const dt_invoice = new DataTable(dt_invoice_table, {
         serverSide: true,
@@ -50,9 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'user' },         // 1 — user (not sortable)
             { data: 'serviceCost' },  // 2 — cost (sortable)
             { data: 'totalCost' },    // 3 — fee (sortable)
-            { data: 'requestId' },    // 4 — request (sortable)
-            { data: 'id' },           // 5 — invoice (sortable)
-            ...(isAdmin ? [{ data: 'status' }] : [])  // 6 — actions (admin only)
+            { data: 'createDate' },   // 4 — date (sortable)
+            { data: 'requestId' },    // 5 — request (sortable)
+            { data: 'id' },           // 6 — invoice (sortable)
+            ...(isAdmin ? [{ data: 'status' }] : [])  // 7 — actions (admin only)
         ],
         columnDefs: [
             {
@@ -61,11 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '60px',
                 render: function (data, type, full) {
                     const status = full['status'];
-                    const label = status ? (status.charAt(0).toUpperCase() + status.slice(1)) : status;
                     const map = statusMap[status];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
-                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + label + '">' +
+                        '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
                         '<div class="avatar-initial rounded-circle bg-label-' + map.color + '">' +
                         '<i class="icon-base ri ' + map.icon + ' icon-m"></i>' +
                         '</div>' +
@@ -99,8 +100,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             {
-                // Request
+                // Date — invoice create date
                 targets: 4,
+                width: '135px',
+                createdCell: function (td) { td.style.minWidth = '135px'; },
+                render: function (data, type, full) {
+                    const create = !data ? '-' :
+                        new Date(data).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const due = !full['dueDate'] ? '-' :
+                        new Date(full['dueDate']).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    return (
+                        '<div class="d-flex flex-column">' +
+                        '<span class="fw-medium">' + create + '</span>' +
+                        '<small class="text-danger">' + due + '</small>' +
+                        '</div>'
+                    );
+                }
+            },
+            {
+                // Request
+                targets: 5,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['requestId'];
@@ -114,13 +134,13 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 // Invoice
-                targets: 5,
+                targets: 6,
                 width: '110px',
                 render: function (data, type, full) {
                     const id = full['id'];
                     const number = full['number'];
                     return (
-                        '<a style="max-width:100px" class="text-primary" href="#">' +
+                        '<a style="max-width:100px" class="text-primary" target="_blank" href=\'/Invoice/Print?number=' + number + '\'>' +
                         '<strong class="text-decoration-underline">#' + id + '</strong>' +
                         '</a>'
                     );
@@ -128,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             ...(isAdmin ? [{
                 // Actions
-                targets: 6,
+                targets: 7,
                 width: '90px',
                 orderable: false,
                 searchable: false,
@@ -137,14 +157,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     const paid = data === 'paid' ? '' : (
                         '<button type="button" class="btn btn-icon btn-label-success invoice-status-btn me-1"' +
                         ' data-invoice-id="' + id + '" data-new-status="paid"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Paid">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Bezahlt">' +
                         '<span class="icon-base ri ri-wallet-line icon-22px text-success"></span>' +
                         '</button>'
                     );
                     const cancelled = data === 'cancelled' ? '' : (
                         '<button type="button" class="btn btn-icon btn-label-danger invoice-status-btn"' +
                         ' data-invoice-id="' + id + '" data-new-status="cancelled"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Stornieren">' +
                         '<span class="icon-base ri ri-hand icon-22px text-danger"></span>' +
                         '</button>'
                     );
@@ -153,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }] : [])
         ],
         pageLength: 10,
-        order: [[0, 'desc']],
+        order: [[4, 'desc']],
         drawCallback: function () {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                 if (!bootstrap.Tooltip.getInstance(el)) {
@@ -172,6 +192,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         language: {
             search: '',
+            // german
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
+            infoEmpty: 'Keine Einträge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
+            zeroRecords: 'Keine passenden Einträge gefunden',
+            emptyTable: 'Keine Daten vorhanden',
+            loadingRecords: 'Wird geladen...',
+            processing: 'Bitte warten...',
+            // german
             paginate: {
                 next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
@@ -213,8 +242,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Status change — confirm → POST → row update (admin only)
     if (isAdmin) {
         const confirmTextMap = {
-            paid: 'Sure you want to mark the invoice as <span class="text-success fw-bold">Paid</span>?',
-            cancelled: 'Sure you want to <span class="text-danger fw-bold">Cancel</span> the invoice?'
+            paid: 'Möchten Sie die Rechnung wirklich als <span class="text-success fw-bold">Bezahlt</span> markieren?',
+            cancelled: 'Möchten Sie die Rechnung wirklich <span class="text-danger fw-bold">Stornieren</span>?'
         };
 
         dt_invoice_table.addEventListener('click', function (e) {
@@ -229,12 +258,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!confirmHtml) { return; }
 
             Swal.fire({
-                title: 'Confirm Action',
+                title: 'Aktion bestätigen',
                 html: confirmHtml,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, confirm',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Ja, bestätigen',
+                cancelButtonText: 'Abbrechen',
                 customClass: {
                     confirmButton: 'btn btn-primary me-3',
                     cancelButton: 'btn btn-label-secondary'
@@ -257,15 +286,15 @@ document.addEventListener('DOMContentLoaded', function () {
                             dtRow.data(rowData).draw(false);
                         });
                         Swal.fire({
-                            title: 'Done!',
-                            text: 'Invoice status has been updated.',
+                            title: 'Erledigt!',
+                            text: 'Rechnungsstatus wurde aktualisiert.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false
                         });
                     } else {
                         Block.remove('.card-datatable');
-                        Swal.fire({ title: 'Error', text: 'Failed to update invoice status.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({ title: 'Fehler', text: 'Rechnungsstatus konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
                     }
                 });
             });

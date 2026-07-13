@@ -6,22 +6,78 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService)
+    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService, SettingService SettingService)
     {
-        public async Task<InvoiceEntity> Create(InvoiceEntity invoice)
-            => await InvoiceRepository.Create(invoice);
+        public async Task<InvoiceEntity> Create(RequestEntity request, RequestProposalEntity proposal)
+        {
+            var settings = await SettingService.GetCached();
+            var commision = proposal.Cost / 100 * settings.InvoiceCommissionPersent;
+            var tax = commision / 100 * settings.InvoiceTaxPersent;
+
+            return await InvoiceRepository.Create(new InvoiceEntity
+            {
+                Number = Guid.NewGuid().ToString("N"),
+                Status = InvoiceStatusEnum.Pending,
+                Service = request.Service,
+                RequestId = request.Id,
+                RequestNumber = request.Number,
+                ProposalId = proposal.Id,
+                CompanyId = proposal.CompanyId,
+                CustomerId = request.RequesterId,
+                Currency = proposal.Currency,
+
+                TaxPersent = settings.InvoiceTaxPersent,
+                CommissionPersent = settings.InvoiceCommissionPersent,
+
+                TaxCost = tax,
+                CommissionCost = commision,
+                ServiceCost = proposal.Cost,
+                TotalCost = commision + tax,
+
+                NotificationSent = false,
+                CreateDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(settings.InvoiceDueDays)
+            });
+        }
         public async Task Update(InvoiceUpdateAreaEnum area, InvoiceEntity update)
             => await InvoiceRepository.Update(area, update);
         public async Task<InvoiceEntity?> Get(long id, string[]? properties = null)
             => await InvoiceRepository.Get<InvoiceEntity>(id, properties);
-        public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
-            => await InvoiceRepository.Get(filter, properties);
-        private async Task<decimal> Sum(InvoiceFilter filter, string property)
+        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter, string[]? properties = null)
+            => await InvoiceRepository.Load(filter, properties);
+        public async Task<decimal> Sum(InvoiceFilter filter, string property)
             => await InvoiceRepository.Sum(filter, property);
-        private async Task<int> Count(InvoiceFilter filter)
+        public async Task<int> Count(InvoiceFilter filter)
             => await InvoiceRepository.Count(filter);
-        private async Task<int> CountDistinct(InvoiceFilter filter, string property)
+        public async Task<int> CountDistinct(InvoiceFilter filter, string property)
             => await InvoiceRepository.CountDistinct(filter, property);
+
+        public async Task<GenericResultModel<InvoicePrintModel>> Get(string number, long userId, string userRole)
+        {
+            var invoice = await InvoiceRepository.Get(new InvoiceFilter
+            {
+                Number = number,
+                ViewerId = userId,
+                ViewerRole = userRole
+            });
+
+            var company = await UserService.Get(
+                invoice?.CompanyId ?? 0,
+                [nameof(UserEntity.Number), nameof(UserEntity.Name), nameof(UserEntity.Address),
+                    nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
+            );
+
+            if (invoice is null || company is null)
+            {
+                return GenericResultModel<InvoicePrintModel>.Fail();
+            }
+
+            return GenericResultModel<InvoicePrintModel>.Ok(new InvoicePrintModel
+            {
+                Data = invoice,
+                Company = company
+            });
+        }
 
         public async Task<GenericResultModel<dynamic>> LoadGrid(long userId, string userRole)
         {
@@ -46,7 +102,11 @@ namespace Bewegdeal.Services
             filter.ViewerId = userId;
             filter.ViewerRole = userRole;
 
-            var invoices = await InvoiceRepository.Load(filter);
+            var invoices = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new InvoiceFilter
             {
@@ -72,9 +132,12 @@ namespace Bewegdeal.Services
                     requestId = i.RequestId,
                     requestNumber = i.RequestNumber,
                     status = i.Status,
+                    createDate = i.CreateDate,
+                    dueDate = i.DueDate,
+                    paymentDate = i.PaymentDate,
                     totalCost = i.TotalCost,
                     serviceCost = i.ServiceCost,
-                    subtotalCost = i.SubtotalCost,
+                    subtotalCost = i.CommissionCost,
                     user = UserService.GetAvatar(users.FirstOrDefault(u => u.Id == i.CompanyId || u.Id == i.CustomerId))
                 })
             };

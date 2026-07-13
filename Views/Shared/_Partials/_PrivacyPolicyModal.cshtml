@@ -1,0 +1,25 @@
+@inject Bewegdeal.Services.SettingService _settingsService
+@{
+    var _settings = (await _settingsService.GetCached());
+}
+
+@if (!string.IsNullOrWhiteSpace(_settings.PrivacyPolicy))
+{
+    <link rel="stylesheet" href="~/vendor/libs/quill/editor.css" />
+    <link rel="stylesheet" href="~/vendor/libs/quill/typography.css" />
+    <div class="modal fade" id="privacyPolicyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary">Datenschutzerklärung</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ql-snow">
+                    <div class="ql-editor">
+                        @Html.Raw(_settings.PrivacyPolicy)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

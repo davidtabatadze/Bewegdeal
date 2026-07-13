@@ -39,12 +39,13 @@ namespace Bewegdeal.Services
         {
             // existings
             var request = await RequestRepository.Get<RequestEntity>(model.Id);
-            var requestFiles = await RequestFileRepository.Load(model.Id);
+            var requestFiles = await LoadFiles(model.Id);
 
             // ...
             if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
             {
-                return GenericResultModel<RequestEntity>.Fail("The request cannot be updated, try again later.");
+                // return GenericResultModel<RequestEntity>.Fail("The request cannot be updated, try again later.");
+                return GenericResultModel<RequestEntity>.Fail("Die Anfrage kann nicht aktualisiert werden, bitte versuchen Sie es später erneut.");
             }
 
             // do update
@@ -63,8 +64,33 @@ namespace Bewegdeal.Services
         public async Task Update(RequestUpdateAreaEnum area, RequestEntity update)
             => await RequestRepository.Update(area, update);
 
-        private async Task<int> Count(RequestFilter filter)
+        public async Task<int> Count(RequestFilter filter)
             => await RequestRepository.Count(filter);
+
+        public async Task<List<RequestEntity>> Load(RequestFilter filter)
+            => await RequestRepository.Load(filter);
+
+        private async Task<List<RequestFileEntity>> LoadFiles(long? requestId, List<long>? requestIds = null, bool? isMain = null)
+            => await RequestFileRepository.Load(requestId, requestIds, isMain);
+
+        private async Task<List<RequestFileEntity>> LoadFilesOrDefault(List<long> requestIds, bool? isMain = null)
+        {
+            var files = await LoadFiles(null, requestIds, isMain);
+
+            files.AddRange(
+                requestIds.Where(i => !files.Any(f => f.RequestId == i))
+                          .Select(i => new RequestFileEntity
+                          {
+                              Id = 0,
+                              RequestId = i,
+                              Size = 0,
+                              IsMain = true,
+                              File = "0-image.png=ni.png",
+                              Type = RequestFileTypeEnum.Image
+                          })
+            );
+            return files;
+        }
 
         public async Task<RequestModel> Get()
             => new() { Data = null, Requester = null, Settings = await SettingService.GetCached() };
@@ -88,8 +114,8 @@ namespace Bewegdeal.Services
             )
             {
                 await InvoiceService.Update(
-                    InvoiceUpdateAreaEnum.Status,
-                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                    InvoiceUpdateAreaEnum.Cancel,
+                    new() { RequestId = request.Id }
                 );
 
                 await Update(
@@ -104,45 +130,28 @@ namespace Bewegdeal.Services
         public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
         {
             var request = await Get(number);
-            var settings = await SettingService.GetCached();
 
             if (request is not null && request.RequesterId == userId && request.Status == RequestStatusEnum.Agreed)
             {
                 var proposal = await ProposalService.Get(request.AgreementId ?? 0);
                 if (proposal is null || proposal.CompanyId != request.ExecutorId || proposal.Status != RequestProposalStatusEnum.Accepted)
                 {
-                    return GenericResultModel.Fail("Something went wrong: no proposal found.");
+                    // return GenericResultModel.Fail("Something went wrong: no proposal found.");
+                    return GenericResultModel.Fail("Ein Fehler ist aufgetreten: Kein Angebot gefunden.");
                 }
 
                 await InvoiceService.Update(
-                    InvoiceUpdateAreaEnum.Status,
-                    new() { RequestId = request.Id, Status = InvoiceStatusEnum.Cancelled }
+                    InvoiceUpdateAreaEnum.Cancel,
+                    new() { RequestId = request.Id }
                 );
 
-                var commision = proposal.Cost / 100 * settings.InvoiceCommissionPersent;
-                var tax = commision / 100 * settings.InvoiceTaxPersent;
-
-                await InvoiceService.Create(new InvoiceEntity
-                {
-                    Number = Guid.NewGuid().ToString("N"),
-                    Status = InvoiceStatusEnum.Pending,
-                    RequestId = request.Id,
-                    RequestNumber = request.Number,
-                    ProposalId = proposal.Id,
-                    CompanyId = proposal.CompanyId,
-                    CustomerId = request.RequesterId,
-                    Currency = proposal.Currency,
-                    ServiceCost = proposal.Cost,
-                    SubtotalCost = commision,
-                    TotalCost = commision + tax,
-                    NotificationSent = false,
-                    CreateDate = DateTime.Now
-                });
+                var invoice = await InvoiceService.Create(request, proposal);
 
                 await Update(
                     RequestUpdateAreaEnum.Status,
                     new() { Id = request.Id, Status = RequestStatusEnum.Resolved }
                 );
+                await ProposalService.Update(proposal.Id, invoice.Id);
 
                 await UserService.Rate(proposal.CompanyId, userId, rating ?? 0);
             }
@@ -197,7 +206,11 @@ namespace Bewegdeal.Services
 
             var viewerIsCompany = filter.ViewerRole == UserRoleEnum.Company;
 
-            var requests = await RequestRepository.Load(filter);
+            var requests = await Load(filter);
+
+            filter.Start = null;
+            filter.Length = null;
+
             var filtered = await Count(filter);
             var total = await Count(new RequestFilter
             {
@@ -206,13 +219,19 @@ namespace Bewegdeal.Services
                 ViewerInterests = user?.Interests ?? []
             });
 
-            var files = await RequestFileRepository.Load(
-                null,
+            var files = await LoadFilesOrDefault(
                 requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
                 true
             );
             var proposals = await ProposalService.Load(
-                requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)], null, null
+                new RequestProposalFilter
+                {
+                    RequestIds = requests.Count == 0 ? [0] : [.. requests.Select(r => r.Id)],
+                    Active = true
+                },
+                [nameof(RequestProposalEntity.CompanyId), nameof(RequestProposalEntity.RequestId),
+                nameof(RequestProposalEntity.Cost), nameof(RequestProposalEntity.Status),
+                nameof(RequestProposalEntity.Date), nameof(RequestProposalEntity.Time)]
             );
 
             var requesters = requests.Select(r => r.RequesterId);
@@ -230,7 +249,6 @@ namespace Bewegdeal.Services
                 Data = requests.Select(r =>
                 {
                     var proposal = proposals.Where(p => !viewerIsCompany || p.CompanyId == filter.ViewerId)
-                                            .Where(p => p.Status != RequestProposalStatusEnum.Rejected)
                                             .Where(p => p.RequestId == r.Id)
                                             .OrderBy(p => p.Status).FirstOrDefault();
 
@@ -267,7 +285,7 @@ namespace Bewegdeal.Services
         {
             // load data
             var settings = await SettingService.GetCached();
-            var requestFiles = await RequestFileRepository.Load(model.Id);
+            var requestFiles = await LoadFiles(model.Id);
 
             // prepare ...
             model.SetValidationExternals(
@@ -325,10 +343,10 @@ namespace Bewegdeal.Services
             }
 
             var settings = await SettingService.GetCached();
-            var files = await RequestFileRepository.Load(request.Id);
+            var files = edit == true ? await LoadFiles(request.Id) : await LoadFilesOrDefault([request.Id]);
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
-            var proposals = edit == true ? [] : await ProposalService.Load([request.Id], null, null);
+            var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
             var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() ??
                            new RequestProposalEntity { Status = string.Empty };
             proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
@@ -352,7 +370,12 @@ namespace Bewegdeal.Services
                     IsMain = i.IsMain,
                     Url = FileService.GetUrl(i.File) ?? "undefined",
                     Name = FileService.GetName(i.File) ?? "undefined"
-                }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)]
+                }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)],
+                AllowResolve = edit != true &&
+                               request.RequesterId == userId &&
+                               request.Status == RequestStatusEnum.Agreed &&
+                               proposal?.Status == RequestProposalStatusEnum.Accepted &&
+                               proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
             });
         }
 

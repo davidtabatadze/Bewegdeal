@@ -1,6 +1,6 @@
 /**
  * Requests List — Bewegdeal
- * v1.0.3
+ * v1.1.0
  */
 
 'use strict';
@@ -9,35 +9,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const dt_table = document.querySelector('.datatables-requests');
 
     // Status → icon HTML + label
+    const sl = window.requestStatusLabels || {};
     const statusMap = {
-        pending: { icon: '<i class="icon-base ri ri-timer-flash-line  icon-22px text-warning"></i>', label: 'Pending' },
-        cancelled: { icon: '<i class="icon-base ri ri-hand              icon-22px text-danger"></i>', label: 'Cancelled' },
-        negotiation: { icon: '<i class="icon-base ri ri-wechat-line       icon-22px text-info"></i>', label: 'Negotiation' },
-        agreed: { icon: '<i class="icon-base ri ri-shake-hands-line  icon-22px text-success"></i>', label: 'Agreed' },
-        resolved: { icon: '<i class="icon-base ri ri-check-double-line icon-22px text-success"></i>', label: 'Resolved' },
-        declined: { icon: '<i class="icon-base ri ri-rest-time-line    icon-22px text-dark"></i>', label: 'Declined' },
-    };
-    const statusMap2 = {
-        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: 'Pending' },
-        cancelled: { icon: 'ri-hand', color: 'danger', label: 'Cancelled' },
-        negotiation: { icon: 'ri-wechat-line', color: 'info', label: 'Negotiation' },
-        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: 'Agreed' },
-        resolved: { icon: 'ri-check-double-line', color: 'success', label: 'Resolved' },
-        declined: { icon: 'ri-rest-time-line', color: 'dark', label: 'Declined' },
+        pending: { icon: 'ri-timer-flash-line', color: 'warning', label: sl.pending },
+        cancelled: { icon: 'ri-hand', color: 'danger', label: sl.cancelled },
+        negotiation: { icon: 'ri-wechat-line', color: 'info', label: sl.negotiation },
+        agreed: { icon: 'ri-shake-hands-line', color: 'success', label: sl.agreed },
+        resolved: { icon: 'ri-check-double-line', color: 'success', label: sl.resolved },
+        declined: { icon: 'ri-rest-time-line', color: 'dark', label: sl.declined },
     };
 
     // Service → icon HTML + label + text color
+    const sv = window.requestServiceLabels || {};
     const serviceMap2 = {
-        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: 'Moving Service' },
-        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: 'Junk Removal' },
-        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: 'Store Pickup' },
-        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: 'Vehicle Transport' }
+        moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: sv.moving },
+        removal: { icon: 'ri-recycle-line', color: 'bg-label-danger', title: sv.removal },
+        pickup: { icon: 'ri-shopping-bag-4-line', color: 'bg-label-warning', title: sv.pickup },
+        transport: { icon: 'ri-car-line', color: 'bg-label-info', title: sv.transport }
     };
     const serviceMap = {
-        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success"></i>', label: 'Moving Service', color: 'text-success' },
-        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger"></i>', label: 'Junk Removal', color: 'text-danger' },
-        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning"></i>', label: 'Store Pickup', color: 'text-warning' },
-        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info"></i>', label: 'Vehicle Transport', color: 'text-info' }
+        moving: { icon: '<i class="icon-base ri ri-truck-line        icon-22px text-success"></i>', label: sv.moving, color: 'text-success' },
+        removal: { icon: '<i class="icon-base ri ri-recycle-line      icon-22px text-danger"></i>', label: sv.removal, color: 'text-danger' },
+        pickup: { icon: '<i class="icon-base ri ri-shopping-bag-4-line      icon-22px text-warning"></i>', label: sv.pickup, color: 'text-warning' },
+        transport: { icon: '<i class="icon-base ri ri-car-line          icon-22px text-info"></i>', label: sv.transport, color: 'text-info' }
     };
 
     // Column index → sort field sent to the server (only sortable columns listed)
@@ -134,9 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 1,
                 width: '60px',
                 render: function (data, type, full) {
-                    //const s = statusMap[full['status']] || { icon: '', label: full['status'] };
-                    //return "<span data-bs-toggle='tooltip' data-bs-placement='top' title='" + s.label + "'>" + s.icon + '</span>';
-                    const map = statusMap2[full['status']];
+                    const map = statusMap[full['status']];
                     return (
                         '<ul class="list-unstyled m-0 avatar-group d-flex align-items-center">' +
                         '<li class="avatar avatar-m" data-bs-toggle="tooltip" data-bs-placement="top" title="' + map.label + '">' +
@@ -152,8 +144,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Request cell — thumbnail + title + service label
                 targets: 0,
                 orderable: false,
-                createdCell: function (td) {
+                createdCell: function (td, cellData, rowData) {
                     td.style.minWidth = '300px';
+                    td.style.cursor = 'pointer';
+                    td.dataset.number = rowData['number'];
                 },
                 render: function (data, type, full) {
                     const title = full['title'];
@@ -232,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     let timing;
                     if (asap) {
-                        timing = 'As soon as possible';
+                        timing = 'So schnell wie möglich';
                     } else {
                         timing = date || '';
                         if (time) { timing += ' - ' + time; }
@@ -276,6 +270,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         language: {
             search: '',
+            // german
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
+            infoEmpty: 'Keine Einträge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
+            zeroRecords: 'Keine passenden Einträge gefunden',
+            emptyTable: 'Keine Daten vorhanden',
+            loadingRecords: 'Wird geladen...',
+            processing: 'Bitte warten...',
+            // german
             paginate: {
                 next: '<i class="icon-base ri ri-arrow-right-s-line scaleX-n1-rtl icon-22px"></i>',
                 previous: '<i class="icon-base ri ri-arrow-left-s-line  scaleX-n1-rtl icon-22px"></i>',
@@ -321,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // View request — delegated click on the table wrapper
     dt_table.addEventListener('click', function (e) {
-        const btn = e.target.closest('.view-request-btn');
+        const btn = e.target.closest('.view-request-btn') || e.target.closest('td[data-number]');
         if (!btn) { return; }
         sessionStorage.setItem(RETURN_KEY, '1');
         window.location.href = '/Request/View?number=' + btn.dataset.number;
@@ -330,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Middle-click — open in new tab
     dt_table.addEventListener('auxclick', function (e) {
         if (e.button !== 1) { return; }
-        const btn = e.target.closest('.view-request-btn');
+        const btn = e.target.closest('.view-request-btn') || e.target.closest('td[data-number]');
         if (!btn) { return; }
         e.preventDefault();
         window.open('/Request/View?number=' + btn.dataset.number, '_blank');

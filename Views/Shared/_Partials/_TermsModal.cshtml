@@ -9,7 +9,7 @@
         ? _settings.TermsAndConditionsContentCustomer + _settings.TermsAndConditionsContentCompany
         : User.IsInRole(UserRoleEnum.Customer) ? _settings.TermsAndConditionsContentCustomer
         : User.IsInRole(UserRoleEnum.Company)  ? _settings.TermsAndConditionsContentCompany
-        : "No contant for display";
+        : "Kein Inhalt zur Anzeige";
 }
 
 @if (!string.IsNullOrWhiteSpace(_termsContent))
@@ -21,7 +21,7 @@
         <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title text-primary">Terms &amp; Conditions</h5>
+                    <h5 class="modal-title text-primary">AGB</h5>
                     @if (!_lockedMode)
                     {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -44,17 +44,17 @@
                             <form method="post" action="/User/AcceptTerms" id="acceptTermsForm">
                                 @Html.AntiForgeryToken()
                             </form>
-                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <small class="text-primary me-auto" id="termsScrollHint">Scrollen Sie nach unten, um zu akzeptieren</small>
                             <button type="submit" form="acceptTermsForm" id="termsAcceptBtn" class="btn btn-primary" disabled>
-                                I Accept
+                                Ich stimme zu
                             </button>
                         }
                         else
                         {
                             <!-- Registration: JS-handled, no POST -->
-                            <small class="text-primary me-auto" id="termsScrollHint">Scroll to the bottom to accept</small>
+                            <small class="text-primary me-auto" id="termsScrollHint">Scrollen Sie nach unten, um zu akzeptieren</small>
                             <button type="button" id="termsAcceptBtn" class="btn btn-primary" disabled>
-                                I Accept
+                                Ich stimme zu
                             </button>
                         }
                     </div>

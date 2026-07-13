@@ -14,10 +14,18 @@ namespace Bewegdeal.Data.Repositories
             {
 
                 case InvoiceUpdateAreaEnum.Status:
-                    await Context.Invoices.Where(r => r.Id == update.Id || r.RequestId == update.RequestId)
+                    await Context.Invoices.Where(r => r.Id == update.Id)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, update.Status)
-                                               .SetProperty(p => p.PaymentDate, update.PaymentDate)
+                                          //.SetProperty(p => p.PaymentDate, update.PaymentDate)
+                                          );
+                    break;
+
+                case InvoiceUpdateAreaEnum.Cancel:
+                    await Context.Invoices.Where(r => r.Status == InvoiceStatusEnum.Pending && r.RequestId == update.RequestId)
+                                          .ExecuteUpdateAsync(r => r
+                                               .SetProperty(p => p.Status, InvoiceStatusEnum.Cancelled)
+                                          //.SetProperty(p => p.PaymentDate, (DateTime?)null)
                                           );
                     break;
 
@@ -29,8 +37,8 @@ namespace Bewegdeal.Data.Repositories
         public async Task<InvoiceEntity?> Get(InvoiceFilter filter, string[]? properties = null)
             => await ApplyFilters(Context.Invoices.AsQueryable(), filter).Select(BuildSelect<InvoiceEntity>(properties)).FirstOrDefaultAsync();
 
-        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter)
-            => await ApplyFilters(Context.Invoices.AsQueryable(), filter).ToListAsync();
+        public async Task<List<InvoiceEntity>> Load(InvoiceFilter filter, string[]? properties = null)
+            => await ApplyFilters(Context.Invoices.AsQueryable(), filter).Select(BuildSelect<InvoiceEntity>(properties)).ToListAsync();
 
         public async Task<decimal> Sum(InvoiceFilter filter, string property)
         {
@@ -38,7 +46,6 @@ namespace Bewegdeal.Data.Repositories
             return property switch
             {
                 nameof(InvoiceEntity.ServiceCost) => await query.SumAsync(s => s.ServiceCost),
-                nameof(InvoiceEntity.SubtotalCost) => await query.SumAsync(s => s.SubtotalCost),
                 nameof(InvoiceEntity.TotalCost) => await query.SumAsync(s => s.TotalCost),
                 _ => throw new ArgumentException("Invalid sum property", nameof(property))
             };
@@ -71,6 +78,18 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(r => r.RequestId == filter.RequestId.Value);
             }
 
+            if (filter.DateFrom.HasValue)
+            {
+                filter.DateFrom = filter.DateFrom.Value.Date;
+                query = query.Where(r => r.CreateDate >= filter.DateFrom);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                filter.DateTo = filter.DateTo.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(r => r.CreateDate <= filter.DateTo.Value);
+            }
+
             if (filter.AmountFrom.HasValue)
             {
                 query = query.Where(r =>
@@ -85,6 +104,11 @@ namespace Bewegdeal.Data.Repositories
                    r.ServiceCost <= filter.AmountTo.Value ||
                    r.TotalCost <= filter.AmountTo.Value
                );
+            }
+
+            if (filter.Active.HasValue && filter.Active == true)
+            {
+                query = query.Where(r => r.Status != InvoiceStatusEnum.Cancelled);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Number))

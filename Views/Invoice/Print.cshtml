@@ -1,0 +1,142 @@
+@{
+    Layout = "_BlankLayout";
+    ViewData["Title"] = "Invoice (Print version)";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/vendor/css/pages/app-invoice-print.css" />
+}
+
+@section PageScripts {
+    <script src="~/js/app-invoice-print.js" asp-append-version="true"></script>
+}
+
+@{
+    var invoice = (Bewegdeal.Models.InvoicePrintModel)ViewBag.Invoice;
+    var data = invoice.Data!;
+    var company = invoice.Company!;
+}
+
+@* ************** Content ************** *@
+<div class="invoice-print p-6">
+    <div class="d-flex justify-content-between flex-row">
+        <div class="mb-6">
+            <div class="d-flex svg-illustration align-items-center gap-2 mb-6">
+                <span class="app-brand-logo demo">@await Html.PartialAsync("~/Views/_Partials/_Macros.cshtml")</span>
+                <span class="h4 mb-0 app-brand-text fw-semibold">Bewegdeal</span>
+            </div>
+            <p class="mb-1">Obere donaustrasse 1, 1020 Wien</p>
+            <p class="mb-1">kontakt@bewegdeal.at</p>
+            <p class="mb-0">+44 (666) 543 2198</p>
+        </div>
+        <div class="text-end">
+            <h4 class="mb-6">RECHNUNG #@data.Id</h4>
+            <div class="mb-1">
+                <span>Ausgabedatum:</span>
+                <span>@data.CreateDate.ToString("d. MMMM yyyy")</span>
+            </div>
+            <div>
+                <span>Verfallsdatum:</span>
+                <span>@data.DueDate.ToString("d. MMMM yyyy")</span>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mb-6" />
+
+    <div class="d-flex justify-content-between mb-6">
+        <div class="my-2">
+            <h6 class="fw-bold">Rechnungsempfänger:</h6>
+            <p class="mb-1">@company.Name</p>
+            <p class="mb-1">@company.Number</p>
+            <p class="mb-1">@company.Address</p>
+            <p class="mb-1">@company.Mobile</p>
+            <p class="mb-0">@company.Email</p>
+        </div>
+        <div class="my-2">
+            <h6 class="fw-bold">Bankverbindung:</h6>
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="pe-2">Kontoinhaber:</td>
+                        <td>Giorgi Chochishvili</td>
+                    </tr>
+                    <tr>
+                        <td class="pe-2">Land:</td>
+                        <td>Österreich</td>
+                    </tr>
+                    <tr>
+                        <td class="pe-2">Bank:</td>
+                        <td>TBC Bank</td>
+                    </tr>
+                    <tr>
+                        <td class="pe-2">IBAN:</td>
+                        <td>ETD95476213874685</td>
+                    </tr>
+                    <tr>
+                        <td class="pe-2">SWIFT:</td>
+                        <td>BR91905</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-responsive border border-bottom-0 rounded">
+        <table class="table m-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Beschreibung</th>
+                    <th>Auftragsnummer</th>
+                    <th>Betrag</th>
+                    <th>Provision</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@data.Service</td>
+                    <td>#@data.RequestId</td>
+                    <td>€@data.ServiceCost</td>
+                    <td>€@data.CommissionCost</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="table-responsive">
+        <table class="table m-0 table-borderless">
+            <tbody>
+                <tr>
+                    <td class="align-top px-6 py-6">
+                        <p class="mb-1">
+                            <span class="me-2 fw-medium"></span>
+                            <span></span>
+                        </p>
+                        <span></span>
+                    </td>
+                    <td class="px-0 py-12 w-px-100 text-end">
+                        <p class="mb-2">Zwischensumme&nbsp<span style="font-size: 0.6rem">(@data.CommissionPersent%)</span>:</p>
+                        <p class="mb-2">USt&nbsp<span style="font-size: 0.6rem">(@data.TaxPersent%)</span>:</p>
+                        <p class="mb-2 border-bottom pb-2">Rabatt:</p>
+                        <p class="mb-0 pt-2">Gesamtsumme:</p>
+                    </td>
+                    <td class="px-0 py-6 w-px-100 text-end">
+                        <p class="fw-medium mb-2">€@data.CommissionCost</p>
+                        <p class="fw-medium mb-2">€@data.TaxCost</p>
+                        <p class="fw-medium mb-2 border-bottom pb-2">€0.00</p>
+                        <p class="fw-medium mb-0 pt-2">€@data.TotalCost</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr class="mt-0 mb-6" />
+    <div class="row">
+        <div class="col-12">
+            <span class="fw-medium">Danke schön!</span>
+        </div>
+        <div class="col-12">
+            <span>Es war mir eine Freude, mit Ihnen zusammenzuarbeiten. Wir hoffen, dass Sie uns bei zukünftigen Projekten in Erinnerung behalten.</span>
+        </div>
+    </div>
+</div>

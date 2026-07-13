@@ -3,6 +3,7 @@
 @{
     Layout = "_HomeLayout";
     ViewData["Title"] = "Settings";
+    var openSection = TempData["OpenSection"] as string ?? "";
 }
 
 @section VendorStyles {
@@ -76,80 +77,95 @@
         document.getElementById('aboutUsForm').addEventListener('submit', function () {
         document.getElementById('aboutUsContent').value = quillAboutUs.root.innerHTML;
         });
+
+        var quillPrivacyPolicy = new Quill('#privacyPolicyEditor', {
+        bounds: '#privacyPolicyEditor',
+        placeholder: '',
+        modules: { toolbar: fullToolbar },
+        theme: 'snow'
+        });
+
+        quillPrivacyPolicy.root.style.maxHeight = '300px';
+        quillPrivacyPolicy.root.style.overflowY = 'auto';
+
+        quillPrivacyPolicy.root.innerHTML = @Html.Raw(Json.Serialize(Model.PrivacyPolicy));
+
+        document.getElementById('privacyPolicyForm').addEventListener('submit', function () {
+        document.getElementById('privacyPolicyContent').value = quillPrivacyPolicy.root.innerHTML;
+        });
         })();
+
+        // Sync .active class for server-pre-opened accordion items (main.js only adds it via Bootstrap events)
+        document.querySelectorAll('.accordion-collapse.show').forEach(function (el) {
+        var item = el.closest('.accordion-item');
+        item.classList.add('active');
+        if (item.previousElementSibling) {
+        item.previousElementSibling.classList.add('previous-active');
+        }
+        });
     </script>
 }
 
-<div class="row g-6">
+@{
+    string Show(string section) => openSection == section ? "show" : "";
+    string Collapsed(string section) => openSection == section ? "" : "collapsed";
+}
+
+<div class="accordion" id="settingsAccordion">
 
     <!-- Mobile -->
-    <div class="col-12">
-        <form asp-controller="Settings" asp-action="SaveMobile" method="post">
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">Mobile</h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["MobileError"] is string mobileError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@mobileError</div>
-                    }
-                    @if (TempData["MobileSuccess"] is string mobileSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@mobileSuccess</div>
-                    } *@
-
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("mobile")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseMobile"
+                    aria-expanded="@(openSection == "mobile" ? "true" : "false")"
+                    aria-controls="collapseMobile">
+                Mobilnummer
+            </button>
+        </h2>
+        <div id="collapseMobile" class="accordion-collapse collapse @Show("mobile")"
+             data-bs-parent="#settingsAccordion">
+            <form asp-controller="Settings" asp-action="SaveMobile" method="post">
+                <div class="accordion-body p-4">
                     <div class="row justify-content-center">
                         <div class="col-auto" style="width: 200px">
                             <div class="form-floating form-floating-outline">
                                 <input type="text" class="form-control" id="mobilePrefix"
                                        name="mobilePrefix" value="@Model.MobilePrefix"
                                        placeholder="" />
-                                <label for="mobilePrefix">Mobile Prefix</label>
+                                <label for="mobilePrefix">Vorwahl</label>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- Invoice -->
-    <div class="col-12">
-        <form asp-controller="Settings" asp-action="SaveInvoice" method="post">
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">Invoice</h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["InvoiceError"] is string invoiceError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@invoiceError</div>
-                    }
-                    @if (TempData["InvoiceSuccess"] is string invoiceSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@invoiceSuccess</div>
-                    }*@
-
-                    <div class="row justify-content-center g-5">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("invoice")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseInvoice"
+                    aria-expanded="@(openSection == "invoice" ? "true" : "false")"
+                    aria-controls="collapseInvoice">
+                Rechnung
+            </button>
+        </h2>
+        <div id="collapseInvoice" class="accordion-collapse collapse @Show("invoice")"
+             data-bs-parent="#settingsAccordion">
+            <form asp-controller="Settings" asp-action="SaveInvoice" method="post">
+                <div class="accordion-body p-4">
+                    <div class="row justify-content-center g-5 pb-5">
                         <div class="col-auto" style="width: 200px">
                             <div class="form-floating form-floating-outline">
                                 <input type="number" class="form-control" id="commissionPersent"
                                        name="commissionPersent" value="@Model.InvoiceCommissionPersent"
                                        min="1" placeholder="" />
-                                <label for="commissionPersent">Commission %</label>
+                                <label for="commissionPersent">Provision %</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -157,63 +173,50 @@
                                 <input type="number" class="form-control" id="taxPersent"
                                        name="taxPersent" value="@Model.InvoiceTaxPersent"
                                        min="1" placeholder="" />
-                                <label for="taxPersent">Tax %</label>
+                                <label for="taxPersent">Steuer %</label>
                             </div>
                         </div>
                     </div>
-
+                    <div class="row justify-content-center g-5">
+                        <div class="col-auto" style="width: 200px">
+                            <div class="form-floating form-floating-outline">
+                                <input type="number" class="form-control" id="invoiceDueDays"
+                                       name="dueDays" value="@Model.InvoiceDueDays"
+                                       min="1" placeholder="" />
+                                <label for="invoiceDueDays">Zahlungsfrist (Tage)</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- Request -->
-    <div class="col-12">
-        <form asp-controller="Settings" asp-action="SaveRequest" method="post">
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">Request</h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["RequestError"] is string requestError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@requestError</div>
-                    }
-                    @if (TempData["RequestSuccess"] is string requestSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@requestSuccess</div>
-                    } *@
-
-                    <!-- Negotiation -->
-                    @* <div class="row justify-content-center">
-                        <div class="col-auto" style="width: 200px">
-                            <div class="form-floating form-floating-outline">
-                                <input type="number" class="form-control" id="requestNegotiationMinutes"
-                                       name="requestNegotiationMinutes" value="@Model.RequestNegotiationMinutes"
-                                       min="1" placeholder="" />
-                                <label for="requestNegotiationMinutes">Negotiation Minutes</label>
-                            </div>
-                        </div>
-                    </div> *@
-
-                    @* <hr class="my-6 mx-n4" /> *@
-
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("request")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseRequest"
+                    aria-expanded="@(openSection == "request" ? "true" : "false")"
+                    aria-controls="collapseRequest">
+                Auftrag
+            </button>
+        </h2>
+        <div id="collapseRequest" class="accordion-collapse collapse @Show("request")"
+             data-bs-parent="#settingsAccordion">
+            <form asp-controller="Settings" asp-action="SaveRequest" method="post">
+                <div class="accordion-body p-4">
                     <!-- Images -->
-                    <div class="row justify-content-center g-5">
+                    <div class="row justify-content-center g-5 pb-5">
                         <div class="col-auto" style="width: 200px">
                             <div class="form-floating form-floating-outline">
                                 <input type="number" class="form-control" id="requestImageMaxCount"
                                        name="imageMaxCount" value="@Model.RequestImageMaxCount"
                                        min="1" placeholder="" />
-                                <label for="requestImageMaxCount">Image Max Count</label>
+                                <label for="requestImageMaxCount">Max. Bilder</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -221,13 +224,10 @@
                                 <input type="number" class="form-control" id="requestImageMaxSize"
                                        name="imageMaxSize" value="@Model.RequestImageMaxSize"
                                        min="1" placeholder="" />
-                                <label for="requestImageMaxSize">Image Max Size (MB)</label>
+                                <label for="requestImageMaxSize">Max. Bildgröße (MB)</label>
                             </div>
                         </div>
                     </div>
-
-                    <hr class="my-6 mx-n4" />
-
                     <!-- Videos -->
                     <div class="row justify-content-center g-5">
                         <div class="col-auto" style="width: 200px">
@@ -235,7 +235,7 @@
                                 <input type="number" class="form-control" id="requestVideoMaxCount"
                                        name="videoMaxCount" value="@Model.RequestVideoMaxCount"
                                        min="1" placeholder="" />
-                                <label for="requestVideoMaxCount">Video Max Count</label>
+                                <label for="requestVideoMaxCount">Max. Videos</label>
                             </div>
                         </div>
                         <div class="col-auto" style="width: 200px">
@@ -243,138 +243,130 @@
                                 <input type="number" class="form-control" id="requestVideoMaxSize"
                                        name="videoMaxSize" value="@Model.RequestVideoMaxSize"
                                        min="1" placeholder="" />
-                                <label for="requestVideoMaxSize">Video Max Size (MB)</label>
+                                <label for="requestVideoMaxSize">Max. Videogröße (MB)</label>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- About Us -->
-    <div class="col-12">
-        <form id="aboutUsForm" asp-controller="Settings" asp-action="SaveAboutUs" method="post">
-            <input type="hidden" id="aboutUsContent" name="content" />
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">About Us</h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["TermsError"] is string termsError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
-                    }
-                    @if (TempData["TermsSuccess"] is string termsSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
-                    } *@
-
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("aboutUs")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseAboutUs"
+                    aria-expanded="@(openSection == "aboutUs" ? "true" : "false")"
+                    aria-controls="collapseAboutUs">
+                Impressum
+            </button>
+        </h2>
+        <div id="collapseAboutUs" class="accordion-collapse collapse @Show("aboutUs")"
+             data-bs-parent="#settingsAccordion">
+            <form id="aboutUsForm" asp-controller="Settings" asp-action="SaveAboutUs" method="post">
+                <input type="hidden" id="aboutUsContent" name="content" />
+                <div class="accordion-body p-4">
                     <div id="aboutUsEditor"></div>
-
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
+            </form>
+        </div>
+    </div>
 
-            </div>
-        </form>
+    <!-- Privacy Policy -->
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("privacyPolicy")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapsePrivacyPolicy"
+                    aria-expanded="@(openSection == "privacyPolicy" ? "true" : "false")"
+                    aria-controls="collapsePrivacyPolicy">
+                Datenschutzerklärung
+            </button>
+        </h2>
+        <div id="collapsePrivacyPolicy" class="accordion-collapse collapse @Show("privacyPolicy")"
+             data-bs-parent="#settingsAccordion">
+            <form id="privacyPolicyForm" asp-controller="Settings" asp-action="SavePrivacyPolicy" method="post">
+                <input type="hidden" id="privacyPolicyContent" name="content" />
+                <div class="accordion-body p-4">
+                    <div id="privacyPolicyEditor"></div>
+                </div>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Terms & Conditions for Customer -->
-    <div class="col-12">
-        <form id="tcFormCustomer" asp-controller="Settings" asp-action="SaveTermsAndConditionsCustomer" method="post">
-            <input type="hidden" id="tcCustomer" name="content" />
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">T&amp;C for the <strong>Customer</strong></h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["TermsError"] is string termsError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
-                    }
-                    @if (TempData["TermsSuccess"] is string termsSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
-                    } *@
-
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("tcCustomer")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseTcCustomer"
+                    aria-expanded="@(openSection == "tcCustomer" ? "true" : "false")"
+                    aria-controls="collapseTcCustomer">
+                AGB für <strong class="ms-1">Kunden</strong>
+            </button>
+        </h2>
+        <div id="collapseTcCustomer" class="accordion-collapse collapse @Show("tcCustomer")"
+             data-bs-parent="#settingsAccordion">
+            <form id="tcFormCustomer" asp-controller="Settings" asp-action="SaveTermsAndConditionsCustomer" method="post">
+                <input type="hidden" id="tcCustomer" name="content" />
+                <div class="accordion-body">
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Handle with care</strong>
+                            <strong>Mit Vorsicht verwenden</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing customers to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Das Speichern von Änderungen erfordert, dass bestehende Kunden den AGB erneut zustimmen.</li>
                         </ul>
                     </div>
-
                     <div id="tcEditorCustomer"></div>
-
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- Terms & Conditions for Company -->
-    <div class="col-12">
-        <form id="tcFormCompany" asp-controller="Settings" asp-action="SaveTermsAndConditionsCompany" method="post">
-            <input type="hidden" id="tcCompany" name="content" />
-            <div class="card">
-
-                <div class="card-header">
-                    <h5 class="card-title m-0">T&amp;C for the <strong>Company</strong></h5>
-                </div>
-
-                <div class="card-body">
-
-                    @* @if (TempData["TermsError"] is string termsError)
-                    {
-                        <div class="alert alert-danger mb-4 text-center" role="alert">@termsError</div>
-                    }
-                    @if (TempData["TermsSuccess"] is string termsSuccess)
-                    {
-                        <div class="alert alert-success mb-4 text-center" role="alert">@termsSuccess</div>
-                    } *@
-
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @Collapsed("tcCompany")" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseTcCompany"
+                    aria-expanded="@(openSection == "tcCompany" ? "true" : "false")"
+                    aria-controls="collapseTcCompany">
+                AGB für <strong class="ms-1">Unternehmen</strong>
+            </button>
+        </h2>
+        <div id="collapseTcCompany" class="accordion-collapse collapse @Show("tcCompany")"
+             data-bs-parent="#settingsAccordion">
+            <form id="tcFormCompany" asp-controller="Settings" asp-action="SaveTermsAndConditionsCompany" method="post">
+                <input type="hidden" id="tcCompany" name="content" />
+                <div class="accordion-body">
                     <div class="alert alert-danger mb-4" role="alert">
                         <div class="d-flex align-items-center mb-2">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong>Handle with care</strong>
+                            <strong>Mit Vorsicht verwenden</strong>
                         </div>
                         <ul class="mb-0">
-                            <li>Saving changes will require existing companies to re-agree to the Terms &amp; Conditions.</li>
+                            <li>Das Speichern von Änderungen erfordert, dass bestehende Unternehmen den AGB erneut zustimmen.</li>
                         </ul>
                     </div>
-
                     <div id="tcEditorCompany"></div>
-
                 </div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="accordion-body pt-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
                 </div>
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
 </div>

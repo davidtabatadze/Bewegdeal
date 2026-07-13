@@ -2,6 +2,7 @@
 {
     public enum InvoiceUpdateAreaEnum
     {
-        Status = 1
+        Status = 1,
+        Cancel
     }
 }

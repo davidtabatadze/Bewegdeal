@@ -16,6 +16,7 @@ namespace Bewegdeal.Data.Repositories
                 {
                     Id = 1,
                     AboutUs = "Bewegdeal.at",
+                    PrivacyPolicy = "Bewegdeal.at",
                     TermsAndConditionsContentCustomer = "This is a free T&C for customers",
                     TermsAndConditionsContentCompany = "This is a free T&C for companies",
                     TermsAndConditionsContentDateCustomer = DateTime.Now,
@@ -27,6 +28,7 @@ namespace Bewegdeal.Data.Repositories
                     RequestNegotiationMinutes = 60,
                     InvoiceCommissionPersent = 10,
                     InvoiceTaxPersent = 20,
+                    InvoiceDueDays = 10,
                     MobilePrefix = "+43"
                 });
             }

@@ -26,7 +26,20 @@ public class SettingsController(SettingService SettingService) : XBaseController
     {
         await SettingService.SaveAboutUs(content);
 
-        TempData["TermsSuccess"] = "About us updated successfully.";
+        TempData["OpenSection"] = "aboutUs";
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Save Privacy Policy
+
+    [HttpPost]
+    public async Task<IActionResult> SavePrivacyPolicy(string? content)
+    {
+        await SettingService.SavePrivacyPolicy(content);
+
+        TempData["OpenSection"] = "privacyPolicy";
         return RedirectToAction(nameof(Index));
     }
 
@@ -39,7 +52,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
     {
         await SettingService.SaveTermsAndConditionsCustomer(content);
 
-        TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";
+        TempData["OpenSection"] = "tcCustomer";
         return RedirectToAction(nameof(Index));
     }
 
@@ -48,7 +61,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
     {
         await SettingService.SaveTermsAndConditionsCompany(content);
 
-        TempData["TermsSuccess"] = "Terms & Conditions updated successfully.";
+        TempData["OpenSection"] = "tcCompany";
         return RedirectToAction(nameof(Index));
     }
 
@@ -61,7 +74,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
     {
         await SettingService.SaveMobile(mobilePrefix);
 
-        TempData["RequestSuccess"] = "Mobile settings saved successfully.";
+        TempData["OpenSection"] = "mobile";
         return RedirectToAction(nameof(Index));
     }
 
@@ -70,17 +83,17 @@ public class SettingsController(SettingService SettingService) : XBaseController
     #region Save Invoice
 
     [HttpPost]
-    public async Task<IActionResult> SaveInvoice(short commissionPersent, short taxPersent)
+    public async Task<IActionResult> SaveInvoice(short commissionPersent, short taxPersent, short dueDays)
     {
-        if (commissionPersent <= 0 || taxPersent <= 0)
+        if (commissionPersent <= 0 || taxPersent <= 0 || dueDays <= 0)
         {
-            TempData["RequestError"] = "All invoice settings must be greater than zero.";
+            TempData["OpenSection"] = "invoice";
             return RedirectToAction(nameof(Index));
         }
 
-        await SettingService.SaveInvoice(commissionPersent, taxPersent);
+        await SettingService.SaveInvoice(commissionPersent, taxPersent, dueDays);
 
-        TempData["RequestSuccess"] = "Invoice settings saved successfully.";
+        TempData["OpenSection"] = "invoice";
         return RedirectToAction(nameof(Index));
     }
 
@@ -93,13 +106,13 @@ public class SettingsController(SettingService SettingService) : XBaseController
     {
         if (imageMaxCount <= 0 || imageMaxSize <= 0 || videoMaxCount <= 0 || videoMaxSize <= 0)
         {
-            TempData["RequestError"] = "All request settings must be greater than zero.";
+            TempData["OpenSection"] = "request";
             return RedirectToAction(nameof(Index));
         }
 
         await SettingService.SaveRequest(imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize);
 
-        TempData["RequestSuccess"] = "Request settings saved successfully.";
+        TempData["OpenSection"] = "request";
         return RedirectToAction(nameof(Index));
     }
 

@@ -21,45 +21,45 @@
     <div class="alert alert-danger mb-0" role="alert">
         <div class="d-flex align-items-center mb-2">
             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-            <strong>Handle with care</strong>
+            <strong>Mit Vorsicht verwenden</strong>
         </div>
         <ul class="mb-0">
-            <li>These words are used to detect fraud in chat messages.</li>
-            <li>Be careful what you add or remove — changes take effect immediately.</li>
-            <li>Incorrect entries may block legitimate messages or miss actual fraud.</li>
+            <li>Diese Wörter werden verwendet, um Betrug in Chatnachrichten zu erkennen.</li>
+            <li>Seien Sie vorsichtig beim Hinzufügen oder Entfernen — Änderungen wirken sofort.</li>
+            <li>Falsche Einträge können legitime Nachrichten blockieren oder echten Betrug übersehen.</li>
         </ul>
     </div>
 
     <div class="card mb-0">
         <div class="card-body">
-            <p class="mb-3">Use <code>*</code> as a wildcard to control how a word is matched against chat messages:</p>
+            <p class="mb-3">Verwenden Sie <code>*</code> als Platzhalter, um zu steuern, wie ein Wort mit Chatnachrichten abgeglichen wird:</p>
             <div class="row g-4">
                 <div class="col-sm-6 col-xl-3">
                     <div class="p-3 border rounded h-100">
-                        <code class="d-block mb-1 fs-5">word</code>
-                        <div class="text-body-secondary small mb-2">Exact match</div>
-                        <div class="small">e.g. <code>scam</code> — only flags the word "scam" by itself</div>
+                        <code class="d-block mb-1 fs-5">wort</code>
+                        <div class="text-body-secondary small mb-2">Genaue Übereinstimmung</div>
+                        <div class="small">z.B. <code>betrug</code> — markiert nur das Wort „betrug" allein</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
                     <div class="p-3 border rounded h-100">
-                        <code class="d-block mb-1 fs-5">word*</code>
-                        <div class="text-body-secondary small mb-2">Starts with</div>
-                        <div class="small">e.g. <code>pay*</code> — flags "paypal", "payment", "payday"</div>
+                        <code class="d-block mb-1 fs-5">wort*</code>
+                        <div class="text-body-secondary small mb-2">Beginnt mit</div>
+                        <div class="small">z.B. <code>zahl*</code> — markiert „zahlung", „zahlungsmittel"</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
                     <div class="p-3 border rounded h-100">
-                        <code class="d-block mb-1 fs-5">*word</code>
-                        <div class="text-body-secondary small mb-2">Ends with</div>
-                        <div class="small">e.g. <code>*fraud</code> — flags "bankfraud", "wirefraud"</div>
+                        <code class="d-block mb-1 fs-5">*wort</code>
+                        <div class="text-body-secondary small mb-2">Endet mit</div>
+                        <div class="small">z.B. <code>*betrug</code> — markiert „bankbetrug", „überweisungsbetrug"</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
                     <div class="p-3 border rounded h-100">
-                        <code class="d-block mb-1 fs-5">*word*</code>
-                        <div class="text-body-secondary small mb-2">Contains</div>
-                        <div class="small">e.g. <code>*cash*</code> — flags "send cash now", "cashapp"</div>
+                        <code class="d-block mb-1 fs-5">*wort*</code>
+                        <div class="text-body-secondary small mb-2">Enthält</div>
+                        <div class="small">z.B. <code>*bar*</code> — markiert „barzahlung", „sofortbar"</div>
                     </div>
                 </div>
             </div>
@@ -67,14 +67,14 @@
     </div>
 
     <div class="card flex-grow-1 mb-0">
-        <h5 class="card-header">Dictionary</h5>
+        <h5 class="card-header">Wörterbuch</h5>
         <div class="card-body">
             <div class="form-floating form-floating-outline">
                 <input id="fraudWordsInput"
                        class="form-control"
                        name="fraudWords"
                        value="@string.Join(", ", Model)" />
-                <label for="fraudWordsInput">Words</label>
+                <label for="fraudWordsInput">Wörter</label>
             </div>
         </div>
     </div>

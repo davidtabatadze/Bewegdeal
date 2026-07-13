@@ -440,9 +440,12 @@ Views/Shared/_Partials/
                                  #   renders nothing if AboutUs is empty; loads quill CSS inline
 wwwroot/js/
 ├── app-company-dashboard.js
-├── app-user-list.js             # User DataTable; shows real avatars (img or initials from full['avatar'])
-├── app-chat-list.js             # Admin chat list DataTable
-├── app-invoice-list.js          # Invoice DataTable; UpdateInvoiceStatus for admin
+├── app-user-list.js             # User DataTable; shows real avatars (img or initials from full['avatar']);
+│                                #   reads window.userStatusLabels / userInterestLabels / userRoleLabels
+├── app-chat-list.js             # Admin chat list DataTable;
+│                                #   reads window.chatStatusLabels / chatFraudLabels
+├── app-invoice-list.js          # Invoice DataTable; UpdateInvoiceStatus for admin;
+│                                #   reads window.invoiceStatusLabels
 ├── pages-auth-two-steps.js      # Two independent OTP wrappers (#emailOtpWrapper / #mobileOtpWrapper)
 ├── pages-auth-multisteps.js     # Register stepper; Step 2 fields toggled by role; Interests via name="Interests"
 ├── request-form.js
@@ -817,6 +820,18 @@ All tables use `serverSide: true`. Key conventions:
 - Each table has its own JS file in `wwwroot/js/`
 - Loading indicator: Notiflix `Block.pulse('.card-datatable')` — never use `processing: true`
 - `scrollX: true`, `responsive: false` — Responsive extension conflicts with scrollX
+
+### German language support
+All DataTable instances set a `language:` block with German strings: `info`, `infoEmpty`, `infoFiltered`, `zeroRecords`, `emptyTable`, `loadingRecords`, `processing`. Pagination keys are icon HTML, not text.
+
+### Label injection pattern
+Status/role/fraud icon maps in JS read labels from `window.*Labels` objects injected by the view (inside `@section PageScripts`) using `AnnotationEnum` — never hardcode English strings in JS maps. Always include an `|| 'fallback'` in the JS in case the window object is absent.
+
+| View | Window object(s) injected |
+|------|--------------------------|
+| `User/List.cshtml` | `window.userStatusLabels`, `window.userInterestLabels`, `window.userRoleLabels` |
+| `Invoice/List.cshtml` | `window.invoiceStatusLabels` |
+| `Chat/List.cshtml` | `window.chatStatusLabels`, `window.chatFraudLabels` |
 
 ---
 

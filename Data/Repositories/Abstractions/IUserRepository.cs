@@ -12,6 +12,6 @@ namespace Bewegdeal.Data.Repositories.Abstractions
         Task<UserEntity?> Get(UserFilter filter, string[]? properties = null);
         Task<UserEntity?> GetRegistered(string email, string mobile);
         Task<int> Count(UserFilter filter);
-        Task<List<UserEntity>> Load(UserFilter filter);
+        Task<List<UserEntity>> Load(UserFilter filter, string[]? properties = null);
     }
 }

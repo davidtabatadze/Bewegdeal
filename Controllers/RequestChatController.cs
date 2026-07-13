@@ -36,7 +36,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     [HttpPost]
     public async Task<IActionResult> Cancel(string requestNumber)
     {
-        await RequestChatService.Cancel(requestNumber, UserId);
+        await RequestChatService.Cancel(requestNumber, UserId, true);
         return Json(GenericResultModel.Ok());
     }
 
@@ -64,6 +64,14 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     public async Task<IActionResult> ProposalReact(long id, bool accepted, string? reason = null)
     {
         await RequestChatService.ProposalReact(UserId, id, accepted, reason);
+        return Json(GenericResultModel.Ok());
+    }
+
+    [HttpPost]
+    [Authorize(Roles = UserRoleEnum.Company)]
+    public async Task<IActionResult> ProposalCancel(string requestNumber)
+    {
+        await RequestChatService.ProposalCancel(UserId, requestNumber);
         return Json(GenericResultModel.Ok());
     }
 

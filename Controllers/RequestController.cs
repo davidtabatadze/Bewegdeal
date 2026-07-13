@@ -175,7 +175,7 @@ public class RequestController(RequestService RequestService, RequestChatService
     [Authorize(Roles = UserRoleEnum.Customer)]
     public async Task<IActionResult> Cancel(string number)
     {
-        await RequestChatService.Cancel(number, UserId);
+        await RequestChatService.Cancel(number, UserId, false);
         return Json(await RequestService.Cancel(number, UserId));
     }
 
