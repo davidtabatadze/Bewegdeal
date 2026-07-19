@@ -26,6 +26,7 @@ namespace Bewegdeal.Data.Repositories
                     RequestVideoMaxCount = 1,
                     RequestVideoMaxSize = 20,
                     RequestNegotiationMinutes = 60,
+                    RequestMediaIsRequired = false,
                     InvoiceCommissionPersent = 10,
                     InvoiceTaxPersent = 20,
                     InvoiceDueDays = 10,

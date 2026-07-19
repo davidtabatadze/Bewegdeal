@@ -388,6 +388,7 @@ namespace Bewegdeal.Data
                 e.Property(s => s.RequestImageMaxSize).IsRequired();
                 e.Property(s => s.RequestVideoMaxCount).IsRequired();
                 e.Property(s => s.RequestVideoMaxSize).IsRequired();
+                e.Property(s => s.RequestMediaIsRequired).IsRequired();
                 e.Property(s => s.InvoiceCommissionPersent).IsRequired();
                 e.Property(s => s.InvoiceTaxPersent).IsRequired();
                 e.Property(s => s.InvoiceDueDays).IsRequired();

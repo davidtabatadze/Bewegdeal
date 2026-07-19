@@ -45,6 +45,7 @@
         const imageMaxSize    = @settings.RequestImageMaxSize;
         const videoMaxCount   = @settings.RequestVideoMaxCount;
         const videoMaxSize    = @settings.RequestVideoMaxSize;
+        const mediaIsRequired = @(settings.RequestMediaIsRequired ? "true" : "false");
         const isEditMode      = @(isEdit ? "true" : "false");
         const requestNumber   = '@(isEdit ? req!.Number : "")';
         @if (isEdit)

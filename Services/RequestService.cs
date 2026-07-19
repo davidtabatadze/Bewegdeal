@@ -300,7 +300,8 @@ namespace Bewegdeal.Services
                 requestFiles.Count(i =>
                     i.Type == RequestFileTypeEnum.Video &&
                     model.KeepFileIds.Contains(i.Id)
-                )
+                ),
+                settings.RequestMediaIsRequired
             );
             return GenericResultModel<RequestViewModel>.Ok(model, null);
         }

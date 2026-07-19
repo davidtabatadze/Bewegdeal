@@ -86,7 +86,7 @@ namespace Bewegdeal.Services
             ClearCache();
         }
 
-        public async Task SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize)
+        public async Task SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize, bool mediaIsRequired)
         {
             var settings = await Get();
 
@@ -94,6 +94,7 @@ namespace Bewegdeal.Services
             settings.RequestImageMaxSize = imageMaxSize;
             settings.RequestVideoMaxCount = videoMaxCount;
             settings.RequestVideoMaxSize = videoMaxSize;
+            settings.RequestMediaIsRequired = mediaIsRequired;
 
             await Update(settings);
             ClearCache();

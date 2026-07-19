@@ -446,7 +446,7 @@ Dropzone.autoDiscover = false;
                 hasErrors = true;
             }
 
-            if (totalImages === 0) {
+            if (mediaIsRequired && totalImages === 0) {
                 mediaErrorEl.textContent = 'Mindestens ein Bild ist erforderlich.';
                 mediaErrorEl.classList.remove('d-none');
                 hasErrors = true;

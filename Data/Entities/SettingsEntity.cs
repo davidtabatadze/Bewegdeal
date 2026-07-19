@@ -16,6 +16,7 @@ namespace Bewegdeal.Data.Entities
         public short RequestImageMaxSize { get; set; }
         public short RequestVideoMaxCount { get; set; }
         public short RequestVideoMaxSize { get; set; }
+        public bool RequestMediaIsRequired { get; set; }
         public short InvoiceCommissionPersent { get; set; }
         public short InvoiceTaxPersent { get; set; }
         public short InvoiceDueDays { get; set; }

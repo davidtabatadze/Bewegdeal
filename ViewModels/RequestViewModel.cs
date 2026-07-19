@@ -58,13 +58,15 @@ namespace Bewegdeal.ViewModels
         private short VideoMaxCount { get; set; }
         private int ExistingImages { get; set; }
         private int ExistingVideos { get; set; }
+        private bool MediaIsRequired { get; set; }
         public void SetValidationExternals(
             short imageMaxCount,
             short imageMaxSize,
             short videoMaxCount,
             short videoMaxSize,
             int existingImages,
-            int existingVideos
+            int existingVideos,
+            bool mediaIsRequired
         )
         {
             ImageMaxCount = imageMaxCount;
@@ -73,6 +75,7 @@ namespace Bewegdeal.ViewModels
             VideoMaxSize = videoMaxSize;
             ExistingImages = existingImages;
             ExistingVideos = existingVideos;
+            MediaIsRequired = mediaIsRequired;
         }
         #endregion
 
@@ -109,7 +112,7 @@ namespace Bewegdeal.ViewModels
             var totalImages = Images.Length + ExistingImages;
             var totalVideos = Videos.Length + ExistingVideos;
 
-            if (totalImages == 0)
+            if (MediaIsRequired && totalImages == 0)
             {
                 yield return new ValidationResult(AnnotationEnum.Request.Media.ImageMinCount);
             }

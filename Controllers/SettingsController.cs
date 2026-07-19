@@ -102,7 +102,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
     #region Save Request
 
     [HttpPost]
-    public async Task<IActionResult> SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize)
+    public async Task<IActionResult> SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize, bool mediaIsRequired)
     {
         if (imageMaxCount <= 0 || imageMaxSize <= 0 || videoMaxCount <= 0 || videoMaxSize <= 0)
         {
@@ -110,7 +110,7 @@ public class SettingsController(SettingService SettingService) : XBaseController
             return RedirectToAction(nameof(Index));
         }
 
-        await SettingService.SaveRequest(imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize);
+        await SettingService.SaveRequest(imageMaxCount, imageMaxSize, videoMaxCount, videoMaxSize, mediaIsRequired);
 
         TempData["OpenSection"] = "request";
         return RedirectToAction(nameof(Index));

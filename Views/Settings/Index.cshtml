@@ -209,6 +209,21 @@
              data-bs-parent="#settingsAccordion">
             <form asp-controller="Settings" asp-action="SaveRequest" method="post">
                 <div class="accordion-body p-4">
+                    <!-- Media required toggle -->
+                    <div class="row justify-content-center g-5 pb-5">
+                        <div class="col-auto d-flex align-items-center gap-3">
+                            <label class="switch switch-lg me-6">
+                                <input type="checkbox" class="switch-input" id="requestMediaIsRequired"
+                                       name="mediaIsRequired" value="true"
+                                       @(Model.RequestMediaIsRequired ? "checked" : "") />
+                                <span class="switch-toggle-slider">
+                                    <span class="switch-on"></span>
+                                    <span class="switch-off"></span>
+                                </span>
+                            </label>
+                            <label class="form-label ms-6 mb-0" for="requestMediaIsRequired">Medien erforderlich</label>
+                        </div>
+                    </div>
                     <!-- Images -->
                     <div class="row justify-content-center g-5 pb-5">
                         <div class="col-auto" style="width: 200px">
