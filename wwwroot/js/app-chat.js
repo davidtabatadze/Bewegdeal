@@ -1,6 +1,6 @@
 /**
  * Request Chat
- * v1.1.0
+ * v1.1.1
  * Phase 1 (page load)   — GET /RequestChat/Visibility    → show/hide the button
  * Phase 2 (canvas open) — GET /RequestChat/Conversation  → server-rendered HTML, connect SignalR
  */
