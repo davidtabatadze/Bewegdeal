@@ -226,10 +226,40 @@
                             </div>
                             <div class="col-12 col-sm-6">
                                 <div class="form-floating form-floating-outline">
+                                    <input type="text" id="owner" name="owner" class="form-control"
+                                           placeholder="" maxlength="128" value="@user.Owner" />
+                                    <label for="owner">Inhaber</label>
+                                    <div class="invalid-feedback">Inhaber ist erforderlich.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-5 mb-5">
+                            <div class="col-12 col-sm-6">
+                                <div class="form-floating form-floating-outline">
                                     <input type="text" id="address" name="address" class="form-control"
                                            placeholder="" maxlength="256" value="@user.Address" />
                                     <label for="address">Adresse</label>
                                     <div class="invalid-feedback">Adresse ist erforderlich.</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="row gx-3">
+                                    <div class="col-7">
+                                        <div class="form-floating form-floating-outline">
+                                            <input type="text" id="city" name="city" class="form-control"
+                                                   placeholder="" maxlength="64" value="@user.City" />
+                                            <label for="city">Stadt</label>
+                                            <div class="invalid-feedback">Stadt ist erforderlich.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <div class="form-floating form-floating-outline">
+                                            <input type="text" id="zipCode" name="zipCode" class="form-control"
+                                                   placeholder="" maxlength="8" value="@user.ZipCode" />
+                                            <label for="zipCode">Postleitzahl</label>
+                                            <div class="invalid-feedback">Postleitzahl ist erforderlich.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -430,7 +460,7 @@
         function validate() {
         var valid = true;
 
-        ['name', 'address'].forEach(function (id) {
+        ['name', 'owner', 'address', 'city', 'zipCode'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) { el.classList.remove('is-invalid'); }
         });
@@ -449,9 +479,11 @@
         valid = false;
         }
 
-        if (isCompany && !document.getElementById('address').value.trim()) {
-        document.getElementById('address').classList.add('is-invalid');
-        valid = false;
+        if (isCompany) {
+        ['owner', 'address', 'city', 'zipCode'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && !el.value.trim()) { el.classList.add('is-invalid'); valid = false; }
+        });
         }
 
         return valid;
@@ -465,7 +497,7 @@
         });
         }
         watchField('name');
-        if (isCompany) { watchField('address'); }
+        if (isCompany) { ['owner', 'address', 'city', 'zipCode'].forEach(watchField); }
 
         if (isCompany) {
         form.querySelectorAll('input[name="Interests"]').forEach(function (cb) {

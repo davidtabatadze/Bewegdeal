@@ -142,6 +142,9 @@ namespace Bewegdeal.Data.Repositories
                                        .ExecuteUpdateAsync(u => u
                                             .SetProperty(p => p.Name, update.Name)
                                             .SetProperty(p => p.Address, update.Address)
+                                            .SetProperty(p => p.Owner, update.Owner)
+                                            .SetProperty(p => p.City, update.City)
+                                            .SetProperty(p => p.ZipCode, update.ZipCode)
                                             .SetProperty(p => p.Interests, update.Interests)
                                             .SetProperty(p => p.ServiceTerms, update.ServiceTerms)
                                        );

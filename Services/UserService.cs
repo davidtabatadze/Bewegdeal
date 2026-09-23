@@ -84,6 +84,9 @@ namespace Bewegdeal.Services
                 Id = user.Id,
                 Name = model.Name,
                 Address = model.Address,
+                Owner = model.Owner,
+                City = model.City,
+                ZipCode = model.ZipCode,
                 Interests = model.Interests ?? [],
                 ServiceTerms = userServiceTerms
             });
