@@ -207,7 +207,7 @@
                                 <span class="input-group-text">@_settings.MobilePrefix</span>
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="mobile" name="mobile" class="form-control"
-                                           placeholder="" maxlength="16" value="@user.Mobile" />
+                                           placeholder="" maxlength="16" value="@(user.Mobile.StartsWith(_settings.MobilePrefix) ? user.Mobile.Substring(_settings.MobilePrefix.Length) : user.Mobile)" />
                                     <label for="mobile">Mobil</label>
                                 </div>
                             </div>

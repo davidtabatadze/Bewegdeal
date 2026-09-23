@@ -221,7 +221,7 @@ namespace Bewegdeal.Services
             model.Mobile = model.Mobile.Replace(" ", "").Trim();
 
             var settings = await SettingService.GetCached();
-            if (!string.IsNullOrWhiteSpace(settings.MobilePrefix))
+            if (!string.IsNullOrWhiteSpace(settings.MobilePrefix) && !model.Mobile.StartsWith(settings.MobilePrefix))
             {
                 model.Mobile = settings.MobilePrefix + model.Mobile;
             }
