@@ -14,6 +14,9 @@ namespace Bewegdeal.Data.Entities
         public string Salt { get; set; } = string.Empty;
         public string? Number { get; set; } = string.Empty;
         public string? Address { get; set; } = string.Empty;
+        public string? Owner { get; set; }
+        public string? City { get; set; }
+        public string? ZipCode { get; set; }
         public string[] Interests { get; set; } = [];
         public string? ServiceTerms { get; set; }
         public string? Avatar { get; set; }

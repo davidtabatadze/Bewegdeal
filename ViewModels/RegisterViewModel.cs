@@ -12,7 +12,7 @@ namespace Bewegdeal.ViewModels
 
         [Required]
         [MinLength(1)]
-        [MaxLength(32)]
+        [MaxLength(128)]
         public string Name { get; set; } = string.Empty;
 
         [Required]
@@ -25,6 +25,15 @@ namespace Bewegdeal.ViewModels
 
         [MaxLength(256)]
         public string? Address { get; set; }
+
+        [MaxLength(128)]
+        public string? Owner { get; set; }
+
+        [MaxLength(64)]
+        public string? City { get; set; }
+
+        [MaxLength(8)]
+        public string? ZipCode { get; set; }
 
         [Required]
         [MinLength(1)]
@@ -60,6 +69,27 @@ namespace Bewegdeal.ViewModels
                         [nameof(Address)]
                     );
                 }
+                if (string.IsNullOrWhiteSpace(Owner))
+                {
+                    yield return new ValidationResult(
+                        "Owner is required for companies.",
+                        [nameof(Owner)]
+                    );
+                }
+                if (string.IsNullOrWhiteSpace(City))
+                {
+                    yield return new ValidationResult(
+                        "City is required for companies.",
+                        [nameof(City)]
+                    );
+                }
+                if (string.IsNullOrWhiteSpace(ZipCode))
+                {
+                    yield return new ValidationResult(
+                        "Zip code is required for companies.",
+                        [nameof(ZipCode)]
+                    );
+                }
 
                 if (Interests == null || Interests.Length == 0)
                 {
@@ -80,6 +110,9 @@ namespace Bewegdeal.ViewModels
             {
                 Number = null;
                 Address = null;
+                Owner = null;
+                City = null;
+                ZipCode = null;
                 Interests = [];
             }
         }

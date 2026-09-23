@@ -111,12 +111,15 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Password).IsRequired().HasMaxLength(64);
                 e.Property(u => u.Salt).IsRequired();
                 e.Property(u => u.Role).IsRequired().HasMaxLength(16);
-                e.Property(u => u.Name).IsRequired().HasMaxLength(32);
+                e.Property(u => u.Name).IsRequired().HasMaxLength(128);
                 e.Property(u => u.Email).IsRequired().HasMaxLength(32);
                 e.Property(u => u.Mobile).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Number).HasMaxLength(16);
                 e.Property(u => u.Address).HasMaxLength(256);
+                e.Property(u => u.Owner).HasMaxLength(128).IsRequired(false);
+                e.Property(u => u.City).HasMaxLength(64).IsRequired(false);
+                e.Property(u => u.ZipCode).HasMaxLength(8).IsRequired(false);
                 e.Property(u => u.ServiceTerms).HasMaxLength(256).IsRequired(false);
                 e.Property(u => u.Avatar).HasMaxLength(256).IsRequired(false);
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");

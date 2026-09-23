@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
             function resetGeneralStep() {
                 generalValidation.resetForm();
-                ['mobile', 'number', 'address'].forEach(function (name) {
+                ['mobile', 'number', 'owner', 'address', 'city', 'zipCode'].forEach(function (name) {
                     const el = generalStep.querySelector('[name="' + name + '"]');
                     if (!el) return;
                     el.classList.remove('is-invalid');
@@ -72,7 +72,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 ];
                 if (isCompany) {
                     toCheck.push({ el: generalStep.querySelector('[name="number"]'), msg: 'Bitte Identifikationsnummer eingeben' });
+                    toCheck.push({ el: generalStep.querySelector('[name="owner"]'), msg: 'Bitte Inhaber eingeben' });
                     toCheck.push({ el: generalStep.querySelector('[name="address"]'), msg: 'Bitte Adresse eingeben' });
+                    toCheck.push({ el: generalStep.querySelector('[name="city"]'), msg: 'Bitte Stadt eingeben' });
+                    toCheck.push({ el: generalStep.querySelector('[name="zipCode"]'), msg: 'Bitte Postleitzahl eingeben' });
                 }
 
                 let passed = true;
@@ -126,9 +129,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         roleIndicator.className = 'badge bg-label-primary';
                     }
                     const numberCol = document.getElementById('numberCol');
+                    const ownerCol = document.getElementById('ownerCol');
                     const addressCol = document.getElementById('addressCol');
+                    const cityZipRow = document.getElementById('cityZipRow');
                     if (numberCol) numberCol.classList.toggle('d-none', !isCompany);
+                    if (ownerCol) ownerCol.classList.toggle('d-none', !isCompany);
                     if (addressCol) addressCol.classList.toggle('d-none', !isCompany);
+                    if (cityZipRow) cityZipRow.classList.toggle('d-none', !isCompany);
                 }
                 validationStepper.next();
             });
