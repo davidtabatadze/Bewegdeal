@@ -64,7 +64,7 @@ namespace Bewegdeal.Services
             var company = await UserService.Get(
                 invoice?.CompanyId ?? 0,
                 [nameof(UserEntity.Number), nameof(UserEntity.Name), nameof(UserEntity.Address),
-                    nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
+                    nameof(UserEntity.Mobile), nameof(UserEntity.Email), nameof(UserEntity.City), nameof(UserEntity.ZipCode)]
             );
 
             if (invoice is null || company is null)
