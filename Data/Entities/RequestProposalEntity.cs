@@ -17,7 +17,6 @@ namespace Bewegdeal.Data.Entities
         public string Currency { get; set; } = "EUR";
         public DateOnly? Date { get; set; }
         public TimeOnly? Time { get; set; }
-        public string? ServiceTerms { get; set; }
         public string Status { get; set; } = RequestProposalStatusEnum.Pending;
         public string Service { get; set; } = "";
         public DateTime? ReactionDate { get; set; }

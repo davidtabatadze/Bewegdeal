@@ -276,7 +276,6 @@ namespace Bewegdeal.Services
                     nameof(RequestProposalEntity.Date),
                     nameof(RequestProposalEntity.Time),
                     nameof(RequestProposalEntity.Status),
-                    nameof(RequestProposalEntity.ServiceTerms),
                     nameof(RequestProposalEntity.CompanyContactId),
                 ]
             );

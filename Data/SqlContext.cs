@@ -252,7 +252,6 @@ namespace Bewegdeal.Data
                 e.Property(p => p.CreateDate).IsRequired();
                 e.Property(p => p.Cost).IsRequired().HasPrecision(18, 2);
                 e.Property(p => p.Currency).IsRequired().HasMaxLength(4);
-                e.Property(p => p.ServiceTerms).HasMaxLength(256).IsRequired(false);
                 e.Property(p => p.Status).IsRequired().HasMaxLength(16);
                 e.Property(p => p.Service).IsRequired().HasMaxLength(16);
                 e.Property(p => p.ReactionDate).IsRequired(false);

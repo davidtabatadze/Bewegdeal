@@ -230,7 +230,6 @@ namespace Bewegdeal.Tools
                     Currency = "EUR",
                     Date = DateOnly.FromDateTime(proposalDate.AddDays(Rng.Next(1, 14))),
                     Time = new TimeOnly(Rng.Next(8, 18), 0),
-                    ServiceTerms = null, //"Standard service terms apply.",
                     Status = RequestProposalStatusEnum.Accepted,
                     Service = request.Service,
                     CreateDate = proposalDate,
