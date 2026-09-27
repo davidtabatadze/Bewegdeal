@@ -62,22 +62,11 @@ namespace Bewegdeal.Services
             if (user.Role == UserRoleEnum.Company)
             {
                 var contact = await GetContact(user.ContactId);
-                string? serviceTerms = contact?.ServiceTerms;
-
-                if (model.DeleteServiceTerms)
-                {
-                    await FileService.Delete(serviceTerms);
-                    serviceTerms = null;
-                }
+                string? serviceTerms = model.DeleteServiceTerms ? null : contact?.ServiceTerms;
 
                 if (model.ServiceTermsFile is not null)
                 {
-                    var file = await FileService.Create(
-                        model.ServiceTermsFile,
-                        serviceTerms,
-                        5,
-                        [FileTypeEnum.PDF]
-                    );
+                    var file = await FileService.Create(model.ServiceTermsFile, null, 5, [FileTypeEnum.PDF]);
                     if (file.Message is not null)
                     {
                         return GenericResultModel.Fail(file.Message);
@@ -259,7 +248,7 @@ namespace Bewegdeal.Services
                         interests = u.Interests,
                         createDate = u.CreateDate.ToString("yyyy-MM-dd HH:mm"),
                         address = contact == null ? null :
-                                  contact.Address + ", " + contact.ZipCode + "," + contact.City
+                                  contact.Address + ", " + contact.ZipCode + ", " + contact.City
                     };
                 })
             };

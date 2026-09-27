@@ -94,6 +94,7 @@ namespace Bewegdeal.Data.Repositories
                                    .ExecuteUpdateAsync(u =>
                                        u.SetProperty(p => p.ContactId, contact.Id)
                                    );
+                return;
             }
 
             switch (area)
