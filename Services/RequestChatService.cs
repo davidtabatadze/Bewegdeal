@@ -182,7 +182,7 @@ namespace Bewegdeal.Services
             );
             var chat = await ChatService.GetActual(model.RequestNumber ?? "-");
             var existing = await ProposalService.GetActual(chat?.Id ?? 0);
-            var company = await UserService.Get(userId, [nameof(UserEntity.ServiceTerms)]);
+            var company = await UserService.Get(userId, [nameof(UserEntity.ContactId)]);
 
             if (request?.Status == RequestStatusEnum.Negotiation && chat?.Status == ChatStatusEnum.Ongoing && existing is null)
             {
@@ -191,6 +191,7 @@ namespace Bewegdeal.Services
                 var proposal = await ProposalService.Create(new RequestProposalEntity
                 {
                     CompanyId = userId,
+                    CompanyContactId = company?.ContactId ?? 0,
                     CustomerId = chat?.CustomerId ?? 0,
                     ChatId = model.ChatId,
                     RequestId = model.RequestId,

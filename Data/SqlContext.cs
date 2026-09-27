@@ -246,6 +246,7 @@ namespace Bewegdeal.Data
                 e.Property(p => p.ChatId).IsRequired(false);
                 e.Property(p => p.RequestId).IsRequired();
                 e.Property(p => p.CompanyId).IsRequired();
+                e.Property(p => p.CompanyContactId).IsRequired();
                 e.Property(p => p.CustomerId).IsRequired();
                 e.Property(p => p.InvoiceId).IsRequired();
                 e.Property(p => p.CreateDate).IsRequired();
