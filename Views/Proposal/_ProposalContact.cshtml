@@ -1,0 +1,30 @@
+@model Bewegdeal.Models.ProposalCardModel
+
+@if (!string.IsNullOrWhiteSpace(Model.CompanyContact?.Owner))
+{
+    <div class="mb-1 text-body mt-3 text-center">
+        <i class="icon-base ri ri-user-line icon-18px"></i>Inhaber
+        <div class="fw-semibold">@Model.CompanyContact.Owner</div>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.CompanyContact?.Address))
+{
+    <div class="mb-1 text-body mt-3 text-center">
+        <i class="icon-base ri ri-map-pin-line icon-18px"></i>Adresse
+        <div class="fw-semibold">@string.Join(", ", new[] { Model.CompanyContact?.Address, Model.CompanyContact?.ZipCode, Model.CompanyContact?.City }.Where(p => !string.IsNullOrWhiteSpace(p)))</div>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Company?.Mobile))
+{
+    <div class="mb-1 text-body mt-3 text-center">
+        <i class="icon-base ri ri-phone-line icon-18px"></i>Mobil
+        <div class="fw-semibold">@Model.Company.Mobile</div>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Company?.Email))
+{
+    <div class="mb-1 text-body mt-3 text-center">
+        <i class="icon-base ri ri-mail-line icon-18px"></i>E-Mail
+        <div class="fw-semibold">@Model.Company.Email</div>
+    </div>
+}

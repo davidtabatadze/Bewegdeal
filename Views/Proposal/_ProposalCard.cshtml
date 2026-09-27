@@ -44,7 +44,16 @@
     {
         @if (ViewData["Author"] is Bewegdeal.Models.UserAvatarModel author)
         {
-            <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+            <div id="proposal-contact-@Model.Proposal.Id" style="display:none;">
+                @await Html.PartialAsync("~/Views/Proposal/_ProposalContact.cshtml", Model)
+            </div>
+            <div class="d-flex align-items-center justify-content-center gap-1 mb-1 proposal-author-trigger" style="cursor:pointer;"
+                 data-bs-toggle="popover"
+                 data-bs-placement="bottom"
+                 data-bs-trigger="click"
+                 data-bs-custom-class="popover-header-primary"
+                 data-bs-title="Firmendetails"
+                 data-proposal-contact-id="@Model.Proposal.Id">
                 <div class="avatar">
                     @if (author.Url is not null)
                     {
@@ -60,12 +69,12 @@
                         <span class="position-absolute top-10 start-100 translate-middle badge badge-center border rounded-pill bg-primary fw-bold">@author.Rating</span>
                     }
                 </div>
-                <span class="fw-semibold text-body">@author.Name</span>
+                <span class="fw-semibold text-body text-decoration-underline">@author.Name</span>
             </div>
         }
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
             <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
-            <span class="fw-semibold">@Model.Proposal.Cost.ToString("N2")</span>@* @Model.Proposal.Currency *@
+            <span class="fw-bolder text-primary">@Model.Proposal.Cost.ToString("N2")</span>@* @Model.Proposal.Currency *@
         </div>
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
             <i class="icon-base ri ri-calendar-line icon-18px"></i>
@@ -83,34 +92,7 @@
         @if (ViewData["RequestMode"] is not true)
         {
             <hr class="border border-secondary mt-3 mb-3" />
-            @if (!string.IsNullOrWhiteSpace(Model.CompanyContact?.Owner))
-            {
-                <div class="mb-1 text-body mt-3">
-                    <i class="icon-base ri ri-user-line icon-18px"></i>Inhaber
-                    <div class="fw-semibold">@Model.CompanyContact.Owner</div>
-                </div>
-            }
-            @if (!string.IsNullOrWhiteSpace(Model.CompanyContact?.Address))
-            {
-                <div class="mb-1 text-body mt-3">
-                    <i class="icon-base ri ri-map-pin-line icon-18px"></i>Adresse
-                    <div class="fw-semibold">@string.Join(", ", [Model.CompanyContact?.Address, Model.CompanyContact?.ZipCode, Model.CompanyContact?.City])</div>
-                </div>
-            }
-            @if (!string.IsNullOrWhiteSpace(Model.Company?.Mobile))
-            {
-                <div class="mb-1 text-body mt-3">
-                    <i class="icon-base ri ri-phone-line icon-18px"></i>Mobil
-                    <div class="fw-semibold">@Model.Company.Mobile</div>
-                </div>
-            }
-            @if (!string.IsNullOrWhiteSpace(Model.Company?.Email))
-            {
-                <div class="mb-1 text-body mt-3">
-                    <i class="icon-base ri ri-mail-line icon-18px"></i>E-Mail
-                    <div class="fw-semibold">@Model.Company.Email</div>
-                </div>
-            }
+            @await Html.PartialAsync("~/Views/Proposal/_ProposalContact.cshtml", Model)
         }
         @if (Model.Proposal.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer) && ViewData["RequestMode"] is not true)
         {
@@ -129,3 +111,34 @@
         }
     }
 </div>
+<script>
+    (function () {
+        function initAuthorPopovers() {
+            document.querySelectorAll('.proposal-author-trigger[data-bs-toggle="popover"]').forEach(function (el) {
+                if (!bootstrap.Popover.getInstance(el)) {
+                    var contactId = el.getAttribute('data-proposal-contact-id');
+                    var contentEl = document.getElementById('proposal-contact-' + contactId);
+                    new bootstrap.Popover(el, {
+                        customClass: el.getAttribute('data-bs-custom-class') || '',
+                        html: true,
+                        content: contentEl ? contentEl.innerHTML : ''
+                    });
+                }
+            });
+        }
+        if (typeof bootstrap !== 'undefined') {
+            initAuthorPopovers();
+        } else {
+            document.addEventListener('DOMContentLoaded', initAuthorPopovers);
+        }
+
+        document.addEventListener('click', function (e) {
+            document.querySelectorAll('.proposal-author-trigger[data-bs-toggle="popover"]').forEach(function (el) {
+                var popover = bootstrap.Popover.getInstance(el);
+                if (popover && !el.contains(e.target) && !e.target.closest('.popover')) {
+                    popover.hide();
+                }
+            });
+        }, true);
+    })();
+</script>
