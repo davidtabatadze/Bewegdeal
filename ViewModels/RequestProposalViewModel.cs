@@ -6,6 +6,7 @@ namespace Bewegdeal.ViewModels
     public class RequestProposalViewModel : IValidatableObject
     {
         public long ChatId { get; set; }
+
         public long RequestId { get; set; }
 
         [Required]
