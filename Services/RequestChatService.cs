@@ -202,7 +202,6 @@ namespace Bewegdeal.Services
                     Time = TimeOnly.Parse(model.Time!),
                     Status = RequestProposalStatusEnum.Pending,
                     Service = request?.Service ?? "-",
-                    ServiceTerms = company?.ServiceTerms,
                     InvoiceId = 0
                 });
 
@@ -253,7 +252,7 @@ namespace Bewegdeal.Services
             }
         }
 
-        public async Task<RequestProposalEntity?> GetProposal(long proposalId)
+        public async Task<ProposalCardModel?> GetProposal(long proposalId)
         {
             var proposal = await ProposalService.Get(
                 proposalId,
@@ -265,11 +264,21 @@ namespace Bewegdeal.Services
                     nameof(RequestProposalEntity.Time),
                     nameof(RequestProposalEntity.Status),
                     nameof(RequestProposalEntity.ServiceTerms),
+                    nameof(RequestProposalEntity.CompanyContactId),
                 ]
             );
 
-            proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
-            return proposal;
+            var contact = await UserService.GetContact(proposal?.CompanyContactId ?? 0);
+            if (contact?.ServiceTerms != null)
+            {
+                contact.ServiceTerms = FileService.GetUrl(contact.ServiceTerms);
+            }
+
+            return new ProposalCardModel
+            {
+                Proposal = proposal,
+                CompanyContact = contact
+            };
         }
 
     }
