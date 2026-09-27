@@ -88,7 +88,7 @@ namespace Bewegdeal.Tools
             var companies = await context.Users
                 .Where(u => u.Role == UserRoleEnum.Company && u.Status == UserStatusEnum.Active)
                 .Where(u => u.Id >= 8)
-                .Select(u => u.Id)
+                .Select(u => new { u.Id, u.ContactId })
                 .ToListAsync();
 
             if (customers.Count == 0 || companies.Count == 0) { return; }
@@ -103,12 +103,14 @@ namespace Bewegdeal.Tools
             var toGenerate = dataRange - existingCount;
 
             // ── Phase 1: requests ──────────────────────────────────────────────
-            var requestMeta = new List<(RequestEntity Request, long CustomerId, long CompanyId)>(toGenerate);
+            var requestMeta = new List<(RequestEntity Request, long CustomerId, long CompanyId, long CompanyContactId)>(toGenerate);
 
             for (var i = 0; i < toGenerate; i++)
             {
                 var customerId = Pick(customers);
-                var companyId = Pick(companies);
+                var company = Pick(companies);
+                var companyId = company.Id;
+                var companyContactId = company.ContactId;
                 var service = Pick(Services);
                 var status = Pick(RequestStatuses);
                 var createDate = RandomDate(from, now);
@@ -145,15 +147,15 @@ namespace Bewegdeal.Tools
                 }
 
                 context.Requests.Add(request);
-                requestMeta.Add((request, customerId, companyId));
+                requestMeta.Add((request, customerId, companyId, companyContactId));
             }
 
             await context.SaveChangesAsync();
 
             // ── Phase 2: chats ─────────────────────────────────────────────────
-            var chatMeta = new List<(ChatEntity Chat, RequestEntity Request, long CustomerId, long CompanyId)>();
+            var chatMeta = new List<(ChatEntity Chat, RequestEntity Request, long CustomerId, long CompanyId, long CompanyContactId)>();
 
-            foreach (var (request, customerId, companyId) in requestMeta)
+            foreach (var (request, customerId, companyId, companyContactId) in requestMeta)
             {
                 if (request.Status != RequestStatusEnum.Negotiation &&
                     request.Status != RequestStatusEnum.Agreed &&
@@ -181,13 +183,13 @@ namespace Bewegdeal.Tools
                 };
 
                 context.Chats.Add(chat);
-                chatMeta.Add((chat, request, customerId, companyId));
+                chatMeta.Add((chat, request, customerId, companyId, companyContactId));
             }
 
             await context.SaveChangesAsync();
 
             // ── Phase 3: chat messages ─────────────────────────────────────────
-            foreach (var (chat, request, customerId, companyId) in chatMeta)
+            foreach (var (chat, request, customerId, companyId, companyContactId) in chatMeta)
             {
                 var count = Rng.Next(2, 7);
                 var fraudMessageIndex = chat.Fraud == ChatFraudEnum.Dubious ? Rng.Next(0, count) : -1;
@@ -208,9 +210,9 @@ namespace Bewegdeal.Tools
             await context.SaveChangesAsync();
 
             // ── Phase 4: proposals ─────────────────────────────────────────────
-            var proposalMeta = new List<(RequestProposalEntity Proposal, RequestEntity Request, long CompanyId)>();
+            var proposalMeta = new List<(RequestProposalEntity Proposal, RequestEntity Request, long CompanyId, long CompanyContactId)>();
 
-            foreach (var (chat, request, customerId, companyId) in chatMeta)
+            foreach (var (chat, request, customerId, companyId, companyContactId) in chatMeta)
             {
                 if (request.Status != RequestStatusEnum.Agreed &&
                     request.Status != RequestStatusEnum.Resolved)
@@ -225,6 +227,7 @@ namespace Bewegdeal.Tools
                     ChatId = chat.Id,
                     RequestId = request.Id,
                     CompanyId = companyId,
+                    CompanyContactId = companyContactId,
                     CustomerId = customerId,
                     Cost = request.Cost,
                     Currency = "EUR",
@@ -237,13 +240,13 @@ namespace Bewegdeal.Tools
                 };
 
                 context.RequestProposals.Add(proposal);
-                proposalMeta.Add((proposal, request, companyId));
+                proposalMeta.Add((proposal, request, companyId, companyContactId));
             }
 
             await context.SaveChangesAsync();
 
             // set ExecutorId on agreed/resolved requests
-            foreach (var (proposal, request, companyId) in proposalMeta)
+            foreach (var (proposal, request, companyId, companyContactId) in proposalMeta)
             {
                 request.ExecutorId = companyId;
             }
@@ -253,7 +256,7 @@ namespace Bewegdeal.Tools
             // ── Phase 5: invoices (resolved only) ─────────────────────────────
             var invoiceMeta = new List<(InvoiceEntity Invoice, RequestProposalEntity Proposal)>();
 
-            foreach (var (proposal, request, companyId) in proposalMeta)
+            foreach (var (proposal, request, companyId, companyContactId) in proposalMeta)
             {
                 if (request.Status != RequestStatusEnum.Resolved) { continue; }
 
@@ -270,6 +273,7 @@ namespace Bewegdeal.Tools
                     RequestNumber = request.Number,
                     ProposalId = proposal.Id,
                     CompanyId = companyId,
+                    CompanyContactId = companyContactId,
                     CustomerId = request.RequesterId,
                     Currency = "EUR",
                     ServiceCost = proposal.Cost,
