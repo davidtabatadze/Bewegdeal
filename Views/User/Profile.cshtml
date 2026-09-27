@@ -227,7 +227,7 @@
                             <div class="col-12 col-sm-6">
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="owner" name="owner" class="form-control"
-                                           placeholder="" maxlength="128" value="@user.Owner" />
+                                           placeholder="" maxlength="128" value="@profile.Contact?.Owner" />
                                     <label for="owner">Inhaber</label>
                                     <div class="invalid-feedback">Inhaber ist erforderlich.</div>
                                 </div>
@@ -237,7 +237,7 @@
                             <div class="col-12 col-sm-6">
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="address" name="address" class="form-control"
-                                           placeholder="" maxlength="256" value="@user.Address" />
+                                           placeholder="" maxlength="256" value="@profile.Contact?.Address" />
                                     <label for="address">Adresse</label>
                                     <div class="invalid-feedback">Adresse ist erforderlich.</div>
                                 </div>
@@ -247,7 +247,7 @@
                                     <div class="col-7">
                                         <div class="form-floating form-floating-outline">
                                             <input type="text" id="city" name="city" class="form-control"
-                                                   placeholder="" maxlength="64" value="@user.City" />
+                                                   placeholder="" maxlength="64" value="@profile.Contact?.City" />
                                             <label for="city">Stadt</label>
                                             <div class="invalid-feedback">Stadt ist erforderlich.</div>
                                         </div>
@@ -255,7 +255,7 @@
                                     <div class="col-5">
                                         <div class="form-floating form-floating-outline">
                                             <input type="text" id="zipCode" name="zipCode" class="form-control"
-                                                   placeholder="" maxlength="8" value="@user.ZipCode" />
+                                                   placeholder="" maxlength="8" value="@profile.Contact?.ZipCode" />
                                             <label for="zipCode">Postleitzahl</label>
                                             <div class="invalid-feedback">Postleitzahl ist erforderlich.</div>
                                         </div>

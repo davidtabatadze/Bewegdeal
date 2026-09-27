@@ -13,6 +13,7 @@ namespace Bewegdeal.Data
         #region DbSets
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<UserRatingEntity> UserRatings => Set<UserRatingEntity>();
+        public DbSet<UserContactEntity> UserContacts => Set<UserContactEntity>();
         public DbSet<SettingsEntity> Settings => Set<SettingsEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
         public DbSet<RequestFileEntity> RequestFiles => Set<RequestFileEntity>();
@@ -82,6 +83,7 @@ namespace Bewegdeal.Data
         {
             ConfigureUsers(modelBuilder);
             ConfigureUserRatings(modelBuilder);
+            ConfigureUserContacts(modelBuilder);
             ConfigureSettings(modelBuilder);
             ConfigureRequests(modelBuilder);
             ConfigureRequestFiles(modelBuilder);
@@ -116,11 +118,7 @@ namespace Bewegdeal.Data
                 e.Property(u => u.Mobile).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Status).IsRequired().HasMaxLength(16);
                 e.Property(u => u.Number).HasMaxLength(16);
-                e.Property(u => u.Address).HasMaxLength(256);
-                e.Property(u => u.Owner).HasMaxLength(128).IsRequired(false);
-                e.Property(u => u.City).HasMaxLength(64).IsRequired(false);
-                e.Property(u => u.ZipCode).HasMaxLength(8).IsRequired(false);
-                e.Property(u => u.ServiceTerms).HasMaxLength(256).IsRequired(false);
+                e.Property(u => u.ContactId).IsRequired().HasDefaultValue(0L);
                 e.Property(u => u.Avatar).HasMaxLength(256).IsRequired(false);
                 e.Property(u => u.Theme).IsRequired().HasMaxLength(8).HasDefaultValue("light");
                 e.Property(u => u.AcquaintedHIW).IsRequired().HasDefaultValue(false);
@@ -155,6 +153,27 @@ namespace Bewegdeal.Data
                 e.Property(f => f.EvaluatorId).IsRequired();
                 e.Property(i => i.CreateDate).IsRequired();
                 e.Property(r => r.Value).IsRequired().HasPrecision(18, 1);
+            });
+        }
+
+        private void ConfigureUserContacts(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserContactEntity>(e =>
+            {
+                e.ToTable(_prefix + "UserContacts");
+
+                e.HasKey(c => c.Id);
+                e.Property(c => c.Id).ValueGeneratedOnAdd();
+
+                e.HasIndex(c => c.UserId);
+
+                e.Property(c => c.UserId).IsRequired();
+                e.Property(c => c.Address).HasMaxLength(256).IsRequired(false);
+                e.Property(c => c.Owner).HasMaxLength(128).IsRequired(false);
+                e.Property(c => c.City).HasMaxLength(64).IsRequired(false);
+                e.Property(c => c.ZipCode).HasMaxLength(8).IsRequired(false);
+                e.Property(c => c.ServiceTerms).HasMaxLength(256).IsRequired(false);
+                e.Property(c => c.CreateDate).IsRequired();
             });
         }
 

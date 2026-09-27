@@ -43,13 +43,13 @@ namespace Bewegdeal.Data.Repositories
                 await Create(new UserEntity
                 {
                     Id = row.Id,
+                    ContactId = 0,
                     Role = row.Role,
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
                     Number = row.Number ?? "-",
                     Mobile = row.Mobile ?? "-",
-                    Address = row.Address,
                     Password = hash,
                     Salt = salt,
                     CreateDate = DateTime.Now,
@@ -82,8 +82,20 @@ namespace Bewegdeal.Data.Repositories
             await Update(UserUpdateAreaEnum.Rating, new UserEntity { Id = userId, Rating = rating });
         }
 
-        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update, UserContactEntity? contact = null)
         {
+            if (area == UserUpdateAreaEnum.Contact && contact != null)
+            {
+                contact.UserId = update.Id;
+                contact.CreateDate = DateTime.Now;
+                contact = await Create(contact);
+
+                await Context.Users.Where(u => u.Id == update.Id)
+                                   .ExecuteUpdateAsync(u =>
+                                       u.SetProperty(p => p.ContactId, contact.Id)
+                                   );
+            }
+
             switch (area)
             {
 
@@ -141,12 +153,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u => u
                                             .SetProperty(p => p.Name, update.Name)
-                                            .SetProperty(p => p.Address, update.Address)
-                                            .SetProperty(p => p.Owner, update.Owner)
-                                            .SetProperty(p => p.City, update.City)
-                                            .SetProperty(p => p.ZipCode, update.ZipCode)
                                             .SetProperty(p => p.Interests, update.Interests)
-                                            .SetProperty(p => p.ServiceTerms, update.ServiceTerms)
                                        );
                     break;
 
@@ -171,6 +178,27 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<int> Count(UserFilter filter)
             => await ApplyFilters(Context.Users.AsQueryable(), filter).CountAsync();
+
+        public async Task<UserContactEntity?> GetContact(long contactId)
+        {
+            if (contactId == 0)
+            {
+                return null;
+            }
+            return await Get<UserContactEntity>(contactId);
+        }
+
+        public async Task<List<UserContactEntity>> LoadContacts(IEnumerable<long> contactIds)
+        {
+            contactIds = (contactIds ?? []).Where(c => c != 0);
+
+            if (!contactIds.Any())
+            {
+                return [];
+            }
+
+            return await Load<UserContactEntity>(contactIds);
+        }
 
         private IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
         {
@@ -220,8 +248,7 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u =>
                     u.Name.ToLower().Contains(term) ||
                     u.Email.ToLower().Contains(term) ||
-                    (u.Mobile != null && u.Mobile.ToLower().Contains(term)) ||
-                    (u.Address != null && u.Address.ToLower().Contains(term))
+                    (u.Mobile != null && u.Mobile.ToLower().Contains(term))
                 );
             }
 

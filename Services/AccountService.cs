@@ -251,25 +251,41 @@ namespace Bewegdeal.Services
             // do create user
             var user = await UserService.Create(new UserEntity
             {
+                ContactId = 0,
                 Role = model.Role,
                 Name = model.Name,
                 Email = model.Email,
                 Number = model.Number,
                 Mobile = model.Mobile,
-                Address = model.Address,
-                Owner = model.Owner,
-                City = model.City,
-                ZipCode = model.ZipCode,
                 Password = hash,
                 Salt = salt,
                 Interests = model.Interests ?? [],
                 Status = UserStatusEnum.Unverified,
-                ServiceTerms = userServiceTerms,
                 AcquaintedHIW = false,
                 Theme = model.Theme == UserThemeEnum.Dark ? UserThemeEnum.Dark : UserThemeEnum.Light,
                 CreateDate = DateTime.Now,
                 TermsAndConditionsAcceptDate = DateTime.Now
             });
+
+            // create contact
+            if (model.Role == UserRoleEnum.Company)
+            {
+                await UserService.Update(
+                    UserUpdateAreaEnum.Contact,
+                    new UserEntity
+                    {
+                        Id = user.Id
+                    },
+                    new UserContactEntity
+                    {
+                        Address = model.Address,
+                        Owner = model.Owner,
+                        City = model.City,
+                        ZipCode = model.ZipCode,
+                        ServiceTerms = userServiceTerms
+                    }
+                );
+            }
 
             // send verification
             var verification = await VerifySend(user.Email, user.Mobile);

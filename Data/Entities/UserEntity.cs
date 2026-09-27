@@ -5,6 +5,7 @@ namespace Bewegdeal.Data.Entities
     public class UserEntity : IEntity
     {
         public long Id { get; set; }
+        public long ContactId { get; set; }
         public string Role { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -13,12 +14,7 @@ namespace Bewegdeal.Data.Entities
         public string Password { get; set; } = string.Empty;
         public string Salt { get; set; } = string.Empty;
         public string? Number { get; set; } = string.Empty;
-        public string? Address { get; set; } = string.Empty;
-        public string? Owner { get; set; }
-        public string? City { get; set; }
-        public string? ZipCode { get; set; }
         public string[] Interests { get; set; } = [];
-        public string? ServiceTerms { get; set; }
         public string? Avatar { get; set; }
         public string Theme { get; set; } = "light";
         public bool AcquaintedHIW { get; set; }

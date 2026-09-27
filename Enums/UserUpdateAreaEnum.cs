@@ -9,6 +9,7 @@
         AcceptHIW,
         Profile,
         Avatar,
-        Rating
+        Rating,
+        Contact
     }
 }
