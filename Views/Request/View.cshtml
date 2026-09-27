@@ -191,9 +191,9 @@
             </div> *@
             </div>
             <div class="col-12 col-md-4 d-flex justify-content-center align-items-start">
-                @if (vm.Proposal is not null)
+                @if (vm.ProposalCard?.Proposal is not null)
                 {
-                    @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.Proposal, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
+                    @await Html.PartialAsync("~/Views/Proposal/_ProposalCard.cshtml", vm.ProposalCard, new ViewDataDictionary(ViewData) { { "RequestMode", true }, { "Author", vm.ProposalCompany } })
                 }
             </div>
         </div>

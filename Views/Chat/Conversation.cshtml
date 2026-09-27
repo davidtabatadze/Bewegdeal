@@ -1,5 +1,5 @@
-@using Bewegdeal.Data.Entities
 @using Bewegdeal.Enums
+@using Bewegdeal.Models
 @using System.Text.RegularExpressions
 @model Bewegdeal.Models.ChatHistoryModel
 
@@ -128,7 +128,7 @@ else
                         var isMine = msg.SenderId == Model.ViewerId;
                         var msgDay = msg.SentDate.ToString("yyyy-MM-dd");
                         var proposalMatch = proposalRegex.Match(msg.Content);
-                        RequestProposalEntity? proposalCard = null;
+                        ProposalCardModel? proposalCard = null;
                         var isProposal = proposalMatch.Success &&
                                          Model.Proposals.TryGetValue(long.Parse(proposalMatch.Groups[1].Value), out proposalCard);
                         if (lastDay != msgDay)
