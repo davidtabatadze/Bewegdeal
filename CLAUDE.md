@@ -266,16 +266,17 @@ Data/
 ├── Entities/
 │   ├── UserEntity.cs            # Users table
 │   ├── UserRatingEntity.cs      # UserRatings table: UserId, EvaluatorId, Value, CreateDate
+│   ├── UserContactEntity.cs     # UserContacts table: UserId, Owner, Address, City, ZipCode, ServiceTerms (file key), CreateDate
 │   ├── FileEntity.cs            # Files table (metadata only)
 │   ├── SettingsEntity.cs        # Settings table (single row, Id = 1)
 │   ├── RequestEntity.cs         # Requests table
 │   ├── RequestFileEntity.cs     # RequestFiles table
 │   ├── RequestAgreementEntity.cs
-│   ├── RequestProposalEntity.cs # RequestProposals table: ChatId, RequestId, CompanyId, Cost, Currency,
-│   │                            #   Date, Time, ServiceTerms, Status, ReactionDate, ReactionReason
+│   ├── RequestProposalEntity.cs # RequestProposals table: ChatId, RequestId, CompanyId, CompanyContactId,
+│   │                            #   CustomerId, Cost, Currency, Date, Time, Status, ReactionDate, ReactionReason
 │   ├── InvoiceEntity.cs         # Invoices table: Number, Status, RequestNumber, RequestId, ProposalId,
-│   │                            #   CompanyId, CustomerId, Currency, ServiceCost, SubtotalCost, TotalCost,
-│   │                            #   NotificationSent, CreateDate, PaymentDate
+│   │                            #   CompanyId, CompanyContactId, CustomerId, Currency, ServiceCost, SubtotalCost,
+│   │                            #   TotalCost, NotificationSent, CreateDate, PaymentDate
 │   ├── ChatEntity.cs            # Chats table: Key, RequestId, CustomerId, CompanyId, Fraud, Status
 │   ├── ChatMessageEntity.cs     # ChatMessages table: ChatId, SenderId, Content, SentDate, IsRead, IsFraud
 │   └── FraudWordEntity.cs       # FraudWords table: Word
@@ -347,7 +348,8 @@ Models/
 ├── RequestFileModel.cs
 ├── ChatHistoryModel.cs          # @model for Conversation.cshtml: Mode, ChatKey, ChatStatus, RequestStatus,
 │                                #   ViewerId/Initials/PictureUrl, OtherParty Name/Initials/PictureUrl/Rating,
-│                                #   Messages, Proposals (Dictionary<long, RequestProposalEntity>), ProposalPending
+│                                #   Messages, Proposals (Dictionary<long, ProposalCardModel>), ProposalPending
+├── ProposalCardModel.cs         # Proposal + CompanyContact; used as @model for _ProposalCard.cshtml
 ├── ChatUnreadSummary.cs         # SenderName, Preview, RequestNumber, Date — returned by ChatService.GetMessageUnread()
 ├── UserProfileModel.cs          # Profile page model: UserEntity User, Avatar, ServiceTermsFileName/Url
 └── UserAvatarModel.cs           # Url, Initials, Name
@@ -519,12 +521,13 @@ wwwroot/js/
 | ChatId | long? | FK to Chats |
 | RequestId | long | FK to Requests |
 | CompanyId | long | FK to Users |
+| CompanyContactId | long | FK to UserContacts — snapshot of company contact at proposal time |
+| CustomerId | long | FK to Users |
 | CreateDate | DateTime | UTC |
 | Cost | decimal | proposed cost |
 | Currency | string | default "EUR" |
 | Date | DateOnly? | proposed date |
 | Time | TimeOnly? | proposed time |
-| ServiceTerms | string? | company-provided service terms text |
 | Status | string | `RequestProposalStatusEnum` value |
 | ReactionDate | DateTime? | when customer accepted/rejected |
 | ReactionReason | string? | rejection reason |
@@ -549,6 +552,18 @@ wwwroot/js/
 | PaymentDate | DateTime? | when marked paid |
 
 **UserRatingEntity** (`UserRatings` table): `Id` (long PK), `UserId`, `EvaluatorId` (both FK to Users), `Value` (decimal), `CreateDate` (DateTime).
+
+**UserContactEntity** (`UserContacts` table):
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | long | PK, auto-increment |
+| UserId | long | FK to Users |
+| Owner | string? | contact person name, max 128 |
+| Address | string? | max 256 |
+| City | string? | max 64 |
+| ZipCode | string? | max 8 |
+| ServiceTerms | string? | file key (PDF); resolved to URL via `FileService.GetUrl` before use |
+| CreateDate | DateTime | UTC |
 
 **ChatEntity** (`Chats` table):
 | Field | Type | Notes |
@@ -761,8 +776,9 @@ Proposals allow a Company to offer terms (cost, date, time, service terms) to a 
 - `ChatService.GetMessageUnread()` strips the prefix before generating notification preview text
 
 ### _ProposalCard.cshtml
-- `@model RequestProposalEntity`; colored border (success/danger/warning) by status
+- `@model ProposalCardModel` (`Proposal` + `CompanyContact`); colored border (success/danger/warning) by status
 - `ViewData["RequestMode"] = true` → narrow inline style (used inside message thread)
+- `Model.CompanyContact.ServiceTerms` (resolved URL) → service terms download link
 
 ---
 
@@ -863,7 +879,7 @@ Status/role/fraud icon maps in JS read labels from `window.*Labels` objects inje
 
 ### ChatHistoryModel
 - `OtherPartyRating` (decimal) — loaded from `UserRatingEntity` aggregation; shown in conversation header
-- `Proposals` (Dictionary&lt;long, RequestProposalEntity&gt;) — all proposals for the chat, keyed by id
+- `Proposals` (Dictionary&lt;long, ProposalCardModel&gt;) — all proposals for the chat, keyed by id; each carries the proposal entity + company contact snapshot
 - `ProposalPending` (bool) — true if any proposal has Status=Pending
 
 ### Fraud Word Management
