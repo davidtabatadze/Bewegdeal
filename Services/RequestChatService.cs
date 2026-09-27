@@ -104,18 +104,31 @@ namespace Bewegdeal.Services
 
             var messages = await ChatService.LoadMessages(data.chat?.Id ?? 0);
             var proposals = await ProposalService.Load(data.chat?.Id ?? 0);
+            var contacts = await UserService.LoadContacts(proposals.Select(p => p.CompanyContactId));
             var users = await UserService.Load(
                 [data.chat?.CustomerId ?? 0, data.chat?.CompanyId ?? 0],
                 [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
             );
 
-            foreach (var proposal in proposals)
-            {
-                proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
-            }
-
             var viewerAvatar = UserService.GetAvatar(users.FirstOrDefault(u => u.Id == userId));
             var otherPartyAvatar = UserService.GetAvatar(users.FirstOrDefault(u => u.Id != userId));
+
+            var proposalCards = new Dictionary<long, ProposalCardModel> { };
+            foreach (var proposal in proposals)
+            {
+                var contact = contacts.FirstOrDefault(c => c.Id == proposal.CompanyContactId);
+                if (contact?.ServiceTerms != null)
+                {
+                    contact.ServiceTerms = FileService.GetUrl(contact.ServiceTerms);
+                }
+
+                proposalCards.Add(proposal.Id,
+                    new ProposalCardModel
+                    {
+                        Proposal = proposal,
+                        CompanyContact = contact
+                    });
+            }
 
             return new ChatHistoryModel
             {
@@ -131,7 +144,7 @@ namespace Bewegdeal.Services
                 OtherPartyPictureUrl = otherPartyAvatar.Url,
                 OtherPartyRating = otherPartyAvatar.Rating,
                 Messages = messages,
-                Proposals = proposals.ToDictionary(p => p.Id),
+                Proposals = proposalCards,
                 ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }
