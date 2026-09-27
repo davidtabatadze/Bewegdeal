@@ -13,6 +13,7 @@ namespace Bewegdeal.Services
             var settings = await SettingService.GetCached();
             var commision = proposal.Cost / 100 * settings.InvoiceCommissionPersent;
             var tax = commision / 100 * settings.InvoiceTaxPersent;
+            var company = await UserService.Get(proposal.CompanyId, [nameof(UserEntity.ContactId)]);
 
             return await InvoiceRepository.Create(new InvoiceEntity
             {
@@ -23,6 +24,7 @@ namespace Bewegdeal.Services
                 RequestNumber = request.Number,
                 ProposalId = proposal.Id,
                 CompanyId = proposal.CompanyId,
+                CompanyContactId = company?.ContactId ?? 0,
                 CustomerId = request.RequesterId,
                 Currency = proposal.Currency,
 
@@ -63,9 +65,10 @@ namespace Bewegdeal.Services
 
             var company = await UserService.Get(
                 invoice?.CompanyId ?? 0,
-                [nameof(UserEntity.Number), nameof(UserEntity.Name), nameof(UserEntity.Address),
-                    nameof(UserEntity.Mobile), nameof(UserEntity.Email), nameof(UserEntity.City), nameof(UserEntity.ZipCode)]
+                [nameof(UserEntity.Number), nameof(UserEntity.Name), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
+
+            var companyContact = await UserService.GetContact(invoice?.CompanyContactId ?? 0);
 
             if (invoice is null || company is null)
             {
@@ -75,7 +78,14 @@ namespace Bewegdeal.Services
             return GenericResultModel<InvoicePrintModel>.Ok(new InvoicePrintModel
             {
                 Data = invoice,
-                Company = company
+                Company = company,
+                CompanyContact = companyContact ?? new UserContactEntity
+                {
+                    City = "-",
+                    Owner = "-",
+                    ZipCode = "-",
+                    Address = "-"
+                }
             });
         }
 

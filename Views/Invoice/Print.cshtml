@@ -15,6 +15,7 @@
     var invoice = (Bewegdeal.Models.InvoicePrintModel)ViewBag.Invoice;
     var data = invoice.Data!;
     var company = invoice.Company!;
+    var companyContact = invoice.CompanyContact;
 }
 
 @* ************** Content ************** *@
@@ -51,7 +52,7 @@
             <p class="mb-1">@company.Number</p>
             <p class="mb-1">@company.Mobile</p>
             <p class="mb-0">@company.Email</p>
-            <p class="mb-1">@company.Address, @company.ZipCode @company.City</p>
+            <p class="mb-1">@companyContact?.Address, @companyContact?.ZipCode @companyContact?.City</p>
         </div>
         <div class="my-2">
             <h6 class="fw-bold">Bankverbindung:</h6>

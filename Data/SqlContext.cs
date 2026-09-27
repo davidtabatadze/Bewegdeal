@@ -328,6 +328,7 @@ namespace Bewegdeal.Data
                 e.Property(i => i.ProposalId).IsRequired();
                 e.Property(i => i.CustomerId).IsRequired();
                 e.Property(i => i.CompanyId).IsRequired();
+                e.Property(i => i.CompanyContactId).IsRequired();
 
                 e.Property(i => i.Currency).IsRequired().HasMaxLength(4);
                 e.Property(i => i.TaxPersent).IsRequired();

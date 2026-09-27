@@ -12,6 +12,7 @@ namespace Bewegdeal.Data.Entities
         public long RequestId { get; set; }
         public long ProposalId { get; set; }
         public long CompanyId { get; set; }
+        public long CompanyContactId { get; set; }
         public long CustomerId { get; set; }
         public string Currency { get; set; } = "EUR";
         public decimal ServiceCost { get; set; }
