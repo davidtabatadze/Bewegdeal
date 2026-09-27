@@ -107,7 +107,8 @@ namespace Bewegdeal.Services
             var contacts = await UserService.LoadContacts(proposals.Select(p => p.CompanyContactId));
             var users = await UserService.Load(
                 [data.chat?.CustomerId ?? 0, data.chat?.CompanyId ?? 0],
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar),
+                    nameof(UserEntity.Rating), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
 
             var viewerAvatar = UserService.GetAvatar(users.FirstOrDefault(u => u.Id == userId));
@@ -126,7 +127,8 @@ namespace Bewegdeal.Services
                     new ProposalCardModel
                     {
                         Proposal = proposal,
-                        CompanyContact = contact
+                        CompanyContact = contact,
+                        Company = users.FirstOrDefault(u => u.Id == proposal.CompanyId)
                     });
             }
 
@@ -276,8 +278,14 @@ namespace Bewegdeal.Services
                     nameof(RequestProposalEntity.Date),
                     nameof(RequestProposalEntity.Time),
                     nameof(RequestProposalEntity.Status),
-                    nameof(RequestProposalEntity.CompanyContactId),
+                    nameof(RequestProposalEntity.CompanyId),
+                    nameof(RequestProposalEntity.CompanyContactId)
                 ]
+            );
+
+            var company = await UserService.Get(
+                proposal?.CompanyId ?? 0,
+                [nameof(UserEntity.Id), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
 
             var contact = await UserService.GetContact(proposal?.CompanyContactId ?? 0);
@@ -289,7 +297,8 @@ namespace Bewegdeal.Services
             return new ProposalCardModel
             {
                 Proposal = proposal,
-                CompanyContact = contact
+                Company = company,
+                CompanyContact = contact,
             };
         }
 

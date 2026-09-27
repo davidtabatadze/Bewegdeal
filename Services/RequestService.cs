@@ -353,7 +353,8 @@ namespace Bewegdeal.Services
 
             var proposalCompany = await UserService.Get(
                 proposal.CompanyId,
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar),
+                    nameof(UserEntity.Rating), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
 
             var proposalContact = await UserService.GetContact(proposal.CompanyContactId);
@@ -365,7 +366,8 @@ namespace Bewegdeal.Services
             var proposalCard = new ProposalCardModel
             {
                 Proposal = proposal,
-                CompanyContact = proposalContact
+                Company = proposalCompany,
+                CompanyContact = proposalContact,
             };
 
             return GenericResultModel<RequestModel>.Ok(new RequestModel
