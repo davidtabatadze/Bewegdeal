@@ -26,9 +26,9 @@ namespace Bewegdeal.Data.Repositories
                 //new UserEntity { Id = 8, Name = "Gerhard Schröder",Email = "gerhard@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
                 //new UserEntity { Id = 9, Name = "Bastian Schweinsteiger",Email = "bastian@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
                 //new UserEntity { Id = 10, Name = "Ludwig Van Beethoven",Email = "ludwig@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000", Address="000" },
-                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111", Address="111" },
-                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222", Address="222" },
+                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000" },
+                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111" },
+                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222" },
             };
 
             foreach (var row in rows)
@@ -40,6 +40,14 @@ namespace Bewegdeal.Data.Repositories
 
                 var (hash, salt) = PasswordTool.HashPassword(row.Password);
 
+                var contact = new UserContactEntity
+                {
+                    Address = "Somewhere, over the rainbow",
+                    ZipCode = "0000",
+                    City = "Neverland",
+                    Owner = "John Doe"
+                };
+
                 await Create(new UserEntity
                 {
                     Id = row.Id,
@@ -49,12 +57,17 @@ namespace Bewegdeal.Data.Repositories
                     Name = row.Name,
                     Email = row.Email,
                     Number = row.Number ?? "-",
-                    Mobile = row.Mobile ?? "-",
+                    Mobile = row.Mobile ?? "+995000000000",
                     Password = hash,
                     Salt = salt,
                     CreateDate = DateTime.Now,
                     TermsAndConditionsAcceptDate = DateTime.Now
                 });
+
+                if (row.Role == UserRoleEnum.Company)
+                {
+                    await Update(UserUpdateAreaEnum.Contact, new UserEntity { Id = row.Id }, contact);
+                }
             }
         }
 

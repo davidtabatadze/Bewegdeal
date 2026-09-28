@@ -12,6 +12,7 @@ namespace Bewegdeal.Controllers;
 
 public class AccountController(AccountService AccountService, IMemoryCache Cache) : XBaseController
 {
+    private bool VerifyMobile => AccountService.VerifyMobile;
 
     #region Login
 
@@ -141,6 +142,7 @@ public class AccountController(AccountService AccountService, IMemoryCache Cache
     {
         ViewBag.Email = email;
         ViewBag.Mobile = mobile;
+        ViewBag.MobileVerification = VerifyMobile;
         return View();
     }
 
@@ -149,6 +151,7 @@ public class AccountController(AccountService AccountService, IMemoryCache Cache
     {
         ViewBag.Email = email;
         ViewBag.Mobile = mobile;
+        ViewBag.MobileVerification = VerifyMobile;
 
         var result = await AccountService.VerifyAccount(email, mobile, emailOtp, mobileOtp);
 
@@ -167,6 +170,7 @@ public class AccountController(AccountService AccountService, IMemoryCache Cache
     {
         ViewBag.Email = email;
         ViewBag.Mobile = mobile;
+        ViewBag.MobileVerification = VerifyMobile;
 
         var result = await AccountService.VerifySend(email, mobile);
 

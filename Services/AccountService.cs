@@ -7,8 +7,10 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bewegdeal.Services
 {
-    public class AccountService(UserService UserService, FileService FileService, SettingService SettingService, BrevoService BrevoService, IMemoryCache Cache)
+    public class AccountService(IConfiguration Configuration, UserService UserService, FileService FileService, SettingService SettingService, BrevoService BrevoService, IMemoryCache Cache)
     {
+        public bool VerifyMobile => Configuration.GetValue<bool?>("Verification:Mobile") ?? true;
+
         public async Task<GenericResultModel<UserEntity>> Login(string email, string password)
         {
             var user = await UserService.Get(email, [
@@ -125,19 +127,23 @@ namespace Bewegdeal.Services
             var cachedMobileOtp = Cache.Get<string>(smsCacheKey);
 
             // expired ...
-            if (cachedEmailOtp is null || cachedMobileOtp is null)
+            if (cachedEmailOtp is null)
             {
-                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.Expired);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Verify.Expired);
+            }
+            if (cachedMobileOtp is null && VerifyMobile)
+            {
+                return GenericResultModel.Fail(AnnotationEnum.Account.Verify.Expired);
             }
 
             // invalid ...
             if (cachedEmailOtp != emailOtp)
             {
-                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidEmail);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Verify.InvalidEmail);
             }
-            if (cachedMobileOtp != mobileOtp)
+            if (cachedMobileOtp != mobileOtp && VerifyMobile)
             {
-                return GenericResultModel.Fail(AnnotationEnum.Account.VerifyEmail.InvalidMobile);
+                return GenericResultModel.Fail(AnnotationEnum.Account.Verify.InvalidMobile);
             }
 
             // update user
@@ -158,7 +164,7 @@ namespace Bewegdeal.Services
             // clear cache
             Cache.Remove(emailCacheKey);
             Cache.Remove(smsCacheKey);
-            return GenericResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Success);
+            return GenericResultModel.Ok(AnnotationEnum.Account.Verify.Success);
         }
 
         public async Task<GenericResultModel> VerifySend(string email, string mobile)
@@ -184,17 +190,20 @@ namespace Bewegdeal.Services
             );
 
             // send sms
-            var smsResult = await BrevoService.SendSms(
-                mobile,
-                new Dictionary<string, object> {
+            if (VerifyMobile)
+            {
+                var smsResult = await BrevoService.SendSms(
+                    mobile,
+                    new Dictionary<string, object> {
                     { "otcode", otSms },
                     { "timeout", ConstantEnum.VerificationTimeout }
-                }
-            );
+                    }
+                );
 
-            if (!smsResult.Success)
-            {
-                return GenericResultModel.Fail(AnnotationEnum.Account.Sms.Verification);
+                if (!smsResult.Success)
+                {
+                    return GenericResultModel.Fail(AnnotationEnum.Account.Sms.Verification);
+                }
             }
 
             // send email
@@ -212,7 +221,7 @@ namespace Bewegdeal.Services
                 return GenericResultModel.Fail(AnnotationEnum.Account.Email.Verification);
             }
 
-            return GenericResultModel.Ok(AnnotationEnum.Account.VerifyEmail.Resent);
+            return GenericResultModel.Ok(AnnotationEnum.Account.Verify.Resent);
         }
 
         public async Task<GenericResultModel> Register(RegistrationViewModel model)

@@ -91,7 +91,7 @@ namespace Bewegdeal.Enums
                     ? "Ihr Passwort wurde zurückgesetzt. Sie können sich jetzt anmelden."
                     : "Your password has been reset. You can now log in.";
             }
-            public class VerifyEmail
+            public class Verify
             {
                 public static string Expired => _l == "de"
                     ? "Die Bestätigungscodes sind abgelaufen. Bitte fordern Sie neue an."
