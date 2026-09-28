@@ -146,7 +146,7 @@ namespace Bewegdeal.Services
             var messages = await LoadMessages(chat.Id);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), 
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar),
                     nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
             var customer = users.FirstOrDefault(u => u.Id == chat.CustomerId);

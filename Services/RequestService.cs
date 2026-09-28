@@ -348,7 +348,7 @@ namespace Bewegdeal.Services
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
             var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
-            var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() 
+            var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault()
                            ?? new RequestProposalEntity { Status = string.Empty };
 
             var proposalCompany = await UserService.Get(
