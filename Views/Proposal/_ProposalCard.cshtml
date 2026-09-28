@@ -1,9 +1,9 @@
 @using Bewegdeal.Enums
-@model Bewegdeal.Data.Entities.RequestProposalEntity
+@model Bewegdeal.Models.ProposalCardModel
 
 @{
     var userId = long.TryParse(User.FindFirstValue(IdentityFieldEnum.Id), out var id) ? id : 0;
-    var color = Model.Status switch
+    var color = Model.Proposal!.Status switch
     {
         RequestProposalStatusEnum.Accepted => "success",
         RequestProposalStatusEnum.Rejected => "danger",
@@ -14,27 +14,27 @@
 }
 
 <div class="@(ViewData["RequestMode"] is true ? "" : $"border border-{color} rounded") @(ViewData["RequestMode"] is true ? "p-0" : "p-3") text-center"
-     data-proposal-card-id="@Model.Id"
+     data-proposal-card-id="@Model.Proposal.Id"
      style="@(ViewData["RequestMode"] is true ? "width:80%;" : "min-width:220px;")">
     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Vorschlag@* Proposal *@</span>
     </div>
     <hr class="border border-@color mt-1 mb-3" />
-    @if (Model.Id == 0 || (Model.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
+    @if (Model.Proposal.Id == 0 || (Model.Proposal.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
             <span class="fw-bold">Es liegt noch kein Angebot vor.</span>
         </div>
     }
-    else if (Model.Status == RequestProposalStatusEnum.Canceled)
+    else if (Model.Proposal.Status == RequestProposalStatusEnum.Canceled)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
             <i class="icon-base ri ri-prohibited-line icon-18px"></i>
             <span class="fst-italic">Die Nachricht wurde gelöscht.</span>
         </div>
     }
-    else if (ViewData["RequestMode"] is true && User.IsInRole(UserRoleEnum.Company) && Model.CompanyId != userId)
+    else if (ViewData["RequestMode"] is true && User.IsInRole(UserRoleEnum.Company) && Model.Proposal.CompanyId != userId)
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-danger">
             <span class="fw-bold text-danger h4">Geheim</span>
@@ -44,7 +44,16 @@
     {
         @if (ViewData["Author"] is Bewegdeal.Models.UserAvatarModel author)
         {
-            <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+            <div id="proposal-contact-@Model.Proposal.Id" style="display:none;">
+                @await Html.PartialAsync("~/Views/Proposal/_ProposalContact.cshtml", Model)
+            </div>
+            <div class="d-flex align-items-center justify-content-center gap-1 mb-1 proposal-author-trigger" style="cursor:pointer;"
+                 data-bs-toggle="popover"
+                 data-bs-placement="bottom"
+                 data-bs-trigger="click"
+                 data-bs-custom-class="popover-header-primary"
+                 data-bs-title="Firmendetails"
+                 data-proposal-contact-id="@Model.Proposal.Id">
                 <div class="avatar">
                     @if (author.Url is not null)
                     {
@@ -60,36 +69,41 @@
                         <span class="position-absolute top-10 start-100 translate-middle badge badge-center border rounded-pill bg-primary fw-bold">@author.Rating</span>
                     }
                 </div>
-                <span class="fw-semibold text-body">@author.Name</span>
+                <span class="fw-semibold text-body text-decoration-underline">@author.Name</span>
             </div>
         }
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
             <i class="icon-base ri ri-money-euro-circle-line icon-18px"></i>
-            <span class="fw-semibold">@Model.Cost.ToString("N2")</span>@* @Model.Currency *@
+            <span class="fw-bolder text-primary">@Model.Proposal.Cost.ToString("N2")</span>@* @Model.Proposal.Currency *@
         </div>
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
             <i class="icon-base ri ri-calendar-line icon-18px"></i>
-            <span class="fw-semibold">@Model.Date!.Value.ToString("dd MMM yyyy")</span>
+            <span class="fw-semibold">@Model.Proposal.Date!.Value.ToString("dd MMM yyyy")</span>
             <i class="icon-base ri ri-time-line icon-18px"></i>
-            <span class="fw-semibold">@Model.Time!.Value.ToString("HH:mm")</span>
+            <span class="fw-semibold">@Model.Proposal.Time!.Value.ToString("HH:mm")</span>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.ServiceTerms))
+        @if (!string.IsNullOrWhiteSpace(Model.CompanyContact?.ServiceTerms))
         {
             <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
                 <i class="icon-base ri ri-file-text-line icon-18px"></i>
-                <a href="@Model.ServiceTerms" target="_blank" rel="noopener noreferrer">Dienstleistungsbedingungen</a>
+                <a href="@Model.CompanyContact.ServiceTerms" target="_blank" rel="noopener noreferrer">Dienstleistungsbedingungen</a>
             </div>
         }
-        @if (Model.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer) && ViewData["RequestMode"] is not true)
+        @if (ViewData["RequestMode"] is not true)
+        {
+            <hr class="border border-secondary mt-3 mb-3" />
+            @await Html.PartialAsync("~/Views/Proposal/_ProposalContact.cshtml", Model)
+        }
+        @if (Model.Proposal.Status == RequestProposalStatusEnum.Pending && User.IsInRole(UserRoleEnum.Customer) && ViewData["RequestMode"] is not true)
         {
             <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
                 <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
-                      data-proposal-id="@Model.Id"
+                      data-proposal-id="@Model.Proposal.Id"
                       data-bs-toggle="tooltip" data-bs-placement="left" title="Annehmen">
                     <i class="icon-base ri ri-check-line icon-md text-success"></i>
                 </span>
                 <span class="btn btn-text-danger btn-icon bg-label-danger p-2 rounded-circle proposal-reject-btn"
-                      data-proposal-id="@Model.Id"
+                      data-proposal-id="@Model.Proposal.Id"
                       data-bs-toggle="tooltip" data-bs-placement="right" title="Ablehnen">
                     <i class="icon-base ri ri-close-line icon-md text-danger"></i>
                 </span>
@@ -97,3 +111,34 @@
         }
     }
 </div>
+<script>
+    (function () {
+        function initAuthorPopovers() {
+            document.querySelectorAll('.proposal-author-trigger[data-bs-toggle="popover"]').forEach(function (el) {
+                if (!bootstrap.Popover.getInstance(el)) {
+                    var contactId = el.getAttribute('data-proposal-contact-id');
+                    var contentEl = document.getElementById('proposal-contact-' + contactId);
+                    new bootstrap.Popover(el, {
+                        customClass: el.getAttribute('data-bs-custom-class') || '',
+                        html: true,
+                        content: contentEl ? contentEl.innerHTML : ''
+                    });
+                }
+            });
+        }
+        if (typeof bootstrap !== 'undefined') {
+            initAuthorPopovers();
+        } else {
+            document.addEventListener('DOMContentLoaded', initAuthorPopovers);
+        }
+
+        document.addEventListener('click', function (e) {
+            document.querySelectorAll('.proposal-author-trigger[data-bs-toggle="popover"]').forEach(function (el) {
+                var popover = bootstrap.Popover.getInstance(el);
+                if (popover && !el.contains(e.target) && !e.target.closest('.popover')) {
+                    popover.hide();
+                }
+            });
+        }, true);
+    })();
+</script>

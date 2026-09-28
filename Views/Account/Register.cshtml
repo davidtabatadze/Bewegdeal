@@ -211,10 +211,32 @@
                                                 <label for="number">UID/GISA</label>
                                             </div>
                                         </div>
-                                        <div id="addressCol" class="col-sm-6 mb-5 form-control-validation d-none">
+                                        <div id="ownerCol" class="col-sm-6 mb-5 d-none">
+                                            <div class="form-floating form-floating-outline">
+                                                <input type="text" id="owner" name="owner" class="form-control" placeholder="" value="@Model.Owner" />
+                                                <label for="owner">Inhaber</label>
+                                            </div>
+                                        </div>
+                                        <div id="addressCol" class="col-sm-6 mb-5 d-none">
                                             <div class="form-floating form-floating-outline">
                                                 <input type="text" id="address" name="address" class="form-control" placeholder="" value="@Model.Address" />
                                                 <label for="address">Adresse</label>
+                                            </div>
+                                        </div>
+                                        <div id="cityZipRow" class="col-sm-6 mb-5 d-none">
+                                            <div class="row gx-3">
+                                                <div class="col-7">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <input type="text" id="city" name="city" class="form-control" placeholder="" value="@Model.City" />
+                                                        <label for="city">Stadt</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-5">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <input type="text" id="zipCode" name="zipCode" class="form-control" placeholder="" value="@Model.ZipCode" />
+                                                        <label for="zipCode">Postleitzahl</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-12 d-flex justify-content-between">
@@ -366,8 +388,12 @@
             if (companyTermsUpload) { companyTermsUpload.classList.remove('d-none'); }
             const numberCol = document.getElementById('numberCol');
             if (numberCol) { numberCol.classList.remove('d-none'); }
+            const ownerCol = document.getElementById('ownerCol');
+            if (ownerCol) { ownerCol.classList.remove('d-none'); }
             const addressCol = document.getElementById('addressCol');
             if (addressCol) { addressCol.classList.remove('d-none'); }
+            const cityZipRow = document.getElementById('cityZipRow');
+            if (cityZipRow) { cityZipRow.classList.remove('d-none'); }
         }
     });
 </script>

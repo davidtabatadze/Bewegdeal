@@ -79,7 +79,7 @@ public class RequestChatController(RequestChatService RequestChatService) : XBas
     public async Task<IActionResult> ProposalCard(long proposalId)
     {
         var model = await RequestChatService.GetProposal(proposalId);
-        if (model is null)
+        if (model is null || model.Proposal is null)
         {
             return Content("");
         }

@@ -1,10 +1,10 @@
-﻿using Bewegdeal.Data.Entities;
+using Bewegdeal.Data.Entities;
 
 namespace Bewegdeal.Models
 {
-    public class InvoicePrintModel
+    public class ProposalCardModel
     {
-        public InvoiceEntity? Data { get; set; }
+        public RequestProposalEntity? Proposal { get; set; }
         public UserEntity? Company { get; set; }
         public UserContactEntity? CompanyContact { get; set; }
     }

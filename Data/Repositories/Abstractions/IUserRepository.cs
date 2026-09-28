@@ -8,10 +8,12 @@ namespace Bewegdeal.Data.Repositories.Abstractions
     public interface IUserRepository : IRepository
     {
         Task Rate(long userId, long evaluatorId, decimal value);
-        Task Update(UserUpdateAreaEnum area, UserEntity update);
+        Task Update(UserUpdateAreaEnum area, UserEntity update, UserContactEntity? contact = null);
         Task<UserEntity?> Get(UserFilter filter, string[]? properties = null);
         Task<UserEntity?> GetRegistered(string email, string mobile);
         Task<int> Count(UserFilter filter);
         Task<List<UserEntity>> Load(UserFilter filter, string[]? properties = null);
+        Task<UserContactEntity?> GetContact(long contactId);
+        Task<List<UserContactEntity>> LoadContacts(IEnumerable<long> contactIds);
     }
 }

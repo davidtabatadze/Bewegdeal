@@ -104,18 +104,33 @@ namespace Bewegdeal.Services
 
             var messages = await ChatService.LoadMessages(data.chat?.Id ?? 0);
             var proposals = await ProposalService.Load(data.chat?.Id ?? 0);
+            var contacts = await UserService.LoadContacts(proposals.Select(p => p.CompanyContactId));
             var users = await UserService.Load(
                 [data.chat?.CustomerId ?? 0, data.chat?.CompanyId ?? 0],
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar),
+                    nameof(UserEntity.Rating), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
-
-            foreach (var proposal in proposals)
-            {
-                proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
-            }
 
             var viewerAvatar = UserService.GetAvatar(users.FirstOrDefault(u => u.Id == userId));
             var otherPartyAvatar = UserService.GetAvatar(users.FirstOrDefault(u => u.Id != userId));
+
+            var proposalCards = new Dictionary<long, ProposalCardModel> { };
+            foreach (var proposal in proposals)
+            {
+                var contact = contacts.FirstOrDefault(c => c.Id == proposal.CompanyContactId);
+                if (contact?.ServiceTerms != null)
+                {
+                    contact.ServiceTerms = FileService.GetUrl(contact.ServiceTerms);
+                }
+
+                proposalCards.Add(proposal.Id,
+                    new ProposalCardModel
+                    {
+                        Proposal = proposal,
+                        CompanyContact = contact,
+                        Company = users.FirstOrDefault(u => u.Id == proposal.CompanyId)
+                    });
+            }
 
             return new ChatHistoryModel
             {
@@ -131,7 +146,7 @@ namespace Bewegdeal.Services
                 OtherPartyPictureUrl = otherPartyAvatar.Url,
                 OtherPartyRating = otherPartyAvatar.Rating,
                 Messages = messages,
-                Proposals = proposals.ToDictionary(p => p.Id),
+                Proposals = proposalCards,
                 ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }
@@ -182,7 +197,7 @@ namespace Bewegdeal.Services
             );
             var chat = await ChatService.GetActual(model.RequestNumber ?? "-");
             var existing = await ProposalService.GetActual(chat?.Id ?? 0);
-            var company = await UserService.Get(userId, [nameof(UserEntity.ServiceTerms)]);
+            var company = await UserService.Get(userId, [nameof(UserEntity.ContactId)]);
 
             if (request?.Status == RequestStatusEnum.Negotiation && chat?.Status == ChatStatusEnum.Ongoing && existing is null)
             {
@@ -191,6 +206,7 @@ namespace Bewegdeal.Services
                 var proposal = await ProposalService.Create(new RequestProposalEntity
                 {
                     CompanyId = userId,
+                    CompanyContactId = company?.ContactId ?? 0,
                     CustomerId = chat?.CustomerId ?? 0,
                     ChatId = model.ChatId,
                     RequestId = model.RequestId,
@@ -201,7 +217,6 @@ namespace Bewegdeal.Services
                     Time = TimeOnly.Parse(model.Time!),
                     Status = RequestProposalStatusEnum.Pending,
                     Service = request?.Service ?? "-",
-                    ServiceTerms = company?.ServiceTerms,
                     InvoiceId = 0
                 });
 
@@ -252,7 +267,7 @@ namespace Bewegdeal.Services
             }
         }
 
-        public async Task<RequestProposalEntity?> GetProposal(long proposalId)
+        public async Task<ProposalCardModel?> GetProposal(long proposalId)
         {
             var proposal = await ProposalService.Get(
                 proposalId,
@@ -263,12 +278,28 @@ namespace Bewegdeal.Services
                     nameof(RequestProposalEntity.Date),
                     nameof(RequestProposalEntity.Time),
                     nameof(RequestProposalEntity.Status),
-                    nameof(RequestProposalEntity.ServiceTerms),
+                    nameof(RequestProposalEntity.CompanyId),
+                    nameof(RequestProposalEntity.CompanyContactId)
                 ]
             );
 
-            proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
-            return proposal;
+            var company = await UserService.Get(
+                proposal?.CompanyId ?? 0,
+                [nameof(UserEntity.Id), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
+            );
+
+            var contact = await UserService.GetContact(proposal?.CompanyContactId ?? 0);
+            if (contact?.ServiceTerms != null)
+            {
+                contact.ServiceTerms = FileService.GetUrl(contact.ServiceTerms);
+            }
+
+            return new ProposalCardModel
+            {
+                Proposal = proposal,
+                Company = company,
+                CompanyContact = contact,
+            };
         }
 
     }

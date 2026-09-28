@@ -9,6 +9,7 @@ namespace Bewegdeal.Data.Entities
         public long? ChatId { get; set; }
         public long RequestId { get; set; }
         public long CompanyId { get; set; }
+        public long CompanyContactId { get; set; }
         public long CustomerId { get; set; }
         public long InvoiceId { get; set; }
         public DateTime CreateDate { get; set; }
@@ -16,7 +17,6 @@ namespace Bewegdeal.Data.Entities
         public string Currency { get; set; } = "EUR";
         public DateOnly? Date { get; set; }
         public TimeOnly? Time { get; set; }
-        public string? ServiceTerms { get; set; }
         public string Status { get; set; } = RequestProposalStatusEnum.Pending;
         public string Service { get; set; } = "";
         public DateTime? ReactionDate { get; set; }

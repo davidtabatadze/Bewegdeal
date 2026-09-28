@@ -348,20 +348,34 @@ namespace Bewegdeal.Services
             var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
             var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
-            var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() ??
-                           new RequestProposalEntity { Status = string.Empty };
-            proposal?.ServiceTerms = FileService.GetUrl(proposal.ServiceTerms);
+            var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault() 
+                           ?? new RequestProposalEntity { Status = string.Empty };
+
             var proposalCompany = await UserService.Get(
-                proposal?.CompanyId ?? 0,
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), nameof(UserEntity.Rating)]
+                proposal.CompanyId,
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar),
+                    nameof(UserEntity.Rating), nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
+
+            var proposalContact = await UserService.GetContact(proposal.CompanyContactId);
+            if (proposalContact?.ServiceTerms != null)
+            {
+                proposalContact.ServiceTerms = FileService.GetUrl(proposalContact.ServiceTerms);
+            }
+
+            var proposalCard = new ProposalCardModel
+            {
+                Proposal = proposal,
+                Company = proposalCompany,
+                CompanyContact = proposalContact,
+            };
 
             return GenericResultModel<RequestModel>.Ok(new RequestModel
             {
                 Data = request,
                 Settings = settings,
                 Requester = UserService.GetAvatar(requester),
-                Proposal = proposal,
+                ProposalCard = proposalCard,
                 ProposalCompany = proposalCompany is null ? null : UserService.GetAvatar(proposalCompany),
                 Files = [.. files.Select(i => new RequestFileModel
                 {
@@ -375,8 +389,8 @@ namespace Bewegdeal.Services
                 AllowResolve = edit != true &&
                                request.RequesterId == userId &&
                                request.Status == RequestStatusEnum.Agreed &&
-                               proposal?.Status == RequestProposalStatusEnum.Accepted &&
-                               proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
+                               proposalCard.Proposal?.Status == RequestProposalStatusEnum.Accepted &&
+                               proposalCard.Proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
             });
         }
 

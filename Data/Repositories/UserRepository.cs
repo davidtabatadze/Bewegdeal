@@ -26,9 +26,9 @@ namespace Bewegdeal.Data.Repositories
                 //new UserEntity { Id = 8, Name = "Gerhard Schröder",Email = "gerhard@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
                 //new UserEntity { Id = 9, Name = "Bastian Schweinsteiger",Email = "bastian@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
                 //new UserEntity { Id = 10, Name = "Ludwig Van Beethoven",Email = "ludwig@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000", Address="000" },
-                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111", Address="111" },
-                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222", Address="222" },
+                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000" },
+                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111" },
+                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222" },
             };
 
             foreach (var row in rows)
@@ -40,21 +40,34 @@ namespace Bewegdeal.Data.Repositories
 
                 var (hash, salt) = PasswordTool.HashPassword(row.Password);
 
+                var contact = new UserContactEntity
+                {
+                    Address = "Somewhere, over the rainbow",
+                    ZipCode = "0000",
+                    City = "Neverland",
+                    Owner = "John Doe"
+                };
+
                 await Create(new UserEntity
                 {
                     Id = row.Id,
+                    ContactId = 0,
                     Role = row.Role,
                     Status = UserStatusEnum.Active,
                     Name = row.Name,
                     Email = row.Email,
                     Number = row.Number ?? "-",
-                    Mobile = row.Mobile ?? "-",
-                    Address = row.Address,
+                    Mobile = row.Mobile ?? "+995000000000",
                     Password = hash,
                     Salt = salt,
                     CreateDate = DateTime.Now,
                     TermsAndConditionsAcceptDate = DateTime.Now
                 });
+
+                if (row.Role == UserRoleEnum.Company)
+                {
+                    await Update(UserUpdateAreaEnum.Contact, new UserEntity { Id = row.Id }, contact);
+                }
             }
         }
 
@@ -82,8 +95,21 @@ namespace Bewegdeal.Data.Repositories
             await Update(UserUpdateAreaEnum.Rating, new UserEntity { Id = userId, Rating = rating });
         }
 
-        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update, UserContactEntity? contact = null)
         {
+            if (area == UserUpdateAreaEnum.Contact && contact != null)
+            {
+                contact.UserId = update.Id;
+                contact.CreateDate = DateTime.Now;
+                contact = await Create(contact);
+
+                await Context.Users.Where(u => u.Id == update.Id)
+                                   .ExecuteUpdateAsync(u =>
+                                       u.SetProperty(p => p.ContactId, contact.Id)
+                                   );
+                return;
+            }
+
             switch (area)
             {
 
@@ -141,9 +167,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Users.Where(u => u.Id == update.Id)
                                        .ExecuteUpdateAsync(u => u
                                             .SetProperty(p => p.Name, update.Name)
-                                            .SetProperty(p => p.Address, update.Address)
                                             .SetProperty(p => p.Interests, update.Interests)
-                                            .SetProperty(p => p.ServiceTerms, update.ServiceTerms)
                                        );
                     break;
 
@@ -168,6 +192,27 @@ namespace Bewegdeal.Data.Repositories
 
         public async Task<int> Count(UserFilter filter)
             => await ApplyFilters(Context.Users.AsQueryable(), filter).CountAsync();
+
+        public async Task<UserContactEntity?> GetContact(long contactId)
+        {
+            if (contactId == 0)
+            {
+                return null;
+            }
+            return await Get<UserContactEntity>(contactId);
+        }
+
+        public async Task<List<UserContactEntity>> LoadContacts(IEnumerable<long> contactIds)
+        {
+            contactIds = (contactIds ?? []).Where(c => c != 0);
+
+            if (!contactIds.Any())
+            {
+                return [];
+            }
+
+            return await Load<UserContactEntity>(contactIds);
+        }
 
         private IQueryable<UserEntity> ApplyFilters(IQueryable<UserEntity> query, UserFilter filter)
         {
@@ -217,8 +262,7 @@ namespace Bewegdeal.Data.Repositories
                 query = query.Where(u =>
                     u.Name.ToLower().Contains(term) ||
                     u.Email.ToLower().Contains(term) ||
-                    (u.Mobile != null && u.Mobile.ToLower().Contains(term)) ||
-                    (u.Address != null && u.Address.ToLower().Contains(term))
+                    (u.Mobile != null && u.Mobile.ToLower().Contains(term))
                 );
             }
 

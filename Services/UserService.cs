@@ -19,8 +19,8 @@ namespace Bewegdeal.Services
         public async Task Delete(long id)
             => await UserRepository.Delete<UserEntity>(id);
 
-        public async Task Update(UserUpdateAreaEnum area, UserEntity update)
-            => await UserRepository.Update(area, update);
+        public async Task Update(UserUpdateAreaEnum area, UserEntity update, UserContactEntity? contact = null)
+            => await UserRepository.Update(area, update, contact);
 
         public async Task<UserEntity?> Get(long id, string[]? properties = null)
             => await UserRepository.Get<UserEntity>(id, properties);
@@ -43,49 +43,59 @@ namespace Bewegdeal.Services
         public async Task Rate(long userId, long evaluatorId, decimal value)
             => await UserRepository.Rate(userId, evaluatorId, value);
 
+        public async Task<UserContactEntity?> GetContact(long contactId)
+            => await UserRepository.GetContact(contactId);
+
+        public async Task<List<UserContactEntity>> LoadContacts(IEnumerable<long> contactIds)
+            => await UserRepository.LoadContacts(contactIds);
+
         #endregion
 
         public async Task<GenericResultModel> UpdateProfile(long id, ProfileViewModel model)
         {
-            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ServiceTerms)]);
+            var user = await Get(id, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.ContactId)]);
             if (user is null || user.Role != model.Role)
             {
                 return GenericResultModel.Fail("");
             }
 
-            // define service terms
-            var userServiceTerms = user.Role == UserRoleEnum.Company ? user.ServiceTerms : null;
             if (user.Role == UserRoleEnum.Company)
             {
-                if (model.DeleteServiceTerms)
-                {
-                    await FileService.Delete(user.ServiceTerms);
-                    userServiceTerms = null;
-                }
+                var contact = await GetContact(user.ContactId);
+                string? serviceTerms = model.DeleteServiceTerms ? null : contact?.ServiceTerms;
+
                 if (model.ServiceTermsFile is not null)
                 {
-                    var file = await FileService.Create(
-                        model.ServiceTermsFile,
-                        model.DeleteServiceTerms ? null : user.ServiceTerms,
-                        5,
-                        [FileTypeEnum.PDF]
-                    );
+                    var file = await FileService.Create(model.ServiceTermsFile, null, 5, [FileTypeEnum.PDF]);
                     if (file.Message is not null)
                     {
                         return GenericResultModel.Fail(file.Message);
                     }
-                    userServiceTerms = file.Result;
+                    serviceTerms = file.Result;
                 }
+
+                await Update(
+                    UserUpdateAreaEnum.Contact,
+                    new UserEntity
+                    {
+                        Id = user.Id
+                    },
+                    new UserContactEntity
+                    {
+                        Address = model.Address,
+                        Owner = model.Owner,
+                        City = model.City,
+                        ZipCode = model.ZipCode,
+                        ServiceTerms = serviceTerms
+                    }
+                );
             }
 
-            // save
             await Update(UserUpdateAreaEnum.Profile, new UserEntity
             {
                 Id = user.Id,
                 Name = model.Name,
-                Address = model.Address,
-                Interests = model.Interests ?? [],
-                ServiceTerms = userServiceTerms
+                Interests = model.Interests ?? []
             });
 
             return GenericResultModel.Ok();
@@ -165,14 +175,14 @@ namespace Bewegdeal.Services
                 return null;
             }
 
-            var serviceTermsFileUrl = FileService.GetUrl(user.ServiceTerms);
-            var serviceTermsFileName = FileService.GetName(user.ServiceTerms);
+            var contact = await GetContact(user.ContactId);
 
             return new UserProfileModel
             {
                 User = user,
-                ServiceTermsFileUrl = serviceTermsFileUrl,
-                ServiceTermsFileName = serviceTermsFileName,
+                Contact = contact,
+                ServiceTermsFileUrl = FileService.GetUrl(contact?.ServiceTerms),
+                ServiceTermsFileName = FileService.GetName(contact?.ServiceTerms),
                 Avatar = GetAvatar(user)
             };
         }
@@ -215,24 +225,31 @@ namespace Bewegdeal.Services
             var filtered = await Count(filter);
             var total = await Count(new UserFilter());
             var avatars = users.Select(u => GetAvatar(u)).ToList();
+            var contacts = await LoadContacts(users.Select(u => u.ContactId));
+
 
             return new GridResultModel<object>
             {
                 Draw = draw,
                 RecordsTotal = total,
                 RecordsFiltered = filtered,
-                Data = users.Select((u, i) => new
+                Data = users.Select((u, i) =>
                 {
-                    id = u.Id,
-                    name = u.Name,
-                    email = u.Email,
-                    mobile = u.Mobile,
-                    address = u.Address,
-                    role = u.Role,
-                    status = u.Status,
-                    avatar = avatars[i],
-                    interests = u.Interests,
-                    createDate = u.CreateDate.ToString("yyyy-MM-dd HH:mm")
+                    var contact = contacts.FirstOrDefault(c => c.Id == u.ContactId);
+                    return new
+                    {
+                        id = u.Id,
+                        name = u.Name,
+                        email = u.Email,
+                        mobile = u.Mobile,
+                        role = u.Role,
+                        status = u.Status,
+                        avatar = avatars[i],
+                        interests = u.Interests,
+                        createDate = u.CreateDate.ToString("yyyy-MM-dd HH:mm"),
+                        address = contact == null ? null :
+                                  contact.Address + ", " + contact.ZipCode + ", " + contact.City
+                    };
                 })
             };
         }

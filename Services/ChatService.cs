@@ -6,7 +6,7 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class ChatService(IChatRepository ChatRepository, ProposalService ProposalService, UserService UserService)
+    public class ChatService(IChatRepository ChatRepository, ProposalService ProposalService, UserService UserService, FileService FileService)
     {
         public async Task<ChatEntity> Create(ChatEntity chat)
             => await ChatRepository.Create(chat);
@@ -144,15 +144,36 @@ namespace Bewegdeal.Services
             if (chat is null) { return null; }
 
             var messages = await LoadMessages(chat.Id);
-            var proposals = await ProposalService.Load(chat.Id);
             var users = await UserService.Load(
                 [chat.CustomerId, chat.CompanyId],
-                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar)]
+                [nameof(UserEntity.Id), nameof(UserEntity.Name), nameof(UserEntity.Avatar), 
+                    nameof(UserEntity.Mobile), nameof(UserEntity.Email)]
             );
             var customer = users.FirstOrDefault(u => u.Id == chat.CustomerId);
             var company = users.FirstOrDefault(u => u.Id == chat.CompanyId);
             var customerAvatar = UserService.GetAvatar(customer);
             var companyAvatar = UserService.GetAvatar(company);
+
+            var proposals = await ProposalService.Load(chat.Id);
+            var contacts = await UserService.LoadContacts(proposals.Select(p => p.CompanyContactId));
+
+            var proposalCards = new Dictionary<long, ProposalCardModel> { };
+            foreach (var proposal in proposals)
+            {
+                var contact = contacts.FirstOrDefault(c => c.Id == proposal.CompanyContactId);
+                if (contact?.ServiceTerms != null)
+                {
+                    contact.ServiceTerms = FileService.GetUrl(contact.ServiceTerms);
+                }
+
+                proposalCards.Add(proposal.Id,
+                    new ProposalCardModel
+                    {
+                        Proposal = proposal,
+                        Company = company,
+                        CompanyContact = contact
+                    });
+            }
 
             return new ChatHistoryModel
             {
@@ -167,7 +188,7 @@ namespace Bewegdeal.Services
                 OtherPartyInitials = companyAvatar.Initials,
                 OtherPartyPictureUrl = companyAvatar.Url,
                 Messages = messages,
-                Proposals = proposals.ToDictionary(p => p.Id),
+                Proposals = proposalCards,
                 ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
             };
         }

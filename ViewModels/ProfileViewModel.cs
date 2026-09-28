@@ -18,6 +18,15 @@ namespace Bewegdeal.ViewModels
         [MaxLength(256)]
         public string? Address { get; set; }
 
+        [MaxLength(128)]
+        public string? Owner { get; set; }
+
+        [MaxLength(64)]
+        public string? City { get; set; }
+
+        [MaxLength(8)]
+        public string? ZipCode { get; set; }
+
         public string[]? Interests { get; set; }
 
         public IFormFile? ServiceTermsFile { get; set; }
@@ -28,11 +37,32 @@ namespace Bewegdeal.ViewModels
         {
             if (Role == UserRoleEnum.Company)
             {
+                if (string.IsNullOrWhiteSpace(Owner))
+                {
+                    yield return new ValidationResult(
+                        "Owner is required for companies.",
+                        [nameof(Owner)]
+                    );
+                }
                 if (string.IsNullOrWhiteSpace(Address))
                 {
                     yield return new ValidationResult(
                         "Address is required for companies.",
                         [nameof(Address)]
+                    );
+                }
+                if (string.IsNullOrWhiteSpace(City))
+                {
+                    yield return new ValidationResult(
+                        "City is required for companies.",
+                        [nameof(City)]
+                    );
+                }
+                if (string.IsNullOrWhiteSpace(ZipCode))
+                {
+                    yield return new ValidationResult(
+                        "Zip code is required for companies.",
+                        [nameof(ZipCode)]
                     );
                 }
 
@@ -53,7 +83,10 @@ namespace Bewegdeal.ViewModels
             }
             else
             {
+                Owner = null;
                 Address = null;
+                City = null;
+                ZipCode = null;
                 Interests = [];
             }
         }
