@@ -78,7 +78,15 @@
                 <h5 class="mb-2 text-center">
                     <small>
                         <span class="badge rounded-pill bg-label-@statusStyle">
-                            <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@req.Status.ToUpper()
+                            <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@(req.Status switch {
+                                Bewegdeal.Enums.RequestStatusEnum.Pending => "Ausstehend",
+                                Bewegdeal.Enums.RequestStatusEnum.Negotiation => "Verhandlung",
+                                Bewegdeal.Enums.RequestStatusEnum.Agreed => "Vereinbart",
+                                Bewegdeal.Enums.RequestStatusEnum.Resolved => "Gelöst",
+                                Bewegdeal.Enums.RequestStatusEnum.Cancelled => "Abgesagt",
+                                Bewegdeal.Enums.RequestStatusEnum.Declined => "Abgelehnt",
+                                _ => req.Status
+                            })
                         </span>
                     </small>
                     <span class="h4 fw-semibold"> @req.Title</span>

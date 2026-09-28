@@ -115,6 +115,16 @@ namespace Bewegdeal.Enums
                     ? "Ein Konto mit dieser E-Mail-Adresse oder Mobilnummer existiert bereits. Sie können sich stattdessen anmelden."
                     : "An account with this email address or mobile number already exists. You may sign in instead.";
             }
+            public class Profile
+            {
+                public static string OwnerRequired => _l == "de" ? "Ansprechpartner ist für Unternehmen erforderlich." : "Owner is required for companies.";
+                public static string AddressRequired => _l == "de" ? "Adresse ist für Unternehmen erforderlich." : "Address is required for companies.";
+                public static string CityRequired => _l == "de" ? "Stadt ist für Unternehmen erforderlich." : "City is required for companies.";
+                public static string ZipCodeRequired => _l == "de" ? "Postleitzahl ist für Unternehmen erforderlich." : "Zip code is required for companies.";
+                public static string UidRequired => _l == "de" ? "UID ist für Unternehmen erforderlich." : "UID is required for companies.";
+                public static string InterestsRequired => _l == "de" ? "Mindestens ein Interesse ist für Unternehmen erforderlich." : "At least one interest is required for companies.";
+                public static string InterestsInvalid => _l == "de" ? "Die ausgewählten Interessen sind ungültig." : "Selected interests are not valid.";
+            }
             public class Email
             {
                 public static string Verification => _l == "de"

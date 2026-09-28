@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Invoices List — Bewegdeal
- * v1.1.2
+ * v1.1.3
  */
 
 'use strict';
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const create = !data ? '-' :
                         new Date(data).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
                     const due = !full['dueDate'] ? '-' :
-                        new Date(full['dueDate']).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        new Date(full['dueDate']).toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' });
 
                     return (
                         '<div class="d-flex flex-column">' +

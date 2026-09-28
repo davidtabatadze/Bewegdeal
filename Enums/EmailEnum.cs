@@ -5,7 +5,7 @@
         public string Value { get; }
         private EmailEnum(string value) => Value = value;
 
-        public static readonly EmailEnum VerifyAccount = new("Verify your Bewegdeal account # VerifyAccount");
-        public static readonly EmailEnum PasswordReset = new("Reset your Bewegdeal password # PasswordReset");
+        public static readonly EmailEnum VerifyAccount = new("Ihr Bewegdeal-Konto bestätigen # VerifyAccount");
+        public static readonly EmailEnum PasswordReset = new("Ihr Bewegdeal-Passwort zurücksetzen # PasswordReset");
     }
 }

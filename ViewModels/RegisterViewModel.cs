@@ -57,53 +57,32 @@ namespace Bewegdeal.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(Number))
                 {
-                    yield return new ValidationResult(
-                        "UID is required for companies.",
-                        [nameof(Number)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.UidRequired, [nameof(Number)]);
                 }
                 if (string.IsNullOrWhiteSpace(Address))
                 {
-                    yield return new ValidationResult(
-                        "Address is required for companies.",
-                        [nameof(Address)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.AddressRequired, [nameof(Address)]);
                 }
                 if (string.IsNullOrWhiteSpace(Owner))
                 {
-                    yield return new ValidationResult(
-                        "Owner is required for companies.",
-                        [nameof(Owner)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.OwnerRequired, [nameof(Owner)]);
                 }
                 if (string.IsNullOrWhiteSpace(City))
                 {
-                    yield return new ValidationResult(
-                        "City is required for companies.",
-                        [nameof(City)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.CityRequired, [nameof(City)]);
                 }
                 if (string.IsNullOrWhiteSpace(ZipCode))
                 {
-                    yield return new ValidationResult(
-                        "Zip code is required for companies.",
-                        [nameof(ZipCode)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.ZipCodeRequired, [nameof(ZipCode)]);
                 }
 
                 if (Interests == null || Interests.Length == 0)
                 {
-                    yield return new ValidationResult(
-                        "At least one interest is required for companies.",
-                        [nameof(Interests)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.InterestsRequired, [nameof(Interests)]);
                 }
                 else if (Interests.Any(i => !ServiceEnum.All.Contains(i)))
                 {
-                    yield return new ValidationResult(
-                        "Interests ins not valid for companies.",
-                        [nameof(Interests)]
-                    );
+                    yield return new ValidationResult(AnnotationEnum.Account.Profile.InterestsInvalid, [nameof(Interests)]);
                 }
             }
             else
