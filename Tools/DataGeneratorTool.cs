@@ -71,7 +71,7 @@ namespace Bewegdeal.Tools
         public async Task Generate()
         {
             var section = configuration.GetSection("DataGenerator");
-            if (!section.GetValue<bool>("Enabled") && false) { return; }
+            if (section.GetValue<bool>("Enabled") != true) { return; }
 
             var dayRange = section.GetValue("DayRange", 0);
             var dataRange = section.GetValue("DataRange", 0);
