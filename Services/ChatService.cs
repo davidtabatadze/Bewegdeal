@@ -128,7 +128,7 @@ namespace Bewegdeal.Services
                         customerEmail = customer?.Email ?? "-",
                         company = UserService.GetAvatar(company),
                         companyEmail = company?.Email ?? "-",
-                        createDate = c.CreateDate.ToString("MMM d, yyyy"),
+                        createDate = c.CreateDate.ToString("o"),
                     };
                 })
             };

@@ -24,6 +24,36 @@
                             <li>Die vorgeschlagenen Dienstleistungsbedingungen.</li>
                         </ul>
                     </div>
+                    <div id="chatProposalEarlyServiceNotice" class="d-none mt-4 ms-1 me-1" style="max-width:480px;">
+                        <p class="small text-muted text-decoration-underline mb-2">
+                            Der vereinbarte Durchführungstermin liegt innerhalb von 14 Tagen ab verbindlicher Buchung.
+                        </p>
+                        <p class="small text-muted text-decoration-underline mb-2">
+                            Soweit für diesen Auftrag ein gesetzliches Rücktrittsrecht besteht, kann die Ausführung der Dienstleistung vor
+                            Ablauf der Rücktrittsfrist nur beginnen, wenn Sie dies ausdrücklich verlangen.
+                        </p>
+                        <p class="small text-muted text-decoration-underline mb-2">
+                            Bei vollständiger Erbringung der Dienstleistung durch das Unternehmen kann ein bestehendes gesetzliches
+                            Rücktrittsrecht nach den gesetzlichen Bestimmungen vorzeitig erlöschen.
+                        </p>
+                        <p class="small text-muted text-decoration-underline mb-4">
+                            Ihre gesetzlichen Verbraucherrechte bleiben unberührt.
+                        </p>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="earlyServiceCheckbox1" />
+                            <label class="form-check-label fw-semibold" for="earlyServiceCheckbox1">
+                                Ich verlange ausdrücklich, dass das Unternehmen mit der Ausführung der Dienstleistung vor Ablauf einer
+                                allfälligen 14-tägigen Rücktrittsfrist beginnen darf.
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="earlyServiceCheckbox2" />
+                            <label class="form-check-label fw-semibold" for="earlyServiceCheckbox2">
+                                Ich bestätige, dass ich zur Kenntnis genommen habe, dass ich ein allfälliges gesetzliches Rücktrittsrecht bei
+                                vollständiger Vertragserfüllung durch das Unternehmen verlieren kann.
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline">
                     <input id="proposalRejectReason" type="text" class="form-control" placeholder="" />
@@ -41,6 +71,8 @@
 <script>
     'use strict';
 
+    window.bewegdealServerDate = '@DateTime.UtcNow.ToString("yyyy-MM-dd")';
+
     window.ChatProposalReact = (function () {
         var modal      = null;
         var modalEl    = document.getElementById('chatProposalReactModal');
@@ -49,13 +81,25 @@
         var rejectBody = document.getElementById('chatProposalReactRejectBody');
         var reasonEl   = document.getElementById('proposalRejectReason');
         var confirmBtn = document.getElementById('chatProposalReactConfirmBtn');
+        var noticeEl   = document.getElementById('chatProposalEarlyServiceNotice');
+        var cb1        = document.getElementById('earlyServiceCheckbox1');
+        var cb2        = document.getElementById('earlyServiceCheckbox2');
 
-        var _proposalId = null;
-        var _accepted   = false;
+        var _proposalId   = null;
+        var _accepted     = false;
+        var _earlyService = false;
+
+        function updateConfirmState() {
+            if (!confirmBtn) { return; }
+            confirmBtn.disabled = _earlyService && (!cb1.checked || !cb2.checked);
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             if (modalEl) { modal = new bootstrap.Modal(modalEl); }
         });
+
+        if (cb1) { cb1.addEventListener('change', updateConfirmState); }
+        if (cb2) { cb2.addEventListener('change', updateConfirmState); }
 
         if (confirmBtn) {
             confirmBtn.addEventListener('click', function () {
@@ -83,9 +127,18 @@
         }
 
         return {
-            open: function (proposalId, accepted) {
+            open: function (proposalId, accepted, proposalDate) {
                 _proposalId = proposalId;
                 _accepted   = accepted;
+
+                _earlyService = false;
+                if (accepted && proposalDate) {
+                    var serverToday  = new Date(window.bewegdealServerDate);
+                    var deadline     = new Date(serverToday);
+                    deadline.setDate(deadline.getDate() + 14);
+                    var proposed     = new Date(proposalDate);
+                    _earlyService = proposed <= deadline;
+                }
 
                 if (titleEl) {
                     var iconColor = accepted ? 'text-success' : 'text-danger';
@@ -97,9 +150,14 @@
                 if (rejectBody) { rejectBody.classList.toggle('d-none', accepted); }
                 if (reasonEl)   { reasonEl.value = ''; }
 
+                if (noticeEl) { noticeEl.classList.toggle('d-none', !_earlyService); }
+                if (cb1)      { cb1.checked = false; }
+                if (cb2)      { cb2.checked = false; }
+
                 if (confirmBtn) {
                     confirmBtn.textContent = accepted ? 'Ja, annehmen' : 'Ja, ablehnen';
                     confirmBtn.className   = 'btn ' + (accepted ? 'btn-success' : 'btn-danger');
+                    confirmBtn.disabled    = _earlyService;
                 }
 
                 if (modal) { modal.show(); }

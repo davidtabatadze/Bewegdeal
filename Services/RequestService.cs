@@ -145,7 +145,11 @@ namespace Bewegdeal.Services
                     new() { RequestId = request.Id }
                 );
 
-                var invoice = await InvoiceService.Create(request, proposal);
+                var invoice = await InvoiceService.Get(proposal.InvoiceId, [nameof(InvoiceEntity.Id), nameof(InvoiceEntity.Status)]);
+                if (invoice?.Status != InvoiceStatusEnum.Paid)
+                {
+                    invoice = await InvoiceService.Create(request, proposal);
+                }
 
                 await Update(
                     RequestUpdateAreaEnum.Status,
@@ -259,16 +263,16 @@ namespace Bewegdeal.Services
                         status = r.Status,
                         service = r.Service,
                         title = r.Title,
-                        createDate = r.CreateDate.ToString("MMM d, yyyy"),
+                        createDate = r.CreateDate.ToString("d. MMMM yyyy"),
                         currency = r.Currency,
                         asap = r.ASAP,
                         cost = r.Cost,
-                        date = r.Date?.ToString("MMM d, yyyy"),
+                        date = r.Date?.ToString("d. MMMM yyyy"),
                         time = r.Time?.ToString("HH:mm"),
                         proposal = proposal == null ? null : new
                         {
                             cost = proposal.Cost,
-                            date = proposal.Date?.ToString("MMM d, yyyy"),
+                            date = proposal.Date?.ToString("d. MMMM yyyy"),
                             time = proposal.Time?.ToString("HH:mm"),
                             status = proposal.Status
                         },

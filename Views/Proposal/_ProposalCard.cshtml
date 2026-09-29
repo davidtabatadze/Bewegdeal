@@ -78,7 +78,7 @@
         </div>
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
             <i class="icon-base ri ri-calendar-line icon-18px"></i>
-            <span class="fw-semibold">@Model.Proposal.Date!.Value.ToString("dd MMM yyyy")</span>
+            <span class="fw-semibold">@Model.Proposal.Date!.Value.ToString("d. MMMM yyyy")</span>
             <i class="icon-base ri ri-time-line icon-18px"></i>
             <span class="fw-semibold">@Model.Proposal.Time!.Value.ToString("HH:mm")</span>
         </div>
@@ -99,11 +99,13 @@
             <div class="d-flex justify-content-center gap-2 mt-3 proposal-actions">
                 <span class="btn btn-text-success btn-icon bg-label-success p-2 rounded-circle proposal-accept-btn"
                       data-proposal-id="@Model.Proposal.Id"
+                      data-proposal-date="@Model.Proposal.Date!.Value.ToString("yyyy-MM-dd")"
                       data-bs-toggle="tooltip" data-bs-placement="left" title="Annehmen">
                     <i class="icon-base ri ri-check-line icon-md text-success"></i>
                 </span>
                 <span class="btn btn-text-danger btn-icon bg-label-danger p-2 rounded-circle proposal-reject-btn"
                       data-proposal-id="@Model.Proposal.Id"
+                      data-proposal-date="@Model.Proposal.Date!.Value.ToString("yyyy-MM-dd")"
                       data-bs-toggle="tooltip" data-bs-placement="right" title="Ablehnen">
                     <i class="icon-base ri ri-close-line icon-md text-danger"></i>
                 </span>

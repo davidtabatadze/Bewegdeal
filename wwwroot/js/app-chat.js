@@ -78,10 +78,12 @@
         if (!acceptBtn && !rejectBtn) { return; }
 
         var accepted = !!acceptBtn;
-        var proposalId = (acceptBtn || rejectBtn).dataset.proposalId;
+        var btn = acceptBtn || rejectBtn;
+        var proposalId = btn.dataset.proposalId;
+        var proposalDate = btn.dataset.proposalDate || null;
 
         if (!window.ChatProposalReact) { return; }
-        window.ChatProposalReact.open(proposalId, accepted);
+        window.ChatProposalReact.open(proposalId, accepted, proposalDate);
     });
 
     // ── Cancel Proposal flow ──────────────────────────────────────────────────
