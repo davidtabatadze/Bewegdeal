@@ -17,6 +17,7 @@ namespace Bewegdeal.Data.Entities
         public string DeliveryZipCode { get; set; } = "";
         public long CustomerId { get; set; }
         public long? CompanyId { get; set; }
+        public string Companies { get; set; } = "";
         public decimal Cost { get; set; }
         public string Currency { get; set; } = "EUR";
         public bool ASAP { get; set; }

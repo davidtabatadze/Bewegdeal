@@ -249,6 +249,7 @@ namespace Bewegdeal.Tools
             foreach (var (proposal, request, companyId, companyContactId) in proposalMeta)
             {
                 request.CompanyId = companyId;
+                request.Companies = "#" + companyId + "#";
             }
 
             await context.SaveChangesAsync();

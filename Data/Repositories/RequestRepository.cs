@@ -31,6 +31,7 @@ namespace Bewegdeal.Data.Repositories
                                                .SetProperty(p => p.Status, RequestStatusEnum.Negotiation)
                                                .SetProperty(p => p.CompanyId, (long?)null)
                                                .SetProperty(p => p.AgreementId, (long?)null)
+                                               .SetProperty(p => p.Companies, p => (p.Companies == "" ? "#" : p.Companies) + update.CompanyId + "#")
                                           );
                     break;
 
@@ -118,6 +119,7 @@ namespace Bewegdeal.Data.Repositories
                 }
                 else if (filter.ViewerRole == UserRoleEnum.Company)
                 {
+                    var companyTag = "#" + viewerId + "#";
                     var interests = filter.ViewerInterests;
                     var hasMoving = interests.Contains(ServiceEnum.Moving);
                     var hasPickup = interests.Contains(ServiceEnum.Pickup);
@@ -126,7 +128,7 @@ namespace Bewegdeal.Data.Repositories
 
                     if (filter.ViewerFocus == RequestViewerFocusEnum.Mine)
                     {
-                        query = query.Where(r => r.CompanyId == viewerId);
+                        query = query.Where(r => r.CompanyId == viewerId || r.Companies.Contains(companyTag));
                     }
                     else if (filter.ViewerFocus == RequestViewerFocusEnum.Potential)
                     {
@@ -145,6 +147,7 @@ namespace Bewegdeal.Data.Repositories
                     {
                         query = query.Where(r =>
                             r.CompanyId == viewerId ||
+                            r.Companies.Contains(companyTag) ||
                             (
                                 (r.Status == RequestStatusEnum.Pending || r.Status == RequestStatusEnum.Negotiation) &&
                                 (

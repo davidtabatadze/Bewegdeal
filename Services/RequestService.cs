@@ -327,7 +327,12 @@ namespace Bewegdeal.Services
 
             var viewer = (await UserService.Get(userId, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.Interests)]))!;
 
-            if (viewer.Role == UserRoleEnum.Administrator || viewer.Id == request.CustomerId || viewer.Id == request.CompanyId)
+            if (
+                viewer.Role == UserRoleEnum.Administrator || 
+                viewer.Id == request.CustomerId || 
+                viewer.Id == request.CompanyId ||
+                request.Companies.Contains("#" + viewer.Id + "#")
+            )
             {
                 // ok, viewer is allowed ...
             }

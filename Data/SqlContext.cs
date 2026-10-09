@@ -205,6 +205,7 @@ namespace Bewegdeal.Data
                 e.Property(r => r.DeliveryZipCode).IsRequired(false).HasMaxLength(8);
                 e.Property(r => r.CustomerId).IsRequired();
                 e.Property(r => r.CompanyId).IsRequired(false);
+                e.Property(r => r.Companies).IsRequired(false).HasMaxLength(2048);
                 e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);
                 e.Property(r => r.Currency).IsRequired().HasMaxLength(4);
                 e.Property(r => r.ASAP).IsRequired();

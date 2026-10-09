@@ -74,7 +74,7 @@ namespace Bewegdeal.Services
                 CreateDate = DateTime.Now
             });
 
-            await RequestService.Update(RequestUpdateAreaEnum.ChatActivate, new() { Id = data.request.Id });
+            await RequestService.Update(RequestUpdateAreaEnum.ChatActivate, new() { Id = data.request.Id, CompanyId = userId });
 
             return GenericResultModel.Ok();
         }

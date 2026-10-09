@@ -590,7 +590,10 @@ wwwroot/js/
 
 **FraudWordEntity** (`FraudWords` table): `Id` (long PK), `Word` (string) — supports `*` prefix/suffix wildcards.
 
-**RequestEntity** (`Requests` table) — key fields: `Number`, `Status`, `Service`, `Title`, `Description`, `PickupAddress`, `PickupZipCode`, `DeliveryAddress`, `DeliveryZipCode`, `RequesterId`, `ExecutorId?`, `Cost`, `Currency`, `ASAP`, `Date?`, `Time?`, `AgreementId?`, `VehicleType?`, `VehicleCondition?`, `PresentElevator`, `PresentParking`.
+**RequestEntity** (`Requests` table) — key fields: `Number`, `Status`, `Service`, `Title`, `Description`, `PickupAddress`, `PickupZipCode`, `DeliveryAddress`, `DeliveryZipCode`, `CustomerId`, `CompanyId?`, `Companies`, `Cost`, `Currency`, `ASAP`, `Date?`, `Time?`, `AgreementId?`, `VehicleType?`, `VehicleCondition?`, `PresentElevator`, `PresentParking`.
+- `CustomerId` — FK to Users; the customer who created the request
+- `CompanyId?` — FK to Users; set when a proposal is accepted (the winning company); cleared when the chat is cancelled or the request returns to Pending
+- `Companies` — string; tracks every company that ever initiated a negotiation; format `#id1#id2#id3#`; append-only, never cleared
 
 **RequestFileEntity**, **RequestAgreementEntity** — see source.
 
@@ -745,7 +748,7 @@ First-time onboarding for Customer/Company roles. Administrators are exempt.
 
 ### Role-based list visibility
 `List` and `LoadRequests` use `ViewerRole`, `ViewerId`, `ViewerInterests`, `ViewerFocus` on `RequestFilter`. Repository `ApplyFilters` branches on role:
-- **Customer** → `WHERE RequesterId == viewerId`
+- **Customer** → `WHERE CustomerId == viewerId`
 - **Company** → filtered by `ViewerFocus` (Mine / Potential / default=all); interest matching uses individual `bool` variables per service — **never** use `interests.Contains()` in LINQ (EF Core SQLite cannot translate it)
 - **Administrator** → no extra filter
 
