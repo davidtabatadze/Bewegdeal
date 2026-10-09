@@ -129,7 +129,7 @@ namespace Bewegdeal.Tools
                     PickupZipCode = pickup.Zip,
                     DeliveryAddress = delivery.Address,
                     DeliveryZipCode = delivery.Zip,
-                    RequesterId = customerId,
+                    CustomerId = customerId,
                     Cost = Math.Round((decimal)(Rng.NextDouble() * 900 + 100), 2),
                     Currency = "EUR",
                     ASAP = asap,
@@ -245,10 +245,10 @@ namespace Bewegdeal.Tools
 
             await context.SaveChangesAsync();
 
-            // set ExecutorId on agreed/resolved requests
+            // set CompanyId on agreed/resolved requests
             foreach (var (proposal, request, companyId, companyContactId) in proposalMeta)
             {
-                request.ExecutorId = companyId;
+                request.CompanyId = companyId;
             }
 
             await context.SaveChangesAsync();
@@ -274,7 +274,7 @@ namespace Bewegdeal.Tools
                     ProposalId = proposal.Id,
                     CompanyId = companyId,
                     CompanyContactId = companyContactId,
-                    CustomerId = request.RequesterId,
+                    CustomerId = request.CustomerId,
                     Currency = "EUR",
                     ServiceCost = proposal.Cost,
                     CommissionPersent = commissionPct,

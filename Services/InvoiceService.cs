@@ -25,7 +25,7 @@ namespace Bewegdeal.Services
                 ProposalId = proposal.Id,
                 CompanyId = proposal.CompanyId,
                 CompanyContactId = company?.ContactId ?? 0,
-                CustomerId = request.RequesterId,
+                CustomerId = request.CustomerId,
                 Currency = proposal.Currency,
 
                 TaxPersent = settings.InvoiceTaxPersent,

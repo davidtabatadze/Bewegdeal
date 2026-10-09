@@ -264,7 +264,7 @@
                     <div class="card-title m-0">
                         <h5 class="m-0 me-2">Details</h5>
                     </div>
-                    @if (req.RequesterId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
+                    @if (req.CustomerId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
                     {
                         <div>
                             @if (req.Status == RequestStatusEnum.Pending)

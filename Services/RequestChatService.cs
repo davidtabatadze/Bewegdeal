@@ -19,7 +19,7 @@ namespace Bewegdeal.Services
         {
             var request = await RequestService.Get(
                 requestNumber,
-                [nameof(RequestEntity.Id), nameof(RequestEntity.Status), nameof(RequestEntity.RequesterId)]
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Status), nameof(RequestEntity.CustomerId)]
             );
             var requestChat = await ChatService.GetActual(requestNumber, userId, userRole);
             var companyChat = await ChatService.Get(new ChatFilter
@@ -67,7 +67,7 @@ namespace Bewegdeal.Services
                 Key = Guid.NewGuid().ToString("N"),
                 RequestId = data.request.Id,
                 RequestNumber = requestNumber,
-                CustomerId = data.request.RequesterId,
+                CustomerId = data.request.CustomerId,
                 CompanyId = userId,
                 Fraud = ChatFraudEnum.Safe,
                 Status = ChatStatusEnum.Ongoing,
@@ -248,7 +248,7 @@ namespace Bewegdeal.Services
                     );
                     await RequestService.Update(
                         RequestUpdateAreaEnum.ChatDeal,
-                        new() { Id = chat?.RequestId ?? 0, ExecutorId = chat?.CompanyId ?? 0, AgreementId = proposalId }
+                        new() { Id = chat?.RequestId ?? 0, CompanyId = chat?.CompanyId ?? 0, AgreementId = proposalId }
                     );
                 }
                 await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposalId, status);

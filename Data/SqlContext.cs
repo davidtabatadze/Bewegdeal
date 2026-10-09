@@ -189,8 +189,8 @@ namespace Bewegdeal.Data
                 e.HasIndex(r => r.Number).IsUnique();
                 e.HasIndex(r => r.Status);
                 e.HasIndex(r => r.Service);
-                e.HasIndex(r => r.ExecutorId);
-                e.HasIndex(r => r.RequesterId);
+                e.HasIndex(r => r.CompanyId);
+                e.HasIndex(r => r.CustomerId);
                 e.HasIndex(r => r.AgreementId);
 
                 e.Property(r => r.Number).IsRequired().HasMaxLength(36);
@@ -203,8 +203,8 @@ namespace Bewegdeal.Data
                 e.Property(r => r.PickupZipCode).IsRequired(false).HasMaxLength(8);
                 e.Property(r => r.DeliveryAddress).IsRequired().HasMaxLength(512);
                 e.Property(r => r.DeliveryZipCode).IsRequired(false).HasMaxLength(8);
-                e.Property(r => r.RequesterId).IsRequired();
-                e.Property(r => r.ExecutorId).IsRequired(false);
+                e.Property(r => r.CustomerId).IsRequired();
+                e.Property(r => r.CompanyId).IsRequired(false);
                 e.Property(r => r.Cost).IsRequired().HasPrecision(18, 2);
                 e.Property(r => r.Currency).IsRequired().HasMaxLength(4);
                 e.Property(r => r.ASAP).IsRequired();

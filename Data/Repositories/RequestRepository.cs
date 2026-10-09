@@ -29,7 +29,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Pending)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Negotiation)
-                                               .SetProperty(p => p.ExecutorId, (long?)null)
+                                               .SetProperty(p => p.CompanyId, (long?)null)
                                                .SetProperty(p => p.AgreementId, (long?)null)
                                           );
                     break;
@@ -38,7 +38,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Negotiation)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Agreed)
-                                               .SetProperty(p => p.ExecutorId, update.ExecutorId)
+                                               .SetProperty(p => p.CompanyId, update.CompanyId)
                                                .SetProperty(p => p.AgreementId, update.AgreementId)
                                           );
                     break;
@@ -47,7 +47,7 @@ namespace Bewegdeal.Data.Repositories
                     await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Negotiation)
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Pending)
-                                               .SetProperty(p => p.ExecutorId, (long?)null)
+                                               .SetProperty(p => p.CompanyId, (long?)null)
                                                .SetProperty(p => p.AgreementId, (long?)null)
                                           );
                     break;
@@ -114,7 +114,7 @@ namespace Bewegdeal.Data.Repositories
                 }
                 else if (filter.ViewerRole == UserRoleEnum.Customer)
                 {
-                    query = query.Where(r => r.RequesterId == viewerId);
+                    query = query.Where(r => r.CustomerId == viewerId);
                 }
                 else if (filter.ViewerRole == UserRoleEnum.Company)
                 {
@@ -126,12 +126,12 @@ namespace Bewegdeal.Data.Repositories
 
                     if (filter.ViewerFocus == RequestViewerFocusEnum.Mine)
                     {
-                        query = query.Where(r => r.ExecutorId == viewerId);
+                        query = query.Where(r => r.CompanyId == viewerId);
                     }
                     else if (filter.ViewerFocus == RequestViewerFocusEnum.Potential)
                     {
                         query = query.Where(r =>
-                            r.ExecutorId != viewerId &&
+                            r.CompanyId != viewerId &&
                             (r.Status == RequestStatusEnum.Pending || r.Status == RequestStatusEnum.Negotiation) &&
                             (
                                 (hasMoving && r.Service == ServiceEnum.Moving) ||
@@ -144,7 +144,7 @@ namespace Bewegdeal.Data.Repositories
                     else
                     {
                         query = query.Where(r =>
-                            r.ExecutorId == viewerId ||
+                            r.CompanyId == viewerId ||
                             (
                                 (r.Status == RequestStatusEnum.Pending || r.Status == RequestStatusEnum.Negotiation) &&
                                 (
