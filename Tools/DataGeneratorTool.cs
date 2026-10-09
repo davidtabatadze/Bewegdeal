@@ -44,7 +44,7 @@ namespace Bewegdeal.Tools
         [
             "Hallo, ich bin interessiert.", "Können wir den Termin besprechen?",
             "Wann sind Sie verfügbar?", "Das klingt gut.", "Wie hoch sind die Kosten?",
-            "Ich habe Ihren Vorschlag erhalten.", "Danke für die schnelle Antwort.",
+            "Ich habe Ihren Angebot erhalten.", "Danke für die schnelle Antwort.",
             "Ich bin einverstanden.", "Können wir Details klären?", "Perfekt, danke!"
         ];
 

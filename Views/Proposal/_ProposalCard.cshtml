@@ -18,7 +18,7 @@
      style="@(ViewData["RequestMode"] is true ? "width:80%;" : "min-width:220px;")">
     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
-        <span class="fw-bolder">Vorschlag@* Proposal *@</span>
+        <span class="fw-bolder">Angebot</span>
     </div>
     <hr class="border border-@color mt-1 mb-3" />
     @if (Model.Proposal.Id == 0 || (Model.Proposal.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
@@ -86,7 +86,7 @@
         {
             <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-body">
                 <i class="icon-base ri ri-file-text-line icon-18px"></i>
-                <a href="@Model.CompanyContact.ServiceTerms" target="_blank" rel="noopener noreferrer">Dienstleistungsbedingungen</a>
+                <a href="@Model.CompanyContact.ServiceTerms" target="_blank" rel="noopener noreferrer">Stornobedingungen@* Dienstleistungsbedingungen *@</a>
             </div>
         }
         @if (ViewData["RequestMode"] is not true)
