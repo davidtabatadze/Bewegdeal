@@ -147,7 +147,14 @@ namespace Bewegdeal.Services
                 OtherPartyRating = otherPartyAvatar.Rating,
                 Messages = messages,
                 Proposals = proposalCards,
-                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
+                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending),
+                AllowAgreementCancel = data.chat?.Status == ChatStatusEnum.Agreed &&
+                                       proposals.Any(p =>
+                                            data.request?.Status == RequestStatusEnum.Agreed &&
+                                            p.Status == RequestProposalStatusEnum.Accepted &&
+                                            p.Date is not null && p.Time is not null &&
+                                            p.Date.Value.ToDateTime(p.Time.Value) >= DateTime.Now
+                                       )
             };
         }
 

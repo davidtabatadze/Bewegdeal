@@ -18,5 +18,6 @@ namespace Bewegdeal.Models
         public List<ChatMessageEntity> Messages { get; set; } = [];
         public Dictionary<long, ProposalCardModel> Proposals { get; set; } = [];
         public bool ProposalPending { get; set; }
+        public bool AllowAgreementCancel { get; set; }
     }
 }

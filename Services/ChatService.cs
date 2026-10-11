@@ -189,7 +189,8 @@ namespace Bewegdeal.Services
                 OtherPartyPictureUrl = companyAvatar.Url,
                 Messages = messages,
                 Proposals = proposalCards,
-                ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending)
+                ProposalPending = false, //proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending),
+                AllowAgreementCancel = false
             };
         }
     }

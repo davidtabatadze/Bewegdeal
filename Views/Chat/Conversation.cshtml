@@ -70,17 +70,20 @@ else
             @* Header *@
             @if (!isAdminView)
             {
-                <div class="alert alert-danger alert-dismissible m-2" role="alert">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                        <strong>Bitte beachten</strong>
+                if (new List<string>() { RequestStatusEnum.Agreed, RequestStatusEnum.Negotiation }.Contains(Model.RequestStatus))
+                {
+                    <div class="alert alert-danger alert-dismissible m-2" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Bitte beachten</strong>
+                        </div>
+                        <ul class="mb-0">
+                            <li>Bitte halten Sie sich an die Regeln der <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">AGB</strong>.</li>
+                            <li>Der Chat kann von der Systemverwaltung überwacht werden.</li>
+                        </ul>
                     </div>
-                    <ul class="mb-0">
-                        <li>Bitte halten Sie sich an die Regeln der <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">AGB</strong>.</li>
-                        <li>Der Chat kann von der Systemverwaltung überwacht werden.</li>
-                    </ul>
-                </div>
+                }
                 <div class="chat-history-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -289,6 +292,13 @@ else
                                 <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Chat abbrechen">
                                     <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                                </span>
+                            }
+                            @if (Model.AllowAgreementCancel)
+                            {
+                                <span id="agreementCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren">
+                                    <i class="icon-base ri ri-shake-hands-line icon-md text-danger"></i>
                                 </span>
                             }
                             <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">
