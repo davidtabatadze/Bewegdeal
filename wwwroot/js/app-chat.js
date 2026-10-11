@@ -7,7 +7,7 @@
 'use strict';
 
 (function () {
-    var cfg = window.chatConfig || {};
+    var cfg = window.Config || {};
     var ChatMode = window.ChatMode || { None: 'none', Initiate: 'initiate', Ongoing: 'ongoing' };
     var requestNumber = cfg.requestNumber || '';
     if (!requestNumber) { return; }

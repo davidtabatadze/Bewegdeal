@@ -411,7 +411,7 @@ namespace Bewegdeal.Services
                                        proposalCard.Proposal?.Date is not null &&
                                        proposalCard.Proposal?.Time is not null &&
                                        proposalCard.Proposal.Date.Value.ToDateTime(proposalCard.Proposal.Time.Value) >= DateTime.Now &&
-                                       (request.CustomerId == userId || request.CustomerId == userId)
+                                       (request.CustomerId == userId || request.CompanyId == userId)
             });
         }
 

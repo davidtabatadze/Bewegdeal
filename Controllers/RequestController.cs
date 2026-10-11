@@ -179,5 +179,12 @@ public class RequestController(RequestService RequestService, RequestChatService
         return Json(await RequestService.Cancel(number, UserId));
     }
 
+    [HttpPost]
+    public async Task<IActionResult> CancelAgreement(string number)
+    {
+        await RequestChatService.Cancel(number, UserId, false);
+        return Json(await RequestService.CancelAgreement(number, UserId));
+    }
+
     #endregion
 }
