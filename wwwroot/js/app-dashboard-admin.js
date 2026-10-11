@@ -1,6 +1,6 @@
-ï»¿/**
- * Admin Dashboard â€” Bewegdeal
- * v1.1.4
+/**
+ * Admin Dashboard — Bewegdeal
+ * v1.1.5
  */
 
 'use strict';
@@ -98,7 +98,7 @@
             },
             yaxis: {
                 labels: {
-                    formatter: val => 'â‚¬' + parseInt(val),
+                    formatter: val => '€' + parseInt(val),
                     style: { fontSize: '13px', fontFamily: fontFamily, colors: labelColor }
                 }
             },

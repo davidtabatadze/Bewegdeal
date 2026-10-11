@@ -1,4 +1,7 @@
-﻿// v1.1.4
+/**
+ * Fraud Words — Bewegdeal
+ * v1.1.5
+ */
 'use strict';
 
 (function () {

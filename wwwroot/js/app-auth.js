@@ -1,6 +1,6 @@
-ï»¿/**
+/**
  * Pages Authentication
- * v1.1.4
+ * v1.1.5
  */
 'use strict';
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 message: 'Bitte E-Mail-Adresse eingeben'
                             },
                             emailAddress: {
-                                message: 'Bitte eine gÃ¼ltige E-Mail-Adresse eingeben'
+                                message: 'Bitte eine gültige E-Mail-Adresse eingeben'
                             }
                         }
                     },
@@ -58,11 +58,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     'confirm-password': {
                         validators: {
                             notEmpty: {
-                                message: 'Bitte Passwort bestÃ¤tigen'
+                                message: 'Bitte Passwort bestätigen'
                             },
                             identical: {
                                 compare: () => formAuthentication.querySelector('[name="password"]').value,
-                                message: 'Das Passwort und die BestÃ¤tigung stimmen nicht Ã¼berein'
+                                message: 'Das Passwort und die Bestätigung stimmen nicht überein'
                             },
                             stringLength: {
                                 min: 6,

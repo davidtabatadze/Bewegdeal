@@ -1,6 +1,6 @@
-ï»¿/**
- * Company Dashboard â€” Bewegdeal
- * v1.1.4
+/**
+ * Company Dashboard — Bewegdeal
+ * v1.1.5
  */
 
 'use strict';
@@ -90,7 +90,7 @@
             },
             yaxis: {
                 labels: {
-                    formatter: val => 'â‚¬' + parseInt(val),
+                    formatter: val => '€' + parseInt(val),
                     style: { fontSize: '13px', fontFamily: fontFamily, colors: labelColor }
                 }
             },

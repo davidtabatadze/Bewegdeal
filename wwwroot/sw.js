@@ -1,4 +1,4 @@
-const CACHE = 'bewegdeal-v1.1.4';
+const CACHE = 'bewegdeal-v1.1.5';
 
 const PRECACHE = [
   '/offline.html'
