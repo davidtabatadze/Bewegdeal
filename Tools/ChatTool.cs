@@ -12,7 +12,7 @@ namespace Bewegdeal.Tools
             => await ChatHubService.Join(UserId, chatKey, Context.ConnectionId);
 
         public async Task Send(string chatKey, string content)
-            => await ChatHubService.Send(UserId, chatKey, content);
+            => await ChatHubService.Send(UserId, chatKey, content, false);
 
         public async Task MarkRead(string chatKey)
             => await ChatHubService.MarkRead(UserId, chatKey, Context.ConnectionId);

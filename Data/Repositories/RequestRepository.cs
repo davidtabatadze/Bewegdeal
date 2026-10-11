@@ -45,7 +45,7 @@ namespace Bewegdeal.Data.Repositories
                     break;
 
                 case RequestUpdateAreaEnum.ChatDeactivate:
-                    await Context.Requests.Where(r => r.Id == update.Id && r.Status == RequestStatusEnum.Negotiation)
+                    await Context.Requests.Where(r => r.Id == update.Id && (r.Status == RequestStatusEnum.Negotiation || r.Status == RequestStatusEnum.Agreed))
                                           .ExecuteUpdateAsync(r => r
                                                .SetProperty(p => p.Status, RequestStatusEnum.Pending)
                                                .SetProperty(p => p.CompanyId, (long?)null)

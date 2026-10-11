@@ -158,7 +158,7 @@ namespace Bewegdeal.Services
             };
         }
 
-        public async Task Cancel(string requestNumber, long userId, bool notify)
+        public async Task Cancel(string requestNumber, long userId)
         {
             var request = await RequestService.Get(
                 requestNumber,
@@ -169,16 +169,43 @@ namespace Bewegdeal.Services
 
             if (request?.Status == RequestStatusEnum.Negotiation && chat?.Status == ChatStatusEnum.Ongoing && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {
-                if (proposal is not null)
-                {
-                    await ProposalReact(userId, proposal.Id, false, null);
-                }
-                if (notify == true)
-                {
-                    // await ChatHubService.Send(userId, chat, "Sorry, I kindly have to end our negotiation, because we couldn't reach an agreement. Wish you a good luck.");
-                    await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss unsere Verhandlung beenden, da wir keine Einigung erzielen konnten. Ich wünsche Ihnen viel Erfolg.");
-                }
+                await ProposalReact(userId, proposal?.Id ?? 0, false, null);
+                await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss unsere Verhandlung beenden, da wir keine Einigung erzielen konnten. Ich wünsche Ihnen viel Erfolg.", true);
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat.Id, Status = ChatStatusEnum.Cancelled });
+                await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
+                await ChatHubService.Leave(chat.Key);
+            }
+        }
+
+        public async Task CancelAgreement(string requestNumber, long userId)
+        {
+            var request = await RequestService.Get(
+                requestNumber,
+                [nameof(RequestEntity.Id), nameof(RequestEntity.Status)]
+            );
+            var chat = await ChatService.Get(new ChatFilter
+            {
+                RequestId = request?.Id ?? 0,
+                Status = ChatStatusEnum.Agreed
+            }, [nameof(ChatEntity.Id), nameof(ChatEntity.Status)]);
+            var proposal = await ProposalService.Load(new RequestProposalFilter { });
+
+            if (request?.Status == RequestStatusEnum.Agreed && chat?.Status == ChatStatusEnum.Agreed && (chat?.CompanyId == userId || chat?.CustomerId == userId))
+            {
+                await ProposalService.Update(0, RequestProposalStatusEnum.Declined);
+                await ChatHubService.Send(userId, chat,
+                    userId == chat?.CompanyId ?
+                    "Leider müssen wir die Durchführung des gebuchten Auftrags absagen. Wir entschuldigen uns für die Unannehmlichkeiten."
+                    : "Leider muss ich den gebuchten Auftrag stornieren. Ich bitte um Verständnis.",
+                    true
+                );
+                await ChatHubService.Send(userId, chat,
+                    userId == chat?.CompanyId ?
+                    "Hinweis von Bewegdeal: Entstehen Ihnen durch die Absage Mehrkosten, können Sie unter den gesetzlichen Voraussetzungen Ersatz verlangen. Ihre Rechte gegenüber der Firma bleiben bestehen."
+                    : "Hinweis von Bewegdeal: Ob Kosten anfallen, richtet sich nach den wirksam vereinbarten Stornobedingungen und den gesetzlichen Vorschriften. Ein bestehendes gesetzliches Rücktrittsrecht bleibt unberührt.",
+                    true
+                );
+                await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat!.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
                 await ChatHubService.Leave(chat.Key);
             }
@@ -228,8 +255,8 @@ namespace Bewegdeal.Services
                 });
 
                 // await ChatHubService.Send(userId, chat, "Kindly, consider my proposal.");
-                await ChatHubService.Send(userId, chat, "Bitte berücksichtigen Sie mein Angebot.");
-                await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id);
+                await ChatHubService.Send(userId, chat, "Bitte berücksichtigen Sie mein Angebot.", true);
+                await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id, false);
             }
         }
 
@@ -263,13 +290,13 @@ namespace Bewegdeal.Services
                 if (accepted)
                 {
                     // await ChatHubService.Send(userId, chat, "Deal, i accept!");
-                    await ChatHubService.Send(userId, chat, "Einverstanden, ich nehme an!");
+                    await ChatHubService.Send(userId, chat, "Einverstanden, ich nehme an!", true);
                 }
                 else
                 {
                     // await ChatHubService.Send(userId, chat, "Sorry, i have to reject");
-                    await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss ablehnen.");
-                    await ChatHubService.Send(userId, chat, reason ?? "");
+                    await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss ablehnen.", true);
+                    await ChatHubService.Send(userId, chat, reason ?? "", true);
                 }
             }
         }
