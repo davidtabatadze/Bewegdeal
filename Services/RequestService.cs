@@ -127,6 +127,11 @@ namespace Bewegdeal.Services
             return GenericResultModel.Ok();
         }
 
+        public async Task<GenericResultModel> CancelAgreement(string number, long userId)
+        {
+            return GenericResultModel.Ok();
+        }
+
         public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
         {
             var request = await Get(number);
@@ -399,7 +404,14 @@ namespace Bewegdeal.Services
                                request.CustomerId == userId &&
                                request.Status == RequestStatusEnum.Agreed &&
                                proposalCard.Proposal?.Status == RequestProposalStatusEnum.Accepted &&
-                               proposalCard.Proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
+                               proposalCard.Proposal?.Date <= DateOnly.FromDateTime(DateTime.Now),
+                AllowAgreementCancel = edit != true &&
+                                       request.Status == RequestStatusEnum.Agreed &&
+                                       proposalCard.Proposal?.Status == RequestProposalStatusEnum.Accepted &&
+                                       proposalCard.Proposal?.Date is not null &&
+                                       proposalCard.Proposal?.Time is not null &&
+                                       proposalCard.Proposal.Date.Value.ToDateTime(proposalCard.Proposal.Time.Value) >= DateTime.Now &&
+                                       (request.CustomerId == userId || request.CustomerId == userId)
             });
         }
 

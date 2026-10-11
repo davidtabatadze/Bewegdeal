@@ -11,5 +11,6 @@ namespace Bewegdeal.Models
         public UserAvatarModel? ProposalCompany { get; set; }
         public List<RequestFileModel> Files { get; set; } = [];
         public bool AllowResolve { get; set; }
+        public bool AllowAgreementCancel { get; set; }
     }
 }
