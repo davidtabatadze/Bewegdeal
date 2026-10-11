@@ -296,7 +296,7 @@ namespace Bewegdeal.Services
                 {
                     // await ChatHubService.Send(userId, chat, "Sorry, i have to reject");
                     await ChatHubService.Send(userId, chat, "Es tut mir leid, ich muss ablehnen.", true);
-                    await ChatHubService.Send(userId, chat, reason ?? "", true);
+                    await ChatHubService.Send(userId, chat, reason ?? "", false);
                 }
             }
         }
