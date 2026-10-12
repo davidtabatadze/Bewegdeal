@@ -9,19 +9,29 @@
         RequestProposalStatusEnum.Rejected => "danger",
         RequestProposalStatusEnum.Canceled => "secondary",
         RequestProposalStatusEnum.Pending => "warning",
+        RequestProposalStatusEnum.Declined => "success",
         _ => "secondary"
     };
+
+    if (ViewData["RequestMode"] is true && Model.Proposal.Status == RequestProposalStatusEnum.Declined)
+    {
+        color = "secondary";
+    }
 }
 
 <div class="@(ViewData["RequestMode"] is true ? "" : $"border border-{color} rounded") @(ViewData["RequestMode"] is true ? "p-0" : "p-3") text-center"
      data-proposal-card-id="@Model.Proposal.Id"
      style="@(ViewData["RequestMode"] is true ? "width:80%;" : "min-width:220px;")">
-    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-1 position-relative">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Angebot</span>
+        @if (Model.Proposal.Status == RequestProposalStatusEnum.Declined)
+        {
+            <i class="icon-base ri ri-file-forbid-line text-danger icon-48px position-absolute" style="top: -15px; right: -13px;"></i>
+        }
     </div>
     <hr class="border border-@color mt-1 mb-3" />
-    @if (Model.Proposal.Id == 0 || (Model.Proposal.Status == RequestProposalStatusEnum.Canceled && ViewData["RequestMode"] is true))
+    @if (Model.Proposal.Id == 0 || ((Model.Proposal.Status == RequestProposalStatusEnum.Canceled || Model.Proposal.Status == RequestProposalStatusEnum.Declined) && ViewData["RequestMode"] is true))
     {
         <div class="d-flex align-items-center justify-content-center gap-1 mb-1 text-secondary">
             <span class="fw-bold">Es liegt noch kein Angebot vor.</span>

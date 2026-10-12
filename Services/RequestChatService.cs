@@ -187,7 +187,7 @@ namespace Bewegdeal.Services
             {
                 RequestId = request?.Id ?? 0,
                 Status = ChatStatusEnum.Agreed
-            }, [nameof(ChatEntity.Id), nameof(ChatEntity.Status)]);
+            }, [nameof(ChatEntity.Id), nameof(ChatEntity.Status), nameof(ChatEntity.CompanyId), nameof(ChatEntity.CustomerId)]);
             var proposals = await ProposalService.Load(new RequestProposalFilter
             {
                 ChatId = chat?.Id ?? 0,
@@ -199,6 +199,7 @@ namespace Bewegdeal.Services
                 foreach (var proposal in proposals)
                 {
                     await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Declined);
+                    await ChatHubService.NotifyProposal(chat.Key, proposal.Id, RequestProposalStatusEnum.Declined);
                 }
                 await ChatHubService.Send(userId, chat,
                     userId == chat?.CompanyId ?

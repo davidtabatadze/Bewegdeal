@@ -64,6 +64,7 @@ else
          data-viewer-picture="@(Model.ViewerPictureUrl ?? "")"
          data-other-initials="@Model.OtherPartyInitials"
          data-other-picture="@(Model.OtherPartyPictureUrl ?? "")"
+         data-is-customer="@User.IsInRole(UserRoleEnum.Customer).ToString().ToLower()"
          class="col app-chat-history"
          style="block-size:100%">
         <div class="chat-history-wrapper" style="block-size:100%;display:flex;flex-direction:column;">
@@ -307,7 +308,7 @@ else
                             {
                                 <span id="agreementCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren">
-                                    <i class="icon-base ri ri-shake-hands-line icon-md text-danger"></i>
+                                    <i class="icon-base ri ri-file-forbid-line icon-md text-danger"></i>
                                 </span>
                             }
                             <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">

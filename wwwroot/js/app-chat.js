@@ -158,6 +158,55 @@
         });
     });
 
+    // ── Agreement Cancel flow ────────────────────────────────────────────────
+
+    body.addEventListener('click', function (e) {
+        if (!e.target.closest('#agreementCancelBtn')) { return; }
+
+        var conv = document.getElementById('chatConversation');
+        var isCustomer = conv && conv.dataset.isCustomer === 'true';
+
+        var title = isCustomer ? 'Auftrag stornieren' : 'Auftrag absagen';
+        var bodyHtml = isCustomer
+            ? '<p class="text-start">Bei einer Stornierung können nach den wirksam vereinbarten Stornobedingungen der Firma oder gesetzlichen Vorschriften Kosten anfallen.</p>' +
+              '<p class="text-start">Üben Sie ein bestehendes gesetzliches Rücktrittsrecht wirksam aus, fällt keine Stornogebühr an. Für bereits erbrachte Leistungen kann unter den gesetzlichen Voraussetzungen ein anteiliges Entgelt anfallen.</p>' +
+              '<p class="text-start">Ihre gesetzlichen Rechte bleiben unberührt.</p>' +
+              '<p class="text-start mb-0">Möchten Sie den Auftrag stornieren?</p>'
+            : '<p class="text-start">Eine Absage befreit Sie nicht automatisch von Ihren vertraglichen Pflichten. Unter den gesetzlichen Voraussetzungen können Sie verpflichtet sein, dem Kunden Schäden zu ersetzen, etwa Mehrkosten für eine Ersatzfirma.</p>' +
+              '<p class="text-start">Bestehende Rechte und Ansprüche beider Seiten bleiben unberührt.</p>' +
+              '<p class="text-start mb-0">Möchten Sie den Auftrag absagen?</p>';
+        var confirmText = isCustomer ? 'Ja, stornieren' : 'Ja, absagen';
+
+        Swal.fire({
+            title: title,
+            html: bodyHtml,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: confirmText,
+            cancelButtonText: 'Nein, behalten',
+            customClass: {
+                confirmButton: 'btn btn-danger me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            Block.pulse('#chatCard');
+            fetch('/RequestChat/CancelAgreement', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'requestNumber=' + encodeURIComponent(requestNumber)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) { window.location.reload(); }
+                    else { Block.remove('#chatCard'); }
+                })
+                .catch(function () { Block.remove('#chatCard'); });
+        });
+    });
+
     // ── Initiate flow ─────────────────────────────────────────────────────────
 
     body.addEventListener('click', function (e) {
@@ -291,11 +340,11 @@
             if (!card) { return; }
 
             if (data.proposalStatus === 'canceled') {
-                card.classList.remove('border-warning');
+                card.classList.remove('border-warning', 'border-success', 'border-danger');
                 card.classList.add('border-secondary');
                 var icon = card.querySelector('.ri-shake-hands-line');
                 if (icon) {
-                    icon.classList.remove('text-warning');
+                    icon.classList.remove('text-warning', 'text-success', 'text-danger');
                     icon.classList.add('text-secondary');
                 }
                 var hr = card.querySelector('hr');
@@ -309,18 +358,27 @@
                     card.appendChild(deleted);
                 }
             } else {
-                var color = data.proposalStatus === 'accepted' ? 'success' : 'danger';
-                card.classList.remove('border-warning', 'border-success', 'border-danger');
+                var color = (data.proposalStatus === 'accepted' || data.proposalStatus === 'declined') ? 'success' : 'danger';
+                card.classList.remove('border-warning', 'border-success', 'border-danger', 'border-secondary');
                 card.classList.add('border-' + color);
                 var icon = card.querySelector('.ri-shake-hands-line');
                 if (icon) {
-                    icon.classList.remove('text-warning', 'text-success', 'text-danger');
+                    icon.classList.remove('text-warning', 'text-success', 'text-danger', 'text-secondary');
                     icon.classList.add('text-' + color);
                 }
                 var hr = card.querySelector('hr');
                 if (hr) { hr.className = 'border border-' + color + ' mt-1 mb-3'; }
                 var actions = card.querySelector('.proposal-actions');
                 if (actions) { actions.remove(); }
+                if (data.proposalStatus === 'declined') {
+                    var headerDiv = card.querySelector('.position-relative');
+                    if (headerDiv && !headerDiv.querySelector('.ri-file-forbid-line')) {
+                        var overlayIcon = document.createElement('i');
+                        overlayIcon.className = 'icon-base ri ri-file-forbid-line text-danger icon-48px position-absolute';
+                        overlayIcon.style.cssText = 'top:-15px;right:-13px;';
+                        headerDiv.appendChild(overlayIcon);
+                    }
+                }
             }
 
             if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled') {
