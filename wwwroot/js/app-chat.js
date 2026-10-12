@@ -315,7 +315,7 @@
                 if (footer) {
                     var cancelBtn = (msg.senderId === viewerId)
                         ? '<a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" style="cursor:pointer;"' +
-                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot stornieren">' +
+                        ' data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot zurückziehen">' +
                             '<i class="icon-base ri ri-hand icon-md text-danger"></i></a>'
                         : '';
                     footer.outerHTML =
@@ -323,7 +323,7 @@
                         '<div class="alert alert-warning m-0" role="alert">' +
                         '<div class="d-flex align-items-center">' +
                         '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
-                        '<strong class="pe-1">Ausstehende Antwort auf Angebot</strong>' +
+                        '<strong class="pe-1">Ausstehendes Angebot</strong>' +
                         cancelBtn +
                         '</div></div></div>';
                     var cancelEl = body.querySelector('#chatCancelProposalBtn');
@@ -383,15 +383,11 @@
 
             if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled' || data.proposalStatus === 'declined') {
                 Block.remove('#chatCard');
-                if (savedFooterHtml) {
+                if (data.proposalStatus === 'accepted' || data.proposalStatus === 'declined') {
+                    loadConversation();
+                } else if (savedFooterHtml) {
                     var footer = body.querySelector('.chat-history-footer');
                     if (footer) { footer.outerHTML = savedFooterHtml; }
-                    if (data.proposalStatus === 'accepted') {
-                        var cancelBtn = body.querySelector('#chatCancelBtn');
-                        if (cancelBtn) { cancelBtn.remove(); }
-                        var proposalBtn = body.querySelector('#chatProposalBtn');
-                        if (proposalBtn) { proposalBtn.remove(); }
-                    }
                 } else {
                     loadConversation();
                 }

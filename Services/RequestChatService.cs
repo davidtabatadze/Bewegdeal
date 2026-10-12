@@ -198,7 +198,7 @@ namespace Bewegdeal.Services
             {
                 foreach (var proposal in proposals)
                 {
-                    await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Declined);
+                    await ProposalService.Update(proposal.Id, userId, RequestProposalStatusEnum.Declined);
                     await ChatHubService.NotifyProposal(chat.Key, proposal.Id, RequestProposalStatusEnum.Declined);
                 }
                 await ChatHubService.Send(userId, chat,
@@ -225,7 +225,7 @@ namespace Bewegdeal.Services
 
             if (proposal?.Status == RequestProposalStatusEnum.Pending && proposal?.CompanyId == userId)
             {
-                await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Canceled);
+                await ProposalService.Update(proposal.Id, userId, RequestProposalStatusEnum.Canceled);
                 await ChatHubService.NotifyProposal(chat?.Key ?? "-", proposal.Id, RequestProposalStatusEnum.Canceled);
             }
         }
@@ -280,7 +280,7 @@ namespace Bewegdeal.Services
                 reason = accepted ? null : reason;
                 var status = accepted ? RequestProposalStatusEnum.Accepted : RequestProposalStatusEnum.Rejected;
 
-                await ProposalService.Update(proposalId, status, reason);
+                await ProposalService.Update(proposalId, userId, status, reason);
                 if (accepted)
                 {
                     await ChatService.Update(

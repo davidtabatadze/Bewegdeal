@@ -256,6 +256,7 @@ namespace Bewegdeal.Data
                 e.Property(p => p.Status).IsRequired().HasMaxLength(16);
                 e.Property(p => p.Service).IsRequired().HasMaxLength(16);
                 e.Property(p => p.ReactionDate).IsRequired(false);
+                e.Property(p => p.ReactionUserId).IsRequired(false);
                 e.Property(p => p.ReactionReason).IsRequired(false).HasMaxLength(1024);
                 e.Property(p => p.Date).IsRequired(true)
                     .HasConversion(

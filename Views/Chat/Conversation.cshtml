@@ -56,6 +56,10 @@
 else
 {
     var isAdminView = User.IsInRole(UserRoleEnum.Administrator);
+    var declinedProposal = Model.Proposals.Values
+                                .FirstOrDefault(p => p?.Proposal?.Status == RequestProposalStatusEnum.Declined)
+                                ?.Proposal;
+
     <div id="chatConversation"
          data-mode="@Model.Mode"
          data-chat-key="@Model.ChatKey"
@@ -240,6 +244,20 @@ else
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                             <strong>Administrator – Nur-Lese-Ansicht</strong>
                         </div>
+                    </div>
+                </div>
+            }
+            else if (declinedProposal != null && (declinedProposal.ReactionUserId ?? 0).ToString() != User.FindFirstValue(IdentityFieldEnum.Id))
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-danger m-0" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Der Chat wurde abgebrochen</strong>
+                        </div>
+                        @(User.IsInRole(UserRoleEnum.Customer) ?
+                            "Hinweis von Bewegdeal: Entstehen Ihnen durch die Absage Mehrkosten, können Sie unter den gesetzlichen Voraussetzungen Ersatz verlangen. Ihre Rechte gegenüber der Firma bleiben bestehen."
+                            : "Hinweis von Bewegdeal: Ob Kosten anfallen, richtet sich nach den wirksam vereinbarten Stornobedingungen und den gesetzlichen Vorschriften. Ein bestehendes gesetzliches Rücktrittsrecht bleibt unberührt.")
                     </div>
                 </div>
             }
