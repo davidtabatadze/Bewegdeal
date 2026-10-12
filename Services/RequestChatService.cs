@@ -188,23 +188,30 @@ namespace Bewegdeal.Services
                 RequestId = request?.Id ?? 0,
                 Status = ChatStatusEnum.Agreed
             }, [nameof(ChatEntity.Id), nameof(ChatEntity.Status)]);
-            var proposal = await ProposalService.Load(new RequestProposalFilter { });
+            var proposals = await ProposalService.Load(new RequestProposalFilter
+            {
+                ChatId = chat?.Id ?? 0,
+                Status = RequestProposalStatusEnum.Accepted
+            });
 
             if (request?.Status == RequestStatusEnum.Agreed && chat?.Status == ChatStatusEnum.Agreed && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {
-                await ProposalService.Update(0, RequestProposalStatusEnum.Declined);
+                foreach (var proposal in proposals)
+                {
+                    await ProposalService.Update(proposal.Id, RequestProposalStatusEnum.Declined);
+                }
                 await ChatHubService.Send(userId, chat,
                     userId == chat?.CompanyId ?
                     "Leider müssen wir die Durchführung des gebuchten Auftrags absagen. Wir entschuldigen uns für die Unannehmlichkeiten."
                     : "Leider muss ich den gebuchten Auftrag stornieren. Ich bitte um Verständnis.",
                     true
                 );
-                await ChatHubService.Send(userId, chat,
-                    userId == chat?.CompanyId ?
-                    "Hinweis von Bewegdeal: Entstehen Ihnen durch die Absage Mehrkosten, können Sie unter den gesetzlichen Voraussetzungen Ersatz verlangen. Ihre Rechte gegenüber der Firma bleiben bestehen."
-                    : "Hinweis von Bewegdeal: Ob Kosten anfallen, richtet sich nach den wirksam vereinbarten Stornobedingungen und den gesetzlichen Vorschriften. Ein bestehendes gesetzliches Rücktrittsrecht bleibt unberührt.",
-                    true
-                );
+                //await ChatHubService.Send(userId, chat,
+                //    userId == chat?.CompanyId ?
+                //    "Hinweis von Bewegdeal: Entstehen Ihnen durch die Absage Mehrkosten, können Sie unter den gesetzlichen Voraussetzungen Ersatz verlangen. Ihre Rechte gegenüber der Firma bleiben bestehen."
+                //    : "Hinweis von Bewegdeal: Ob Kosten anfallen, richtet sich nach den wirksam vereinbarten Stornobedingungen und den gesetzlichen Vorschriften. Ein bestehendes gesetzliches Rücktrittsrecht bleibt unberührt.",
+                //    true
+                //);
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat!.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
                 await ChatHubService.Leave(chat.Key);
