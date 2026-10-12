@@ -187,7 +187,7 @@ namespace Bewegdeal.Services
             {
                 RequestId = request?.Id ?? 0,
                 Status = ChatStatusEnum.Agreed
-            }, [nameof(ChatEntity.Id), nameof(ChatEntity.Status), nameof(ChatEntity.CompanyId), nameof(ChatEntity.CustomerId)]);
+            }, [nameof(ChatEntity.Id), nameof(ChatEntity.Key), nameof(ChatEntity.Status), nameof(ChatEntity.CompanyId), nameof(ChatEntity.CustomerId)]);
             var proposals = await ProposalService.Load(new RequestProposalFilter
             {
                 ChatId = chat?.Id ?? 0,
@@ -215,7 +215,6 @@ namespace Bewegdeal.Services
                 //);
                 await ChatService.Update(ChatUpdateAreaEnum.Status, new() { Id = chat!.Id, Status = ChatStatusEnum.Cancelled });
                 await RequestService.Update(RequestUpdateAreaEnum.ChatDeactivate, new() { Id = request.Id });
-                await ChatHubService.Leave(chat.Key);
             }
         }
 

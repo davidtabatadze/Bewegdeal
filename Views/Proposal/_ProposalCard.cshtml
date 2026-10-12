@@ -25,7 +25,7 @@
     <div class="d-flex align-items-center justify-content-center gap-2 mb-1 position-relative">
         <i class="icon-base ri ri-shake-hands-line text-@color icon-28px"></i>
         <span class="fw-bolder">Angebot</span>
-        @if (Model.Proposal.Status == RequestProposalStatusEnum.Declined)
+        @if (Model.Proposal.Status == RequestProposalStatusEnum.Declined && ViewData["RequestMode"] is not true)
         {
             <i class="icon-base ri ri-file-forbid-line text-danger icon-48px position-absolute" style="top: -15px; right: -13px;"></i>
         }

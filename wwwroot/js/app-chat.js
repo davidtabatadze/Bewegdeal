@@ -381,7 +381,7 @@
                 }
             }
 
-            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled') {
+            if (data.proposalStatus === 'accepted' || data.proposalStatus === 'rejected' || data.proposalStatus === 'canceled' || data.proposalStatus === 'declined') {
                 Block.remove('#chatCard');
                 if (savedFooterHtml) {
                     var footer = body.querySelector('.chat-history-footer');
