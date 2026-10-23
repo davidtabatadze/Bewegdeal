@@ -315,7 +315,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 
@@ -332,12 +333,27 @@ document.addEventListener('DOMContentLoaded', function () {
                             text: 'Benutzer wurde gelöscht.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
-                            buttonsStyling: false
+                            buttonsStyling: false,
+                            reverseButtons: true
                         });
                     } else if (res.status === 400) {
-                        Swal.fire({ title: 'Nicht erlaubt', text: 'Dieser Benutzer kann nicht gelöscht werden.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({
+                            title: 'Nicht erlaubt',
+                            text: 'Dieser Benutzer kann nicht gelöscht werden.',
+                            icon: 'warning',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false,
+                            reverseButtons: true
+                        });
                     } else {
-                        Swal.fire({ title: 'Fehler', text: 'Benutzer konnte nicht gelöscht werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({
+                            title: 'Fehler',
+                            text: 'Benutzer konnte nicht gelöscht werden.',
+                            icon: 'error',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false,
+                            reverseButtons: true
+                        });
                     }
                 });
                 return;
@@ -359,12 +375,27 @@ document.addEventListener('DOMContentLoaded', function () {
                         text: 'Benutzerstatus wurde aktualisiert.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
-                        buttonsStyling: false
+                        buttonsStyling: false,
+                        reverseButtons: true
                     });
                 } else if (res.status === 400) {
-                    Swal.fire({ title: 'Nicht erlaubt', text: 'Sie können Ihren eigenen Status nicht ändern.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({
+                        title: 'Nicht erlaubt',
+                        text: 'Sie können Ihren eigenen Status nicht ändern.',
+                        icon: 'warning',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false,
+                        reverseButtons: true
+                    });
                 } else {
-                    Swal.fire({ title: 'Fehler', text: 'Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({
+                        title: 'Fehler',
+                        text: 'Status konnte nicht aktualisiert werden.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false,
+                        reverseButtons: true
+                    });
                 }
             });
         });

@@ -104,7 +104,8 @@
                 confirmButton: 'btn btn-danger me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 
@@ -139,7 +140,8 @@
                 confirmButton: 'btn btn-danger me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 
@@ -188,7 +190,8 @@
                 confirmButton: 'btn btn-danger me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 

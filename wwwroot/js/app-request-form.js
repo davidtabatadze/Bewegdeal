@@ -358,7 +358,8 @@ Dropzone.autoDiscover = false;
                     confirmButton: 'btn btn-danger me-3',
                     cancelButton: 'btn btn-label-secondary'
                 },
-                buttonsStyling: false
+                buttonsStyling: false,
+                reverseButtons: true
             });
 
             if (!confirmed.isConfirmed) { return; }

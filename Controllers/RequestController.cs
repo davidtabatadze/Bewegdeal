@@ -182,7 +182,7 @@ public class RequestController(RequestService RequestService, RequestChatService
     [HttpPost]
     public async Task<IActionResult> CancelAgreement(string number)
     {
-        await RequestChatService.Cancel(number, UserId);
+        await RequestChatService.CancelAgreement(number, UserId);
         return Json(await RequestService.CancelAgreement(number, UserId));
     }
 
