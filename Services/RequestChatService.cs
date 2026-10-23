@@ -194,7 +194,12 @@ namespace Bewegdeal.Services
                 Status = RequestProposalStatusEnum.Accepted
             });
 
-            if (request?.Status == RequestStatusEnum.Agreed && chat?.Status == ChatStatusEnum.Agreed && (chat?.CompanyId == userId || chat?.CustomerId == userId))
+            var allowCancel = proposals.All(p =>
+                p.Date is not null && p.Time is not null &&
+                p.Date.Value.ToDateTime(p.Time.Value) >= DateTime.Now
+            );
+
+            if (allowCancel && request?.Status == RequestStatusEnum.Agreed && chat?.Status == ChatStatusEnum.Agreed && (chat?.CompanyId == userId || chat?.CustomerId == userId))
             {
                 foreach (var proposal in proposals)
                 {
