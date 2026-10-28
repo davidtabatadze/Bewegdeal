@@ -514,6 +514,7 @@ wwwroot/js/
 | RequestImageMaxSize | short | SMALLINT, in MB |
 | RequestVideoMaxCount | short | SMALLINT |
 | RequestVideoMaxSize | short | SMALLINT, in MB |
+| InvoiceDueDays | short | SMALLINT, days until invoice is due |
 
 **RequestProposalEntity** (`RequestProposals` table):
 | Field | Type | Notes |
@@ -549,10 +550,14 @@ wwwroot/js/
 | CustomerId | long | FK to Users |
 | Currency | string | default "EUR" |
 | ServiceCost | decimal | base cost from proposal |
-| SubtotalCost | decimal | after commission |
-| TotalCost | decimal | after tax |
+| CommissionPersent | short | commission % snapshot at invoice creation |
+| CommissionCost | decimal | commission amount |
+| TaxPersent | short | tax % snapshot at invoice creation |
+| TaxCost | decimal | tax amount |
+| TotalCost | decimal | CommissionCost + TaxCost |
 | NotificationSent | bool | whether email notification was sent |
 | CreateDate | DateTime | UTC |
+| DueDate | DateTime | payment due date (CreateDate + InvoiceDueDays from settings) |
 | PaymentDate | DateTime? | when marked paid |
 
 **UserRatingEntity** (`UserRatings` table): `Id` (long PK), `UserId`, `EvaluatorId` (both FK to Users), `Value` (decimal), `CreateDate` (DateTime).
@@ -797,7 +802,7 @@ Proposals allow a Company to offer terms (cost, date, time, service terms) to a 
 Invoices are auto-created when a proposal is accepted. Admin can update status to Paid or Cancelled.
 
 ### Entity
-`InvoiceEntity` stores: request/proposal references, company/customer IDs, `ServiceCost` (from proposal), `SubtotalCost` (after commission), `TotalCost` (after tax), `NotificationSent`, `PaymentDate`.
+`InvoiceEntity` stores: request/proposal references, company/customer IDs, `ServiceCost` (from proposal), `CommissionPersent`/`CommissionCost`, `TaxPersent`/`TaxCost`, `TotalCost` (commission + tax), `DueDate`, `NotificationSent`, `PaymentDate`.
 
 ### Access
 - `GET /Invoice/List` — all authenticated roles; DataTable filtered server-side by userId + userRole
