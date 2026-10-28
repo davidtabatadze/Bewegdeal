@@ -116,6 +116,17 @@ else
                                 </small>
                             </div>
                         </div>
+                        @if (Model.AllowAgreementCancel)
+                        {
+                            @* <span id="agreementCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren">
+                                <i class="icon-base ri ri-file-forbid-line icon-md text-danger"></i>
+                            </span> *@
+                            <button id="agreementCancelBtn" type="button" class="btn rounded-pill btn-label-danger">
+                                <span class="icon-base ri ri-file-forbid-line icon-16px me-1_5"></span>
+                                <span style="font-size: 0.75rem;">Auftrag stornieren</span>
+                            </button>
+                        }
                     </div>
                 </div>
             }
@@ -320,13 +331,6 @@ else
                                 <span id="chatCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Chat abbrechen">
                                     <i class="icon-base ri ri-hand icon-md text-danger"></i>
-                                </span>
-                            }
-                            @if (Model.AllowAgreementCancel)
-                            {
-                                <span id="agreementCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
-                                      data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren">
-                                    <i class="icon-base ri ri-file-forbid-line icon-md text-danger"></i>
                                 </span>
                             }
                             <button type="submit" class="btn btn-icon btn-primary send-msg-btn ms-2">
