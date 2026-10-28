@@ -55,7 +55,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline">
+                <div id="chatProposalReactRejectBody" class="form-floating form-floating-outline" style="width: 480px;">
                     <input id="proposalRejectReason" type="text" class="form-control" placeholder="" />
                     <label for="proposalRejectReason">Grund (optional)</label>
                 </div>
@@ -155,7 +155,7 @@
                 if (cb2)      { cb2.checked = false; }
 
                 if (confirmBtn) {
-                    confirmBtn.textContent = accepted ? 'Ja, annehmen' : 'Ja, ablehnen';
+                    confirmBtn.textContent = accepted ? 'Zahlungspflichtig buchen' : 'Abbrechen';
                     confirmBtn.className   = 'btn ' + (accepted ? 'btn-success' : 'btn-danger');
                     confirmBtn.disabled    = _earlyService;
                 }

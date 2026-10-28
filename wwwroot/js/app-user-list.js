@@ -1,6 +1,6 @@
 ﻿/**
  * Users List — Bewegdeal
- * v1.1.4
+ * v1.1.5
  */
 
 'use strict';
@@ -8,7 +8,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const dt_user_table = document.querySelector('.datatables-users');
 
-    // Status → icon + color + label
+    // Status ? icon + color + label
     const us = window.userStatusLabels || {};
     const statusMap = {
         active: { title: us.active, icon: 'ri-user-follow-line', color: 'success' },
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
         unverified: { title: us.unverified, icon: 'ri-user-settings-line', color: 'secondary' }
     };
 
-    // Interest → icon + color + label
+    // Interest ? icon + color + label
     const ui = window.userInterestLabels || {};
     const interestMap = {
         moving: { icon: 'ri-truck-line', color: 'bg-label-success', title: ui.moving },
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
         transport: { icon: 'ri-car-line', color: 'bg-label-info', title: ui.transport }
     };
 
-    // Role → icon HTML
+    // Role ? icon HTML
     const ur = window.userRoleLabels || {};
     const roleMap = {
         customer: { icon: 'ri-user-2-line', color: 'success', label: ur.customer },
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
         administrator: { icon: 'ri-computer-line', color: 'danger', label: ur.administrator }
     };
 
-    // Column index → sort field name sent to the server (only orderable columns listed)
+    // Column index ? sort field name sent to the server (only orderable columns listed)
     const columnToField = { 0: 'status', 1: 'role', 4: 'createDate' };
 
     if (!dt_user_table) { return; }
@@ -315,7 +315,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 
@@ -332,12 +333,27 @@ document.addEventListener('DOMContentLoaded', function () {
                             text: 'Benutzer wurde gelöscht.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
-                            buttonsStyling: false
+                            buttonsStyling: false,
+                            reverseButtons: true
                         });
                     } else if (res.status === 400) {
-                        Swal.fire({ title: 'Nicht erlaubt', text: 'Dieser Benutzer kann nicht gelöscht werden.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({
+                            title: 'Nicht erlaubt',
+                            text: 'Dieser Benutzer kann nicht gelöscht werden.',
+                            icon: 'warning',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false,
+                            reverseButtons: true
+                        });
                     } else {
-                        Swal.fire({ title: 'Fehler', text: 'Benutzer konnte nicht gelöscht werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                        Swal.fire({
+                            title: 'Fehler',
+                            text: 'Benutzer konnte nicht gelöscht werden.',
+                            icon: 'error',
+                            customClass: { confirmButton: 'btn btn-primary' },
+                            buttonsStyling: false,
+                            reverseButtons: true
+                        });
                     }
                 });
                 return;
@@ -359,12 +375,27 @@ document.addEventListener('DOMContentLoaded', function () {
                         text: 'Benutzerstatus wurde aktualisiert.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
-                        buttonsStyling: false
+                        buttonsStyling: false,
+                        reverseButtons: true
                     });
                 } else if (res.status === 400) {
-                    Swal.fire({ title: 'Nicht erlaubt', text: 'Sie können Ihren eigenen Status nicht ändern.', icon: 'warning', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({
+                        title: 'Nicht erlaubt',
+                        text: 'Sie können Ihren eigenen Status nicht ändern.',
+                        icon: 'warning',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false,
+                        reverseButtons: true
+                    });
                 } else {
-                    Swal.fire({ title: 'Fehler', text: 'Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({
+                        title: 'Fehler',
+                        text: 'Status konnte nicht aktualisiert werden.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false,
+                        reverseButtons: true
+                    });
                 }
             });
         });

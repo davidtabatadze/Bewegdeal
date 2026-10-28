@@ -64,7 +64,7 @@
     <script src="~/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
     <script src="~/js/app-request-view.js" asp-append-version="true"></script>
     <script>
-        window.chatConfig = { requestNumber: '@req.Number' };
+        window.Config = { requestNumber: '@req.Number', isCustomer: @(req.CustomerId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id) ? "true" : "false") };
         window.ChatMode = { None: '@ChatModeEnum.None', Initiate: '@ChatModeEnum.Initiate', Ongoing: '@ChatModeEnum.Ongoing' };
     </script>
     <script src="~/vendor/libs/signalr/signalr.min.js"></script>
@@ -78,7 +78,8 @@
                 <h5 class="mb-2 text-center">
                     <small>
                         <span class="badge rounded-pill bg-label-@statusStyle">
-                            <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@(req.Status switch {
+                            <i class="icon-base ri ri-@statusIcon text-@statusStyle"></i>@(req.Status switch
+                            {
                                 Bewegdeal.Enums.RequestStatusEnum.Pending => "Ausstehend",
                                 Bewegdeal.Enums.RequestStatusEnum.Negotiation => "Verhandlung",
                                 Bewegdeal.Enums.RequestStatusEnum.Agreed => "Vereinbart",
@@ -264,36 +265,41 @@
                     <div class="card-title m-0">
                         <h5 class="m-0 me-2">Details</h5>
                     </div>
-                    @if (req.RequesterId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id))
-                    {
-                        <div>
-                            @if (req.Status == RequestStatusEnum.Pending)
-                            {
-                                <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Bearbeiten"
-                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
-                                        onclick="window.location.href='/Request/Edit?id=@req.Id'">
-                                    <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
-                                </button>
-                            }
-                            @if (req.Status == RequestStatusEnum.Pending || req.Status == RequestStatusEnum.Negotiation)
-                            {
-                                <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Abbrechen"
-                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
-                                    <i class="icon-base ri ri-hand icon-md text-danger"></i>
-                                </button>
-                            }
-                            @if (vm.AllowResolve == true)
-                            {
-                                <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Abschließen"
-                                        style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
-                                    <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
-                                </button>
-                            }
-                        </div>
-                    }
+                    <div>
+                        @if (req.CustomerId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id) && req.Status == RequestStatusEnum.Pending)
+                        {
+                            <button id="btnRequestEdit" type="button" class="btn btn-label-warning btn-icon rounded-pill me-1"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Bearbeiten"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-warning-rgb),0.45);"
+                                    onclick="window.location.href='/Request/Edit?id=@req.Id'">
+                                <i class="icon-base ri ri-exchange-line icon-md text-warning"></i>
+                            </button>
+                        }
+                        @if (req.CustomerId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id) && new[] { RequestStatusEnum.Pending, RequestStatusEnum.Negotiation }.Contains(req.Status))
+                        {
+                            <button id="btnRequestCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Abbrechen"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
+                                <i class="icon-base ri ri-hand icon-md text-danger"></i>
+                            </button>
+                        }
+                        @if (vm.AllowAgreementCancel)
+                        {
+                            <button id="btnAgreementCancel" type="button" class="btn btn-label-danger btn-icon rounded-pill"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-danger-rgb),0.45);">
+                                <i class="icon-base ri ri-file-forbid-line icon-md text-danger"></i>
+                            </button>
+                        }
+                        @if (req.CustomerId.ToString() == User.FindFirstValue(IdentityFieldEnum.Id) && vm.AllowResolve == true)
+                        {
+                            <button id="btnRequestResolve" type="button" class="btn btn-label-success btn-icon rounded-pill"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Abschließen"
+                                    style="box-shadow:0 1px 8px 2px rgba(var(--bs-success-rgb),0.45);">
+                                <i class="icon-base ri ri-check-double-line icon-md text-success"></i>
+                            </button>
+                        }
+                    </div>
                     @* <div class="btn-group">
                     <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
                     <ul class="dropdown-menu">

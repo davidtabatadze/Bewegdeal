@@ -1,6 +1,6 @@
 ﻿/**
  * Chats List — Bewegdeal
- * v1.1.4
+ * v1.1.5
  */
 
 'use strict';
@@ -282,7 +282,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary'
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            reverseButtons: true
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
 
@@ -302,10 +303,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         text: 'Der Betrugs-Status des Chats wurde aufgelöst.',
                         icon: 'success',
                         customClass: { confirmButton: 'btn btn-primary' },
-                        buttonsStyling: false
+                        buttonsStyling: false,
+                        reverseButtons: true
                     });
                 } else {
-                    Swal.fire({ title: 'Fehler', text: 'Betrugs-Status konnte nicht aktualisiert werden.', icon: 'error', customClass: { confirmButton: 'btn btn-primary' }, buttonsStyling: false });
+                    Swal.fire({
+                        title: 'Fehler',
+                        text: 'Betrugs-Status konnte nicht aktualisiert werden.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' },
+                        buttonsStyling: false,
+                        reverseButtons: true
+                    });
                 }
             });
         });

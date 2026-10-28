@@ -19,6 +19,7 @@ namespace Bewegdeal.Data.Repositories
                                                   .ExecuteUpdateAsync(p => p
                                                        .SetProperty(p => p.Status, update.Status)
                                                        .SetProperty(p => p.ReactionDate, DateTime.Now)
+                                                       .SetProperty(p => p.ReactionUserId, update.ReactionUserId)
                                                        .SetProperty(p => p.ReactionReason, update.ReactionReason)
                                                        .SetProperty(p => p.InvoiceId, 0)
                                                   );

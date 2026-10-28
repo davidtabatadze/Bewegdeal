@@ -42,7 +42,7 @@ namespace Bewegdeal.Services
             var requestFiles = await LoadFiles(model.Id);
 
             // ...
-            if (request is null || request.RequesterId != userId || request.Status != RequestStatusEnum.Pending)
+            if (request is null || request.CustomerId != userId || request.Status != RequestStatusEnum.Pending)
             {
                 // return GenericResultModel<RequestEntity>.Fail("The request cannot be updated, try again later.");
                 return GenericResultModel<RequestEntity>.Fail("Die Anfrage kann nicht aktualisiert werden, bitte versuchen Sie es später erneut.");
@@ -109,7 +109,7 @@ namespace Bewegdeal.Services
             var request = await Get(number);
 
             if (
-                request is not null && request.RequesterId == userId &&
+                request is not null && request.CustomerId == userId &&
                 (request.Status == RequestStatusEnum.Pending || request.Status == RequestStatusEnum.Negotiation)
             )
             {
@@ -127,14 +127,19 @@ namespace Bewegdeal.Services
             return GenericResultModel.Ok();
         }
 
+        public async Task<GenericResultModel> CancelAgreement(string number, long userId)
+        {
+            return GenericResultModel.Ok();
+        }
+
         public async Task<GenericResultModel> Resolve(string number, long userId, decimal? rating)
         {
             var request = await Get(number);
 
-            if (request is not null && request.RequesterId == userId && request.Status == RequestStatusEnum.Agreed)
+            if (request is not null && request.CustomerId == userId && request.Status == RequestStatusEnum.Agreed)
             {
                 var proposal = await ProposalService.Get(request.AgreementId ?? 0);
-                if (proposal is null || proposal.CompanyId != request.ExecutorId || proposal.Status != RequestProposalStatusEnum.Accepted)
+                if (proposal is null || proposal.CompanyId != request.CompanyId || proposal.Status != RequestProposalStatusEnum.Accepted)
                 {
                     // return GenericResultModel.Fail("Something went wrong: no proposal found.");
                     return GenericResultModel.Fail("Ein Fehler ist aufgetreten: Kein Angebot gefunden.");
@@ -238,7 +243,7 @@ namespace Bewegdeal.Services
                 nameof(RequestProposalEntity.Date), nameof(RequestProposalEntity.Time)]
             );
 
-            var requesters = requests.Select(r => r.RequesterId);
+            var requesters = requests.Select(r => r.CustomerId);
             var executors = viewerIsCompany ? [] : proposals.Select(p => p.CompanyId);
             var users = await UserService.Load(
                 requests.Count == 0 ? [0] : requesters.Concat(executors),
@@ -278,7 +283,7 @@ namespace Bewegdeal.Services
                         },
                         imageUrl = FileService.GetUrl(files.FirstOrDefault(f => f.RequestId == r.Id)?.File, baseUrl),
                         requester = UserService.GetAvatar(
-                            users.FirstOrDefault(u => u.Id == (viewerIsCompany ? r.RequesterId : proposal?.CompanyId ?? r.RequesterId))
+                            users.FirstOrDefault(u => u.Id == (viewerIsCompany ? r.CustomerId : proposal?.CompanyId ?? r.CustomerId))
                         )
                     };
                 })
@@ -320,14 +325,19 @@ namespace Bewegdeal.Services
                 return GenericResultModel<RequestModel>.Fail();
             }
 
-            if (edit && request.RequesterId != userId)
+            if (edit && request.CustomerId != userId)
             {
                 return GenericResultModel<RequestModel>.Fail();
             }
 
             var viewer = (await UserService.Get(userId, [nameof(UserEntity.Id), nameof(UserEntity.Role), nameof(UserEntity.Interests)]))!;
 
-            if (viewer.Role == UserRoleEnum.Administrator || viewer.Id == request.RequesterId || viewer.Id == request.ExecutorId)
+            if (
+                viewer.Role == UserRoleEnum.Administrator ||
+                viewer.Id == request.CustomerId ||
+                viewer.Id == request.CompanyId ||
+                request.Companies.Contains("#" + viewer.Id + "#")
+            )
             {
                 // ok, viewer is allowed ...
             }
@@ -349,7 +359,7 @@ namespace Bewegdeal.Services
 
             var settings = await SettingService.GetCached();
             var files = edit == true ? await LoadFiles(request.Id) : await LoadFilesOrDefault([request.Id]);
-            var requester = await UserService.Get(request.RequesterId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
+            var requester = await UserService.Get(request.CustomerId, [nameof(UserEntity.Name), nameof(UserEntity.Avatar)]);
 
             var proposals = edit == true ? [] : await ProposalService.Load([request.Id]);
             var proposal = proposals.OrderByDescending(p => p.Id).FirstOrDefault()
@@ -391,10 +401,17 @@ namespace Bewegdeal.Services
                     Name = FileService.GetName(i.File) ?? "undefined"
                 }).OrderBy(i => i.Type).ThenByDescending(f => f.IsMain)],
                 AllowResolve = edit != true &&
-                               request.RequesterId == userId &&
+                               request.CustomerId == userId &&
                                request.Status == RequestStatusEnum.Agreed &&
                                proposalCard.Proposal?.Status == RequestProposalStatusEnum.Accepted &&
-                               proposalCard.Proposal?.Date <= DateOnly.FromDateTime(DateTime.Now)
+                               proposalCard.Proposal?.Date <= DateOnly.FromDateTime(DateTime.Now),
+                AllowAgreementCancel = edit != true &&
+                                       request.Status == RequestStatusEnum.Agreed &&
+                                       proposalCard.Proposal?.Status == RequestProposalStatusEnum.Accepted &&
+                                       proposalCard.Proposal?.Date is not null &&
+                                       proposalCard.Proposal?.Time is not null &&
+                                       proposalCard.Proposal.Date.Value.ToDateTime(proposalCard.Proposal.Time.Value) >= DateTime.Now &&
+                                       (request.CustomerId == userId || request.CompanyId == userId)
             });
         }
 
@@ -481,7 +498,7 @@ namespace Bewegdeal.Services
             {
                 Number = Guid.NewGuid().ToString("N"),
                 CreateDate = DateTime.Now,
-                RequesterId = userId
+                CustomerId = userId
             };
 
             entity.Status = RequestStatusEnum.Pending;

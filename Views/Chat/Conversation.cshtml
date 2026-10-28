@@ -56,6 +56,10 @@
 else
 {
     var isAdminView = User.IsInRole(UserRoleEnum.Administrator);
+    var declinedProposal = Model.Proposals.Values
+                                .FirstOrDefault(p => p?.Proposal?.Status == RequestProposalStatusEnum.Declined)
+                                ?.Proposal;
+
     <div id="chatConversation"
          data-mode="@Model.Mode"
          data-chat-key="@Model.ChatKey"
@@ -64,23 +68,28 @@ else
          data-viewer-picture="@(Model.ViewerPictureUrl ?? "")"
          data-other-initials="@Model.OtherPartyInitials"
          data-other-picture="@(Model.OtherPartyPictureUrl ?? "")"
+         data-is-customer="@User.IsInRole(UserRoleEnum.Customer).ToString().ToLower()"
          class="col app-chat-history"
          style="block-size:100%">
         <div class="chat-history-wrapper" style="block-size:100%;display:flex;flex-direction:column;">
             @* Header *@
             @if (!isAdminView)
             {
-                <div class="alert alert-danger alert-dismissible m-2" role="alert">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                        <strong>Bitte beachten</strong>
+                if (new List<string>() { RequestStatusEnum.Agreed, RequestStatusEnum.Negotiation }.Contains(Model.RequestStatus))
+                {
+                    <div class="alert alert-danger alert-dismissible m-2" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Bitte beachten</strong>
+                        </div>
+                        <ul class="mb-0">
+                            <li>Bitte halten Sie sich an die Regeln der <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">AGB</strong>.</li>
+                            <li>Der Chat kann von der Systemverwaltung überwacht werden.</li>
+                            <li>Einige Nachrichten werden automatisch generiert und durch das <i class="icon-base ri ri-robot-2-line icon-18px text-danger"></i>-Symbol gekennzeichnet. Dies ist nur für Sie sichtbar, die andere Partei sieht es nicht.</li>
+                        </ul>
                     </div>
-                    <ul class="mb-0">
-                        <li>Bitte halten Sie sich an die Regeln der <strong role="button" data-bs-toggle="modal" data-bs-target="#termsModal" style="cursor:pointer;text-decoration:underline;">AGB</strong>.</li>
-                        <li>Der Chat kann von der Systemverwaltung überwacht werden.</li>
-                    </ul>
-                </div>
+                }
                 <div class="chat-history-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -107,6 +116,17 @@ else
                                 </small>
                             </div>
                         </div>
+                        @if (Model.AllowAgreementCancel)
+                        {
+                            @* <span id="agreementCancelBtn" class="btn btn-text-danger btn-icon rounded-pill cursor-pointer"
+                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Auftrag stornieren">
+                                <i class="icon-base ri ri-file-forbid-line icon-md text-danger"></i>
+                            </span> *@
+                            <button id="agreementCancelBtn" type="button" class="btn rounded-pill btn-label-danger">
+                                <span class="icon-base ri ri-file-forbid-line icon-16px me-1_5"></span>
+                                <span style="font-size: 0.75rem;">Auftrag stornieren</span>
+                            </button>
+                        }
                     </div>
                 </div>
             }
@@ -152,13 +172,17 @@ else
                                     {
                                         <div class="chat-message-wrapper flex-grow-1">
                                             <div class="chat-message-text p-2" style="@(isAdminView ? "background-color:var(--bs-paper-bg) !important;color:var(--bs-body-color) !important;" : "")@(isAdminView && msg.IsFraud ? "border-left:3px solid var(--bs-danger);" : "")">
-                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@(isAdminView ? "width:45px;" : "")"></span></p>
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@((isAdminView && msg.IsAutoGenerated) ? "width:65px;" : isAdminView ? "width:45px;" : msg.IsAutoGenerated ? "width:85px;" : "")"></span></p>
                                                 <span class="chat-bubble-meta">
+                                                    @if (msg.IsAutoGenerated)
+                                                    {
+                                                        <i class="icon-base ri ri-robot-2-line icon-16px text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Automatisch generierte Nachricht"></i>
+                                                    }
                                                     @if (!isAdminView)
                                                     {
                                                         <i class="msg-read-receipt icon-base ri ri-check-double-line icon-16px @(msg.IsRead ? "text-warning" : "")"></i>
                                                     }
-                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                    <small class="text-secondary">@msg.SentDate.ToString("HH:mm")</small>
                                                 </span>
                                             </div>
                                         </div>
@@ -205,9 +229,13 @@ else
                                     {
                                         <div class="chat-message-wrapper flex-grow-1">
                                             <div class="chat-message-text p-2" style="@(isAdminView && msg.IsFraud ? "border-right:3px solid var(--bs-danger);" : "")">
-                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail"></span></p>
+                                                <p class="mb-0" style="white-space:pre-wrap;">@msg.Content<span class="chat-bubble-tail" style="@((isAdminView && msg.IsAutoGenerated) ? "width:65px;" : "")"></span></p>
                                                 <span class="chat-bubble-meta">
-                                                    <small>@msg.SentDate.ToString("HH:mm")</small>
+                                                    @if (msg.IsAutoGenerated && isAdminView)
+                                                    {
+                                                        <i class="icon-base ri ri-robot-2-line icon-16px text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Automatisch generierte Nachricht"></i>
+                                                    }
+                                                    <small class="text-secondary">@msg.SentDate.ToString("HH:mm")</small>
                                                 </span>
                                             </div>
                                         </div>
@@ -227,6 +255,20 @@ else
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
                             <strong>Administrator – Nur-Lese-Ansicht</strong>
                         </div>
+                    </div>
+                </div>
+            }
+            else if (declinedProposal != null && (declinedProposal.ReactionUserId ?? 0).ToString() != User.FindFirstValue(IdentityFieldEnum.Id))
+            {
+                <div class="chat-history-footer shadow-xs mt-0 p-0">
+                    <div class="alert alert-danger m-0" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
+                            <strong>Der Chat wurde abgebrochen</strong>
+                        </div>
+                        @(User.IsInRole(UserRoleEnum.Customer) ?
+                            "Hinweis von Bewegdeal: Entstehen Ihnen durch die Absage Mehrkosten, können Sie unter den gesetzlichen Voraussetzungen Ersatz verlangen. Ihre Rechte gegenüber der Firma bleiben bestehen."
+                            : "Hinweis von Bewegdeal: Ob Kosten anfallen, richtet sich nach den wirksam vereinbarten Stornobedingungen und den gesetzlichen Vorschriften. Ein bestehendes gesetzliches Rücktrittsrecht bleibt unberührt.")
                     </div>
                 </div>
             }
@@ -258,7 +300,7 @@ else
                     <div class="alert alert-warning m-0" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>
-                            <strong class="pe-1">Ausstehendes Angebot</strong>
+                            <strong class="pe-1">Annahme ausstehend</strong>
                             @if (User.IsInRole(UserRoleEnum.Company))
                             {
                                 <a href="#" id="chatCancelProposalBtn" class="text-danger fw-bold ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Angebot zurückziehen">

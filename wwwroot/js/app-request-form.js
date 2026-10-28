@@ -1,6 +1,6 @@
 ﻿/**
  * Request Create / Edit
- * v1.1.4
+ * v1.1.5
  *
  * Works for both the Create and Edit views.
  * The Edit view defines `existingFiles` in an inline <script> block before this file loads.
@@ -358,7 +358,8 @@ Dropzone.autoDiscover = false;
                     confirmButton: 'btn btn-danger me-3',
                     cancelButton: 'btn btn-label-secondary'
                 },
-                buttonsStyling: false
+                buttonsStyling: false,
+                reverseButtons: true
             });
 
             if (!confirmed.isConfirmed) { return; }

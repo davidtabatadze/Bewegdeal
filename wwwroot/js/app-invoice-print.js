@@ -1,6 +1,6 @@
-﻿/**
+/**
  * Invoice Print
- * v1.1.4
+ * v1.1.5
  */
 
 'use strict';

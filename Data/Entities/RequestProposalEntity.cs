@@ -21,5 +21,6 @@ namespace Bewegdeal.Data.Entities
         public string Service { get; set; } = "";
         public DateTime? ReactionDate { get; set; }
         public string? ReactionReason { get; set; }
+        public long? ReactionUserId { get; set; }
     }
 }

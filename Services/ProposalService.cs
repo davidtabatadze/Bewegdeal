@@ -30,13 +30,14 @@ namespace Bewegdeal.Services
                         InvoiceId = invoiceId
                     }
                );
-        public async Task Update(long id, string status, string? reason = null)
+        public async Task Update(long id, long userId, string status, string? reason = null)
             => await ProposalRepository.Update(
                     RequestProposalUpdateAreaEnum.Status,
                     new RequestProposalEntity
                     {
                         Id = id,
                         Status = status,
+                        ReactionUserId = userId,
                         ReactionReason = reason
                     }
                );
