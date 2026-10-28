@@ -1,5 +1,5 @@
-/**
- * Users List — Bewegdeal
+ï»¿/**
+ * Users List â€” Bewegdeal
  * v1.1.5
  */
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 d.sortField = columnToField[order ? order.column : 5] || 'createDate';
                 d.sortDirection = order ? order.dir : 'desc';
 
-                // Remove DT's auto-generated nested params — controller doesn't use them
+                // Remove DT's auto-generated nested params â€” controller doesn't use them
                 delete d.order;
                 delete d.columns;
                 delete d.search;   // replaced below with our own plain-string value
@@ -64,13 +64,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
         columns: [
-            { data: 'status' },   // 0 — status (sortable)
-            { data: 'role' },   // 1 — role
-            { data: 'avatar' },   // 2 — user cell
-            { data: 'mobile' },   // 3 — contact
-            { data: 'createDate' },   // 4 — date (sortable)
-            { data: 'interests' },   // 5 — interests
-            { data: null },          // 6 — actions
+            { data: 'status' },   // 0 â€” status (sortable)
+            { data: 'role' },   // 1 â€” role
+            { data: 'avatar' },   // 2 â€” user cell
+            { data: 'mobile' },   // 3 â€” contact
+            { data: 'createDate' },   // 4 â€” date (sortable)
+            { data: 'interests' },   // 5 â€” interests
+            { data: null },          // 6 â€” actions
         ],
         columnDefs: [
             {
@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 targets: 3,
                 orderable: false,
                 render: (data, type, full) => {
-                    const mobile = full['mobile'] || '—';
-                    const address = full['address'] || '—';
+                    const mobile = full['mobile'] || 'â€”';
+                    const address = full['address'] || 'â€”';
                     return (
                         '<div class="d-flex flex-column">' +
                         '<span class="fw-medium">' + mobile + '</span>' +
@@ -172,9 +172,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const actionsConfig = {
                         active: [{ action: 'block', icon: 'ri-admin-line', color: 'danger', title: 'Sperren' }],
                         pending: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Aktivieren' },
-                        { action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Löschen' }],
+                        { action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'LÃ¶schen' }],
                         blocked: [{ action: 'activate', icon: 'ri-user-follow-line', color: 'success', title: 'Aktivieren' }],
-                        unverified: [{ action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'Löschen' }]
+                        unverified: [{ action: 'delete', icon: 'ri-user-unfollow-line', color: 'danger', title: 'LÃ¶schen' }]
                     };
                     const actions = actionsConfig[status] || [];
                     return actions.map(function (a) {
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 createdCell: function (td) {
                     td.style.minWidth = '135px';
                 },
-                render: (data) => '<span class="text-muted small">' + (data || '—') + '</span>'
+                render: (data) => '<span class="text-muted small">' + (data || 'â€”') + '</span>'
             },
             {
                 // Status icon
@@ -241,10 +241,10 @@ document.addEventListener('DOMContentLoaded', function () {
         language: {
             search: '',
             // german
-            info: 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
-            infoEmpty: 'Keine Einträge vorhanden',
-            infoFiltered: '(gefiltert von _MAX_ Einträgen)',
-            zeroRecords: 'Keine passenden Einträge gefunden',
+            info: 'Zeige _START_ bis _END_ von _TOTAL_ EintrÃ¤gen',
+            infoEmpty: 'Keine EintrÃ¤ge vorhanden',
+            infoFiltered: '(gefiltert von _MAX_ EintrÃ¤gen)',
+            zeroRecords: 'Keine passenden EintrÃ¤ge gefunden',
             emptyTable: 'Keine Daten vorhanden',
             loadingRecords: 'Wird geladen...',
             processing: 'Bitte warten...',
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
         responsive: false,
     });
 
-    // Loading indicator — also covers the initial load
+    // Loading indicator â€” also covers the initial load
     Block.pulse('.card-datatable');
 
     dt_user.on('preXhr.dt', function () {
@@ -285,11 +285,11 @@ document.addEventListener('DOMContentLoaded', function () {
         dt_user.ajax.reload(null, true);
     });
 
-    // Action button — delegated click on the table wrapper
+    // Action button â€” delegated click on the table wrapper
     const confirmTextMap = {
-        block: 'Möchten Sie den Benutzer wirklich <span class="text-danger fw-bold">Sperren</span>?',
-        activate: 'Möchten Sie den Benutzer wirklich <span class="text-success fw-bold">Aktivieren</span>?',
-        delete: 'Möchten Sie den Benutzer wirklich <span class="text-danger fw-bold">Löschen</span>?'
+        block: 'MÃ¶chten Sie den Benutzer wirklich <span class="text-danger fw-bold">Sperren</span>?',
+        activate: 'MÃ¶chten Sie den Benutzer wirklich <span class="text-success fw-bold">Aktivieren</span>?',
+        delete: 'MÃ¶chten Sie den Benutzer wirklich <span class="text-danger fw-bold">LÃ¶schen</span>?'
     };
 
     dt_user_table.addEventListener('click', function (e) {
@@ -305,11 +305,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!confirmHtml) { return; }
 
         Swal.fire({
-            title: 'Aktion bestätigen',
+            title: 'Aktion bestÃ¤tigen',
             html: confirmHtml,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Ja, bestätigen',
+            confirmButtonText: 'Ja, bestÃ¤tigen',
             cancelButtonText: 'Abbrechen',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         dtRow.remove().draw(false);
                         Swal.fire({
                             title: 'Erledigt!',
-                            text: 'Benutzer wurde gelöscht.',
+                            text: 'Benutzer wurde gelÃ¶scht.',
                             icon: 'success',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false,
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else if (res.status === 400) {
                         Swal.fire({
                             title: 'Nicht erlaubt',
-                            text: 'Dieser Benutzer kann nicht gelöscht werden.',
+                            text: 'Dieser Benutzer kann nicht gelÃ¶scht werden.',
                             icon: 'warning',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false,
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         Swal.fire({
                             title: 'Fehler',
-                            text: 'Benutzer konnte nicht gelöscht werden.',
+                            text: 'Benutzer konnte nicht gelÃ¶scht werden.',
                             icon: 'error',
                             customClass: { confirmButton: 'btn btn-primary' },
                             buttonsStyling: false,
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (res.status === 400) {
                     Swal.fire({
                         title: 'Nicht erlaubt',
-                        text: 'Sie können Ihren eigenen Status nicht ändern.',
+                        text: 'Sie kÃ¶nnen Ihren eigenen Status nicht Ã¤ndern.',
                         icon: 'warning',
                         customClass: { confirmButton: 'btn btn-primary' },
                         buttonsStyling: false,

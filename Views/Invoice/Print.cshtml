@@ -15,6 +15,7 @@
     var invoice = (Bewegdeal.Models.InvoicePrintModel)ViewBag.Invoice;
     var data = invoice.Data!;
     var company = invoice.Company!;
+    var proposal = invoice.Proposal!;
     var companyContact = invoice.CompanyContact;
 }
 
@@ -26,18 +27,22 @@
                 <span class="app-brand-logo demo">@await Html.PartialAsync("~/Views/_Partials/_Macros.cshtml")</span>
                 <span class="h4 mb-0 app-brand-text fw-semibold">Bewegdeal</span>
             </div>
-            <p class="mb-1">Obere donaustrasse 1, 1020 Wien</p>
+            <p class="mb-1">Obere donaustrasse 35/16, 1020 Wien, Österreich</p>
             <p class="mb-1">kontakt@bewegdeal.at</p>
-            <p class="mb-0">+44 (666) 543 2198</p>
+            <p class="mb-0">+43 676 4976027</p>
         </div>
         <div class="text-end">
             <h4 class="mb-6">RECHNUNG #@data.Id</h4>
-            <div class="mb-1">
-                <span>Ausgabedatum:</span>
+            <div>
+                <span>Leistungsdatum:</span>
+                <span>@proposal.Date!.Value.ToString("d. MMMM yyyy")</span>
+            </div>
+            <div>
+                <span>Rechnungsdatum:</span>
                 <span>@data.CreateDate.ToString("d. MMMM yyyy")</span>
             </div>
             <div>
-                <span>Verfallsdatum:</span>
+                <span>Fällig am:</span>
                 <span>@data.DueDate.ToString("d. MMMM yyyy")</span>
             </div>
         </div>
@@ -62,21 +67,21 @@
                         <td class="pe-2">Kontoinhaber:</td>
                         <td>Giorgi Chochishvili</td>
                     </tr>
-                    <tr>
+                    @* <tr>
                         <td class="pe-2">Land:</td>
                         <td>Österreich</td>
-                    </tr>
+                    </tr> *@
                     <tr>
                         <td class="pe-2">Bank:</td>
                         <td>TBC Bank</td>
                     </tr>
                     <tr>
                         <td class="pe-2">IBAN:</td>
-                        <td>ETD95476213874685</td>
+                        <td>AT46 1420 0200 1448 5091</td>
                     </tr>
                     <tr>
-                        <td class="pe-2">SWIFT:</td>
-                        <td>BR91905</td>
+                        <td class="pe-2">BIC:</td>
+                        <td>BAWAATWW</td>
                     </tr>
                 </tbody>
             </table>
@@ -87,7 +92,7 @@
         <table class="table m-0">
             <thead class="table-light">
                 <tr>
-                    <th>Beschreibung</th>
+                    <th>Leistung</th>
                     <th>Auftragsnummer</th>
                     <th>Betrag</th>
                     <th>Provision</th>
@@ -133,11 +138,11 @@
 
     <hr class="mt-0 mb-6" />
     <div class="row">
-        <div class="col-12">
+        @* <div class="col-12">
             <span class="fw-medium">Danke schön!</span>
-        </div>
-        <div class="col-12">
-            <span>Es war mir eine Freude, mit Ihnen zusammenzuarbeiten. Wir hoffen, dass Sie uns bei zukünftigen Projekten in Erinnerung behalten.</span>
+        </div> *@
+        <div class="col-12 text-center">
+            <span>Vielen Dank für Ihr Vertrauen und die gute Zusammenarbeit. Ihr Team von <span class="fw-bold">bewegdeal.at</span></span>
         </div>
     </div>
 </div>

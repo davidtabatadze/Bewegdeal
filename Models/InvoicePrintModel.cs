@@ -6,6 +6,7 @@ namespace Bewegdeal.Models
     {
         public InvoiceEntity? Data { get; set; }
         public UserEntity? Company { get; set; }
+        public RequestProposalEntity? Proposal { get; set; }
         public UserContactEntity? CompanyContact { get; set; }
     }
 }

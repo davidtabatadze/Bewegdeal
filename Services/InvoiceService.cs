@@ -6,7 +6,7 @@ using Bewegdeal.Models;
 
 namespace Bewegdeal.Services
 {
-    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService, SettingService SettingService)
+    public class InvoiceService(IInvoiceRepository InvoiceRepository, UserService UserService, ProposalService ProposalService, SettingService SettingService)
     {
         public async Task<InvoiceEntity> Create(RequestEntity request, RequestProposalEntity proposal)
         {
@@ -69,8 +69,9 @@ namespace Bewegdeal.Services
             );
 
             var companyContact = await UserService.GetContact(invoice?.CompanyContactId ?? 0);
+            var invoiceProposal = await ProposalService.Get(invoice?.ProposalId ?? 0, [nameof(RequestProposalEntity.Date)]);
 
-            if (invoice is null || company is null)
+            if (invoice is null || company is null || invoiceProposal?.Date is null)
             {
                 return GenericResultModel<InvoicePrintModel>.Fail();
             }
@@ -79,6 +80,7 @@ namespace Bewegdeal.Services
             {
                 Data = invoice,
                 Company = company,
+                Proposal = invoiceProposal,
                 CompanyContact = companyContact ?? new UserContactEntity
                 {
                     City = "-",
