@@ -17,22 +17,33 @@
     var company = invoice.Company!;
     var proposal = invoice.Proposal!;
     var companyContact = invoice.CompanyContact;
+    var service = data.Service switch
+    {
+        ServiceEnum.Moving => AnnotationEnum.General.Service.Moving,
+        ServiceEnum.Removal => AnnotationEnum.General.Service.Removal,
+        ServiceEnum.Pickup => AnnotationEnum.General.Service.Pickup,
+        ServiceEnum.Transport => AnnotationEnum.General.Service.Transport,
+        _ => data.Service
+    };
 }
 
 @* ************** Content ************** *@
 <div class="invoice-print p-6">
     <div class="d-flex justify-content-between flex-row">
         <div class="mb-6">
-            <div class="d-flex svg-illustration align-items-center gap-2 mb-6">
+            <div class="d-flex svg-illustration align-items-center gap-2">
                 <span class="app-brand-logo demo">@await Html.PartialAsync("~/Views/_Partials/_Macros.cshtml")</span>
                 <span class="h4 mb-0 app-brand-text fw-semibold">Bewegdeal</span>
             </div>
+            <p class="mb-6 fw-bold">Online-Vermittlungsplattform</p>
+            <p class="mb-1">Giorgi Chochishvili - Einzelunternehmen</p>
             <p class="mb-1">Obere donaustrasse 35/16, 1020 Wien, Österreich</p>
+            <p class="mb-1">UID: 12345678</p>
             <p class="mb-1">kontakt@bewegdeal.at</p>
             <p class="mb-0">+43 676 4976027</p>
         </div>
         <div class="text-end">
-            <h4 class="mb-6">RECHNUNG #@data.Id</h4>
+            <h4 class="mb-11">RECHNUNG Nr. @data.Id.ToString("D6")</h4>
             <div>
                 <span>Leistungsdatum:</span>
                 <span>@proposal.Date!.Value.ToString("d. MMMM yyyy")</span>
@@ -53,8 +64,8 @@
     <div class="d-flex justify-content-between mb-6 gap-3">
         <div class="my-2">
             <h6 class="fw-bold">Rechnungsempfänger:</h6>
-            <p class="mb-1">@company.Name</p>
-            <p class="mb-1">@company.Number</p>
+            <p class="mb-1">@company.Name - @companyContact?.Owner</p>
+            <p class="mb-1">UID/GISA: @company.Number</p>
             <p class="mb-1">@company.Mobile</p>
             <p class="mb-0">@company.Email</p>
             <p class="mb-1">@companyContact?.Address, @companyContact?.ZipCode @companyContact?.City</p>
@@ -94,14 +105,14 @@
                 <tr>
                     <th>Leistung</th>
                     <th>Auftragsnummer</th>
-                    <th>Betrag</th>
+                    <th>Auftragswert netto</th>
                     <th>Provision</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@data.Service</td>
-                    <td>#@data.RequestId</td>
+                    <td>@service</td>
+                    <td>Nr. @data.RequestId</td>
                     <td>€@data.ServiceCost</td>
                     <td>€@data.CommissionCost</td>
                 </tr>
@@ -120,7 +131,7 @@
                         <span></span>
                     </td>
                     <td class="px-0 py-12 w-px-100 text-end">
-                        <p class="mb-2">Zwischensumme&nbsp<span style="font-size: 0.6rem">(@data.CommissionPersent%)</span>:</p>
+                        <p class="mb-2">Provision&nbsp<span style="font-size: 0.6rem">(@data.CommissionPersent%)</span>:</p>
                         <p class="mb-2">USt&nbsp<span style="font-size: 0.6rem">(@data.TaxPersent%)</span>:</p>
                         <p class="mb-2 border-bottom pb-2">Rabatt:</p>
                         <p class="mb-0 pt-2">Gesamtsumme:</p>

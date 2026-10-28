@@ -326,7 +326,7 @@
                         '<div class="alert alert-warning m-0" role="alert">' +
                         '<div class="d-flex align-items-center">' +
                         '<i class="icon-base ri ri-error-warning-line me-2 icon-22px"></i>' +
-                        '<strong class="pe-1">Ausstehendes Angebot</strong>' +
+                        '<strong class="pe-1">Annahme ausstehend</strong>' +
                         cancelBtn +
                         '</div></div></div>';
                     var cancelEl = body.querySelector('#chatCancelProposalBtn');

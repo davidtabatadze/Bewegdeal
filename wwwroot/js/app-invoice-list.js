@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const number = full['number'];
                     return (
                         '<a style="max-width:100px" class="text-primary" target="_blank" href=\'/Invoice/Print?number=' + number + '\'>' +
-                        '<strong class="text-decoration-underline">#' + id + '</strong>' +
+                        '<strong class="text-decoration-underline">' + String(id).padStart(6, '0') + '</strong>' +
                         '</a>'
                     );
                 }

@@ -267,7 +267,7 @@ namespace Bewegdeal.Services
                 });
 
                 // await ChatHubService.Send(userId, chat, "Kindly, consider my proposal.");
-                await ChatHubService.Send(userId, chat, "Bitte berücksichtigen Sie mein Angebot.", true);
+                await ChatHubService.Send(userId, chat, "Angebot erhalten.", true);
                 await ChatHubService.Send(userId, chat, "#bewegdeal-proposal-" + proposal.Id, false);
             }
         }
