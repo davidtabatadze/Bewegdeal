@@ -255,7 +255,7 @@
                                     <div class="col-5">
                                         <div class="form-floating form-floating-outline">
                                             <input type="text" id="zipCode" name="zipCode" class="form-control"
-                                                   placeholder="" maxlength="8" value="@profile.Contact?.ZipCode" />
+                                                   placeholder="" maxlength="4" inputmode="numeric" value="@profile.Contact?.ZipCode" />
                                             <label for="zipCode">Postleitzahl</label>
                                             <div class="invalid-feedback">Postleitzahl ist erforderlich.</div>
                                         </div>
@@ -498,6 +498,14 @@
         }
         watchField('name');
         if (isCompany) { ['owner', 'address', 'city', 'zipCode'].forEach(watchField); }
+
+        // Zip code — digits only, max 4
+        var zipEl = document.getElementById('zipCode');
+        if (zipEl) {
+        zipEl.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+        }
 
         if (isCompany) {
         form.querySelectorAll('input[name="Interests"]').forEach(function (cb) {

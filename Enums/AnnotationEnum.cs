@@ -162,6 +162,12 @@ namespace Bewegdeal.Enums
                 public static string ImageMaxCount => _l == "de" ? "Maximal {0} Bilder erlaubt." : "Maximum {0} images allowed.";
                 public static string VideoMaxCount => _l == "de" ? "Maximal {0} Videos erlaubt." : "Maximum {0} videos allowed.";
             }
+            public class VehicleCondition
+            {
+                public static string WorksProperly = _l == "de" ? "Fahrbereit" : "Works Properly";
+                public static string CanRun = _l == "de" ? "Springt an" : "Can Run";
+                public static string Damaged = _l == "de" ? "Nicht fahrbereit" : "Damaged";
+            }
         }
     }
 }

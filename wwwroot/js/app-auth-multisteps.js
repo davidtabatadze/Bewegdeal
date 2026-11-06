@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 if (selected) {
                     const isCompany = selected.value === 'company';
                     if (roleIndicator) {
-                        const label = selected.value.charAt(0).toUpperCase() + selected.value.slice(1);
+                        const label = (window.roleLabels && window.roleLabels[selected.value]) || (selected.value.charAt(0).toUpperCase() + selected.value.slice(1));
                         roleIndicator.innerHTML = `<i class="icon-base ri ${isCompany ? 'ri-building-line' : 'ri-user-line'} me-1"></i>${label}`;
                         roleIndicator.className = 'badge bg-label-primary';
                     }
@@ -297,6 +297,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
                     }
                 });
             });
+
+            // Mobile — digits only
+            const mobileInput = document.getElementById('mobile');
+            if (mobileInput) {
+                mobileInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+            }
+
+            // Zip code — digits only, max 4
+            const zipInput = document.getElementById('zipCode');
+            if (zipInput) {
+                zipInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+                });
+            }
 
             stepsValidationPrev.forEach(item => {
                 item.addEventListener('click', event => {

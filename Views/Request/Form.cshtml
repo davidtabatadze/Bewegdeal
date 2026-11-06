@@ -185,7 +185,7 @@
                                             </div>
                                             <div class="col-12 col-sm-3">
                                                 <div class="form-floating form-floating-outline">
-                                                    <input type="text" id="pickupZipCode" name="pickupZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.PickupZipCode : "")" />
+                                                    <input type="text" id="pickupZipCode" name="pickupZipCode" class="form-control" placeholder="" maxlength="4" inputmode="numeric" value="@(isEdit ? req!.PickupZipCode : "")" />
                                                     <label for="pickupZipCode">Abholpostleitzahl</label>
                                                 </div>
                                             </div>
@@ -202,7 +202,7 @@
                                             </div>
                                             <div class="col-12 col-sm-3">
                                                 <div class="form-floating form-floating-outline">
-                                                    <input type="text" id="deliveryZipCode" name="deliveryZipCode" class="form-control" placeholder="" maxlength="8" value="@(isEdit ? req!.DeliveryZipCode : "")" />
+                                                    <input type="text" id="deliveryZipCode" name="deliveryZipCode" class="form-control" placeholder="" maxlength="4" inputmode="numeric" value="@(isEdit ? req!.DeliveryZipCode : "")" />
                                                     <label for="deliveryZipCode">Lieferpostleitzahl</label>
                                                 </div>
                                             </div>
@@ -231,9 +231,9 @@
                                         <div class="col-12 col-sm-4">
                                             <div class="form-floating form-floating-outline">
                                                 <select id="vehicleCondition" name="vehicleCondition" class="selectpicker w-100" data-style="btn-default" title="@(!isEdit ? "..." : null)">
-                                                    <option value="@VehicleConditionEnum.WorksProperly" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.WorksProperly ? "selected" : null)">Fahrbereit@* Works Properly *@</option>
-                                                    <option value="@VehicleConditionEnum.CanRun" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.CanRun ? "selected" : null)">Springt an@* Can Run *@</option>
-                                                    <option value="@VehicleConditionEnum.Damaged" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.Damaged ? "selected" : null)">Nicht fahrbereit@* Damaged *@</option>
+                                                    <option value="@VehicleConditionEnum.WorksProperly" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.WorksProperly ? "selected" : null)">@AnnotationEnum.Request.VehicleCondition.WorksProperly</option>
+                                                    <option value="@VehicleConditionEnum.CanRun" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.CanRun ? "selected" : null)">@AnnotationEnum.Request.VehicleCondition.CanRun</option>
+                                                    <option value="@VehicleConditionEnum.Damaged" selected="@(isEdit && req!.VehicleCondition == VehicleConditionEnum.Damaged ? "selected" : null)">@AnnotationEnum.Request.VehicleCondition.Damaged</option>
                                                 </select>
                                                 <label for="vehicleCondition">Fahrzeugzustand</label>
                                             </div>

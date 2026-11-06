@@ -313,6 +313,16 @@ Dropzone.autoDiscover = false;
     if (initialService) { toggleDestinationAddress(initialService); }
     updateAdditionalDetails(initialService);
 
+    // Zip codes — digits only, max 4
+    ['pickupZipCode', 'deliveryZipCode'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            });
+        }
+    });
+
     // ── Loading overlay helper (shared by submit and cancel) ─────────────────
     function setLoadingMessage(text) {
         Loading.standard({

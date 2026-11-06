@@ -200,7 +200,7 @@
                                             <div class="input-group input-group-merge">
                                                 <span class="input-group-text">@_settings.MobilePrefix</span>
                                                 <div class="form-floating form-floating-outline">
-                                                    <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" value="@Model.Mobile" />
+                                                    <input type="text" id="mobile" name="mobile" class="form-control" placeholder="" inputmode="numeric" value="@Model.Mobile" />
                                                     <label for="mobile">Mobilnummer</label>
                                                 </div>
                                             </div>
@@ -233,7 +233,7 @@
                                                 </div>
                                                 <div class="col-5">
                                                     <div class="form-floating form-floating-outline">
-                                                        <input type="text" id="zipCode" name="zipCode" class="form-control" placeholder="" value="@Model.ZipCode" />
+                                                        <input type="text" id="zipCode" name="zipCode" class="form-control" placeholder="" maxlength="4" inputmode="numeric" value="@Model.ZipCode" />
                                                         <label for="zipCode">Postleitzahl</label>
                                                     </div>
                                                 </div>
@@ -376,6 +376,11 @@
 </div>
 
 <script>
+    window.roleLabels = {
+        'customer': '@AnnotationEnum.General.Role.Customer',
+        'company': '@AnnotationEnum.General.Role.Company'
+    };
+
     window.Helpers.initCustomOptionCheck();
 
     // Restore company-only sections when the page reloads with a pre-selected role

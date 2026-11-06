@@ -38,6 +38,14 @@
         RequestStatusEnum.Declined => ("dark", "rest-time-line"),
         _ => ("", "")
     };
+
+    var vehicleCondition = req.VehicleCondition switch
+    {
+        VehicleConditionEnum.WorksProperly => AnnotationEnum.Request.VehicleCondition.WorksProperly,
+        VehicleConditionEnum.Damaged => AnnotationEnum.Request.VehicleCondition.Damaged,
+        VehicleConditionEnum.CanRun => AnnotationEnum.Request.VehicleCondition.CanRun,
+        _ => ""
+    };
 }
 
 @section VendorStyles {
@@ -373,7 +381,7 @@
                                     </dl>
                                     <dl class="row mb-0">
                                         <dt class="col-6 fw-normal">Fahrzeugzustand</dt>
-                                        <dd class="col-6 text-end mb-0"><strong>@req.VehicleCondition</strong></dd>
+                                        <dd class="col-6 text-end mb-0"><strong>@vehicleCondition</strong></dd>
                                     </dl>
                                 }
                                 else
