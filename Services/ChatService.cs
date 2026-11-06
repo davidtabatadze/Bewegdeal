@@ -187,6 +187,7 @@ namespace Bewegdeal.Services
                 OtherPartyName = companyAvatar.Name,
                 OtherPartyInitials = companyAvatar.Initials,
                 OtherPartyPictureUrl = companyAvatar.Url,
+                OtherPartyContact = null,
                 Messages = messages,
                 Proposals = proposalCards,
                 ProposalPending = false, //proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending),

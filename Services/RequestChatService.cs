@@ -145,6 +145,10 @@ namespace Bewegdeal.Services
                 OtherPartyInitials = otherPartyAvatar.Initials,
                 OtherPartyPictureUrl = otherPartyAvatar.Url,
                 OtherPartyRating = otherPartyAvatar.Rating,
+                OtherPartyContact = proposals.Any(p => 
+                                        p.Status == RequestProposalStatusEnum.Accepted || 
+                                        p.Status == RequestProposalStatusEnum.Declined
+                                    ) ? users.FirstOrDefault(u => u.Id != userId)?.Mobile : null,
                 Messages = messages,
                 Proposals = proposalCards,
                 ProposalPending = proposals.Any(p => p.Status == RequestProposalStatusEnum.Pending),

@@ -111,9 +111,19 @@ else
                             </div>
                             <div class="chat-contact-info flex-grow-1 ms-4">
                                 <h6 class="m-0 fw-normal">@Model.OtherPartyName</h6>
-                                <small class="user-status text-body">
-                                    @(User.IsInRole(UserRoleEnum.Customer) ? "Unternehmen" : "Kunde")
-                                </small>
+                                @if (Model.OtherPartyContact != null)
+                                {
+                                    <small class="user-status text-primary fw-bold">
+                                        <i class="icon-base ri ri-phone-line icon-18px"></i>
+                                        @Model.OtherPartyContact
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small class="user-status text-body">
+                                        @(User.IsInRole(UserRoleEnum.Customer) ? "Unternehmen" : "Kunde")
+                                    </small>
+                                }
                             </div>
                         </div>
                         @if (Model.AllowAgreementCancel)
