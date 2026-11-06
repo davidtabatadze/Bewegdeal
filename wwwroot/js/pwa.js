@@ -1,4 +1,4 @@
-﻿// v1.1.5
+// v1.1.6
 (function () {
   'use strict';
 
@@ -49,7 +49,7 @@
     textDiv.innerHTML = html;
 
     var closeBtn = document.createElement('button');
-    closeBtn.textContent = '✕';
+    closeBtn.textContent = '?';
     closeBtn.style.cssText = [
       'background:none', 'border:none', 'font-size:18px', 'cursor:pointer',
       'color:#999', 'padding:4px 8px', 'flex-shrink:0'
@@ -105,7 +105,7 @@
     );
   });
 
-  // iOS Safari: no beforeinstallprompt — show manual instructions
+  // iOS Safari: no beforeinstallprompt � show manual instructions
   if (isIos() && isSafariBrowser() && !isDismissed()) {
     window.addEventListener('load', function () {
       // Small delay so the page settles first

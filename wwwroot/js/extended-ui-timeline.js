@@ -1,6 +1,6 @@
 /**
  * Timeline
- * v1.1.5
+ * v1.1.6
  */
 
 'use strict';
