@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bewegdeal.Data.Repositories
 {
-    public class UserRepository(SqlContext SqlContext) : BaseRepository(SqlContext), IUserRepository, IRepositorySeedable
+    public class UserRepository(SqlContext SqlContext, IHostEnvironment HostEnvironment, IConfiguration Configuration) : BaseRepository(SqlContext), IUserRepository, IRepositorySeedable
     {
 
         public async Task Seed()
@@ -38,7 +38,15 @@ namespace Bewegdeal.Data.Repositories
                     continue;
                 }
 
-                var (hash, salt) = PasswordTool.HashPassword(row.Password);
+                var password = HostEnvironment.IsDevelopment() ? row.Password : Configuration["Seed:Password"];
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    throw new InvalidOperationException(
+                        "Seed:Password is not configured. Set it (e.g. Seed__Password env variable) before the first start outside Development."
+                    );
+                }
+
+                var (hash, salt) = PasswordTool.HashPassword(password);
 
                 var contact = new UserContactEntity
                 {

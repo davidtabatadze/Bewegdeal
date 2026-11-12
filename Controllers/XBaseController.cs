@@ -18,7 +18,7 @@ namespace Bewegdeal.Controllers
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
 
-            if (!HttpContext.Request.Headers.ContainsKey("X-Requested-With"))
+            if (!HttpContext.Request.Headers.ContainsKey("X-Requested-With") && Response.StatusCode < 400)
             {
                 if (User.IsInRole(UserRoleEnum.Administrator))
                 {

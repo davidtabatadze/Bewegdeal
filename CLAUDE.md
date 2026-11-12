@@ -51,6 +51,7 @@ Default route: `{controller=Landing}/{action=Index}` → public landing page at 
 Admin pages:
 - `/Dashboard` or `/Dashboard/Index` → Dashboard (role-dispatched: Admin / Company / Customer view)
 - `/Home` or `/Home/Index` → HIW check then redirects to `/Dashboard`
+- `/Home/Error?code=` → shared error page (anonymous); target of `UseExceptionHandler` (prod) and `UseStatusCodePagesWithReExecute` (all envs)
 - `/Settings` or `/Settings/Index` → Settings
 - `/User/List` → Users list
 - `/Request/List` → Requests list (admin only)
@@ -97,9 +98,9 @@ Views/
 
 ## Controllers
 
-- `XBaseController` — base controller; provides `UserId` (long), `UserRole` (string), `GetClaim<T>`, `HasClaim`, `RefreshClaim`; all app controllers inherit from it
+- `XBaseController` — base controller; provides `UserId` (long), `UserRole` (string), `GetClaim<T>`, `HasClaim`, `RefreshClaim`; all app controllers inherit from it; `OnActionExecutionAsync` loads menu badge counts (DB) except for AJAX requests and error-page renders (`Response.StatusCode >= 400`)
 - `LandingController` — public landing page; checks `User.Identity!.IsAuthenticated` to redirect logged-in users
-- `HomeController` — `[Authorize]`; checks `AcquaintedHIW` claim and role, redirects to `HowItWorks` or `Dashboard`
+- `HomeController` — `[Authorize]`; checks `AcquaintedHIW` claim and role, redirects to `HowItWorks` or `Dashboard`; `Error(int? code)` is `[AllowAnonymous]`, no-store, no HTTP-method attribute (errors during POST re-execute as POST)
 - `DashboardController` — `[Authorize]`; `Index()` dispatches via `User.IsInRole()` to Admin/Company views or Request/List
 - `HowItWorksController` — `[Authorize]`; `Customer()` `[Authorize(Roles=Customer)]`; `Company()` `[Authorize(Roles=Company)]`
 - `UserController` — `[Authorize(Roles=Administrator)]` on List/LoadUsers/UpdateUserStatus; `[Authorize]` on all Profile actions; actions: `UpdateAvatar`, `UpdateTheme`, `UpdateProfile`, `UpdatePassword`, `AcceptHIW`, `AcceptTerms`
@@ -154,6 +155,8 @@ They share the same visual shell: `authentication-wrapper authentication-basic`,
 - Two visual groups: Image settings / Video settings (negotiation minutes removed)
 - All inputs are `type="number"`, `col-auto` with fixed `width: 200px`, centered via `justify-content-center`
 - Controller rejects any value `<= 0`
+- Controller also rejects (silently, old values kept) when `imageMaxCount × imageMaxSize + videoMaxCount × videoMaxSize > ConstantEnum.RequestUploadMaxSize` (27 MB): Request Create/Edit posts all files in one request and Kestrel's default body limit is 30,000,000 bytes; raise both together if ever needed
+- Seed defaults: 5 images × 3 MB, 1 video × 12 MB (= 27 MB)
 
 ## Landing Page Sections
 
@@ -240,7 +243,7 @@ Claim keys live in `IdentityFieldEnum` — always use these constants, never har
 Controllers/
 ├── XBaseController.cs           # Base: UserId, UserRole, GetClaim<T>, HasClaim, RefreshClaim
 ├── LandingController.cs
-├── HomeController.cs            # [Authorize]; HIW + role check → redirect
+├── HomeController.cs            # [Authorize]; HIW + role check → redirect; Error [AllowAnonymous]
 ├── HowItWorksController.cs      # [Authorize]; Customer/Company [Authorize(Roles=...)]
 ├── DashboardController.cs       # [Authorize]; Index() dispatches via User.IsInRole()
 ├── AccountController.cs         # public; Login/Logout/Register/ForgotPassword/ResetPassword/VerifyAccount/VerifyResend
@@ -400,6 +403,9 @@ Tools/
                                  #   Personal group: "user-{userId}" — used for NewMessageNotification
                                  #   Reads UserId via IdentityFieldEnum.Id claim
 Views/
+├── Home/
+│   └── Error.cshtml             # Shared error page (_BlankLayout); 404 → "Seite nicht gefunden", any other code →
+│                                #   "Etwas ist schiefgelaufen"; Bewegdeal banner + text only; theme via _BlankLayout localStorage sync
 ├── Dashboard/
 │   ├── Admin.cshtml
 │   └── Company.cshtml           # Period filter + 6 stat cards; Quill stars via Raty
@@ -681,7 +687,9 @@ UserProfileModel? profile = await userService.GetProfile(userId);
 - **Cookie auth**: `AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(...)` — `LoginPath = "/Account/Login"`, `AccessDeniedPath = "/Home/Index"`, `ExpireTimeSpan = 8h`, `SlidingExpiration = true`
 - **Remember-me**: `IsPersistent = true` + `ExpiresUtc = +30 days` in `AuthenticationProperties` passed to `SignInAsync`
 - **No session** — sessions were fully removed; `IMemoryCache` is used by `UserRefreshTool`
-- **Middleware order**: `UseRouting` → `UseAuthentication` → `UseMiddleware<UserRefreshTool>` → `UseAuthorization`
+- **Data Protection** — `AddDataProtection().SetApplicationName("Bewegdeal")`; keys (login cookie, antiforgery, TempData) persisted to `DataProtection:KeysPath` when set (prod: `/var/lib/bewegdeal/keys`), else ASP.NET default location (dev)
+- **Middleware order**: `UseForwardedHeaders` → `UseExceptionHandler`/`UseHsts` (prod only) → `UseStatusCodePagesWithReExecute` → `UseHttpsRedirection` → `UseRouting` → `UseAuthentication` → `UseMiddleware<UserRefreshTool>` → `UseAuthorization`
+- **Reverse proxy**: production runs behind Caddy (HTTPS terminated there, forwarded over HTTP to 127.0.0.1:5000); `UseForwardedHeaders` (XForwardedFor + XForwardedProto, loopback-only trust by default) must stay first so `Request.Scheme`, cookie `Secure` flags, HSTS and generated absolute links (reset email, `BaseUrl`) are https
 - **Database**: SQLite or MySQL via EF Core — `Database:Provider` in appsettings (`"sqlite"` or `"mysql"`)
 - **Table prefix**: `Database:TablePrefix`
 - **DI**: all repositories scoped, `IFileStorageTool` singleton, all services scoped
@@ -693,6 +701,8 @@ Users (7 rows, all Status=Active):
 - `admin@bewegdeal.at` / `datiko.admin@bewegdeal.at` / `gio.admin@bewegdeal.at` — Role=Administrator
 - `datiko.customer@bewegdeal.at` / `gio.customer@bewegdeal.at` — Role=Customer
 - `datiko.company@bewegdeal.at` / `gio.company@bewegdeal.at` — Role=Company
+
+Seeded in every environment. Password: hardcoded in `UserRepository.Seed()` in Development; outside Development it is read from `Seed:Password` (env var `Seed__Password`) and startup fails if a user still needs creating and it is empty. Existing users are skipped, so the setting is only needed on the first start.
 
 ---
 

@@ -1,0 +1,29 @@
+@{
+    Layout = "_BlankLayout";
+    var code = (int)(ViewBag.Code ?? 500);
+    var notFound = code == 404;
+    ViewData["Title"] = notFound ? "Seite nicht gefunden" : "Fehler";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/vendor/css/pages/page-misc.css" />
+}
+
+@* ************** Content ************** *@
+<!-- Error -->
+<div class="misc-wrapper">
+    <img class="img-fluid d-block mx-auto mb-6" style="max-inline-size: 500px; inline-size: 100%;" src="~/img/pages/bewegdeal-banner.png" alt="Bewegdeal" />
+    <h1 class="mb-2 mx-2" style="font-size: 6rem; line-height: 6rem;">@code</h1>
+    @if (notFound)
+    {
+        <h4 class="mb-2">Seite nicht gefunden 🙄</h4>
+        <p class="mb-6 mx-2">Die gesuchte Seite gibt es nicht oder sie wurde verschoben.</p>
+    }
+    else
+    {
+        <h4 class="mb-2">Etwas ist schiefgelaufen 🔐</h4>
+        <p class="mb-6 mx-2">Bitte versuchen Sie es später erneut.</p>
+    }
+    <a href="/" class="btn btn-primary">Zur Startseite</a>
+</div>
+<!-- /Error -->

@@ -6,6 +6,8 @@ using Bewegdeal.Jobs;
 using Bewegdeal.Services;
 using Bewegdeal.Tools;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -46,6 +48,14 @@ namespace Bewegdeal
                     o.ExpireTimeSpan = TimeSpan.FromHours(8);
                     o.SlidingExpiration = true;
                 });
+
+            // ── Data Protection ───────────────────────────────────────────────────
+            var dataProtection = builder.Services.AddDataProtection().SetApplicationName("Bewegdeal");
+            var keysPath = builder.Configuration["DataProtection:KeysPath"];
+            if (!string.IsNullOrWhiteSpace(keysPath))
+            {
+                dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+            }
 
             // ── Cache ─────────────────────────────────────────────────────────────
             // Used by StatusRefreshMiddleware to throttle per-user DB status checks.
@@ -131,12 +141,21 @@ namespace Bewegdeal
                 await scope.ServiceProvider.GetRequiredService<DataGeneratorTool>().Generate();
             }
 
+            // ── Reverse proxy ─────────────────────────────────────────────────────
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             // ── Middleware pipeline ───────────────────────────────────────────────
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
+            // Empty-body error responses (404 etc.) render the shared error page; status code is kept
+            app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
 
             app.UseHttpsRedirection();
             app.UseRouting();

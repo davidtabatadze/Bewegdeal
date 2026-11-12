@@ -104,7 +104,8 @@ public class SettingsController(SettingService SettingService) : XBaseController
     [HttpPost]
     public async Task<IActionResult> SaveRequest(short imageMaxCount, short imageMaxSize, short videoMaxCount, short videoMaxSize, bool mediaIsRequired)
     {
-        if (imageMaxCount <= 0 || imageMaxSize <= 0 || videoMaxCount <= 0 || videoMaxSize <= 0)
+        if (imageMaxCount <= 0 || imageMaxSize <= 0 || videoMaxCount <= 0 || videoMaxSize <= 0 ||
+            imageMaxCount * imageMaxSize + videoMaxCount * videoMaxSize > ConstantEnum.RequestUploadMaxSize)
         {
             TempData["OpenSection"] = "request";
             return RedirectToAction(nameof(Index));

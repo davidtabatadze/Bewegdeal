@@ -21,5 +21,13 @@ namespace Bewegdeal.Controllers
 
             return RedirectToAction("Index", "Dashboard");
         }
+
+        [AllowAnonymous]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error(int? code)
+        {
+            ViewBag.Code = code ?? (Response.StatusCode >= 400 ? Response.StatusCode : 500);
+            return View();
+        }
     }
 }
