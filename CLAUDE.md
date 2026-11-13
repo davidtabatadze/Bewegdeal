@@ -920,8 +920,8 @@ Status/role/fraud icon maps in JS read labels from `window.*Labels` objects inje
 ## PWA & Cache Busting
 
 ### Service Worker (`wwwroot/sw.js`)
-- Cache name: `const CACHE = 'bewegdeal-v1'` — bump this string on each deploy to purge old cached assets
-- Format is flexible: `'bewegdeal-v2.1.1'`, `'bewegdeal-2026-06-19'`, any unique string works
+- Cache name: `const CACHE = 'bewegdeal-v1.0.0'` — bump this string on each deploy to purge old cached assets
+- Convention: the cache name matches the release git tag (`v1.0.0` → `'bewegdeal-v1.0.0'`, next release `v1.0.1` …)
 - SW uses `skipWaiting()` + `clients.claim()` — updates activate immediately on next page load, no tab close required
 - Strategy: network-first for navigation (HTML pages), cache-first for static assets
 
@@ -931,5 +931,6 @@ Status/role/fraud icon maps in JS read labels from `window.*Labels` objects inje
 - Vendor files (`~/vendor/...`) are excluded — they don't change between deploys
 
 ### Deploy checklist
-1. Bump `const CACHE` in `wwwroot/sw.js` to a new value
+1. Bump `const CACHE` in `wwwroot/sw.js` to the new release version, commit, tag the release (`vX.Y.Z`)
 2. Deploy — `asp-append-version` handles JS/CSS cache invalidation automatically
+3. `appsettings.Development.json` is excluded from publish (`CopyToPublishDirectory="Never"` in `Bewegdeal.csproj`)

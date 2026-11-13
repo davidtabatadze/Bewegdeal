@@ -1,6 +1,6 @@
 /**
  * Page auth register multi-steps
- * v1.1.6
+ * v1.0.0
  */
 
 'use strict';
@@ -14,7 +14,7 @@ $(function () {
             var $this = $(this);
             select2Focus($this);
             $this.select2({
-                placeholder: 'Land auswählen',
+                placeholder: 'Land auswÃ¤hlen',
                 dropdownParent: $this.parent()
             });
         });
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                     role: {  // matches input name="role"
                         validators: {
                             notEmpty: {
-                                message: 'Bitte Kontotyp auswählen'
+                                message: 'Bitte Kontotyp auswÃ¤hlen'
                             }
                         }
                     }
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                                 message: 'Bitte E-Mail-Adresse eingeben'
                             },
                             emailAddress: {
-                                message: 'Bitte eine gültige E-Mail-Adresse eingeben'
+                                message: 'Bitte eine gÃ¼ltige E-Mail-Adresse eingeben'
                             }
                         }
                     },
@@ -208,13 +208,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
                     confirmPassword: {
                         validators: {
                             notEmpty: {
-                                message: 'Bitte Passwort bestätigen'
+                                message: 'Bitte Passwort bestÃ¤tigen'
                             },
                             identical: {
                                 compare: function () {
                                     return accountStep.querySelector('[name="password"]').value;
                                 },
-                                message: 'Das Passwort und die Bestätigung stimmen nicht überein'
+                                message: 'Das Passwort und die BestÃ¤tigung stimmen nicht Ã¼berein'
                             }
                         }
                     }
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                                     fb.className = 'invalid-feedback';
                                     agreeTerms.parentElement.appendChild(fb);
                                 }
-                                fb.textContent = 'Sie müssen den AGB zustimmen';
+                                fb.textContent = 'Sie mÃ¼ssen den AGB zustimmen';
                                 agreeTerms.addEventListener('change', function () { agreeTerms.classList.remove('is-invalid'); }, { once: true });
                             }
 
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                                         svcFb.className = 'services-invalid-feedback text-danger small mt-2';
                                         servicesSection.appendChild(svcFb);
                                     }
-                                    svcFb.textContent = 'Bitte mindestens einen Dienst auswählen';
+                                    svcFb.textContent = 'Bitte mindestens einen Dienst auswÃ¤hlen';
                                     servicesSection.querySelectorAll('[name="Interests"]').forEach(function (cb) {
                                         cb.addEventListener('change', function () {
                                             if (servicesSection.querySelectorAll('[name="Interests"]:checked').length > 0) {
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 });
             });
 
-            // Mobile — digits only
+            // Mobile â€” digits only
             const mobileInput = document.getElementById('mobile');
             if (mobileInput) {
                 mobileInput.addEventListener('input', function () {
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 });
             }
 
-            // Zip code — digits only, max 4
+            // Zip code â€” digits only, max 4
             const zipInput = document.getElementById('zipCode');
             if (zipInput) {
                 zipInput.addEventListener('input', function () {

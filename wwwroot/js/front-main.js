@@ -1,6 +1,6 @@
 /**
  * Main - Front Pages
- * v1.1.6
+ * v1.0.0
  */
 'use strict';
 

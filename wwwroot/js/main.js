@@ -1,11 +1,11 @@
 /**
  * Main
- * v1.1.6
+ * v1.0.0
  */
 
 'use strict';
 
-// Disable DataTables' built-in third "unsorted" click state app-wide — every sortable
+// Disable DataTables' built-in third "unsorted" click state app-wide â€” every sortable
 // column should only ever toggle between ascending and descending.
 if (typeof DataTable !== 'undefined') {
   DataTable.defaults.column.orderSequence = ['asc', 'desc'];
