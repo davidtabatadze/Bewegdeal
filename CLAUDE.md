@@ -691,7 +691,7 @@ UserProfileModel? profile = await userService.GetProfile(userId);
 - **Middleware order**: `UseForwardedHeaders` → `UseExceptionHandler`/`UseHsts` (prod only) → `UseStatusCodePagesWithReExecute` → `UseHttpsRedirection` → `UseRouting` → `UseAuthentication` → `UseMiddleware<UserRefreshTool>` → `UseAuthorization`
 - **Reverse proxy**: production runs behind Caddy (HTTPS terminated there, forwarded over HTTP to 127.0.0.1:5000); `UseForwardedHeaders` (XForwardedFor + XForwardedProto, loopback-only trust by default) must stay first so `Request.Scheme`, cookie `Secure` flags, HSTS and generated absolute links (reset email, `BaseUrl`) are https
 - **Database**: SQLite or MySQL via EF Core — `Database:Provider` in appsettings (`"sqlite"` or `"mysql"`)
-- **Table prefix**: `Database:TablePrefix`
+- **Table prefix**: `Database:TablePrefix` — production uses `prod_` (`Database__TablePrefix=prod_` in `/etc/bewegdeal/bewegdeal.env`), so tables are `prod_Users`, `prod_Settings` …; EF index names include the prefix, so switching prefix means fresh tables, not renaming
 - **DI**: all repositories scoped, `IFileStorageTool` singleton, all services scoped
 - **Startup**: `EnsureTablesAsync()` → seed Users → seed Settings
 
@@ -702,7 +702,7 @@ Users (4 rows, all Status=Active, placeholder mobile `+43000000000`):
 - Id 3 `customer@bewegdeal.at` — Role=Customer
 - Id 4 `company@bewegdeal.at` — Role=Company
 
-Seed matches by Id and skips existing Ids: production was seeded earlier and still has `datiko.admin@` / `datiko.customer@` / `datiko.company@` for Ids 2–4 (left as is on purpose). Production Id 8 is a real account, so never give a seed row Id 8 (the commented example rows include one).
+Seed matches by Id and skips existing Ids, so changing an existing row's name or email never updates a database that already has that Id. Production holds exactly these 4 accounts (as of v1.0.1); new seed rows need Ids that were never used there.
 
 Seeded in every environment. Password: hardcoded in `UserRepository.Seed()` in Development; outside Development it is read from `Seed:Password` (env var `Seed__Password`) and startup fails if a user still needs creating and it is empty. Existing users are skipped, so the setting is only needed on the first start.
 
