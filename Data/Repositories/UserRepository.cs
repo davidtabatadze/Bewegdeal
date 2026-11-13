@@ -16,19 +16,16 @@ namespace Bewegdeal.Data.Repositories
             var rows = new[]
             {
                 new UserEntity { Id = 1, Name = "Administrator",   Email = "admin@bewegdeal.at",           Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 2, Name = "Datiko Admin",    Email = "datiko.admin@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 3, Name = "Datiko Customer", Email = "datiko.customer@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 4, Name = "Datiko Company",  Email = "datiko.company@bewegdeal.at",  Password = "asdASD123", Role = UserRoleEnum.Company },
-                new UserEntity { Id = 5, Name = "Gio Admin",       Email = "gio.admin@bewegdeal.at",       Password = "asdASD123", Role = UserRoleEnum.Administrator },
-                new UserEntity { Id = 6, Name = "Gio Customer",    Email = "gio.customer@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Customer },
-                new UserEntity { Id = 7, Name = "Gio Company",     Email = "gio.company@bewegdeal.at",     Password = "asdASD123", Role = UserRoleEnum.Company },
+                new UserEntity { Id = 2, Name = "Datiko",    Email = "datiko@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Administrator },
+                new UserEntity { Id = 3, Name = "Customer",    Email = "customer@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Customer },
+                new UserEntity { Id = 4, Name = "Company",    Email = "company@bewegdeal.at",    Password = "asdASD123", Role = UserRoleEnum.Company },
 
-                //new UserEntity { Id = 8, Name = "Gerhard Schröder",Email = "gerhard@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                //new UserEntity { Id = 9, Name = "Bastian Schweinsteiger",Email = "bastian@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                //new UserEntity { Id = 10, Name = "Ludwig Van Beethoven",Email = "ludwig@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
-                //new UserEntity { Id = 11, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000" },
-                //new UserEntity { Id = 12, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111" },
-                //new UserEntity { Id = 13, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222" },
+                //new UserEntity { Id = 5, Name = "Gerhard Schröder",Email = "gerhard@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 6, Name = "Bastian Schweinsteiger",Email = "bastian@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 7, Name = "Ludwig Van Beethoven",Email = "ludwig@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Customer },
+                //new UserEntity { Id = 8, Name = "Mercedes Benz",Email = "benz@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "000" },
+                //new UserEntity { Id = 9, Name = "Bayern Motorische Werke",Email = "bmw@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "111" },
+                //new UserEntity { Id = 10, Name = "Über Alles",Email = "uber@bewegdeal.at", Password = "asdASD123", Role = UserRoleEnum.Company, Number = "222" },
             };
 
             foreach (var row in rows)
@@ -65,7 +62,7 @@ namespace Bewegdeal.Data.Repositories
                     Name = row.Name,
                     Email = row.Email,
                     Number = row.Number ?? "-",
-                    Mobile = row.Mobile ?? "+995000000000",
+                    Mobile = row.Mobile ?? "+43000000000",
                     Password = hash,
                     Salt = salt,
                     CreateDate = DateTime.Now,

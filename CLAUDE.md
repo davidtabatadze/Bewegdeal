@@ -697,10 +697,12 @@ UserProfileModel? profile = await userService.GetProfile(userId);
 
 ### Seed Data
 
-Users (7 rows, all Status=Active):
-- `admin@bewegdeal.at` / `datiko.admin@bewegdeal.at` / `gio.admin@bewegdeal.at` — Role=Administrator
-- `datiko.customer@bewegdeal.at` / `gio.customer@bewegdeal.at` — Role=Customer
-- `datiko.company@bewegdeal.at` / `gio.company@bewegdeal.at` — Role=Company
+Users (4 rows, all Status=Active, placeholder mobile `+43000000000`):
+- Id 1 `admin@bewegdeal.at`, Id 2 `datiko@bewegdeal.at` — Role=Administrator
+- Id 3 `customer@bewegdeal.at` — Role=Customer
+- Id 4 `company@bewegdeal.at` — Role=Company
+
+Seed matches by Id and skips existing Ids: production was seeded earlier and still has `datiko.admin@` / `datiko.customer@` / `datiko.company@` for Ids 2–4 (left as is on purpose). Production Id 8 is a real account, so never give a seed row Id 8 (the commented example rows include one).
 
 Seeded in every environment. Password: hardcoded in `UserRepository.Seed()` in Development; outside Development it is read from `Seed:Password` (env var `Seed__Password`) and startup fails if a user still needs creating and it is empty. Existing users are skipped, so the setting is only needed on the first start.
 
