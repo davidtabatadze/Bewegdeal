@@ -1,6 +1,6 @@
 ﻿/**
  * Request View — Swiper Thumbs Gallery
- * v1.0.2
+ * v1.0.3
  *
  * `requestFiles` is always defined by the inline <script> in View.cshtml.
  */

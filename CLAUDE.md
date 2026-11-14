@@ -13,6 +13,8 @@ Template source: `C:\Software Templates\Materio\AspnetCoreMvcFull`
 
 The full template `wwwroot` (vendor libs, css, img, js, svg, json) has been copied to this project's `wwwroot/`. When a new template component needs an asset not yet present, copy only what is needed from the template source.
 
+**Fonts are self-hosted.** Inter (weights 300–700, all 7 subsets) lives in `wwwroot/vendor/fonts/inter/` (`inter.css` + `inter-*.woff2`, copied from Google Fonts, SIL OFL) and all three layouts load `~/vendor/fonts/inter/inter.css`. Never load fonts or other assets from `fonts.googleapis.com` / `fonts.gstatic.com` or any other third-party host: it sends every visitor's IP address to that host without consent (GDPR).
+
 ## Layout Architecture
 
 Three layouts, each self-contained (no `_CommonMasterLayout` chain, no TempData dependencies):
