@@ -1,7 +1,8 @@
 {
   "name": "Bewegdeal",
   "short_name": "Bewegdeal",
-  "description": "Moving & delivery services marketplace",
+  "description": "Marktplatz für Umzug, Entrümpelung, Abholung und Fahrzeugtransport",
+  "lang": "de",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

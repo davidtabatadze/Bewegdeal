@@ -933,6 +933,10 @@ Status/role/fraud icon maps in JS read labels from `window.*Labels` objects inje
 - Vendor files (`~/vendor/...`) are excluded — they don't change between deploys
 
 ### Deploy checklist
-1. Bump `const CACHE` in `wwwroot/sw.js` to the new release version, commit, tag the release (`vX.Y.Z`)
-2. Deploy — `asp-append-version` handles JS/CSS cache invalidation automatically
-3. `appsettings.Development.json` is excluded from publish (`CopyToPublishDirectory="Never"` in `Bewegdeal.csproj`)
+1. Bump the version everywhere it appears, all to the same `vX.Y.Z`:
+   - `const CACHE` in `wwwroot/sw.js` → `'bewegdeal-vX.Y.Z'`
+   - the header version comment in **every** `wwwroot/js/*.js` file that carries one (` * vX.Y.Z` or `// vX.Y.Z`; 21 files incl. `pwa.js` as of v1.0.2 — `site.js` has none) — every file, not only the changed ones
+   - replace only the old version string; keep files UTF-8 (Edit tool or `sed`, never Windows PowerShell `Set-Content`/`Out-File` without `-Encoding utf8`) and check each with `iconv -f UTF-8 -t UTF-8`
+2. Commit, then tag the release `vX.Y.Z` (git tag = release version)
+3. Deploy — `asp-append-version` handles JS/CSS cache invalidation automatically
+4. `appsettings.Development.json` is excluded from publish (`CopyToPublishDirectory="Never"` in `Bewegdeal.csproj`)

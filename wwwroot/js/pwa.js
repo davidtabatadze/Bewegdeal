@@ -1,4 +1,4 @@
-// v1.0.1
+// v1.0.2
 (function () {
   'use strict';
 
@@ -63,7 +63,7 @@
     banner.appendChild(textDiv);
     if (onInstall) {
       var installBtn = document.createElement('button');
-      installBtn.textContent = 'Install';
+      installBtn.textContent = 'Installieren';
       installBtn.style.cssText = [
         'background:#696cff', 'color:#fff', 'border:none', 'border-radius:6px',
         'padding:8px 16px', 'font-size:13px', 'font-weight:600', 'cursor:pointer',
@@ -96,7 +96,7 @@
     if (isDismissed()) { return; }
 
     createBanner(
-      '<strong>Install Bewegdeal</strong><br>Add to your home screen for quick access.',
+      '<strong>Bewegdeal installieren</strong><br>Zum Startbildschirm hinzufügen – für schnellen Zugriff.',
       function () {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
@@ -111,8 +111,8 @@
       // Small delay so the page settles first
       setTimeout(function () {
         createBanner(
-          '<strong>Install Bewegdeal</strong><br>' +
-          'Tap <strong>Share</strong> <span style="font-size:16px">&#x1F4E4;</span> then <strong>"Add to Home Screen"</strong>.'
+          '<strong>Bewegdeal installieren</strong><br>' +
+          'Tippen Sie auf <strong>Teilen</strong> <span style="font-size:16px">&#x1F4E4;</span> und dann auf <strong>„Zum Home-Bildschirm“</strong>.'
         );
       }, 2000);
     });
